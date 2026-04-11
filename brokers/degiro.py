@@ -1,5 +1,5 @@
 """
-Connecteur Degiro via degiro-connector.
+Connecteur Degiro via degiro-connector v3.
 
 Prérequis:
 - Compte Degiro
@@ -19,14 +19,13 @@ class DegiroBroker(BaseBroker):
         super().__init__(credentials)
         self.username = credentials.get("username", "")
         self.password = credentials.get("password", "")
-        self.totp_secret = credentials.get("totp_secret")
+        self.totp_secret = credentials.get("totp_secret") or None
         self.trading_api = None
-        self._account_info = None
 
     def connect(self) -> bool:
         try:
             from degiro_connector.trading.api import API as TradingAPI
-            from degiro_connector.trading.models import Credentials
+            from degiro_connector.trading.models.credentials import Credentials
 
             creds = Credentials(
                 username=self.username,
@@ -50,39 +49,71 @@ class DegiroBroker(BaseBroker):
                 pass
         self._connected = False
 
+    def _get_update(self, options: list) -> dict:
+        """Récupère les données du compte via get_update."""
+        from degiro_connector.trading.models.account import UpdateRequest, UpdateOption
+
+        request_list = [UpdateRequest(option=opt, last_updated=0) for opt in options]
+        update = self.trading_api.get_update(request_list=request_list, raw=True)
+        return update if isinstance(update, dict) else {}
+
     def get_account(self) -> BrokerAccount:
         self._check_connected()
-        account_info = self.trading_api.get_account_info()
-        portfolio = self.get_positions()
+        from degiro_connector.trading.models.account import UpdateOption
 
-        cash_funds = account_info.get("cashFunds", {})
+        data = self._get_update([
+            UpdateOption.PORTFOLIO,
+            UpdateOption.CASH_FUNDS,
+            UpdateOption.TOTAL_PORTFOLIO,
+        ])
+
+        positions = self._parse_positions(data.get("portfolio", {}))
+
+        # Cash
         cash = 0
-        for fund in cash_funds.get("value", []):
-            if fund.get("currencyCode") == "EUR":
-                cash = fund.get("value", 0)
-                break
+        cash_funds = data.get("cashFunds", data.get("cash_funds", {}))
+        if isinstance(cash_funds, dict):
+            for item in cash_funds.get("value", []):
+                values = {v["name"]: v["value"] for v in item.get("value", [])} if "value" in item else item
+                if values.get("currencyCode") == "EUR":
+                    cash = float(values.get("value", 0))
+                    break
 
-        total_value = cash + sum(p.market_value for p in portfolio)
+        # Total
+        total_portfolio = data.get("totalPortfolio", data.get("total_portfolio", {}))
+        total_value = cash
+        if isinstance(total_portfolio, dict):
+            values = total_portfolio.get("value", total_portfolio)
+            if isinstance(values, list):
+                vals = {v["name"]: v["value"] for v in values}
+                total_value = float(vals.get("degiroCash", cash)) + sum(p.market_value for p in positions)
+            elif isinstance(values, dict):
+                total_value = float(values.get("degiroCash", cash)) + sum(p.market_value for p in positions)
+        else:
+            total_value = cash + sum(p.market_value for p in positions)
 
         return BrokerAccount(
             broker_name="Degiro",
-            account_id=str(self.trading_api.connection_storage.get("intAccount", "")),
-            cash=cash,
-            total_value=total_value,
+            account_id="",
+            cash=round(cash, 2),
+            total_value=round(total_value, 2),
             currency="EUR",
-            positions=portfolio,
+            positions=positions,
             connected=True,
         )
 
-    def get_positions(self) -> list[BrokerPosition]:
-        self._check_connected()
-        from degiro_connector.trading.models import ProductSearch
-
-        portfolio = self.trading_api.get_portfolio()
+    def _parse_positions(self, portfolio_data: dict) -> list[BrokerPosition]:
+        """Parse les positions depuis les données portfolio."""
         positions = []
+        items = portfolio_data.get("value", [])
+        product_ids = []
 
-        for product in portfolio.get("portfolio", {}).get("value", []):
-            pos_data = {item["name"]: item["value"] for item in product.get("value", [])}
+        parsed = []
+        for item in items:
+            if isinstance(item, dict) and "value" in item:
+                pos_data = {v["name"]: v["value"] for v in item["value"]}
+            else:
+                pos_data = item if isinstance(item, dict) else {}
 
             if pos_data.get("positionType") != "PRODUCT":
                 continue
@@ -94,26 +125,52 @@ class DegiroBroker(BaseBroker):
             value = float(pos_data.get("value", shares * price))
             pnl = value - (shares * avg_price) if avg_price else 0
 
-            # Récupérer le ticker symbol
-            try:
-                product_info = self.trading_api.get_product_by_ids(
-                    product_list=[int(product_id)]
-                )
-                ticker = product_info.get(str(product_id), {}).get("symbol", str(product_id))
-            except Exception:
-                ticker = str(product_id)
+            if product_id:
+                product_ids.append(int(product_id))
+            parsed.append({
+                "product_id": product_id,
+                "shares": shares,
+                "price": price,
+                "avg_price": avg_price,
+                "value": value,
+                "pnl": pnl,
+                "currency": pos_data.get("currency", "EUR"),
+            })
 
+        # Récupérer les symboles
+        symbols = {}
+        if product_ids:
+            try:
+                products_info = self.trading_api.get_products_info(
+                    product_list=product_ids,
+                    raw=True,
+                )
+                if isinstance(products_info, dict):
+                    for pid, info in products_info.get("data", products_info).items():
+                        symbols[str(pid)] = info.get("symbol", str(pid))
+            except Exception:
+                pass
+
+        for p in parsed:
+            pid = str(p["product_id"])
+            ticker = symbols.get(pid, pid)
             positions.append(BrokerPosition(
                 ticker=ticker,
-                shares=shares,
-                avg_price=avg_price,
-                current_price=price,
-                market_value=value,
-                unrealized_pnl=round(pnl, 2),
-                currency=pos_data.get("currency", "EUR"),
+                shares=p["shares"],
+                avg_price=p["avg_price"],
+                current_price=p["price"],
+                market_value=round(p["value"], 2),
+                unrealized_pnl=round(p["pnl"], 2),
+                currency=p["currency"],
             ))
 
         return positions
+
+    def get_positions(self) -> list[BrokerPosition]:
+        self._check_connected()
+        from degiro_connector.trading.models.account import UpdateOption
+        data = self._get_update([UpdateOption.PORTFOLIO])
+        return self._parse_positions(data.get("portfolio", {}))
 
     def get_portfolio_value(self) -> float:
         account = self.get_account()
@@ -121,60 +178,71 @@ class DegiroBroker(BaseBroker):
 
     def place_order(self, order: BrokerOrder) -> BrokerOrder:
         self._check_connected()
-        from degiro_connector.trading.models import Order
+        from degiro_connector.trading.models.order import (
+            Order as DegiroOrder, Action, OrderType as DOrderType, TimeType,
+        )
 
-        # Recherche du product_id
         product_id = self._find_product_id(order.ticker)
         if not product_id:
-            order.status = "REJECTED"
+            order.status = "REJECTED - Produit non trouvé"
             return order
 
-        action = Order.Action.BUY if order.side == OrderSide.BUY else Order.Action.SELL
+        action = Action.BUY if order.side == OrderSide.BUY else Action.SELL
 
         if order.order_type == OrderType.MARKET:
-            degiro_order = Order(
-                action=action,
-                order_type=Order.OrderType.MARKET,
+            d_order = DegiroOrder(
+                buy_sell=action,
+                order_type=DOrderType.MARKET,
                 product_id=product_id,
                 size=order.quantity,
-                time_type=Order.TimeType.DAY,
+                time_type=TimeType.GOOD_TILL_DAY,
             )
         else:
-            degiro_order = Order(
-                action=action,
-                order_type=Order.OrderType.LIMIT,
+            d_order = DegiroOrder(
+                buy_sell=action,
+                order_type=DOrderType.LIMIT,
                 product_id=product_id,
                 size=order.quantity,
                 price=order.limit_price,
-                time_type=Order.TimeType.DAY,
+                time_type=TimeType.GOOD_TILL_DAY,
             )
 
-        # Vérification puis confirmation
-        check = self.trading_api.check_order(order=degiro_order)
-        if check:
-            confirmation = self.trading_api.confirm_order(
-                confirmation_id=check.get("confirmationId"),
-                order=degiro_order,
-            )
-            order.order_id = str(confirmation) if confirmation else None
-            order.status = "SUBMITTED" if confirmation else "REJECTED"
-        else:
-            order.status = "REJECTED"
+        try:
+            check = self.trading_api.check_order(order=d_order)
+            if check:
+                conf_id = check.get("confirmationId") if isinstance(check, dict) else getattr(check, "confirmation_id", None)
+                if conf_id:
+                    confirmation = self.trading_api.confirm_order(
+                        confirmation_id=conf_id,
+                        order=d_order,
+                    )
+                    order.order_id = str(confirmation) if confirmation else None
+                    order.status = "SUBMITTED" if confirmation else "REJECTED"
+                else:
+                    order.status = "REJECTED - Pas de confirmation ID"
+            else:
+                order.status = "REJECTED - Check échoué"
+        except Exception as e:
+            order.status = f"REJECTED - {str(e)}"
 
         return order
 
     def get_order_status(self, order_id: str) -> BrokerOrder:
         self._check_connected()
-        orders = self.trading_api.get_orders()
-        for o in orders.get("orders", {}).get("value", []):
-            o_data = {item["name"]: item["value"] for item in o.get("value", [])}
-            if str(o_data.get("orderId")) == order_id:
+        from degiro_connector.trading.models.account import UpdateOption
+        data = self._get_update([UpdateOption.ORDERS])
+
+        orders = data.get("orders", {}).get("value", [])
+        for o in orders:
+            o_data = {v["name"]: v["value"] for v in o.get("value", [])} if "value" in o else o
+            if str(o_data.get("orderId", o_data.get("id", ""))) == order_id:
+                side = OrderSide.BUY if o_data.get("buysell", o_data.get("buy_sell")) == "BUY" else OrderSide.SELL
                 return BrokerOrder(
-                    ticker=o_data.get("productId", ""),
-                    side=OrderSide.BUY if o_data.get("buysell") == "B" else OrderSide.SELL,
+                    ticker=str(o_data.get("productId", o_data.get("product_id", ""))),
+                    side=side,
                     quantity=int(o_data.get("size", 0)),
                     order_id=order_id,
-                    status=o_data.get("status", "UNKNOWN"),
+                    status=str(o_data.get("status", "UNKNOWN")),
                     filled_price=float(o_data.get("price", 0)),
                 )
         return BrokerOrder(ticker="", side=OrderSide.BUY, quantity=0,
@@ -183,24 +251,28 @@ class DegiroBroker(BaseBroker):
     def cancel_order(self, order_id: str) -> bool:
         self._check_connected()
         try:
-            return self.trading_api.delete_order(order_id=order_id)
+            return bool(self.trading_api.delete_order(order_id=order_id))
         except Exception:
             return False
 
     def _find_product_id(self, ticker: str) -> int:
         """Cherche le product_id Degiro à partir du ticker."""
         try:
-            results = self.trading_api.product_search(
-                text=ticker.split(".")[0],
-                limit=5,
-            )
-            for product in results.get("products", []):
-                if product.get("symbol", "").upper() == ticker.split(".")[0].upper():
-                    return int(product["id"])
+            symbol = ticker.split(".")[0]
+            results = self.trading_api.product_search(text=symbol, limit=10, raw=True)
+            products = results if isinstance(results, list) else results.get("products", [])
+            for product in products:
+                if isinstance(product, dict):
+                    if product.get("symbol", "").upper() == symbol.upper():
+                        return int(product["id"])
+            # Fallback: premier résultat
+            if products:
+                first = products[0]
+                return int(first["id"]) if isinstance(first, dict) else None
         except Exception:
             pass
         return None
 
     def _check_connected(self):
         if not self._connected or not self.trading_api:
-            raise ConnectionError("Non connecté à Degiro.")
+            raise ConnectionError("Non connecté à Degiro. Allez dans l'onglet Broker pour vous connecter.")
