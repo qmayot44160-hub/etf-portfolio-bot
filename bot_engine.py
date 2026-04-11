@@ -50,7 +50,7 @@ class BotEngine:
             if success:
                 self.save_broker_config(broker_id, credentials)
                 return {"status": "connected", "broker": self.broker.name}
-            return {"status": "error", "message": "Connexion refusée par le broker"}
+            return {"status": "error", "message": "Connexion échouée — vérifiez vos identifiants"}
         except ImportError as e:
             return {"status": "error", "message": str(e)}
         except Exception as e:

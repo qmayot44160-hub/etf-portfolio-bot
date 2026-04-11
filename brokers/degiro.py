@@ -23,23 +23,18 @@ class DegiroBroker(BaseBroker):
         self.trading_api = None
 
     def connect(self) -> bool:
-        try:
-            from degiro_connector.trading.api import API as TradingAPI
-            from degiro_connector.trading.models.credentials import Credentials
+        from degiro_connector.trading.api import API as TradingAPI
+        from degiro_connector.trading.models.credentials import Credentials
 
-            creds = Credentials(
-                username=self.username,
-                password=self.password,
-                totp_secret_key=self.totp_secret,
-            )
-            self.trading_api = TradingAPI(credentials=creds)
-            self.trading_api.connect()
-            self._connected = True
-            return True
-        except Exception as e:
-            print(f"[Degiro] Erreur de connexion: {e}")
-            self._connected = False
-            return False
+        creds = Credentials(
+            username=self.username,
+            password=self.password,
+            totp_secret_key=self.totp_secret,
+        )
+        self.trading_api = TradingAPI(credentials=creds)
+        self.trading_api.connect()
+        self._connected = True
+        return True
 
     def disconnect(self):
         if self.trading_api:
