@@ -27,7 +27,7 @@ PORTFOLIO = {
         "target_pct": 10,
         "category": "Actions Tech",
     },
-    "GOVT.PA": {  # Amundi Euro Government Bond — obligations souveraines
+    "IEGA.AS": {  # iShares Euro Government Bond — obligations souveraines
         "name": "Obligations Euro",
         "target_pct": 10,
         "category": "Obligations",

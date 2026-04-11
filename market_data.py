@@ -20,13 +20,18 @@ def get_current_prices() -> dict:
         close = data
 
     for ticker in tickers:
-        if isinstance(close, pd.DataFrame) and ticker in close.columns:
-            price = close[ticker].dropna().iloc[-1]
-        elif isinstance(close, pd.Series):
-            price = close.dropna().iloc[-1]
-        else:
+        try:
+            if isinstance(close, pd.DataFrame) and ticker in close.columns:
+                series = close[ticker].dropna()
+            elif isinstance(close, pd.Series):
+                series = close.dropna()
+            else:
+                series = pd.Series(dtype=float)
+
+            price = float(series.iloc[-1]) if len(series) > 0 else None
+        except Exception:
             price = None
-        prices[ticker] = round(float(price), 2) if price is not None else None
+        prices[ticker] = round(price, 2) if price is not None else None
 
     return prices
 
