@@ -23,26 +23,28 @@
         }
         .header h1 { font-size: 1.5rem; color: #58a6ff; }
         .header .subtitle { color: #8b949e; font-size: 0.85rem; }
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+        }
+        .status-badge.live { background: #0d4429; color: #3fb950; }
+        .status-badge.sim { background: #1c2128; color: #f0883e; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .status-dot.live { background: #3fb950; animation: pulse 2s infinite; }
+        .status-dot.sim { background: #f0883e; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
         .nav-btn {
-            background: #21262d;
-            border: 1px solid #30363d;
-            color: #c9d1d9;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            margin-left: 8px;
-            transition: all 0.2s;
+            background: #21262d; border: 1px solid #30363d; color: #c9d1d9;
+            padding: 8px 16px; border-radius: 6px; cursor: pointer;
+            font-size: 0.85rem; margin-left: 8px; transition: all 0.2s;
         }
         .nav-btn:hover { background: #30363d; border-color: #58a6ff; }
         .nav-btn.active { background: #1f6feb; border-color: #1f6feb; color: #fff; }
         .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
         .card {
-            background: #161b22;
-            border: 1px solid #21262d;
-            border-radius: 12px;
-            padding: 20px;
+            background: #161b22; border: 1px solid #21262d;
+            border-radius: 12px; padding: 20px;
         }
         .card h3 { color: #8b949e; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
         .card .value { font-size: 2rem; font-weight: 700; color: #f0f6fc; }
@@ -54,83 +56,99 @@
         th { text-align: left; color: #8b949e; font-size: 0.75rem; text-transform: uppercase; padding: 8px 12px; border-bottom: 1px solid #21262d; }
         td { padding: 10px 12px; border-bottom: 1px solid #21262d; font-size: 0.9rem; }
         tr:hover { background: #1c2128; }
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
         .badge.buy { background: #0d4429; color: #3fb950; }
         .badge.sell { background: #490c11; color: #f85149; }
         .badge.ok { background: #1c2128; color: #8b949e; }
-        .drift-bar {
-            width: 100px;
-            height: 6px;
-            background: #21262d;
-            border-radius: 3px;
-            overflow: hidden;
-            display: inline-block;
-            vertical-align: middle;
-            margin-left: 8px;
-        }
-        .drift-fill {
-            height: 100%;
-            border-radius: 3px;
-            transition: width 0.3s;
-        }
+        .drift-bar { width: 100px; height: 6px; background: #21262d; border-radius: 3px; overflow: hidden; display: inline-block; vertical-align: middle; margin-left: 8px; }
+        .drift-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
         .section { margin-bottom: 32px; }
         .section-title { font-size: 1.1rem; color: #c9d1d9; margin-bottom: 16px; font-weight: 600; }
         .btn {
-            background: #238636;
-            border: 1px solid #2ea043;
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: all 0.2s;
+            background: #238636; border: 1px solid #2ea043; color: #fff;
+            padding: 10px 20px; border-radius: 6px; cursor: pointer;
+            font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
         }
         .btn:hover { background: #2ea043; }
+        .btn.secondary { background: #1f6feb; border-color: #388bfd; }
+        .btn.secondary:hover { background: #388bfd; }
         .btn.danger { background: #da3633; border-color: #f85149; }
         .btn.danger:hover { background: #f85149; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .actions { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
         .loading { text-align: center; padding: 40px; color: #8b949e; }
         .chart-container { height: 400px; }
-        #view-portfolio, #view-backtest, #view-dca { display: none; }
+        [id^="view-"] { display: none; }
         #view-portfolio { display: block; }
         .metric-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
         .metric { background: #1c2128; border-radius: 8px; padding: 12px 16px; flex: 1; min-width: 150px; }
         .metric .label { font-size: 0.75rem; color: #8b949e; }
         .metric .val { font-size: 1.2rem; font-weight: 600; margin-top: 4px; }
         .toast {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background: #238636;
-            color: #fff;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            display: none;
-            z-index: 100;
+            position: fixed; bottom: 24px; right: 24px; background: #238636; color: #fff;
+            padding: 12px 24px; border-radius: 8px; font-size: 0.9rem; display: none; z-index: 100;
             animation: fadeIn 0.3s;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .input { background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; }
+        .input:focus { border-color: #58a6ff; outline: none; }
+        select.input { cursor: pointer; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; color: #8b949e; font-size: 0.8rem; margin-bottom: 4px; text-transform: uppercase; }
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7); z-index: 200; display: none;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: #161b22; border: 1px solid #30363d; border-radius: 12px;
+            padding: 24px; width: 500px; max-width: 90vw; max-height: 80vh; overflow-y: auto;
+        }
+        .modal h2 { color: #f0f6fc; font-size: 1.2rem; margin-bottom: 16px; }
+        .broker-card {
+            background: #0d1117; border: 1px solid #21262d; border-radius: 8px;
+            padding: 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s;
+        }
+        .broker-card:hover { border-color: #58a6ff; }
+        .broker-card.selected { border-color: #3fb950; background: #0d2818; }
+        .broker-card h4 { color: #f0f6fc; margin-bottom: 4px; }
+        .broker-card p { color: #8b949e; font-size: 0.85rem; }
+        .toggle { position: relative; width: 44px; height: 24px; display: inline-block; }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: #21262d; border-radius: 12px; cursor: pointer; transition: 0.3s;
+        }
+        .toggle-slider::before {
+            content: ''; position: absolute; width: 18px; height: 18px;
+            left: 3px; bottom: 3px; background: #8b949e;
+            border-radius: 50%; transition: 0.3s;
+        }
+        .toggle input:checked + .toggle-slider { background: #238636; }
+        .toggle input:checked + .toggle-slider::before { transform: translateX(20px); background: #fff; }
+        .log-entry { padding: 6px 0; border-bottom: 1px solid #21262d; font-size: 0.8rem; }
+        .log-entry .time { color: #8b949e; }
+        .log-entry .msg { color: #c9d1d9; margin-left: 8px; }
+        .log-entry.error .msg { color: #f85149; }
     </style>
 </head>
 <body>
     <div class="header">
         <div>
             <h1>ETF Portfolio Bot</h1>
-            <div class="subtitle">Gestion automatisee inspiree Finary</div>
+            <div class="subtitle">
+                <span id="bot-status" class="status-badge sim">
+                    <span class="status-dot sim"></span> Simulation
+                </span>
+            </div>
         </div>
-        <div>
-            <button class="nav-btn active" onclick="showView('portfolio')">Portefeuille</button>
-            <button class="nav-btn" onclick="showView('dca')">DCA</button>
-            <button class="nav-btn" onclick="showView('backtest')">Backtest</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <button class="nav-btn active" onclick="showView('portfolio',this)">Portefeuille</button>
+            <button class="nav-btn" onclick="showView('dca',this)">DCA</button>
+            <button class="nav-btn" onclick="showView('backtest',this)">Backtest</button>
+            <button class="nav-btn" onclick="showView('broker',this)">Broker</button>
+            <button class="nav-btn" onclick="showView('automation',this)">Automation</button>
         </div>
     </div>
 
@@ -139,15 +157,14 @@
         <div id="view-portfolio">
             <div class="actions">
                 <button class="btn" onclick="refreshPortfolio()">Actualiser</button>
-                <button class="btn" onclick="executeRebalance()">Reequilibrer</button>
+                <button class="btn secondary" onclick="executeRebalance()">Reequilibrer</button>
                 <button class="btn danger" onclick="resetPortfolio()">Reinitialiser</button>
             </div>
-
             <div class="grid" id="summary-cards">
                 <div class="card">
                     <h3>Valeur totale</h3>
                     <div class="value" id="total-value">--</div>
-                    <div class="sub" id="total-gain"></div>
+                    <div class="sub" id="total-mode"></div>
                 </div>
                 <div class="card">
                     <h3>Cash disponible</h3>
@@ -159,34 +176,23 @@
                     <div class="sub" id="etf-count"></div>
                 </div>
             </div>
-
             <div class="grid">
                 <div class="card full-width">
                     <h3>Allocation du portefeuille</h3>
                     <div id="allocation-chart" class="chart-container"></div>
                 </div>
             </div>
-
             <div class="card">
                 <h3>Positions detaillees</h3>
                 <table>
-                    <thead>
-                        <tr>
-                            <th>ETF</th>
-                            <th>Categorie</th>
-                            <th>Parts</th>
-                            <th>Prix</th>
-                            <th>Valeur</th>
-                            <th>Cible</th>
-                            <th>Actuel</th>
-                            <th>Ecart</th>
-                        </tr>
-                    </thead>
+                    <thead><tr>
+                        <th>ETF</th><th>Categorie</th><th>Parts</th><th>Prix</th>
+                        <th>Valeur</th><th>Cible</th><th>Actuel</th><th>Ecart</th>
+                    </tr></thead>
                     <tbody id="positions-table"></tbody>
                 </table>
             </div>
-
-            <div class="card" style="margin-top: 16px;">
+            <div class="card" style="margin-top:16px">
                 <h3>Ordres de reequilibrage suggeres</h3>
                 <div id="rebalance-orders"><p class="loading">Cliquez sur "Reequilibrer" pour calculer</p></div>
             </div>
@@ -198,27 +204,17 @@
                 <h2 class="section-title">Dollar Cost Averaging (DCA)</h2>
                 <div class="card">
                     <h3>Montant mensuel</h3>
-                    <div style="display: flex; gap: 12px; align-items: center; margin-top: 12px;">
-                        <input type="number" id="dca-amount" value="500" min="50" step="50"
-                            style="background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 8px 12px; border-radius: 6px; width: 150px; font-size: 1rem;">
-                        <span style="color: #8b949e;">EUR</span>
+                    <div style="display:flex;gap:12px;align-items:center;margin-top:12px">
+                        <input type="number" id="dca-amount" value="500" min="50" step="50" class="input" style="width:150px">
+                        <span style="color:#8b949e">EUR</span>
                         <button class="btn" onclick="calculateDCA()">Calculer</button>
-                        <button class="btn" onclick="executeDCA()" style="background: #1f6feb; border-color: #388bfd;">Executer DCA</button>
+                        <button class="btn secondary" onclick="executeDCA()">Executer DCA</button>
                     </div>
                 </div>
-
-                <div class="card" style="margin-top: 16px;">
+                <div class="card" style="margin-top:16px">
                     <h3>Repartition DCA</h3>
                     <table>
-                        <thead>
-                            <tr>
-                                <th>ETF</th>
-                                <th>Montant cible</th>
-                                <th>Prix unitaire</th>
-                                <th>Parts a acheter</th>
-                                <th>Montant reel</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>ETF</th><th>Montant cible</th><th>Prix unitaire</th><th>Parts a acheter</th><th>Montant reel</th></tr></thead>
                         <tbody id="dca-table"></tbody>
                     </table>
                 </div>
@@ -230,9 +226,9 @@
             <div class="section">
                 <h2 class="section-title">Backtest historique</h2>
                 <div class="card">
-                    <div style="display: flex; gap: 12px; align-items: center;">
-                        <span style="color: #8b949e;">Periode :</span>
-                        <select id="bt-years" style="background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 8px 12px; border-radius: 6px;">
+                    <div style="display:flex;gap:12px;align-items:center">
+                        <span style="color:#8b949e">Periode :</span>
+                        <select id="bt-years" class="input">
                             <option value="1">1 an</option>
                             <option value="3">3 ans</option>
                             <option value="5" selected>5 ans</option>
@@ -241,44 +237,114 @@
                         <button class="btn" onclick="runBacktest()" id="bt-btn">Lancer le backtest</button>
                     </div>
                 </div>
-
-                <div id="bt-results" style="margin-top: 16px; display: none;">
+                <div id="bt-results" style="margin-top:16px;display:none">
                     <div class="grid">
-                        <div class="card">
-                            <h3>Valeur finale</h3>
-                            <div class="value" id="bt-final">--</div>
-                        </div>
-                        <div class="card">
-                            <h3>Gain total</h3>
-                            <div class="value" id="bt-gain">--</div>
-                            <div class="sub" id="bt-gain-pct"></div>
-                        </div>
-                        <div class="card">
-                            <h3>Rendement annualise</h3>
-                            <div class="value" id="bt-annual">--</div>
-                        </div>
+                        <div class="card"><h3>Valeur finale</h3><div class="value" id="bt-final">--</div></div>
+                        <div class="card"><h3>Gain total</h3><div class="value" id="bt-gain">--</div><div class="sub" id="bt-gain-pct"></div></div>
+                        <div class="card"><h3>Rendement annualise</h3><div class="value" id="bt-annual">--</div></div>
                     </div>
                     <div class="metric-row">
-                        <div class="metric">
-                            <div class="label">Volatilite</div>
-                            <div class="val" id="bt-vol">--</div>
-                        </div>
-                        <div class="metric">
-                            <div class="label">Ratio de Sharpe</div>
-                            <div class="val" id="bt-sharpe">--</div>
-                        </div>
-                        <div class="metric">
-                            <div class="label">Max Drawdown</div>
-                            <div class="val" id="bt-dd">--</div>
-                        </div>
-                        <div class="metric">
-                            <div class="label">Total investi</div>
-                            <div class="val" id="bt-invested">--</div>
-                        </div>
+                        <div class="metric"><div class="label">Volatilite</div><div class="val" id="bt-vol">--</div></div>
+                        <div class="metric"><div class="label">Ratio de Sharpe</div><div class="val" id="bt-sharpe">--</div></div>
+                        <div class="metric"><div class="label">Max Drawdown</div><div class="val" id="bt-dd">--</div></div>
+                        <div class="metric"><div class="label">Total investi</div><div class="val" id="bt-invested">--</div></div>
                     </div>
-                    <div class="card full-width">
-                        <h3>Evolution du portefeuille</h3>
-                        <div id="bt-chart" class="chart-container"></div>
+                    <div class="card full-width"><h3>Evolution du portefeuille</h3><div id="bt-chart" class="chart-container"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BROKER VIEW -->
+        <div id="view-broker">
+            <div class="section">
+                <h2 class="section-title">Connexion Broker</h2>
+                <div id="broker-status-card" class="card" style="margin-bottom:16px">
+                    <h3>Statut</h3>
+                    <div id="broker-current-status">
+                        <p style="color:#8b949e">Aucun broker connecte. Selectionnez-en un ci-dessous.</p>
+                    </div>
+                </div>
+
+                <div class="grid" id="broker-list"></div>
+
+                <div id="broker-form" class="card" style="display:none;margin-top:16px">
+                    <h3 id="broker-form-title">Configuration</h3>
+                    <div id="broker-fields"></div>
+                    <div style="display:flex;gap:12px;margin-top:16px">
+                        <button class="btn" onclick="connectBroker()">Connecter</button>
+                        <button class="btn danger" onclick="disconnectBroker()">Deconnecter</button>
+                    </div>
+                    <div id="broker-connect-result" style="margin-top:12px"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AUTOMATION VIEW -->
+        <div id="view-automation">
+            <div class="section">
+                <h2 class="section-title">Automatisation</h2>
+
+                <div class="grid">
+                    <div class="card">
+                        <h3>DCA Automatique</h3>
+                        <div style="display:flex;align-items:center;gap:12px;margin:12px 0">
+                            <label class="toggle">
+                                <input type="checkbox" id="auto-dca-enabled" onchange="updateScheduler()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>Activer le DCA automatique</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Montant (EUR)</label>
+                            <input type="number" id="auto-dca-amount" value="500" min="50" step="50" class="input" style="width:100%">
+                        </div>
+                        <div class="form-group">
+                            <label>Jour du mois</label>
+                            <input type="number" id="auto-dca-day" value="1" min="1" max="28" class="input" style="width:100%">
+                        </div>
+                        <div class="form-group">
+                            <label>Heure</label>
+                            <input type="number" id="auto-dca-hour" value="9" min="0" max="23" class="input" style="width:100%">
+                        </div>
+                        <div class="sub" id="dca-next-run"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Reequilibrage Automatique</h3>
+                        <div style="display:flex;align-items:center;gap:12px;margin:12px 0">
+                            <label class="toggle">
+                                <input type="checkbox" id="auto-rebal-enabled" onchange="updateScheduler()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>Activer le reequilibrage</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Jour de la semaine</label>
+                            <select id="auto-rebal-day" class="input" style="width:100%">
+                                <option value="mon">Lundi</option>
+                                <option value="tue">Mardi</option>
+                                <option value="wed">Mercredi</option>
+                                <option value="thu">Jeudi</option>
+                                <option value="fri">Vendredi</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Heure</label>
+                            <input type="number" id="auto-rebal-hour" value="10" min="0" max="23" class="input" style="width:100%">
+                        </div>
+                        <div class="sub" id="rebal-next-run"></div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:16px">
+                    <h3>Jobs planifies</h3>
+                    <div id="scheduled-jobs"><p style="color:#8b949e">Aucun job planifie</p></div>
+                </div>
+
+                <div class="card" style="margin-top:16px">
+                    <h3>Logs d'execution</h3>
+                    <div id="scheduler-logs" style="max-height:300px;overflow-y:auto">
+                        <p style="color:#8b949e">Aucun log</p>
                     </div>
                 </div>
             </div>
@@ -290,15 +356,17 @@
     <script>
         const fmt = (n) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n);
         const pct = (n) => (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+        let selectedBrokerId = null;
 
-        function showView(view) {
+        function showView(view, btn) {
             document.querySelectorAll('[id^="view-"]').forEach(el => el.style.display = 'none');
             document.getElementById('view-' + view).style.display = 'block';
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-
+            if (btn) btn.classList.add('active');
             if (view === 'portfolio') refreshPortfolio();
             if (view === 'dca') calculateDCA();
+            if (view === 'broker') loadBrokers();
+            if (view === 'automation') loadScheduler();
         }
 
         function toast(msg, isError) {
@@ -309,20 +377,37 @@
             setTimeout(() => t.style.display = 'none', 3000);
         }
 
+        // ── Status ──
+        async function refreshStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                const badge = document.getElementById('bot-status');
+                if (data.broker_connected) {
+                    badge.className = 'status-badge live';
+                    badge.innerHTML = `<span class="status-dot live"></span> ${data.broker_name} - Live`;
+                } else {
+                    badge.className = 'status-badge sim';
+                    badge.innerHTML = '<span class="status-dot sim"></span> Simulation';
+                }
+            } catch(e) {}
+        }
+
+        // ── Portfolio ──
         async function refreshPortfolio() {
+            refreshStatus();
             try {
                 const res = await fetch('/api/portfolio');
                 const data = await res.json();
 
                 document.getElementById('total-value').textContent = fmt(data.total_value);
                 document.getElementById('cash-value').textContent = fmt(data.cash);
+                document.getElementById('total-mode').textContent = data.mode === 'live' ? 'Broker: ' + data.broker : 'Mode simulation';
 
-                const invested = data.positions.reduce((s, p) => s + (p.shares * (p.price || 0)), 0);
                 const activePositions = data.positions.filter(p => p.shares > 0);
                 document.getElementById('positions-count').textContent = activePositions.length;
                 document.getElementById('etf-count').textContent = data.positions.length + ' ETFs suivis';
 
-                // Table
                 const tbody = document.getElementById('positions-table');
                 tbody.innerHTML = data.positions.map(p => {
                     const driftClass = Math.abs(p.drift) >= 5 ? (p.drift > 0 ? 'sell' : 'buy') : 'ok';
@@ -343,31 +428,26 @@
                     </tr>`;
                 }).join('');
 
-                // Allocation chart
                 const labels = data.positions.map(p => p.name);
                 const targetValues = data.positions.map(p => p.target_pct);
                 const currentValues = data.positions.map(p => p.current_pct);
+                const colors = ['#58a6ff','#3fb950','#f0883e','#bc8cff','#f85149'];
 
                 Plotly.newPlot('allocation-chart', [
-                    { values: targetValues.map(v => Math.max(v, 0.1)), labels, name: 'Cible', type: 'pie', hole: 0.5,
-                      domain: { column: 0 }, marker: { colors: ['#58a6ff', '#3fb950', '#f0883e', '#bc8cff', '#f85149'] },
-                      textinfo: 'label+percent', textfont: { color: '#fff', size: 12 } },
-                    { values: currentValues.map(v => Math.max(v, 0.1)), labels, name: 'Actuel', type: 'pie', hole: 0.5,
-                      domain: { column: 1 }, marker: { colors: ['#58a6ff', '#3fb950', '#f0883e', '#bc8cff', '#f85149'] },
-                      textinfo: 'label+percent', textfont: { color: '#fff', size: 12 } }
+                    { values: targetValues.map(v => Math.max(v,0.1)), labels, name:'Cible', type:'pie', hole:0.5,
+                      domain:{column:0}, marker:{colors}, textinfo:'label+percent', textfont:{color:'#fff',size:12} },
+                    { values: currentValues.map(v => Math.max(v,0.1)), labels, name:'Actuel', type:'pie', hole:0.5,
+                      domain:{column:1}, marker:{colors}, textinfo:'label+percent', textfont:{color:'#fff',size:12} }
                 ], {
-                    grid: { rows: 1, columns: 2 },
-                    annotations: [
-                        { text: 'Cible', x: 0.2, y: 0.5, font: { size: 14, color: '#8b949e' }, showarrow: false },
-                        { text: 'Actuel', x: 0.8, y: 0.5, font: { size: 14, color: '#8b949e' }, showarrow: false }
+                    grid:{rows:1,columns:2},
+                    annotations:[
+                        {text:'Cible',x:0.2,y:0.5,font:{size:14,color:'#8b949e'},showarrow:false},
+                        {text:'Actuel',x:0.8,y:0.5,font:{size:14,color:'#8b949e'},showarrow:false}
                     ],
-                    paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
-                    showlegend: false, margin: { t: 20, b: 20, l: 20, r: 20 }, height: 350
-                }, { responsive: true });
-
-            } catch (e) {
-                toast('Erreur de chargement: ' + e.message, true);
-            }
+                    paper_bgcolor:'transparent',plot_bgcolor:'transparent',
+                    showlegend:false,margin:{t:20,b:20,l:20,r:20},height:350
+                }, {responsive:true});
+            } catch(e) { toast('Erreur: '+e.message,true); }
         }
 
         async function executeRebalance() {
@@ -375,28 +455,23 @@
                 const res = await fetch('/api/rebalance');
                 const orders = await res.json();
                 const container = document.getElementById('rebalance-orders');
-
                 if (orders.length === 0) {
-                    container.innerHTML = '<p style="color:#3fb950;padding:12px;">Portefeuille equilibre - aucun ordre necessaire</p>';
+                    container.innerHTML = '<p style="color:#3fb950;padding:12px">Portefeuille equilibre</p>';
                     return;
                 }
-
                 container.innerHTML = `<table>
-                    <thead><tr><th>ETF</th><th>Action</th><th>Parts</th><th>Prix</th><th>Montant</th><th>Ecart</th></tr></thead>
+                    <thead><tr><th>ETF</th><th>Action</th><th>Parts</th><th>Montant</th><th>Statut</th></tr></thead>
                     <tbody>${orders.map(o => `<tr>
-                        <td>${o.name}</td>
-                        <td><span class="badge ${o.action.toLowerCase()}">${o.action}</span></td>
-                        <td>${o.shares}</td>
-                        <td>${fmt(o.price)}</td>
-                        <td>${fmt(o.amount)}</td>
-                        <td>${pct(o.drift)}</td>
-                    </tr>`).join('')}</tbody>
-                </table>`;
-            } catch (e) {
-                toast('Erreur: ' + e.message, true);
-            }
+                        <td>${o.name||o.ticker}</td>
+                        <td><span class="badge ${(o.action||'').toLowerCase()}">${o.action||'-'}</span></td>
+                        <td>${o.shares||'-'}</td>
+                        <td>${o.amount?fmt(o.amount):'-'}</td>
+                        <td>${o.status||o.drift?pct(o.drift):'-'}</td>
+                    </tr>`).join('')}</tbody></table>`;
+            } catch(e) { toast('Erreur: '+e.message,true); }
         }
 
+        // ── DCA ──
         async function calculateDCA() {
             const amount = document.getElementById('dca-amount').value;
             try {
@@ -409,95 +484,243 @@
                     <td>${d.shares_to_buy}</td>
                     <td>${fmt(d.real_amount)}</td>
                 </tr>`).join('');
-            } catch (e) {
-                toast('Erreur: ' + e.message, true);
-            }
+            } catch(e) { toast('Erreur: '+e.message,true); }
         }
 
         async function executeDCA() {
             const amount = document.getElementById('dca-amount').value;
             try {
                 const res = await fetch('/api/dca/execute', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount: parseFloat(amount) })
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({amount:parseFloat(amount)})
                 });
                 const data = await res.json();
-                toast(`DCA execute : ${data.length} ordres passes`);
-                calculateDCA();
-            } catch (e) {
-                toast('Erreur: ' + e.message, true);
-            }
+                toast(`DCA execute: ${data.length} ordres`);
+                refreshPortfolio();
+            } catch(e) { toast('Erreur: '+e.message,true); }
         }
 
         async function resetPortfolio() {
-            if (!confirm('Reinitialiser le portefeuille ? Toutes les positions seront perdues.')) return;
-            try {
-                await fetch('/api/reset', { method: 'POST' });
-                toast('Portefeuille reinitialise');
-                refreshPortfolio();
-            } catch (e) {
-                toast('Erreur: ' + e.message, true);
-            }
+            if (!confirm('Reinitialiser le portefeuille ?')) return;
+            await fetch('/api/reset',{method:'POST'});
+            toast('Portefeuille reinitialise');
+            refreshPortfolio();
         }
 
+        // ── Backtest ──
         async function runBacktest() {
             const btn = document.getElementById('bt-btn');
-            btn.disabled = true;
-            btn.textContent = 'Calcul en cours...';
-
+            btn.disabled = true; btn.textContent = 'Calcul en cours...';
             const years = document.getElementById('bt-years').value;
             try {
                 const res = await fetch(`/api/backtest?years=${years}`);
                 const data = await res.json();
-
-                if (data.error) {
-                    toast(data.error, true);
-                    return;
-                }
+                if (data.error) { toast(data.error,true); return; }
 
                 document.getElementById('bt-results').style.display = 'block';
                 document.getElementById('bt-final').textContent = fmt(data.final_value);
-
                 const gainEl = document.getElementById('bt-gain');
                 gainEl.textContent = fmt(data.gain);
-                gainEl.className = 'value ' + (data.gain >= 0 ? 'positive' : 'negative');
+                gainEl.className = 'value '+(data.gain>=0?'positive':'negative');
                 document.getElementById('bt-gain-pct').textContent = pct(data.gain_pct);
-
                 document.getElementById('bt-annual').textContent = pct(data.annualized_return_pct);
-                document.getElementById('bt-vol').textContent = data.volatility_pct + '%';
+                document.getElementById('bt-vol').textContent = data.volatility_pct+'%';
                 document.getElementById('bt-sharpe').textContent = data.sharpe_ratio;
-                document.getElementById('bt-dd').textContent = data.max_drawdown_pct + '%';
+                document.getElementById('bt-dd').textContent = data.max_drawdown_pct+'%';
                 document.getElementById('bt-invested').textContent = fmt(data.total_invested);
 
-                // Chart
-                const dates = data.portfolio_history.map(p => p.date);
-                const values = data.portfolio_history.map(p => p.value);
-                const invested = data.invested_history.map(p => p.invested);
+                Plotly.newPlot('bt-chart',[
+                    {x:data.portfolio_history.map(p=>p.date),y:data.portfolio_history.map(p=>p.value),
+                     name:'Valeur portefeuille',type:'scatter',mode:'lines',
+                     line:{color:'#58a6ff',width:2},fill:'tozeroy',fillcolor:'rgba(88,166,255,0.1)'},
+                    {x:data.invested_history.map(p=>p.date),y:data.invested_history.map(p=>p.invested),
+                     name:'Total investi',type:'scatter',mode:'lines',
+                     line:{color:'#8b949e',width:1,dash:'dash'}}
+                ],{
+                    paper_bgcolor:'transparent',plot_bgcolor:'transparent',
+                    xaxis:{gridcolor:'#21262d',color:'#8b949e'},
+                    yaxis:{gridcolor:'#21262d',color:'#8b949e',tickformat:',.0f'},
+                    legend:{font:{color:'#8b949e'}},
+                    margin:{t:20,b:40,l:60,r:20},height:380
+                },{responsive:true});
+            } catch(e) { toast('Erreur: '+e.message,true); }
+            finally { btn.disabled = false; btn.textContent = 'Lancer le backtest'; }
+        }
 
-                Plotly.newPlot('bt-chart', [
-                    { x: dates, y: values, name: 'Valeur portefeuille', type: 'scatter', mode: 'lines',
-                      line: { color: '#58a6ff', width: 2 }, fill: 'tozeroy', fillcolor: 'rgba(88,166,255,0.1)' },
-                    { x: dates, y: invested, name: 'Total investi', type: 'scatter', mode: 'lines',
-                      line: { color: '#8b949e', width: 1, dash: 'dash' } }
-                ], {
-                    paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
-                    xaxis: { gridcolor: '#21262d', color: '#8b949e' },
-                    yaxis: { gridcolor: '#21262d', color: '#8b949e', tickformat: ',.0f' },
-                    legend: { font: { color: '#8b949e' } },
-                    margin: { t: 20, b: 40, l: 60, r: 20 }, height: 380
-                }, { responsive: true });
+        // ── Broker ──
+        const BROKER_FIELDS = {
+            ibkr: [
+                {id:'host',label:'Adresse TWS/Gateway',type:'text',value:'127.0.0.1'},
+                {id:'port',label:'Port (7497=paper, 7496=live)',type:'number',value:'7497'},
+                {id:'client_id',label:'Client ID',type:'number',value:'1'}
+            ],
+            degiro: [
+                {id:'username',label:'Nom d\'utilisateur',type:'text',value:''},
+                {id:'password',label:'Mot de passe',type:'password',value:''},
+                {id:'totp_secret',label:'TOTP Secret (optionnel)',type:'text',value:''}
+            ],
+            alpaca: [
+                {id:'api_key',label:'API Key',type:'text',value:''},
+                {id:'secret_key',label:'Secret Key',type:'password',value:''},
+                {id:'paper',label:'Paper Trading',type:'checkbox',value:true}
+            ]
+        };
 
-            } catch (e) {
-                toast('Erreur: ' + e.message, true);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Lancer le backtest';
+        async function loadBrokers() {
+            refreshStatus();
+            try {
+                const res = await fetch('/api/brokers');
+                const brokers = await res.json();
+                document.getElementById('broker-list').innerHTML = brokers.map(b => `
+                    <div class="broker-card ${selectedBrokerId===b.id?'selected':''}" onclick="selectBroker('${b.id}')">
+                        <h4>${b.name}</h4>
+                        <p>${b.description}</p>
+                    </div>
+                `).join('');
+
+                // Update status
+                const statusRes = await fetch('/api/status');
+                const status = await statusRes.json();
+                const statusDiv = document.getElementById('broker-current-status');
+                if (status.broker_connected) {
+                    statusDiv.innerHTML = `<div style="display:flex;align-items:center;gap:8px">
+                        <span class="status-dot live"></span>
+                        <strong style="color:#3fb950">${status.broker_name}</strong>
+                        <span style="color:#8b949e"> - Connecte</span>
+                    </div>`;
+                } else {
+                    statusDiv.innerHTML = '<p style="color:#8b949e">Aucun broker connecte</p>';
+                }
+            } catch(e) { toast('Erreur: '+e.message,true); }
+        }
+
+        function selectBroker(brokerId) {
+            selectedBrokerId = brokerId;
+            document.querySelectorAll('.broker-card').forEach(c => c.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+
+            const form = document.getElementById('broker-form');
+            form.style.display = 'block';
+            document.getElementById('broker-form-title').textContent = 'Configuration ' + brokerId.toUpperCase();
+
+            const fields = BROKER_FIELDS[brokerId] || [];
+            document.getElementById('broker-fields').innerHTML = fields.map(f => {
+                if (f.type === 'checkbox') {
+                    return `<div class="form-group"><label>${f.label}</label>
+                        <label class="toggle"><input type="checkbox" id="bf-${f.id}" ${f.value?'checked':''}><span class="toggle-slider"></span></label></div>`;
+                }
+                return `<div class="form-group"><label>${f.label}</label>
+                    <input type="${f.type}" id="bf-${f.id}" value="${f.value}" class="input" style="width:100%"></div>`;
+            }).join('');
+        }
+
+        async function connectBroker() {
+            if (!selectedBrokerId) return;
+            const fields = BROKER_FIELDS[selectedBrokerId] || [];
+            const credentials = {};
+            fields.forEach(f => {
+                const el = document.getElementById('bf-'+f.id);
+                if (f.type === 'checkbox') credentials[f.id] = el.checked;
+                else if (f.type === 'number') credentials[f.id] = parseInt(el.value);
+                else credentials[f.id] = el.value;
+            });
+
+            const resultDiv = document.getElementById('broker-connect-result');
+            resultDiv.innerHTML = '<span style="color:#f0883e">Connexion en cours...</span>';
+
+            try {
+                const res = await fetch('/api/broker/connect',{
+                    method:'POST',headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({broker_id:selectedBrokerId,credentials})
+                });
+                const data = await res.json();
+                if (data.status === 'connected') {
+                    resultDiv.innerHTML = `<span style="color:#3fb950">Connecte a ${data.broker}</span>`;
+                    toast('Broker connecte !');
+                    refreshStatus();
+                } else {
+                    resultDiv.innerHTML = `<span style="color:#f85149">Erreur: ${data.message}</span>`;
+                }
+            } catch(e) {
+                resultDiv.innerHTML = `<span style="color:#f85149">Erreur: ${e.message}</span>`;
             }
         }
 
-        // Load on startup
+        async function disconnectBroker() {
+            await fetch('/api/broker/disconnect',{method:'POST'});
+            toast('Broker deconnecte');
+            refreshStatus();
+            loadBrokers();
+        }
+
+        // ── Automation ──
+        async function loadScheduler() {
+            try {
+                const res = await fetch('/api/scheduler');
+                const data = await res.json();
+                const cfg = data.config;
+
+                document.getElementById('auto-dca-enabled').checked = cfg.dca_enabled;
+                document.getElementById('auto-dca-amount').value = cfg.dca_amount;
+                document.getElementById('auto-dca-day').value = cfg.dca_day;
+                document.getElementById('auto-dca-hour').value = cfg.dca_hour;
+                document.getElementById('auto-rebal-enabled').checked = cfg.rebalance_enabled;
+                document.getElementById('auto-rebal-day').value = cfg.rebalance_day;
+                document.getElementById('auto-rebal-hour').value = cfg.rebalance_hour;
+
+                // Jobs
+                const jobsDiv = document.getElementById('scheduled-jobs');
+                if (data.jobs.length > 0) {
+                    jobsDiv.innerHTML = data.jobs.map(j => `
+                        <div style="padding:8px 0;border-bottom:1px solid #21262d">
+                            <strong style="color:#f0f6fc">${j.name}</strong><br>
+                            <span style="color:#8b949e;font-size:0.8rem">Prochain: ${j.next_run || 'N/A'}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    jobsDiv.innerHTML = '<p style="color:#8b949e">Aucun job planifie</p>';
+                }
+
+                // Logs
+                const logsDiv = document.getElementById('scheduler-logs');
+                if (cfg.logs && cfg.logs.length > 0) {
+                    logsDiv.innerHTML = cfg.logs.slice().reverse().map(l => {
+                        const isErr = l.message.includes('ECHEC');
+                        return `<div class="log-entry ${isErr?'error':''}">
+                            <span class="time">${new Date(l.timestamp).toLocaleString('fr-FR')}</span>
+                            <span class="badge ${l.type==='DCA'?'buy':'ok'}">${l.type}</span>
+                            <span class="msg">${l.message}</span>
+                        </div>`;
+                    }).join('');
+                } else {
+                    logsDiv.innerHTML = '<p style="color:#8b949e">Aucun log</p>';
+                }
+            } catch(e) { toast('Erreur: '+e.message,true); }
+        }
+
+        async function updateScheduler() {
+            const config = {
+                dca_enabled: document.getElementById('auto-dca-enabled').checked,
+                dca_amount: parseFloat(document.getElementById('auto-dca-amount').value),
+                dca_day: parseInt(document.getElementById('auto-dca-day').value),
+                dca_hour: parseInt(document.getElementById('auto-dca-hour').value),
+                rebalance_enabled: document.getElementById('auto-rebal-enabled').checked,
+                rebalance_day: document.getElementById('auto-rebal-day').value,
+                rebalance_hour: parseInt(document.getElementById('auto-rebal-hour').value),
+            };
+            try {
+                await fetch('/api/scheduler/update',{
+                    method:'POST',headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify(config)
+                });
+                toast('Automatisation mise a jour');
+                loadScheduler();
+            } catch(e) { toast('Erreur: '+e.message,true); }
+        }
+
+        // Boot
         refreshPortfolio();
+        refreshStatus();
     </script>
 </body>
 </html>
