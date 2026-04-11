@@ -3,28 +3,89 @@ Dashboard web Flask pour le bot ETF.
 """
 
 from flask import Flask, render_template, jsonify, request
+from bot_engine import BotEngine
 from portfolio import (
     load_state, get_portfolio_value, calculate_rebalance,
     calculate_dca_allocation, execute_dca, _init_state,
 )
 from backtest import run_backtest
-from market_data import get_current_prices, get_etf_info
+from market_data import get_current_prices
+from brokers import list_brokers
+from scheduler import (
+    load_scheduler_config, save_scheduler_config,
+    setup_scheduled_jobs, get_scheduled_jobs,
+)
 from config import PORTFOLIO, DCA_MONTHLY
 
 app = Flask(__name__)
+engine = BotEngine()
 
+
+# ── Pages ──────────────────────────────────────────────
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
 
+# ── API: Bot Status ────────────────────────────────────
+
+@app.route("/api/status")
+def api_status():
+    """Statut global du bot (broker, mode, scheduler)."""
+    status = engine.get_status()
+    status["scheduler"] = {
+        "config": load_scheduler_config(),
+        "jobs": get_scheduled_jobs(),
+    }
+    return jsonify(status)
+
+
+# ── API: Broker ────────────────────────────────────────
+
+@app.route("/api/brokers")
+def api_brokers():
+    """Liste les brokers disponibles."""
+    return jsonify(list_brokers())
+
+
+@app.route("/api/broker/connect", methods=["POST"])
+def api_broker_connect():
+    """Connecte un broker."""
+    data = request.get_json()
+    broker_id = data.get("broker_id")
+    credentials = data.get("credentials", {})
+    result = engine.connect_broker(broker_id, credentials)
+    return jsonify(result)
+
+
+@app.route("/api/broker/disconnect", methods=["POST"])
+def api_broker_disconnect():
+    """Déconnecte le broker."""
+    result = engine.disconnect_broker()
+    return jsonify(result)
+
+
+@app.route("/api/broker/account")
+def api_broker_account():
+    """Info du compte broker."""
+    if not engine.broker or not engine.broker.connected:
+        return jsonify({"error": "Aucun broker connecté"}), 400
+    try:
+        from dataclasses import asdict
+        account = engine.broker.get_account()
+        return jsonify(asdict(account))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ── API: Portfolio ─────────────────────────────────────
+
 @app.route("/api/portfolio")
 def api_portfolio():
-    """Retourne l'état actuel du portefeuille."""
-    state = load_state()
-    value = get_portfolio_value(state)
-    return jsonify(value)
+    """Retourne le portefeuille (broker réel ou simulation)."""
+    result = engine.get_portfolio()
+    return jsonify(result)
 
 
 @app.route("/api/prices")
@@ -42,12 +103,26 @@ def api_prices():
     return jsonify(result)
 
 
+# ── API: Rebalance ─────────────────────────────────────
+
 @app.route("/api/rebalance")
 def api_rebalance():
     """Calcule les ordres de rééquilibrage."""
-    orders = calculate_rebalance()
+    if engine.broker and engine.broker.connected:
+        orders = engine.execute_rebalance()
+    else:
+        orders = calculate_rebalance()
     return jsonify(orders)
 
+
+@app.route("/api/rebalance/execute", methods=["POST"])
+def api_rebalance_execute():
+    """Exécute le rééquilibrage via le broker."""
+    results = engine.execute_rebalance()
+    return jsonify(results)
+
+
+# ── API: DCA ───────────────────────────────────────────
 
 @app.route("/api/dca")
 def api_dca():
@@ -59,12 +134,14 @@ def api_dca():
 
 @app.route("/api/dca/execute", methods=["POST"])
 def api_dca_execute():
-    """Exécute un DCA."""
+    """Exécute un DCA (broker ou simulation)."""
     data = request.get_json() or {}
     amount = data.get("amount", DCA_MONTHLY)
-    results = execute_dca(amount=amount)
+    results = engine.execute_dca(amount=amount)
     return jsonify(results)
 
+
+# ── API: Backtest ──────────────────────────────────────
 
 @app.route("/api/backtest")
 def api_backtest():
@@ -74,12 +151,45 @@ def api_backtest():
     return jsonify(result)
 
 
+# ── API: Scheduler ─────────────────────────────────────
+
+@app.route("/api/scheduler")
+def api_scheduler():
+    """Config et état du scheduler."""
+    config = load_scheduler_config()
+    jobs = get_scheduled_jobs()
+    return jsonify({"config": config, "jobs": jobs})
+
+
+@app.route("/api/scheduler/update", methods=["POST"])
+def api_scheduler_update():
+    """Met à jour la config du scheduler."""
+    data = request.get_json()
+    config = load_scheduler_config()
+    config.update(data)
+    setup_scheduled_jobs(config)
+    return jsonify({"status": "ok", "config": config})
+
+
+# ── API: Reset ─────────────────────────────────────────
+
 @app.route("/api/reset", methods=["POST"])
 def api_reset():
-    """Réinitialise le portefeuille."""
+    """Réinitialise le portefeuille simulé."""
     state = _init_state()
     return jsonify({"status": "ok", "cash": state["cash"]})
 
+
+# ── Startup ────────────────────────────────────────────
+
+def init_app():
+    """Initialisation au démarrage."""
+    config = load_scheduler_config()
+    if config.get("dca_enabled") or config.get("rebalance_enabled"):
+        setup_scheduled_jobs(config)
+
+
+init_app()
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(where python:*)",
+      "Bash(python -m ensurepip --upgrade)",
+      "Bash(python -m pip install -r requirements.txt)",
+      "Bash(C:\\\\\\\\python.exe -m ensurepip --upgrade)",
+      "Bash(C:\\\\\\\\python.exe -m pip install -r \"/c/Users/Toyam/Desktop/code bot etf/requirements.txt\")",
+      "Bash(/c/python.exe -m ensurepip --upgrade)",
+      "Bash(/c/python.exe -m pip install -r \"/c/Users/Toyam/Desktop/code bot etf/requirements.txt\")",
+      "Bash(python -m pip install -r \"/c/Users/Toyam/Desktop/code bot etf/requirements.txt\")",
+      "Bash(gh repo:*)",
+      "Bash(where gh:*)",
+      "Bash(winget install:*)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
+      "Bash(gh auth:*)",
+      "Bash(gh pr create --title 'feat: ETF portfolio bot with web dashboard' --body ':*)",
+      "Bash(python -c \"import sys; print\\(sys.executable\\)\")",
+      "Read(//c/Users/Toyam/AppData/Local/Programs/Python/Python313/**)",
+      "Read(//c/Users/Toyam/AppData/Local/Programs/Python/Python313/Scripts/**)",
+      "Bash(python -c \"import ensurepip; ensurepip._main\\(\\)\")",
+      "Bash(python -m pip --version)",
+      "Bash(python -c \"import site; print\\(site.getsitepackages\\(\\)\\); print\\(site.getusersitepackages\\(\\)\\)\")",
+      "Read(//c/lib/site-packages/**)",
+      "Read(//c/Scripts/**)",
+      "Bash(python -c \"import subprocess, sys; subprocess.check_call\\([sys.executable, '-c', 'import pip; pip.main\\([\\\\\"install\\\\\", \\\\\"-r\\\\\", \\\\\"requirements.txt\\\\\"]\\)']\\)\")",
+      "Bash(/c/Scripts/pip.exe install:*)",
+      "Bash(python -m venv venv)",
+      "Bash(kill %1)",
+      "WebFetch(domain:etf-portfolio-bot-production.up.railway.app)",
+      "Bash(gh api:*)",
+      "Bash(gh pr:*)"
+    ]
+  }
+}
