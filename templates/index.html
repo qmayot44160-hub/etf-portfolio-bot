@@ -555,9 +555,10 @@
                 {id:'client_id',label:'Client ID',type:'number',value:'1'}
             ],
             degiro: [
-                {id:'username',label:'Nom d\'utilisateur',type:'text',value:''},
+                {id:'username',label:'Nom d\'utilisateur Degiro (pas l\'email)',type:'text',value:''},
                 {id:'password',label:'Mot de passe',type:'password',value:''},
-                {id:'totp_secret',label:'TOTP Secret (optionnel)',type:'text',value:''}
+                {id:'totp_secret',label:'TOTP Secret (optionnel - pour 2FA par app authenticator)',type:'text',value:''},
+                {id:'one_time_password',label:'Code OTP a 6 chiffres (optionnel - si 2FA active)',type:'text',value:''}
             ],
             alpaca: [
                 {id:'api_key',label:'API Key',type:'text',value:''},

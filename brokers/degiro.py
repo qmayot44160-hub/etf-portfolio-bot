@@ -20,16 +20,20 @@ class DegiroBroker(BaseBroker):
         self.username = credentials.get("username", "")
         self.password = credentials.get("password", "")
         self.totp_secret = credentials.get("totp_secret") or None
+        self.one_time_password = credentials.get("one_time_password") or None
         self.trading_api = None
 
     def connect(self) -> bool:
         from degiro_connector.trading.api import API as TradingAPI
         from degiro_connector.trading.models.credentials import Credentials
 
+        otp = int(self.one_time_password) if self.one_time_password else None
+
         creds = Credentials(
             username=self.username,
             password=self.password,
             totp_secret_key=self.totp_secret,
+            one_time_password=otp,
         )
         self.trading_api = TradingAPI(credentials=creds)
         self.trading_api.connect()
