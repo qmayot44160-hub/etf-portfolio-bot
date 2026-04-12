@@ -17,10 +17,12 @@ from scheduler import (
 )
 from config import PORTFOLIO, DCA_MONTHLY, CRYPTO_PORTFOLIO, CRYPTO_DCA_MONTHLY
 from crypto_engine import CryptoEngine
+from auto_trader import AutoTrader
 
 app = Flask(__name__)
 engine = BotEngine()
 crypto = CryptoEngine()
+trader = AutoTrader()
 
 
 # ── Pages ──────────────────────────────────────────────
@@ -213,6 +215,71 @@ def api_crypto_dca_execute():
 @app.route("/api/crypto/rebalance")
 def api_crypto_rebalance():
     return jsonify(crypto.calculate_rebalance())
+
+
+# ── API: Trading ───────────────────────────────────────
+
+@app.route("/api/trading/status")
+def api_trading_status():
+    return jsonify(trader.get_status())
+
+
+@app.route("/api/trading/config", methods=["GET", "POST"])
+def api_trading_config():
+    if request.method == "POST":
+        data = request.get_json()
+        trader.save_config(data)
+        return jsonify({"status": "ok"})
+    return jsonify(trader.get_config())
+
+
+@app.route("/api/trading/analyze/<symbol>")
+def api_trading_analyze(symbol):
+    tf = request.args.get("timeframe", "1h")
+    return jsonify(trader.analyze_symbol(symbol.upper(), tf))
+
+
+@app.route("/api/trading/analyze_all")
+def api_trading_analyze_all():
+    return jsonify(trader.analyze_all())
+
+
+@app.route("/api/trading/execute", methods=["POST"])
+def api_trading_execute():
+    data = request.get_json()
+    return jsonify(trader.execute_signal(data))
+
+
+@app.route("/api/trading/active")
+def api_trading_active():
+    return jsonify(trader.get_active_trades())
+
+
+@app.route("/api/trading/history")
+def api_trading_history():
+    return jsonify(trader.get_trade_history())
+
+
+@app.route("/api/trading/close", methods=["POST"])
+def api_trading_close():
+    data = request.get_json()
+    return jsonify(trader.close_trade(data.get("symbol", "")))
+
+
+@app.route("/api/trading/start", methods=["POST"])
+def api_trading_start():
+    trader.exchange = crypto.broker
+    return jsonify(trader.start())
+
+
+@app.route("/api/trading/stop", methods=["POST"])
+def api_trading_stop():
+    return jsonify(trader.stop())
+
+
+@app.route("/api/trading/check_sltp")
+def api_trading_check_sltp():
+    return jsonify(trader.check_stop_loss_take_profit())
 
 
 # ── API: Reset ─────────────────────────────────────────

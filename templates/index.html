@@ -148,6 +148,7 @@
             <button class="nav-btn" onclick="showView('dca',this)">DCA</button>
             <button class="nav-btn" onclick="showView('backtest',this)">Backtest</button>
             <button class="nav-btn" onclick="showView('crypto',this)">Crypto</button>
+            <button class="nav-btn" onclick="showView('trading',this)">Trading</button>
             <button class="nav-btn" onclick="showView('broker',this)">Broker</button>
             <button class="nav-btn" onclick="showView('automation',this)">Automation</button>
         </div>
@@ -251,6 +252,82 @@
                         <div class="metric"><div class="label">Total investi</div><div class="val" id="bt-invested">--</div></div>
                     </div>
                     <div class="card full-width"><h3>Evolution du portefeuille</h3><div id="bt-chart" class="chart-container"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TRADING VIEW -->
+        <div id="view-trading">
+            <div class="section">
+                <h2 class="section-title">Trading Actif</h2>
+
+                <div class="grid">
+                    <div class="card">
+                        <h3>Auto-Trader</h3>
+                        <div style="display:flex;align-items:center;gap:12px;margin:12px 0">
+                            <button class="btn" id="trader-start-btn" onclick="toggleTrader()">Demarrer le bot</button>
+                            <span id="trader-status-label" style="color:#8b949e">Arrete</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Intervalle de scan (secondes)</label>
+                            <input type="number" id="t-interval" value="300" min="60" class="input" style="width:100%">
+                        </div>
+                        <div class="form-group">
+                            <label>Max trades simultanes</label>
+                            <input type="number" id="t-max-trades" value="5" min="1" max="20" class="input" style="width:100%">
+                        </div>
+                        <div class="form-group">
+                            <label>Timeframe</label>
+                            <select id="t-timeframe" class="input" style="width:100%">
+                                <option value="5m">5 min</option>
+                                <option value="15m">15 min</option>
+                                <option value="1h" selected>1 heure</option>
+                                <option value="4h">4 heures</option>
+                                <option value="1d">1 jour</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Risk par trade (%)</label>
+                            <input type="number" id="t-risk" value="2" min="0.5" max="10" step="0.5" class="input" style="width:100%">
+                        </div>
+                        <div class="form-group">
+                            <label>Stop Loss (x ATR)</label>
+                            <input type="number" id="t-sl" value="1.5" min="0.5" max="5" step="0.5" class="input" style="width:100%">
+                        </div>
+                        <div class="form-group">
+                            <label>Take Profit (x ATR)</label>
+                            <input type="number" id="t-tp" value="3" min="1" max="10" step="0.5" class="input" style="width:100%">
+                        </div>
+                        <button class="btn secondary" onclick="saveTraderConfig()" style="margin-top:8px">Sauvegarder la config</button>
+                    </div>
+
+                    <div class="card">
+                        <h3>Signaux en temps reel</h3>
+                        <button class="btn" onclick="analyzeAll()" style="margin-bottom:12px">Scanner maintenant</button>
+                        <div id="signals-list"><p style="color:#8b949e">Cliquez sur Scanner</p></div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom:16px">
+                    <h3>Trades actifs</h3>
+                    <table>
+                        <thead><tr>
+                            <th>Token</th><th>Side</th><th>Entree</th><th>Quantite</th>
+                            <th>SL</th><th>TP</th><th>P&L</th><th>Action</th>
+                        </tr></thead>
+                        <tbody id="active-trades-table"></tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h3>Historique des trades</h3>
+                    <table>
+                        <thead><tr>
+                            <th>Token</th><th>Side</th><th>Entree</th><th>Sortie</th>
+                            <th>P&L</th><th>Statut</th><th>Date</th>
+                        </tr></thead>
+                        <tbody id="trade-history-table"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -443,6 +520,7 @@
             if (view === 'portfolio') refreshPortfolio();
             if (view === 'dca') calculateDCA();
             if (view === 'crypto') loadCrypto();
+            if (view === 'trading') loadTrading();
             if (view === 'broker') loadBrokers();
             if (view === 'automation') loadScheduler();
         }
@@ -927,6 +1005,174 @@
                         <td>${pct(o.drift)}</td>
                     </tr>`).join('')}</tbody></table>`;
             } catch(e) { toast('Erreur: '+e.message, true); }
+        }
+
+        // ── Trading ──
+        let traderRunning = false;
+
+        async function loadTrading() {
+            try {
+                const res = await fetch('/api/trading/status');
+                const data = await res.json();
+                traderRunning = data.running;
+                updateTraderUI(data);
+
+                const cfg = data.config;
+                document.getElementById('t-interval').value = cfg.check_interval;
+                document.getElementById('t-max-trades').value = cfg.max_open_trades;
+                document.getElementById('t-timeframe').value = cfg.timeframe;
+                document.getElementById('t-risk').value = cfg.risk_per_trade_pct;
+                document.getElementById('t-sl').value = cfg.sl_atr_multiplier;
+                document.getElementById('t-tp').value = cfg.tp_atr_multiplier;
+
+                loadActiveTrades();
+                loadTradeHistory();
+            } catch(e) { toast('Erreur: '+e.message, true); }
+        }
+
+        function updateTraderUI(data) {
+            const btn = document.getElementById('trader-start-btn');
+            const label = document.getElementById('trader-status-label');
+            if (data.running) {
+                btn.textContent = 'Arreter le bot';
+                btn.className = 'btn danger';
+                label.innerHTML = '<span class="status-dot live" style="display:inline-block"></span> En cours — ' + data.active_trades + ' trades actifs';
+                label.style.color = '#3fb950';
+            } else {
+                btn.textContent = 'Demarrer le bot';
+                btn.className = 'btn';
+                label.textContent = 'Arrete';
+                label.style.color = '#8b949e';
+            }
+        }
+
+        async function toggleTrader() {
+            const endpoint = traderRunning ? '/api/trading/stop' : '/api/trading/start';
+            await fetch(endpoint, {method:'POST'});
+            toast(traderRunning ? 'Bot arrete' : 'Bot demarre');
+            traderRunning = !traderRunning;
+            loadTrading();
+        }
+
+        async function saveTraderConfig() {
+            const config = {
+                enabled: true,
+                symbols: ['BTC','ETH','SOL','LINK','AAVE'],
+                timeframe: document.getElementById('t-timeframe').value,
+                check_interval: parseInt(document.getElementById('t-interval').value),
+                max_open_trades: parseInt(document.getElementById('t-max-trades').value),
+                risk_per_trade_pct: parseFloat(document.getElementById('t-risk').value),
+                sl_atr_multiplier: parseFloat(document.getElementById('t-sl').value),
+                tp_atr_multiplier: parseFloat(document.getElementById('t-tp').value),
+            };
+            await fetch('/api/trading/config', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify(config)
+            });
+            toast('Config trading sauvegardee');
+        }
+
+        async function analyzeAll() {
+            const container = document.getElementById('signals-list');
+            container.innerHTML = '<p style="color:#f0883e">Analyse en cours...</p>';
+            try {
+                const res = await fetch('/api/trading/analyze_all');
+                const data = await res.json();
+                container.innerHTML = data.map(s => {
+                    if (s.error) return `<div style="padding:8px;border-bottom:1px solid #21262d">
+                        <strong>${s.symbol}</strong> <span style="color:#f85149">${s.error}</span></div>`;
+                    const sigColor = {STRONG_BUY:'#3fb950',BUY:'#3fb950',HOLD:'#8b949e',SELL:'#f85149',STRONG_SELL:'#f85149'}[s.signal]||'#8b949e';
+                    const sigBg = {STRONG_BUY:'#0d4429',BUY:'#0d4429',HOLD:'#1c2128',SELL:'#490c11',STRONG_SELL:'#490c11'}[s.signal]||'#1c2128';
+                    return `<div style="padding:12px;border-bottom:1px solid #21262d">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <div>
+                                <strong style="font-size:1.1rem">${s.symbol}</strong>
+                                <span style="color:#8b949e;margin-left:8px">${fmtU(s.price)}</span>
+                            </div>
+                            <div>
+                                <span class="badge" style="background:${sigBg};color:${sigColor};font-size:0.85rem;padding:4px 12px">${s.signal}</span>
+                                <span style="color:#8b949e;margin-left:8px">${s.confidence}%</span>
+                            </div>
+                        </div>
+                        <div style="margin-top:8px;font-size:0.8rem;color:#8b949e">
+                            SL: ${fmtU(s.stop_loss)} | TP: ${fmtU(s.take_profit)} |
+                            RSI: ${s.indicators.rsi} | Score: ${s.indicators.score}
+                        </div>
+                        <div style="margin-top:4px;font-size:0.75rem;color:#6e7681">${s.reasons.join(' • ')}</div>
+                        ${s.signal.includes('BUY') || s.signal.includes('SELL') ?
+                            `<button class="btn" style="margin-top:8px;padding:4px 12px;font-size:0.8rem" onclick='executeTrade(${JSON.stringify(s).replace(/'/g,"\\'")})'}>Executer ce trade</button>` : ''}
+                    </div>`;
+                }).join('');
+            } catch(e) { container.innerHTML = `<p style="color:#f85149">${e.message}</p>`; }
+        }
+
+        async function executeTrade(analysis) {
+            try {
+                const res = await fetch('/api/trading/execute', {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify(analysis)
+                });
+                const data = await res.json();
+                if (data.status === 'EXECUTED') toast(`Trade ${analysis.symbol} execute !`);
+                else toast(data.reason || data.error || 'Trade non execute', true);
+                loadActiveTrades();
+            } catch(e) { toast('Erreur: '+e.message, true); }
+        }
+
+        async function loadActiveTrades() {
+            try {
+                const res = await fetch('/api/trading/active');
+                const trades = await res.json();
+                const tbody = document.getElementById('active-trades-table');
+                if (!trades.length) { tbody.innerHTML = '<tr><td colspan="8" style="color:#8b949e;text-align:center">Aucun trade actif</td></tr>'; return; }
+                tbody.innerHTML = trades.map(t => {
+                    const pnlColor = t.pnl >= 0 ? '#3fb950' : '#f85149';
+                    return `<tr>
+                        <td><strong>${t.symbol}</strong></td>
+                        <td><span class="badge ${t.side==='BUY'?'buy':'sell'}">${t.side}</span></td>
+                        <td>${fmtU(t.entry_price)}</td>
+                        <td>${t.quantity}</td>
+                        <td style="color:#f85149">${fmtU(t.stop_loss)}</td>
+                        <td style="color:#3fb950">${fmtU(t.take_profit)}</td>
+                        <td style="color:${pnlColor}">${fmtU(t.pnl)}</td>
+                        <td><button class="btn danger" style="padding:4px 10px;font-size:0.75rem" onclick="closeTrade('${t.symbol}')">Fermer</button></td>
+                    </tr>`;
+                }).join('');
+            } catch(e) {}
+        }
+
+        async function closeTrade(symbol) {
+            if (!confirm(`Fermer le trade sur ${symbol} ?`)) return;
+            await fetch('/api/trading/close', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({symbol})
+            });
+            toast(`Trade ${symbol} ferme`);
+            loadActiveTrades();
+            loadTradeHistory();
+        }
+
+        async function loadTradeHistory() {
+            try {
+                const res = await fetch('/api/trading/history');
+                const trades = await res.json();
+                const tbody = document.getElementById('trade-history-table');
+                if (!trades.length) { tbody.innerHTML = '<tr><td colspan="7" style="color:#8b949e;text-align:center">Aucun historique</td></tr>'; return; }
+                tbody.innerHTML = trades.slice().reverse().map(t => {
+                    const pnlColor = t.pnl >= 0 ? '#3fb950' : '#f85149';
+                    const statusLabel = {SL_HIT:'Stop Loss',TP_HIT:'Take Profit',MANUAL_CLOSE:'Manuel'}[t.status]||t.status;
+                    const statusColor = t.status==='TP_HIT'?'#3fb950':t.status==='SL_HIT'?'#f85149':'#8b949e';
+                    return `<tr>
+                        <td><strong>${t.symbol}</strong></td>
+                        <td><span class="badge ${t.side==='BUY'?'buy':'sell'}">${t.side}</span></td>
+                        <td>${fmtU(t.entry_price)}</td>
+                        <td>${t.closed_at ? fmtU(t.pnl/t.quantity + t.entry_price) : '--'}</td>
+                        <td style="color:${pnlColor};font-weight:600">${fmtU(t.pnl)}</td>
+                        <td style="color:${statusColor}">${statusLabel}</td>
+                        <td style="color:#8b949e;font-size:0.8rem">${t.closed_at ? new Date(t.closed_at).toLocaleString('fr-FR') : '--'}</td>
+                    </tr>`;
+                }).join('');
+            } catch(e) {}
         }
 
         // Boot
