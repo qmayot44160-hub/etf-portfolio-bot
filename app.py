@@ -235,12 +235,14 @@ def api_trading_config():
 
 @app.route("/api/trading/analyze/<symbol>")
 def api_trading_analyze(symbol):
+    _sync_trader_exchange()
     tf = request.args.get("timeframe", "1h")
     return jsonify(trader.analyze_symbol(symbol.upper(), tf))
 
 
 @app.route("/api/trading/analyze_all")
 def api_trading_analyze_all():
+    _sync_trader_exchange()
     return jsonify(trader.analyze_all())
 
 
@@ -268,8 +270,14 @@ def api_trading_close():
 
 @app.route("/api/trading/start", methods=["POST"])
 def api_trading_start():
-    trader.exchange = crypto.broker
+    _sync_trader_exchange()
     return jsonify(trader.start())
+
+
+def _sync_trader_exchange():
+    """Lie automatiquement le trader au broker crypto connecté."""
+    if crypto.broker and crypto.broker.connected:
+        trader.exchange = crypto.broker
 
 
 @app.route("/api/trading/stop", methods=["POST"])

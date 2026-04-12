@@ -104,7 +104,7 @@ class AutoTrader:
     def analyze_symbol(self, symbol: str, timeframe: str = "1h") -> dict:
         """Analyse technique d'un symbole."""
         if not self.exchange or not self.exchange.connected:
-            return {"error": "Exchange non connecté"}
+            return {"symbol": symbol, "error": "Exchange non connecté"}
 
         try:
             pair = f"{symbol}/USDT"

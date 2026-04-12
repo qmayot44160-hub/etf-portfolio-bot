@@ -24,8 +24,10 @@ class CryptoEngine:
             if broker_id:
                 try:
                     self.broker = get_broker(broker_id, credentials)
-                except Exception:
-                    pass
+                    self.broker.connect()
+                except Exception as e:
+                    print(f"[CryptoEngine] Auto-reconnect failed: {e}")
+                    self.broker = None
 
     def connect(self, broker_id: str, credentials: dict) -> dict:
         try:
