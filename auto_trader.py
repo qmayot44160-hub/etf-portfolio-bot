@@ -25,6 +25,7 @@ from quant_models import QuantModels, MarketRegime
 from risk_engine import RiskEngine
 from smart_execution import SmartExecution
 from market_intelligence import MarketIntelligence
+from market_scanner import MarketScanner
 
 
 TRADES_FILE = "trades_history.json"
@@ -66,6 +67,7 @@ class AutoTrader:
         self.risk_engine = RiskEngine()
         self.smart_exec = SmartExecution(exchange)
         self.market_intel = MarketIntelligence(exchange)
+        self.scanner = MarketScanner(exchange)
         self.active_trades: list[ActiveTrade] = []
         self.trade_history: list = []
         self.running = False
@@ -119,6 +121,8 @@ class AutoTrader:
             "use_risk_engine": True,
             "use_smart_execution": True,
             "use_market_intel": True,
+            "use_market_scanner": True,
+            "scanner_mode": "hybrid",  # "fixed", "dynamic", "hybrid"
             "min_confidence": 40,
             "min_strategies_agree": 2,
             "execution_urgency": "normal",  # low, normal, high
@@ -492,17 +496,59 @@ class AutoTrader:
         }
 
     def analyze_all(self) -> list:
-        """Analyse tous les symboles."""
+        """Analyse tous les symboles (fixes + dynamiques du scanner)."""
         config = self.get_config()
+        mode = config.get("scanner_mode", "fixed")
+
+        # Determine symbols to analyze
+        fixed_symbols = set(config.get("symbols", []))
+
+        if mode == "dynamic" and config.get("use_market_scanner"):
+            # Only scanner results
+            self.scanner.exchange = self.exchange
+            dynamic = self.scanner.get_dynamic_watchlist()
+            symbols = list(set(dynamic)) if dynamic else list(fixed_symbols)
+        elif mode == "hybrid" and config.get("use_market_scanner"):
+            # Fixed + top from scanner
+            self.scanner.exchange = self.exchange
+            dynamic = self.scanner.get_dynamic_watchlist()
+            symbols = list(fixed_symbols | set(dynamic[:10]))
+        else:
+            # Fixed only
+            symbols = list(fixed_symbols)
+
         results = []
-        for symbol in config["symbols"]:
-            if config.get("use_quant_models"):
-                result = self.analyze_institutional(symbol)
-            elif len(config.get("confirm_timeframes", [])) > 1:
-                result = self.analyze_multi_timeframe(symbol)
-            else:
-                result = self.analyze_symbol(symbol, config["timeframe"])
-            results.append(result)
+        for symbol in symbols:
+            try:
+                if config.get("use_quant_models"):
+                    result = self.analyze_institutional(symbol)
+                elif len(config.get("confirm_timeframes", [])) > 1:
+                    result = self.analyze_multi_timeframe(symbol)
+                else:
+                    result = self.analyze_symbol(symbol, config["timeframe"])
+
+                # Enrich with scanner data
+                scan_cache = self.scanner.cache.get("results", [])
+                scan_match = next((s for s in scan_cache if s.get("symbol") == symbol), None)
+                if scan_match:
+                    result["scanner"] = {
+                        "score": scan_match.get("score", 0),
+                        "category": scan_match.get("category", ""),
+                        "volume_24h": scan_match.get("volume_24h", 0),
+                        "price_change_24h": scan_match.get("price_change_24h", 0),
+                        "volatility": scan_match.get("volatility", 0),
+                        "from_scanner": True,
+                    }
+                else:
+                    result["scanner"] = {"from_scanner": symbol not in fixed_symbols}
+
+                result["is_dynamic"] = symbol not in fixed_symbols
+                results.append(result)
+            except Exception as e:
+                results.append({"symbol": symbol, "error": str(e)})
+
+        # Sort by confidence/score
+        results.sort(key=lambda x: x.get("confidence", 0), reverse=True)
         return results
 
     # ══════════════════════════════════════════════════════════
@@ -918,6 +964,7 @@ class AutoTrader:
     # ══════════════════════════════════════════════════════════
 
     def _trading_loop(self):
+        scan_counter = 0
         while self.running:
             config = self.get_config()
             if not config["enabled"]:
@@ -925,10 +972,20 @@ class AutoTrader:
                 continue
 
             try:
+                # 0. Periodic market scan (every 3 cycles)
+                if config.get("use_market_scanner") and scan_counter % 3 == 0:
+                    try:
+                        self.scanner.exchange = self.exchange
+                        self.scanner.full_scan()
+                        print(f"[AutoTrader] Market scan complete — {len(self.scanner.cache.get('results', []))} opportunities")
+                    except Exception as e:
+                        print(f"[AutoTrader] Scan error: {e}")
+                scan_counter += 1
+
                 # 1. Check SL/TP/trailing
                 self.check_stop_loss_take_profit()
 
-                # 2. Analyze all symbols
+                # 2. Analyze all symbols (includes scanner results if enabled)
                 analyses = self.analyze_all()
 
                 for analysis in analyses:

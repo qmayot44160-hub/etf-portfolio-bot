@@ -332,6 +332,37 @@ def api_trading_intel(symbol):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/trading/scan", methods=["POST"])
+def api_trading_scan():
+    """Lance un scan complet du marche."""
+    _sync_trader_exchange()
+    trader.scanner.exchange = trader.exchange
+    return jsonify(trader.scanner.full_scan())
+
+
+@app.route("/api/trading/scan/results")
+def api_trading_scan_results():
+    """Resultats du dernier scan."""
+    return jsonify(trader.scanner.get_cached_results())
+
+
+@app.route("/api/trading/scan/movers")
+def api_trading_scan_movers():
+    """Top movers rapide."""
+    _sync_trader_exchange()
+    trader.scanner.exchange = trader.exchange
+    return jsonify(trader.scanner.get_top_movers())
+
+
+@app.route("/api/trading/scan/config", methods=["GET", "POST"])
+def api_trading_scan_config():
+    if request.method == "POST":
+        data = request.get_json()
+        trader.scanner.save_config(data)
+        return jsonify({"status": "ok"})
+    return jsonify(trader.scanner.config)
+
+
 @app.route("/api/trading/symbols", methods=["GET", "POST"])
 def api_trading_symbols():
     """Gestion des symboles de trading."""
