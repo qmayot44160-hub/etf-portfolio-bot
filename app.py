@@ -290,6 +290,39 @@ def api_trading_check_sltp():
     return jsonify(trader.check_stop_loss_take_profit())
 
 
+@app.route("/api/trading/performance")
+def api_trading_performance():
+    return jsonify(trader.get_performance())
+
+
+@app.route("/api/trading/symbols", methods=["GET", "POST"])
+def api_trading_symbols():
+    """Gestion des symboles de trading."""
+    if request.method == "POST":
+        data = request.get_json()
+        action = data.get("action")  # "add" or "remove"
+        symbol = data.get("symbol", "").upper()
+        if not symbol:
+            return jsonify({"error": "Symbole manquant"}), 400
+
+        config = trader.get_config()
+        symbols = config.get("symbols", [])
+
+        if action == "add" and symbol not in symbols:
+            symbols.append(symbol)
+        elif action == "remove" and symbol in symbols:
+            symbols.remove(symbol)
+        else:
+            return jsonify({"status": "no_change", "symbols": symbols})
+
+        config["symbols"] = symbols
+        trader.save_config(config)
+        return jsonify({"status": "ok", "symbols": symbols})
+
+    config = trader.get_config()
+    return jsonify({"symbols": config.get("symbols", [])})
+
+
 # ── API: Reset ─────────────────────────────────────────
 
 @app.route("/api/reset", methods=["POST"])

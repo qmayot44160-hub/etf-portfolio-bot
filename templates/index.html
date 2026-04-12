@@ -261,6 +261,51 @@
             <div class="section">
                 <h2 class="section-title">Trading Actif</h2>
 
+                <!-- Performance Dashboard -->
+                <div id="perf-section" style="margin-bottom:24px">
+                    <div class="grid">
+                        <div class="card">
+                            <h3>P&L Total</h3>
+                            <div class="value" id="perf-total-pnl">--</div>
+                            <div class="sub" id="perf-total-trades">0 trades</div>
+                        </div>
+                        <div class="card">
+                            <h3>Win Rate</h3>
+                            <div class="value" id="perf-winrate">--</div>
+                            <div class="sub" id="perf-wins-losses">0W / 0L</div>
+                        </div>
+                        <div class="card">
+                            <h3>Profit Factor</h3>
+                            <div class="value" id="perf-profit-factor">--</div>
+                            <div class="sub" id="perf-avg">Moy: $0 / -$0</div>
+                        </div>
+                        <div class="card">
+                            <h3>Series</h3>
+                            <div class="value" id="perf-streak">--</div>
+                            <div class="sub" id="perf-streak-detail">Max wins/losses</div>
+                        </div>
+                    </div>
+                    <div class="grid">
+                        <div class="card full-width">
+                            <h3>Courbe de P&L cumule</h3>
+                            <div id="pnl-chart" class="chart-container"></div>
+                        </div>
+                    </div>
+                    <div class="grid">
+                        <div class="card">
+                            <h3>P&L Mensuel</h3>
+                            <div id="monthly-pnl-chart" style="height:250px"></div>
+                        </div>
+                        <div class="card">
+                            <h3>Performance par Token</h3>
+                            <table>
+                                <thead><tr><th>Token</th><th>Trades</th><th>Win Rate</th><th>P&L</th></tr></thead>
+                                <tbody id="perf-by-symbol-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid">
                     <div class="card">
                         <h3>Auto-Trader</h3>
@@ -277,7 +322,7 @@
                             <input type="number" id="t-max-trades" value="5" min="1" max="20" class="input" style="width:100%">
                         </div>
                         <div class="form-group">
-                            <label>Timeframe</label>
+                            <label>Timeframe principal</label>
                             <select id="t-timeframe" class="input" style="width:100%">
                                 <option value="5m">5 min</option>
                                 <option value="15m">15 min</option>
@@ -298,13 +343,65 @@
                             <label>Take Profit (x ATR)</label>
                             <input type="number" id="t-tp" value="3" min="1" max="10" step="0.5" class="input" style="width:100%">
                         </div>
-                        <button class="btn secondary" onclick="saveTraderConfig()" style="margin-top:8px">Sauvegarder la config</button>
+
+                        <hr style="border-color:#21262d;margin:16px 0">
+                        <h3 style="margin-bottom:12px">Trailing Stop</h3>
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                            <label class="toggle">
+                                <input type="checkbox" id="t-trailing-enabled" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>Activer le trailing stop</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Trailing Stop (%)</label>
+                            <input type="number" id="t-trailing-pct" value="2.0" min="0.5" max="10" step="0.5" class="input" style="width:100%">
+                        </div>
+                        <div class="form-group">
+                            <label>Activation trailing (% profit)</label>
+                            <input type="number" id="t-trailing-activation" value="1.0" min="0.5" max="10" step="0.5" class="input" style="width:100%">
+                        </div>
+
+                        <hr style="border-color:#21262d;margin:16px 0">
+                        <h3 style="margin-bottom:12px">Multi-Timeframe</h3>
+                        <div class="form-group">
+                            <label>Timeframes de confirmation</label>
+                            <div id="t-confirm-tf" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+                                <label style="display:flex;align-items:center;gap:4px;font-size:0.85rem;color:#c9d1d9">
+                                    <input type="checkbox" value="5m"> 5m</label>
+                                <label style="display:flex;align-items:center;gap:4px;font-size:0.85rem;color:#c9d1d9">
+                                    <input type="checkbox" value="15m"> 15m</label>
+                                <label style="display:flex;align-items:center;gap:4px;font-size:0.85rem;color:#c9d1d9">
+                                    <input type="checkbox" value="1h" checked> 1h</label>
+                                <label style="display:flex;align-items:center;gap:4px;font-size:0.85rem;color:#c9d1d9">
+                                    <input type="checkbox" value="4h" checked> 4h</label>
+                                <label style="display:flex;align-items:center;gap:4px;font-size:0.85rem;color:#c9d1d9">
+                                    <input type="checkbox" value="1d"> 1d</label>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                            <label class="toggle">
+                                <input type="checkbox" id="t-only-strong">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span style="font-size:0.85rem">Signaux forts uniquement (confirmes)</span>
+                        </div>
+
+                        <button class="btn secondary" onclick="saveTraderConfig()" style="margin-top:8px;width:100%">Sauvegarder la config</button>
                     </div>
 
-                    <div class="card">
+                    <div class="card" style="display:flex;flex-direction:column">
+                        <h3>Tokens suivis</h3>
+                        <div style="display:flex;gap:8px;margin:12px 0">
+                            <input type="text" id="new-token-input" class="input" placeholder="Ex: DOGE, XRP..." style="flex:1">
+                            <button class="btn" onclick="addToken()">Ajouter</button>
+                        </div>
+                        <div id="token-list" style="flex:1;overflow-y:auto;max-height:200px"></div>
+
+                        <hr style="border-color:#21262d;margin:16px 0">
                         <h3>Signaux en temps reel</h3>
                         <button class="btn" onclick="analyzeAll()" style="margin-bottom:12px">Scanner maintenant</button>
-                        <div id="signals-list"><p style="color:#8b949e">Cliquez sur Scanner</p></div>
+                        <div id="signals-list" style="flex:1;overflow-y:auto;max-height:400px"><p style="color:#8b949e">Cliquez sur Scanner</p></div>
                     </div>
                 </div>
 
@@ -313,7 +410,7 @@
                     <table>
                         <thead><tr>
                             <th>Token</th><th>Side</th><th>Entree</th><th>Quantite</th>
-                            <th>SL</th><th>TP</th><th>P&L</th><th>Action</th>
+                            <th>SL</th><th>TP</th><th>Trailing</th><th>P&L</th><th>Action</th>
                         </tr></thead>
                         <tbody id="active-trades-table"></tbody>
                     </table>
@@ -324,7 +421,7 @@
                     <table>
                         <thead><tr>
                             <th>Token</th><th>Side</th><th>Entree</th><th>Sortie</th>
-                            <th>P&L</th><th>Statut</th><th>Date</th>
+                            <th>P&L</th><th>%</th><th>Statut</th><th>Date</th>
                         </tr></thead>
                         <tbody id="trade-history-table"></tbody>
                     </table>
@@ -1025,8 +1122,22 @@
                 document.getElementById('t-sl').value = cfg.sl_atr_multiplier;
                 document.getElementById('t-tp').value = cfg.tp_atr_multiplier;
 
+                // Trailing stop config
+                document.getElementById('t-trailing-enabled').checked = cfg.trailing_stop !== false;
+                document.getElementById('t-trailing-pct').value = cfg.trailing_stop_pct || 2.0;
+                document.getElementById('t-trailing-activation').value = cfg.trailing_activation_pct || 1.0;
+
+                // Multi-timeframe config
+                const confirmTFs = cfg.confirm_timeframes || ['1h','4h'];
+                document.querySelectorAll('#t-confirm-tf input[type=checkbox]').forEach(cb => {
+                    cb.checked = confirmTFs.includes(cb.value);
+                });
+                document.getElementById('t-only-strong').checked = cfg.only_strong_signals || false;
+
+                loadTokenList();
                 loadActiveTrades();
                 loadTradeHistory();
+                loadPerformance();
             } catch(e) { toast('Erreur: '+e.message, true); }
         }
 
@@ -1055,21 +1166,165 @@
         }
 
         async function saveTraderConfig() {
+            // Get confirm timeframes
+            const confirmTFs = [];
+            document.querySelectorAll('#t-confirm-tf input[type=checkbox]:checked').forEach(cb => {
+                confirmTFs.push(cb.value);
+            });
+
+            // Get current symbols from token list
+            const symbolEls = document.querySelectorAll('#token-list .token-tag');
+            const symbols = Array.from(symbolEls).map(el => el.dataset.symbol);
+
             const config = {
                 enabled: true,
-                symbols: ['BTC','ETH','SOL','LINK','AAVE'],
+                symbols: symbols.length > 0 ? symbols : ['BTC','ETH','SOL','LINK','AAVE'],
                 timeframe: document.getElementById('t-timeframe').value,
+                confirm_timeframes: confirmTFs.length > 0 ? confirmTFs : ['1h'],
                 check_interval: parseInt(document.getElementById('t-interval').value),
                 max_open_trades: parseInt(document.getElementById('t-max-trades').value),
                 risk_per_trade_pct: parseFloat(document.getElementById('t-risk').value),
                 sl_atr_multiplier: parseFloat(document.getElementById('t-sl').value),
                 tp_atr_multiplier: parseFloat(document.getElementById('t-tp').value),
+                trailing_stop: document.getElementById('t-trailing-enabled').checked,
+                trailing_stop_pct: parseFloat(document.getElementById('t-trailing-pct').value),
+                trailing_activation_pct: parseFloat(document.getElementById('t-trailing-activation').value),
+                only_strong_signals: document.getElementById('t-only-strong').checked,
             };
             await fetch('/api/trading/config', {
                 method:'POST', headers:{'Content-Type':'application/json'},
                 body: JSON.stringify(config)
             });
             toast('Config trading sauvegardee');
+        }
+
+        // ── Token Management ──
+        async function loadTokenList() {
+            try {
+                const res = await fetch('/api/trading/symbols');
+                const data = await res.json();
+                renderTokenList(data.symbols || []);
+            } catch(e) {}
+        }
+
+        function renderTokenList(symbols) {
+            const container = document.getElementById('token-list');
+            container.innerHTML = symbols.map(s => `
+                <div class="token-tag" data-symbol="${s}" style="display:inline-flex;align-items:center;gap:6px;background:#0d1117;border:1px solid #30363d;border-radius:20px;padding:6px 12px;margin:4px;font-size:0.85rem">
+                    <strong style="color:#58a6ff">${s}</strong>
+                    <span style="color:#f85149;cursor:pointer;font-size:1rem;line-height:1" onclick="removeToken('${s}')">&times;</span>
+                </div>
+            `).join('');
+        }
+
+        async function addToken() {
+            const input = document.getElementById('new-token-input');
+            const symbol = input.value.trim().toUpperCase();
+            if (!symbol) return;
+            try {
+                const res = await fetch('/api/trading/symbols', {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({action:'add', symbol})
+                });
+                const data = await res.json();
+                renderTokenList(data.symbols || []);
+                input.value = '';
+                toast(`${symbol} ajoute`);
+            } catch(e) { toast('Erreur: '+e.message, true); }
+        }
+
+        async function removeToken(symbol) {
+            try {
+                const res = await fetch('/api/trading/symbols', {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({action:'remove', symbol})
+                });
+                const data = await res.json();
+                renderTokenList(data.symbols || []);
+                toast(`${symbol} retire`);
+            } catch(e) { toast('Erreur: '+e.message, true); }
+        }
+
+        // ── Performance Dashboard ──
+        async function loadPerformance() {
+            try {
+                const res = await fetch('/api/trading/performance');
+                const perf = await res.json();
+
+                // Cards
+                const pnlEl = document.getElementById('perf-total-pnl');
+                pnlEl.textContent = fmtU(perf.total_pnl);
+                pnlEl.className = 'value ' + (perf.total_pnl >= 0 ? 'positive' : 'negative');
+                document.getElementById('perf-total-trades').textContent = perf.total_trades + ' trades';
+
+                const wrEl = document.getElementById('perf-winrate');
+                wrEl.textContent = perf.win_rate + '%';
+                wrEl.className = 'value ' + (perf.win_rate >= 50 ? 'positive' : perf.win_rate > 0 ? 'negative' : '');
+                document.getElementById('perf-wins-losses').textContent = `${perf.wins||0}W / ${perf.losses||0}L`;
+
+                document.getElementById('perf-profit-factor').textContent = perf.profit_factor || '0';
+                document.getElementById('perf-avg').textContent = `Moy: ${fmtU(perf.avg_win)} / ${fmtU(perf.avg_loss)}`;
+
+                document.getElementById('perf-streak').textContent = `${perf.max_consecutive_wins}W / ${perf.max_consecutive_losses}L`;
+                document.getElementById('perf-streak-detail').textContent = `Best: ${fmtU(perf.best_trade)} | Worst: ${fmtU(perf.worst_trade)}`;
+
+                // PnL Curve
+                if (perf.pnl_history && perf.pnl_history.length > 0) {
+                    Plotly.newPlot('pnl-chart', [{
+                        x: perf.pnl_history.map(p => p.date),
+                        y: perf.pnl_history.map(p => p.pnl),
+                        type: 'scatter', mode: 'lines',
+                        line: {color: perf.total_pnl >= 0 ? '#3fb950' : '#f85149', width: 2},
+                        fill: 'tozeroy',
+                        fillcolor: perf.total_pnl >= 0 ? 'rgba(63,185,80,0.1)' : 'rgba(248,81,73,0.1)',
+                    }], {
+                        paper_bgcolor:'transparent', plot_bgcolor:'transparent',
+                        xaxis:{gridcolor:'#21262d',color:'#8b949e'},
+                        yaxis:{gridcolor:'#21262d',color:'#8b949e',tickprefix:'$'},
+                        margin:{t:10,b:40,l:60,r:20}, height:350,
+                        shapes:[{type:'line',x0:0,x1:1,xref:'paper',y0:0,y1:0,line:{color:'#30363d',width:1,dash:'dash'}}]
+                    }, {responsive:true});
+                } else {
+                    document.getElementById('pnl-chart').innerHTML = '<p style="color:#8b949e;text-align:center;padding:60px 0">Aucun trade termine</p>';
+                }
+
+                // Monthly PnL bar chart
+                const months = Object.keys(perf.monthly_pnl || {});
+                const monthlyVals = Object.values(perf.monthly_pnl || {});
+                if (months.length > 0) {
+                    Plotly.newPlot('monthly-pnl-chart', [{
+                        x: months, y: monthlyVals, type: 'bar',
+                        marker: {color: monthlyVals.map(v => v >= 0 ? '#3fb950' : '#f85149')},
+                    }], {
+                        paper_bgcolor:'transparent', plot_bgcolor:'transparent',
+                        xaxis:{gridcolor:'#21262d',color:'#8b949e'},
+                        yaxis:{gridcolor:'#21262d',color:'#8b949e',tickprefix:'$'},
+                        margin:{t:10,b:40,l:60,r:20}, height:230,
+                    }, {responsive:true});
+                } else {
+                    document.getElementById('monthly-pnl-chart').innerHTML = '<p style="color:#8b949e;text-align:center;padding:40px 0">Pas encore de donnees</p>';
+                }
+
+                // Per symbol table
+                const symTable = document.getElementById('perf-by-symbol-table');
+                const bySymbol = perf.by_symbol || {};
+                const symKeys = Object.keys(bySymbol);
+                if (symKeys.length > 0) {
+                    symTable.innerHTML = symKeys.map(s => {
+                        const d = bySymbol[s];
+                        const wr = d.trades > 0 ? Math.round(d.wins / d.trades * 100) : 0;
+                        const pnlColor = d.pnl >= 0 ? '#3fb950' : '#f85149';
+                        return `<tr>
+                            <td><strong>${s}</strong></td>
+                            <td>${d.trades}</td>
+                            <td>${wr}%</td>
+                            <td style="color:${pnlColor};font-weight:600">${fmtU(d.pnl)}</td>
+                        </tr>`;
+                    }).join('');
+                } else {
+                    symTable.innerHTML = '<tr><td colspan="4" style="color:#8b949e;text-align:center">Aucune donnee</td></tr>';
+                }
+            } catch(e) { console.error('Perf error:', e); }
         }
 
         async function analyzeAll() {
@@ -1083,24 +1338,40 @@
                         <strong>${s.symbol}</strong> <span style="color:#f85149">${s.error}</span></div>`;
                     const sigColor = {STRONG_BUY:'#3fb950',BUY:'#3fb950',HOLD:'#8b949e',SELL:'#f85149',STRONG_SELL:'#f85149'}[s.signal]||'#8b949e';
                     const sigBg = {STRONG_BUY:'#0d4429',BUY:'#0d4429',HOLD:'#1c2128',SELL:'#490c11',STRONG_SELL:'#490c11'}[s.signal]||'#1c2128';
+
+                    // Multi-timeframe confirmation badges
+                    let mtfHtml = '';
+                    if (s.confirmations && s.confirmations.length > 0) {
+                        mtfHtml = '<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">' +
+                            s.confirmations.map(c => {
+                                const cColor = c.confirms ? '#3fb950' : '#f85149';
+                                const cBg = c.confirms ? '#0d4429' : '#490c11';
+                                const icon = c.confirms ? '\u2713' : '\u2717';
+                                return `<span class="badge" style="background:${cBg};color:${cColor};font-size:0.7rem;padding:2px 8px">${c.timeframe} ${icon} ${c.signal}</span>`;
+                            }).join('') + '</div>';
+                    }
+
                     return `<div style="padding:12px;border-bottom:1px solid #21262d">
                         <div style="display:flex;justify-content:space-between;align-items:center">
                             <div>
                                 <strong style="font-size:1.1rem">${s.symbol}</strong>
                                 <span style="color:#8b949e;margin-left:8px">${fmtU(s.price)}</span>
+                                ${s.all_confirmed === true ? '<span class="badge" style="background:#0d4429;color:#3fb950;font-size:0.7rem;margin-left:6px">CONFIRME</span>' : ''}
+                                ${s.all_confirmed === false ? '<span class="badge" style="background:#490c11;color:#f85149;font-size:0.7rem;margin-left:6px">NON CONFIRME</span>' : ''}
                             </div>
                             <div>
                                 <span class="badge" style="background:${sigBg};color:${sigColor};font-size:0.85rem;padding:4px 12px">${s.signal}</span>
                                 <span style="color:#8b949e;margin-left:8px">${s.confidence}%</span>
                             </div>
                         </div>
+                        ${mtfHtml}
                         <div style="margin-top:8px;font-size:0.8rem;color:#8b949e">
                             SL: ${fmtU(s.stop_loss)} | TP: ${fmtU(s.take_profit)} |
                             RSI: ${s.indicators.rsi} | Score: ${s.indicators.score}
                         </div>
-                        <div style="margin-top:4px;font-size:0.75rem;color:#6e7681">${s.reasons.join(' • ')}</div>
+                        <div style="margin-top:4px;font-size:0.75rem;color:#6e7681">${s.reasons.join(' \u2022 ')}</div>
                         ${s.signal.includes('BUY') || s.signal.includes('SELL') ?
-                            `<button class="btn" style="margin-top:8px;padding:4px 12px;font-size:0.8rem" onclick='executeTrade(${JSON.stringify(s).replace(/'/g,"\\'")})'}>Executer ce trade</button>` : ''}
+                            `<button class="btn" style="margin-top:8px;padding:4px 12px;font-size:0.8rem" onclick='executeTrade(${JSON.stringify(s).replace(/'/g,"\\'")})'>Executer ce trade</button>` : ''}
                     </div>`;
                 }).join('');
             } catch(e) { container.innerHTML = `<p style="color:#f85149">${e.message}</p>`; }
@@ -1124,17 +1395,21 @@
                 const res = await fetch('/api/trading/active');
                 const trades = await res.json();
                 const tbody = document.getElementById('active-trades-table');
-                if (!trades.length) { tbody.innerHTML = '<tr><td colspan="8" style="color:#8b949e;text-align:center">Aucun trade actif</td></tr>'; return; }
+                if (!trades.length) { tbody.innerHTML = '<tr><td colspan="9" style="color:#8b949e;text-align:center">Aucun trade actif</td></tr>'; return; }
                 tbody.innerHTML = trades.map(t => {
                     const pnlColor = t.pnl >= 0 ? '#3fb950' : '#f85149';
+                    const trailingBadge = t.trailing_active
+                        ? '<span class="badge buy" style="font-size:0.7rem">ACTIF</span>'
+                        : '<span style="color:#8b949e;font-size:0.75rem">-</span>';
                     return `<tr>
                         <td><strong>${t.symbol}</strong></td>
                         <td><span class="badge ${t.side==='BUY'?'buy':'sell'}">${t.side}</span></td>
                         <td>${fmtU(t.entry_price)}</td>
                         <td>${t.quantity}</td>
-                        <td style="color:#f85149">${fmtU(t.stop_loss)}</td>
+                        <td style="color:#f85149">${fmtU(t.stop_loss)}${t.initial_stop_loss && t.stop_loss !== t.initial_stop_loss ? '<br><span style="font-size:0.7rem;color:#6e7681">init: '+fmtU(t.initial_stop_loss)+'</span>' : ''}</td>
                         <td style="color:#3fb950">${fmtU(t.take_profit)}</td>
-                        <td style="color:${pnlColor}">${fmtU(t.pnl)}</td>
+                        <td>${trailingBadge}</td>
+                        <td style="color:${pnlColor}">${fmtU(t.pnl)}<br><span style="font-size:0.75rem">${t.pnl_pct ? t.pnl_pct.toFixed(2) + '%' : ''}</span></td>
                         <td><button class="btn danger" style="padding:4px 10px;font-size:0.75rem" onclick="closeTrade('${t.symbol}')">Fermer</button></td>
                     </tr>`;
                 }).join('');
@@ -1150,6 +1425,7 @@
             toast(`Trade ${symbol} ferme`);
             loadActiveTrades();
             loadTradeHistory();
+            loadPerformance();
         }
 
         async function loadTradeHistory() {
@@ -1157,17 +1433,20 @@
                 const res = await fetch('/api/trading/history');
                 const trades = await res.json();
                 const tbody = document.getElementById('trade-history-table');
-                if (!trades.length) { tbody.innerHTML = '<tr><td colspan="7" style="color:#8b949e;text-align:center">Aucun historique</td></tr>'; return; }
+                if (!trades.length) { tbody.innerHTML = '<tr><td colspan="8" style="color:#8b949e;text-align:center">Aucun historique</td></tr>'; return; }
                 tbody.innerHTML = trades.slice().reverse().map(t => {
                     const pnlColor = t.pnl >= 0 ? '#3fb950' : '#f85149';
-                    const statusLabel = {SL_HIT:'Stop Loss',TP_HIT:'Take Profit',MANUAL_CLOSE:'Manuel'}[t.status]||t.status;
-                    const statusColor = t.status==='TP_HIT'?'#3fb950':t.status==='SL_HIT'?'#f85149':'#8b949e';
+                    const statusMap = {SL_HIT:'Stop Loss',TP_HIT:'Take Profit',TRAILING_SL:'Trailing SL',MANUAL_CLOSE:'Manuel'};
+                    const statusLabel = statusMap[t.status]||t.status;
+                    const statusColorMap = {TP_HIT:'#3fb950',SL_HIT:'#f85149',TRAILING_SL:'#f0883e',MANUAL_CLOSE:'#8b949e'};
+                    const statusColor = statusColorMap[t.status]||'#8b949e';
                     return `<tr>
                         <td><strong>${t.symbol}</strong></td>
                         <td><span class="badge ${t.side==='BUY'?'buy':'sell'}">${t.side}</span></td>
                         <td>${fmtU(t.entry_price)}</td>
-                        <td>${t.closed_at ? fmtU(t.pnl/t.quantity + t.entry_price) : '--'}</td>
+                        <td>${t.close_price ? fmtU(t.close_price) : '--'}</td>
                         <td style="color:${pnlColor};font-weight:600">${fmtU(t.pnl)}</td>
+                        <td style="color:${pnlColor};font-size:0.85rem">${t.pnl_pct ? t.pnl_pct.toFixed(2)+'%' : '--'}</td>
                         <td style="color:${statusColor}">${statusLabel}</td>
                         <td style="color:#8b949e;font-size:0.8rem">${t.closed_at ? new Date(t.closed_at).toLocaleString('fr-FR') : '--'}</td>
                     </tr>`;
