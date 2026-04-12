@@ -15,10 +15,12 @@ from scheduler import (
     load_scheduler_config, save_scheduler_config,
     setup_scheduled_jobs, get_scheduled_jobs,
 )
-from config import PORTFOLIO, DCA_MONTHLY
+from config import PORTFOLIO, DCA_MONTHLY, CRYPTO_PORTFOLIO, CRYPTO_DCA_MONTHLY
+from crypto_engine import CryptoEngine
 
 app = Flask(__name__)
 engine = BotEngine()
+crypto = CryptoEngine()
 
 
 # ── Pages ──────────────────────────────────────────────
@@ -169,6 +171,48 @@ def api_scheduler_update():
     config.update(data)
     setup_scheduled_jobs(config)
     return jsonify({"status": "ok", "config": config})
+
+
+# ── API: Crypto ────────────────────────────────────────
+
+@app.route("/api/crypto/status")
+def api_crypto_status():
+    return jsonify(crypto.get_status())
+
+
+@app.route("/api/crypto/connect", methods=["POST"])
+def api_crypto_connect():
+    data = request.get_json()
+    result = crypto.connect(data.get("broker_id", "mexc"), data.get("credentials", {}))
+    return jsonify(result)
+
+
+@app.route("/api/crypto/disconnect", methods=["POST"])
+def api_crypto_disconnect():
+    return jsonify(crypto.disconnect())
+
+
+@app.route("/api/crypto/portfolio")
+def api_crypto_portfolio():
+    return jsonify(crypto.get_portfolio())
+
+
+@app.route("/api/crypto/dca")
+def api_crypto_dca():
+    amount = request.args.get("amount", CRYPTO_DCA_MONTHLY, type=float)
+    return jsonify(crypto.calculate_dca(amount))
+
+
+@app.route("/api/crypto/dca/execute", methods=["POST"])
+def api_crypto_dca_execute():
+    data = request.get_json() or {}
+    amount = data.get("amount", CRYPTO_DCA_MONTHLY)
+    return jsonify(crypto.execute_dca(amount))
+
+
+@app.route("/api/crypto/rebalance")
+def api_crypto_rebalance():
+    return jsonify(crypto.calculate_rebalance())
 
 
 # ── API: Reset ─────────────────────────────────────────

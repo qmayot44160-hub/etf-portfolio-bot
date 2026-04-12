@@ -29,6 +29,14 @@ BROKER_REGISTRY = {
         "optional_fields": ["paper"],
         "install": "pip install alpaca-trade-api",
     },
+    "mexc": {
+        "class_path": "brokers.mexc.MEXCBroker",
+        "name": "MEXC (Crypto)",
+        "description": "Exchange crypto MEXC — spot trading via API.",
+        "required_fields": ["api_key", "secret_key"],
+        "optional_fields": [],
+        "install": "pip install ccxt",
+    },
 }
 
 

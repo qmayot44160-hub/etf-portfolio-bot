@@ -147,6 +147,7 @@
             <button class="nav-btn active" onclick="showView('portfolio',this)">Portefeuille</button>
             <button class="nav-btn" onclick="showView('dca',this)">DCA</button>
             <button class="nav-btn" onclick="showView('backtest',this)">Backtest</button>
+            <button class="nav-btn" onclick="showView('crypto',this)">Crypto</button>
             <button class="nav-btn" onclick="showView('broker',this)">Broker</button>
             <button class="nav-btn" onclick="showView('automation',this)">Automation</button>
         </div>
@@ -279,6 +280,82 @@
             </div>
         </div>
 
+        <!-- CRYPTO VIEW -->
+        <div id="view-crypto">
+            <div class="section">
+                <h2 class="section-title">Portefeuille Crypto</h2>
+
+                <div id="crypto-connect-card" class="card" style="margin-bottom:16px">
+                    <h3>Connexion Exchange</h3>
+                    <div id="crypto-status-msg" style="margin-bottom:12px">
+                        <p style="color:#8b949e">Non connecte</p>
+                    </div>
+                    <div class="form-group">
+                        <label>API Key MEXC</label>
+                        <input type="text" id="mexc-api-key" class="input" style="width:100%">
+                    </div>
+                    <div class="form-group">
+                        <label>Secret Key MEXC</label>
+                        <input type="password" id="mexc-secret-key" class="input" style="width:100%">
+                    </div>
+                    <div style="display:flex;gap:12px;margin-top:12px">
+                        <button class="btn" onclick="connectCrypto()">Connecter MEXC</button>
+                        <button class="btn danger" onclick="disconnectCrypto()">Deconnecter</button>
+                    </div>
+                </div>
+
+                <div id="crypto-portfolio-section" style="display:none">
+                    <div class="grid">
+                        <div class="card">
+                            <h3>Valeur totale (USDT)</h3>
+                            <div class="value" id="crypto-total">--</div>
+                        </div>
+                        <div class="card">
+                            <h3>USDT disponible</h3>
+                            <div class="value" id="crypto-cash">--</div>
+                        </div>
+                        <div class="card">
+                            <h3>Tokens detenus</h3>
+                            <div class="value" id="crypto-count">--</div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-bottom:16px">
+                        <h3>Positions crypto</h3>
+                        <table>
+                            <thead><tr>
+                                <th>Token</th><th>Categorie</th><th>Quantite</th><th>Prix</th>
+                                <th>Valeur</th><th>Cible</th><th>Actuel</th><th>Ecart</th>
+                            </tr></thead>
+                            <tbody id="crypto-positions-table"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="card" style="margin-bottom:16px">
+                        <h3>DCA Crypto</h3>
+                        <div style="display:flex;gap:12px;align-items:center;margin:12px 0">
+                            <input type="number" id="crypto-dca-amount" value="200" min="10" step="10" class="input" style="width:150px">
+                            <span style="color:#8b949e">USDT</span>
+                            <button class="btn" onclick="calculateCryptoDCA()">Calculer</button>
+                            <button class="btn secondary" onclick="executeCryptoDCA()">Executer DCA</button>
+                        </div>
+                        <table>
+                            <thead><tr><th>Token</th><th>Montant cible</th><th>Prix</th><th>Quantite</th><th>Montant reel</th></tr></thead>
+                            <tbody id="crypto-dca-table"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <h3>Reequilibrage crypto</h3>
+                        <div style="margin-bottom:12px">
+                            <button class="btn secondary" onclick="cryptoRebalance()">Calculer le reequilibrage</button>
+                        </div>
+                        <div id="crypto-rebalance-orders"><p style="color:#8b949e">Cliquez pour calculer</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- AUTOMATION VIEW -->
         <div id="view-automation">
             <div class="section">
@@ -365,6 +442,7 @@
             if (btn) btn.classList.add('active');
             if (view === 'portfolio') refreshPortfolio();
             if (view === 'dca') calculateDCA();
+            if (view === 'crypto') loadCrypto();
             if (view === 'broker') loadBrokers();
             if (view === 'automation') loadScheduler();
         }
@@ -717,6 +795,138 @@
                 toast('Automatisation mise a jour');
                 loadScheduler();
             } catch(e) { toast('Erreur: '+e.message,true); }
+        }
+
+        // ── Crypto ──
+        const fmtU = (n) => '$' + n.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+        async function loadCrypto() {
+            try {
+                const sRes = await fetch('/api/crypto/status');
+                const status = await sRes.json();
+                const statusMsg = document.getElementById('crypto-status-msg');
+
+                if (status.connected) {
+                    statusMsg.innerHTML = `<span style="color:#3fb950"><span class="status-dot live" style="display:inline-block"></span> ${status.broker_name} connecte</span>`;
+                    document.getElementById('crypto-portfolio-section').style.display = 'block';
+                    refreshCryptoPortfolio();
+                } else {
+                    statusMsg.innerHTML = '<p style="color:#8b949e">Non connecte</p>';
+                    document.getElementById('crypto-portfolio-section').style.display = 'none';
+                }
+            } catch(e) {}
+        }
+
+        async function connectCrypto() {
+            const apiKey = document.getElementById('mexc-api-key').value;
+            const secretKey = document.getElementById('mexc-secret-key').value;
+            if (!apiKey || !secretKey) { toast('Entrez vos cles API MEXC', true); return; }
+
+            const statusMsg = document.getElementById('crypto-status-msg');
+            statusMsg.innerHTML = '<span style="color:#f0883e">Connexion en cours...</span>';
+
+            try {
+                const res = await fetch('/api/crypto/connect', {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({broker_id:'mexc', credentials:{api_key:apiKey, secret_key:secretKey}})
+                });
+                const data = await res.json();
+                if (data.status === 'connected') {
+                    toast('MEXC connecte !');
+                    loadCrypto();
+                } else {
+                    statusMsg.innerHTML = `<span style="color:#f85149">Erreur: ${data.message}</span>`;
+                }
+            } catch(e) { toast('Erreur: '+e.message, true); }
+        }
+
+        async function disconnectCrypto() {
+            await fetch('/api/crypto/disconnect', {method:'POST'});
+            toast('Exchange deconnecte');
+            loadCrypto();
+        }
+
+        async function refreshCryptoPortfolio() {
+            try {
+                const res = await fetch('/api/crypto/portfolio');
+                const data = await res.json();
+                if (data.error && !data.positions.length) { toast(data.error, true); return; }
+
+                document.getElementById('crypto-total').textContent = fmtU(data.total_value);
+                document.getElementById('crypto-cash').textContent = fmtU(data.cash);
+                const active = data.positions.filter(p => p.amount > 0);
+                document.getElementById('crypto-count').textContent = active.length;
+
+                const tbody = document.getElementById('crypto-positions-table');
+                tbody.innerHTML = data.positions.filter(p => p.tracked || p.amount > 0).map(p => {
+                    const driftClass = Math.abs(p.drift) >= 5 ? (p.drift > 0 ? 'sell' : 'buy') : 'ok';
+                    const driftColor = p.drift > 0 ? '#f85149' : p.drift < 0 ? '#3fb950' : '#8b949e';
+                    const driftWidth = Math.min(Math.abs(p.drift) * 5, 100);
+                    return `<tr>
+                        <td><strong>${p.name}</strong><br><span style="color:#8b949e;font-size:0.75rem">${p.ticker}</span></td>
+                        <td>${p.category}</td>
+                        <td>${p.amount > 0 ? p.amount.toFixed(6) : '0'}</td>
+                        <td>${p.price ? fmtU(p.price) : '--'}</td>
+                        <td>${fmtU(p.value)}</td>
+                        <td>${p.target_pct}%</td>
+                        <td>${p.current_pct}%</td>
+                        <td>
+                            <span class="badge ${driftClass}">${pct(p.drift)}</span>
+                            <div class="drift-bar"><div class="drift-fill" style="width:${driftWidth}%;background:${driftColor}"></div></div>
+                        </td>
+                    </tr>`;
+                }).join('');
+            } catch(e) { toast('Erreur: '+e.message, true); }
+        }
+
+        async function calculateCryptoDCA() {
+            const amount = document.getElementById('crypto-dca-amount').value;
+            try {
+                const res = await fetch(`/api/crypto/dca?amount=${amount}`);
+                const data = await res.json();
+                document.getElementById('crypto-dca-table').innerHTML = data.map(d => `<tr>
+                    <td><strong>${d.name}</strong><br><span style="color:#8b949e;font-size:0.75rem">${d.ticker}</span></td>
+                    <td>${fmtU(d.target_amount)}</td>
+                    <td>${fmtU(d.price)}</td>
+                    <td>${d.quantity}</td>
+                    <td>${fmtU(d.real_amount)}</td>
+                </tr>`).join('');
+            } catch(e) { toast('Erreur: '+e.message, true); }
+        }
+
+        async function executeCryptoDCA() {
+            const amount = document.getElementById('crypto-dca-amount').value;
+            try {
+                const res = await fetch('/api/crypto/dca/execute', {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({amount:parseFloat(amount)})
+                });
+                const data = await res.json();
+                toast(`DCA crypto execute: ${data.length} ordres`);
+                refreshCryptoPortfolio();
+            } catch(e) { toast('Erreur: '+e.message, true); }
+        }
+
+        async function cryptoRebalance() {
+            try {
+                const res = await fetch('/api/crypto/rebalance');
+                const orders = await res.json();
+                const container = document.getElementById('crypto-rebalance-orders');
+                if (!orders.length) {
+                    container.innerHTML = '<p style="color:#3fb950">Portefeuille crypto equilibre</p>';
+                    return;
+                }
+                container.innerHTML = `<table>
+                    <thead><tr><th>Token</th><th>Action</th><th>Quantite</th><th>Prix</th><th>Montant</th><th>Ecart</th></tr></thead>
+                    <tbody>${orders.map(o => `<tr>
+                        <td>${o.name}</td>
+                        <td><span class="badge ${o.action.toLowerCase()}">${o.action}</span></td>
+                        <td>${o.quantity}</td>
+                        <td>${fmtU(o.price)}</td>
+                        <td>${fmtU(o.amount)}</td>
+                        <td>${pct(o.drift)}</td>
+                    </tr>`).join('')}</tbody></table>`;
+            } catch(e) { toast('Erreur: '+e.message, true); }
         }
 
         // Boot

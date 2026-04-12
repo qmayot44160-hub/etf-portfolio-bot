@@ -48,3 +48,35 @@ CURRENCY = "EUR"
 
 # Historique de backtest (en années)
 BACKTEST_YEARS = 5
+
+# ── Portefeuille Crypto ──────────────────────────────────
+CRYPTO_PORTFOLIO = {
+    "BTC": {
+        "name": "Bitcoin",
+        "target_pct": 40,
+        "category": "Store of Value",
+    },
+    "ETH": {
+        "name": "Ethereum",
+        "target_pct": 30,
+        "category": "Smart Contracts",
+    },
+    "SOL": {
+        "name": "Solana",
+        "target_pct": 15,
+        "category": "Layer 1",
+    },
+    "LINK": {
+        "name": "Chainlink",
+        "target_pct": 10,
+        "category": "Oracle",
+    },
+    "AAVE": {
+        "name": "Aave",
+        "target_pct": 5,
+        "category": "DeFi",
+    },
+}
+
+# DCA crypto mensuel (en USDT)
+CRYPTO_DCA_MONTHLY = 200
