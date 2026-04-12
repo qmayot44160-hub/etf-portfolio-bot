@@ -295,6 +295,43 @@ def api_trading_performance():
     return jsonify(trader.get_performance())
 
 
+@app.route("/api/trading/risk")
+def api_trading_risk():
+    _sync_trader_exchange()
+    return jsonify(trader.get_risk_dashboard())
+
+
+@app.route("/api/trading/risk/config", methods=["GET", "POST"])
+def api_trading_risk_config():
+    if request.method == "POST":
+        data = request.get_json()
+        trader.risk_engine.save_config(data)
+        return jsonify({"status": "ok"})
+    return jsonify(trader.risk_engine.config)
+
+
+@app.route("/api/trading/risk/log")
+def api_trading_risk_log():
+    return jsonify(trader.risk_engine.risk_log[-50:])
+
+
+@app.route("/api/trading/intel/<symbol>")
+def api_trading_intel(symbol):
+    _sync_trader_exchange()
+    if not trader.exchange or not trader.exchange.connected:
+        return jsonify({"error": "Exchange non connecte"}), 400
+    try:
+        import pandas as pd
+        df = trader._fetch_ohlcv(symbol.upper(), "1h", 200)
+        intel = trader.market_intel
+        intel.exchange = trader.exchange
+        result = intel.full_analysis(df, symbol.upper())
+        from dataclasses import asdict
+        return jsonify(asdict(result))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/trading/symbols", methods=["GET", "POST"])
 def api_trading_symbols():
     """Gestion des symboles de trading."""

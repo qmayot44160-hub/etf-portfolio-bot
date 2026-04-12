@@ -259,7 +259,59 @@
         <!-- TRADING VIEW -->
         <div id="view-trading">
             <div class="section">
-                <h2 class="section-title">Trading Actif</h2>
+                <h2 class="section-title">Trading Institutionnel</h2>
+
+                <!-- Risk Dashboard -->
+                <div id="risk-section" style="margin-bottom:24px">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                        <h3 style="color:#f0f6fc;font-size:1rem">Risk Management</h3>
+                        <button class="btn secondary" onclick="loadRiskDashboard()" style="padding:4px 12px;font-size:0.8rem">Actualiser le risque</button>
+                    </div>
+                    <div class="grid">
+                        <div class="card">
+                            <h3>Risk Score</h3>
+                            <div class="value" id="risk-score">--</div>
+                            <div class="sub" id="risk-score-label">Non calcule</div>
+                        </div>
+                        <div class="card">
+                            <h3>Portfolio Heat</h3>
+                            <div class="value" id="risk-heat">--</div>
+                            <div class="sub">% du capital en risque</div>
+                        </div>
+                        <div class="card">
+                            <h3>VaR 95%</h3>
+                            <div class="value" id="risk-var">--</div>
+                            <div class="sub">Perte max estimee (1 jour)</div>
+                        </div>
+                        <div class="card">
+                            <h3>Exposition</h3>
+                            <div class="value" id="risk-exposure">--</div>
+                            <div class="sub" id="risk-exposure-detail">Long: -- / Short: --</div>
+                        </div>
+                    </div>
+                    <div id="risk-warnings" style="margin-bottom:12px"></div>
+                    <div class="grid">
+                        <div class="card">
+                            <h3>Drawdown</h3>
+                            <div class="metric-row">
+                                <div class="metric"><div class="label">Actuel</div><div class="val" id="risk-dd-current">--</div></div>
+                                <div class="metric"><div class="label">Max</div><div class="val" id="risk-dd-max">--</div></div>
+                                <div class="metric"><div class="label">P&L Jour</div><div class="val" id="risk-daily-pnl">--</div></div>
+                                <div class="metric"><div class="label">P&L Semaine</div><div class="val" id="risk-weekly-pnl">--</div></div>
+                            </div>
+                            <div id="risk-circuit-breaker" style="display:none;background:#490c11;border:1px solid #f85149;border-radius:8px;padding:12px;margin-top:12px;text-align:center">
+                                <strong style="color:#f85149;font-size:1.1rem">CIRCUIT BREAKER ACTIVE</strong>
+                                <p style="color:#f85149;font-size:0.85rem;margin-top:4px">Trading automatique suspendu</p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>Risk Log</h3>
+                            <div id="risk-log-entries" style="max-height:200px;overflow-y:auto">
+                                <p style="color:#8b949e;font-size:0.85rem">Aucun evenement</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Performance Dashboard -->
                 <div id="perf-section" style="margin-bottom:24px">
@@ -284,6 +336,13 @@
                             <div class="value" id="perf-streak">--</div>
                             <div class="sub" id="perf-streak-detail">Max wins/losses</div>
                         </div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric"><div class="label">Sharpe Ratio</div><div class="val" id="perf-sharpe">--</div></div>
+                        <div class="metric"><div class="label">Sortino Ratio</div><div class="val" id="perf-sortino">--</div></div>
+                        <div class="metric"><div class="label">Calmar Ratio</div><div class="val" id="perf-calmar">--</div></div>
+                        <div class="metric"><div class="label">Expectancy</div><div class="val" id="perf-expectancy">--</div></div>
+                        <div class="metric"><div class="label">Max Drawdown</div><div class="val" id="perf-max-dd">--</div></div>
                     </div>
                     <div class="grid">
                         <div class="card full-width">
@@ -1138,6 +1197,7 @@
                 loadActiveTrades();
                 loadTradeHistory();
                 loadPerformance();
+                loadRiskDashboard();
             } catch(e) { toast('Erreur: '+e.message, true); }
         }
 
@@ -1268,6 +1328,13 @@
                 document.getElementById('perf-streak').textContent = `${perf.max_consecutive_wins}W / ${perf.max_consecutive_losses}L`;
                 document.getElementById('perf-streak-detail').textContent = `Best: ${fmtU(perf.best_trade)} | Worst: ${fmtU(perf.worst_trade)}`;
 
+                // Advanced ratios
+                document.getElementById('perf-sharpe').textContent = perf.sharpe_ratio || '--';
+                document.getElementById('perf-sortino').textContent = perf.sortino_ratio || '--';
+                document.getElementById('perf-calmar').textContent = perf.calmar_ratio || '--';
+                document.getElementById('perf-expectancy').textContent = perf.expectancy ? fmtU(perf.expectancy) : '--';
+                document.getElementById('perf-max-dd').textContent = perf.max_drawdown ? fmtU(perf.max_drawdown) : '--';
+
                 // PnL Curve
                 if (perf.pnl_history && perf.pnl_history.length > 0) {
                     Plotly.newPlot('pnl-chart', [{
@@ -1351,6 +1418,35 @@
                             }).join('') + '</div>';
                     }
 
+                    // Quant model info
+                    let quantHtml = '';
+                    if (s.quant) {
+                        const q = s.quant;
+                        const regimeColors = {TRENDING_UP:'#3fb950',TRENDING_DOWN:'#f85149',MEAN_REVERTING:'#bc8cff',HIGH_VOLATILITY:'#f0883e',LOW_VOLATILITY:'#8b949e',BREAKOUT:'#58a6ff'};
+                        quantHtml = `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                            <span class="badge" style="background:#1c2128;color:${regimeColors[q.regime]||'#8b949e'};font-size:0.7rem;padding:2px 8px;border:1px solid ${regimeColors[q.regime]||'#30363d'}">${q.regime||'N/A'}</span>
+                            <span style="color:#8b949e;font-size:0.75rem">Hurst: ${q.hurst||'--'}</span>
+                            <span style="color:#8b949e;font-size:0.75rem">Strats: ${q.strategies_agree||0}/${q.strategies_total||5}</span>
+                            <span style="color:#8b949e;font-size:0.75rem">Vol: ${q.volatility_regime||'--'}</span>
+                            <span style="color:#8b949e;font-size:0.75rem">Kelly: ${q.kelly_size ? (q.kelly_size*100).toFixed(1)+'%' : '--'}</span>
+                        </div>`;
+                    }
+
+                    // Intelligence info
+                    let intelHtml = '';
+                    if (s.intelligence) {
+                        const i = s.intelligence;
+                        const sentColors = {EXTREME_FEAR:'#f85149',FEAR:'#f0883e',NEUTRAL:'#8b949e',GREED:'#3fb950',EXTREME_GREED:'#238636'};
+                        const whaleColors = {LOW:'#8b949e',MEDIUM:'#f0883e',HIGH:'#f85149'};
+                        intelHtml = `<div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                            <span class="badge" style="background:#1c2128;color:${sentColors[i.sentiment]||'#8b949e'};font-size:0.7rem;padding:2px 8px">${i.sentiment||'--'} (${i.sentiment_score})</span>
+                            <span style="color:${whaleColors[i.whale_activity]||'#8b949e'};font-size:0.75rem">\uD83D\uDC33 ${i.whale_activity}</span>
+                            <span style="color:#8b949e;font-size:0.75rem">Vol: ${i.volume_trend}</span>
+                            <span style="color:#8b949e;font-size:0.75rem">Structure: ${i.market_structure}</span>
+                            ${i.funding_rate !== null && i.funding_rate !== undefined ? `<span style="color:${i.funding_rate>0?'#3fb950':'#f85149'};font-size:0.75rem">FR: ${i.funding_rate}%</span>` : ''}
+                        </div>`;
+                    }
+
                     return `<div style="padding:12px;border-bottom:1px solid #21262d">
                         <div style="display:flex;justify-content:space-between;align-items:center">
                             <div>
@@ -1365,11 +1461,13 @@
                             </div>
                         </div>
                         ${mtfHtml}
+                        ${quantHtml}
+                        ${intelHtml}
                         <div style="margin-top:8px;font-size:0.8rem;color:#8b949e">
-                            SL: ${fmtU(s.stop_loss)} | TP: ${fmtU(s.take_profit)} |
-                            RSI: ${s.indicators.rsi} | Score: ${s.indicators.score}
+                            SL: ${fmtU(s.stop_loss)} | TP: ${fmtU(s.take_profit)}
+                            ${s.indicators ? ` | RSI: ${s.indicators.rsi} | Score: ${s.indicators.score}` : ''}
                         </div>
-                        <div style="margin-top:4px;font-size:0.75rem;color:#6e7681">${s.reasons.join(' \u2022 ')}</div>
+                        <div style="margin-top:4px;font-size:0.75rem;color:#6e7681">${(s.reasons||[]).join(' \u2022 ')}</div>
                         ${s.signal.includes('BUY') || s.signal.includes('SELL') ?
                             `<button class="btn" style="margin-top:8px;padding:4px 12px;font-size:0.8rem" onclick='executeTrade(${JSON.stringify(s).replace(/'/g,"\\'")})'>Executer ce trade</button>` : ''}
                     </div>`;
@@ -1452,6 +1550,70 @@
                     </tr>`;
                 }).join('');
             } catch(e) {}
+        }
+
+        // ── Risk Dashboard ──
+        async function loadRiskDashboard() {
+            try {
+                const res = await fetch('/api/trading/risk');
+                const data = await res.json();
+                if (data.error) { return; }
+
+                const r = data.risk_metrics;
+
+                // Risk score with color
+                const scoreEl = document.getElementById('risk-score');
+                scoreEl.textContent = r.risk_score + '/100';
+                scoreEl.className = 'value ' + (r.risk_score > 60 ? 'negative' : r.risk_score > 30 ? '' : 'positive');
+                const scoreLabels = {0:'Tres sur',20:'Sur',40:'Modere',60:'Eleve',80:'Critique'};
+                const scoreKey = Math.min(80, Math.floor(r.risk_score/20)*20);
+                document.getElementById('risk-score-label').textContent = scoreLabels[scoreKey] || 'Calcule';
+
+                document.getElementById('risk-heat').textContent = r.portfolio_heat + '%';
+                document.getElementById('risk-var').textContent = r.var_95 + '%';
+                document.getElementById('risk-exposure').textContent = r.total_exposure + '%';
+                document.getElementById('risk-exposure-detail').textContent = `Long: ${r.long_exposure}% / Short: ${r.short_exposure}%`;
+
+                // Drawdown
+                const ddCurEl = document.getElementById('risk-dd-current');
+                ddCurEl.textContent = r.current_drawdown + '%';
+                ddCurEl.style.color = r.current_drawdown < 0 ? '#f85149' : '#3fb950';
+                document.getElementById('risk-dd-max').textContent = r.max_drawdown + '%';
+
+                const dpEl = document.getElementById('risk-daily-pnl');
+                dpEl.textContent = fmtU(r.daily_pnl);
+                dpEl.style.color = r.daily_pnl >= 0 ? '#3fb950' : '#f85149';
+                const wpEl = document.getElementById('risk-weekly-pnl');
+                wpEl.textContent = fmtU(r.weekly_pnl);
+                wpEl.style.color = r.weekly_pnl >= 0 ? '#3fb950' : '#f85149';
+
+                // Circuit breaker
+                document.getElementById('risk-circuit-breaker').style.display = r.circuit_breaker_triggered ? 'block' : 'none';
+
+                // Warnings
+                const warnDiv = document.getElementById('risk-warnings');
+                if (r.warnings && r.warnings.length > 0) {
+                    warnDiv.innerHTML = r.warnings.map(w =>
+                        `<div style="background:#490c11;border:1px solid #f85149;border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:0.85rem;color:#f85149">\u26a0 ${w}</div>`
+                    ).join('');
+                } else {
+                    warnDiv.innerHTML = '';
+                }
+
+                // Risk log
+                const logEntries = data.risk_log || [];
+                const logDiv = document.getElementById('risk-log-entries');
+                if (logEntries.length > 0) {
+                    logDiv.innerHTML = logEntries.slice().reverse().slice(0, 15).map(l => {
+                        const color = l.type === 'BLOCKED' ? '#f85149' : l.type === 'AUTHORIZED' ? '#3fb950' : l.type === 'TRADE_CLOSE' ? '#f0883e' : '#8b949e';
+                        return `<div style="padding:4px 0;border-bottom:1px solid #21262d;font-size:0.78rem">
+                            <span style="color:#6e7681">${new Date(l.timestamp).toLocaleTimeString('fr-FR')}</span>
+                            <span class="badge" style="background:${color}22;color:${color};font-size:0.7rem;margin:0 4px">${l.type}</span>
+                            <span style="color:#c9d1d9">${l.message}</span>
+                        </div>`;
+                    }).join('');
+                }
+            } catch(e) { console.error('Risk dashboard error:', e); }
         }
 
         // Boot
