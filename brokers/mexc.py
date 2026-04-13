@@ -19,6 +19,7 @@ class MEXCBroker(BaseBroker):
         super().__init__(credentials)
         self.api_key = credentials.get("api_key", "")
         self.secret_key = credentials.get("secret_key", "")
+        self.wallet_type = credentials.get("wallet_type", "spot")  # spot ou futures
         self.exchange = None
 
     def connect(self) -> bool:
@@ -26,7 +27,7 @@ class MEXCBroker(BaseBroker):
         self.exchange = ccxt.mexc({
             "apiKey": self.api_key,
             "secret": self.secret_key,
-            "options": {"defaultType": "spot"},
+            "options": {"defaultType": self.wallet_type},
         })
         # Test connexion en récupérant le solde
         balance = self.exchange.fetch_balance()
