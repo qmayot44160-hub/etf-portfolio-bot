@@ -101,8 +101,13 @@ class MEXCBroker(BaseBroker):
         return positions
 
     def _total_in_usdt(self, positions: list, balance: dict) -> float:
-        """Calcule la valeur totale en USDT."""
-        return sum(p.market_value for p in positions)
+        """Calcule la valeur totale en USDT (positions + cash libre non compté dans positions)."""
+        total = sum(p.market_value for p in positions)
+        # Si USDT n'est pas dans les positions, ajouter le cash libre
+        usdt_in_positions = any(p.ticker == "USDT" for p in positions)
+        if not usdt_in_positions:
+            total += float(balance.get("USDT", {}).get("free", 0))
+        return total
 
     def get_positions(self) -> list[BrokerPosition]:
         self._check_connected()
