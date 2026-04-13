@@ -82,11 +82,20 @@ class BotEngine:
 
     def get_portfolio(self) -> dict:
         """
-        Récupère le portefeuille — du broker si connecté, sinon simulation locale.
+        Récupère le portefeuille — du broker si connecté, sinon message non connecté.
         """
         if self.broker and self.broker.connected:
             return self._get_broker_portfolio()
-        return self._get_simulated_portfolio()
+        return {
+            "mode": "not_connected",
+            "broker": None,
+            "total_value": 0,
+            "cash": 0,
+            "currency": "EUR",
+            "positions": [],
+            "last_update": None,
+            "message": "Aucun broker ETF connecté. Connectez IBKR ou un autre broker pour voir votre portefeuille réel.",
+        }
 
     def _get_broker_portfolio(self) -> dict:
         """Portefeuille réel depuis le broker."""
