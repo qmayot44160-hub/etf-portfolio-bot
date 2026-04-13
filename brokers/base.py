@@ -23,7 +23,7 @@ class OrderType(Enum):
 class BrokerOrder:
     ticker: str
     side: OrderSide
-    quantity: int
+    quantity: float
     order_type: OrderType = OrderType.MARKET
     limit_price: Optional[float] = None
     order_id: Optional[str] = None
@@ -109,7 +109,7 @@ class BaseBroker(ABC):
         """Annule un ordre. Retourne True si succès."""
         pass
 
-    def buy(self, ticker: str, quantity: int, order_type: OrderType = OrderType.MARKET,
+    def buy(self, ticker: str, quantity: float, order_type: OrderType = OrderType.MARKET,
             limit_price: float = None) -> BrokerOrder:
         """Raccourci pour placer un ordre d'achat."""
         order = BrokerOrder(
@@ -121,7 +121,7 @@ class BaseBroker(ABC):
         )
         return self.place_order(order)
 
-    def sell(self, ticker: str, quantity: int, order_type: OrderType = OrderType.MARKET,
+    def sell(self, ticker: str, quantity: float, order_type: OrderType = OrderType.MARKET,
              limit_price: float = None) -> BrokerOrder:
         """Raccourci pour placer un ordre de vente."""
         order = BrokerOrder(

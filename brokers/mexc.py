@@ -174,7 +174,7 @@ class MEXCBroker(BaseBroker):
         return BrokerOrder(
             ticker=o.get("symbol", ""),
             side=side,
-            quantity=int(float(o.get("amount", 0))),
+            quantity=float(o.get("amount", 0)),
             order_id=str(o["id"]),
             status=o.get("status", "UNKNOWN"),
             filled_price=float(o.get("average", 0) or 0),

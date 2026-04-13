@@ -133,8 +133,11 @@ class AutoTrader:
             json.dump(config, f, indent=2)
 
     def get_status(self) -> dict:
+        live = bool(self.exchange and self.exchange.connected)
         return {
             "running": self.running,
+            "live_mode": live,
+            "mode": "LIVE" if live else "SIMULATION",
             "active_trades": len(self.active_trades),
             "total_trades": len(self.trade_history),
             "config": self.get_config(),

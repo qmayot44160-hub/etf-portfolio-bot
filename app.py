@@ -408,6 +408,20 @@ def init_app():
     if config.get("dca_enabled") or config.get("rebalance_enabled"):
         setup_scheduled_jobs(config)
 
+    # Auto-connect trader to MEXC if crypto engine is connected
+    if crypto.broker and crypto.broker.connected:
+        trader.exchange = crypto.broker
+        trader.smart_exec.exchange = crypto.broker
+        trader.market_intel.exchange = crypto.broker
+        trader.scanner.exchange = crypto.broker
+        print("[Startup] Trader auto-linked to MEXC exchange")
+
+        # Auto-start trading loop if enabled in config
+        trader_config = trader.get_config()
+        if trader_config.get("enabled") and not trader.running:
+            trader.start()
+            print("[Startup] Trading loop auto-started (LIVE mode)")
+
 
 init_app()
 
