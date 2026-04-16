@@ -402,6 +402,24 @@
         .dbar-fill { height: 100%; border-radius: 2px; }
 
         /* ════════════════════════════════════════════════
+           HINT CTA — clickable empty state
+           ════════════════════════════════════════════════ */
+        .hint-cta {
+            display: flex; align-items: center; justify-content: center;
+            gap: 10px; padding: 32px 20px;
+            border: 1.5px dashed rgba(255,255,255,0.1);
+            border-radius: 16px; cursor: pointer;
+            transition: border-color 0.25s, background 0.25s;
+            color: var(--sf-text-secondary); font-size: 0.9rem;
+        }
+        .hint-cta:hover {
+            border-color: var(--sf-blue);
+            background: rgba(41,151,255,0.05);
+            color: var(--sf-blue);
+        }
+        .hint-icon { font-size: 1.4rem; }
+
+        /* ════════════════════════════════════════════════
            HERO GLOW — unique per page
            ════════════════════════════════════════════════ */
         .hero { position: relative; overflow: hidden; }
@@ -546,8 +564,11 @@
             <table><thead><tr><th>ETF</th><th>Categorie</th><th>Parts</th><th>Prix</th><th>Valeur</th><th>Cible</th><th>Actuel</th><th>Ecart</th></tr></thead><tbody id="positions-table"></tbody></table>
         </div>
         <div class="dcard">
-            <div class="dcard-label">Reequilibrage</div>
-            <div id="rebalance-orders"><p style="color:var(--sf-text-muted)">Cliquez sur Reequilibrer pour voir les ordres suggeeres.</p></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                <div class="dcard-label" style="margin-bottom:0">Reequilibrage ETF</div>
+                <button class="abtn abtn-blue abtn-sm" onclick="executeRebalance()">Calculer</button>
+            </div>
+            <div id="rebalance-orders"><div class="hint-cta" onclick="executeRebalance()"><span class="hint-icon">⚖️</span><span>Calculer les ordres de rééquilibrage</span></div></div>
         </div>
     </div>
 </div>
@@ -704,7 +725,7 @@
                         <span style="font-size:0.88rem;font-weight:500">Analyse en temps reel</span>
                         <button class="abtn abtn-dark abtn-sm" onclick="analyzeAll()">Scanner</button>
                     </div>
-                    <div id="signals-list" style="flex:1;overflow-y:auto;max-height:600px"><p style="color:var(--sf-text-muted)">Cliquez sur Scanner pour analyser le marche.</p></div>
+                    <div id="signals-list" style="flex:1;overflow-y:auto;max-height:600px"><div class="hint-cta" onclick="analyzeAll()"><span class="hint-icon">🔍</span><span>Lancer l'analyse du marché</span></div></div>
                 </div>
             </div>
         </div>
@@ -743,7 +764,7 @@
         <div class="grid-2col">
             <div class="dcard">
                 <div class="dcard-title">Top Opportunites</div>
-                <div id="scan-results-list"><p style="color:var(--sf-text-muted);text-align:center;padding:40px 0">Lancez un scan pour decouvrir les meilleures opportunites.</p></div>
+                <div id="scan-results-list"><div class="hint-cta" onclick="runFullScan()"><span class="hint-icon">🚀</span><span>Lancer un scan complet du marché</span></div></div>
             </div>
             <div class="dcard">
                 <div class="dcard-title">Top Movers</div>
@@ -785,7 +806,13 @@
                 </div>
                 <table><thead><tr><th>Token</th><th>Montant</th><th>Prix</th><th>Qty</th><th>Reel</th></tr></thead><tbody id="crypto-dca-table"></tbody></table>
             </div>
-            <div class="dcard"><div class="dcard-label">Reequilibrage</div><button class="abtn abtn-dark abtn-sm" onclick="cryptoRebalance()" style="margin-bottom:14px">Calculer</button><div id="crypto-rebalance-orders"><p style="color:var(--sf-text-muted)">Cliquez pour calculer</p></div></div>
+            <div class="dcard">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                    <div class="dcard-label" style="margin-bottom:0">Reequilibrage Crypto</div>
+                    <button class="abtn abtn-blue abtn-sm" onclick="cryptoRebalance()">Calculer</button>
+                </div>
+                <div id="crypto-rebalance-orders"><div class="hint-cta" onclick="cryptoRebalance()"><span class="hint-icon">⚖️</span><span>Calculer les ordres de rééquilibrage</span></div></div>
+            </div>
         </div>
     </div>
 </div>
@@ -933,7 +960,7 @@ async function refreshStatus(){try{const d=await(await fetch('/api/status')).jso
 
 /* ═══ Portfolio ═══ */
 async function refreshPortfolio(){refreshStatus();try{const d=await(await fetch('/api/portfolio')).json();if(d.mode==='not_connected'){document.getElementById('total-value').textContent='--';document.getElementById('cash-value').textContent='--';document.getElementById('total-mode').textContent='Non connecté';document.getElementById('positions-count').textContent='0';document.getElementById('etf-count').textContent='';document.getElementById('positions-table').innerHTML=`<tr><td colspan="8">${emptyState('🏦','Aucun broker ETF connecté','Connectez Interactive Brokers, Degiro ou Alpaca via l\'onglet Connexions.')}</td></tr>`;document.getElementById('allocation-chart').innerHTML=emptyState('📊','En attente de données','Connectez un broker ETF pour voir votre allocation.');return;}animateVal(document.getElementById('total-value'),d.total_value,'','€');animateVal(document.getElementById('cash-value'),d.cash,'','€');document.getElementById('total-mode').textContent=d.mode==='live'?d.broker:'--';const ap=d.positions.filter(p=>p.shares>0);document.getElementById('positions-count').textContent=ap.length;document.getElementById('etf-count').textContent=d.positions.length+' ETFs suivis';document.getElementById('positions-table').innerHTML=d.positions.map(p=>{const dc=Math.abs(p.drift)>=5?(p.drift>0?'pill-red':'pill-green'):'pill-gray';const dCol=p.drift>0?'var(--sf-red)':p.drift<0?'var(--sf-green)':'var(--sf-text-muted)';return`<tr><td><strong>${p.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${p.ticker}</span></td><td style="color:var(--sf-text-secondary)">${p.category}</td><td class="mono">${p.shares}</td><td class="mono">${p.price?fmt(p.price):'--'}</td><td class="mono">${fmt(p.value)}</td><td>${p.target_pct}%</td><td>${p.current_pct}%</td><td><span class="pill ${dc}">${pct(p.drift)}</span><div class="dbar"><div class="dbar-fill" style="width:${Math.min(Math.abs(p.drift)*5,100)}%;background:${dCol}"></div></div></td></tr>`;}).join('');const lbl=d.positions.map(p=>p.name),tgt=d.positions.map(p=>p.target_pct),cur=d.positions.map(p=>p.current_pct),col=['#2997ff','#30d158','#ff9f0a','#bf5af2','#ff453a','#64d2ff'];Plotly.newPlot('allocation-chart',[{values:tgt.map(v=>Math.max(v,0.1)),labels:lbl,name:'Cible',type:'pie',hole:0.65,domain:{column:0},marker:{colors:col},textinfo:'label+percent',textfont:{color:'#f5f5f7',size:11,family:'Inter'}},{values:cur.map(v=>Math.max(v,0.1)),labels:lbl,name:'Actuel',type:'pie',hole:0.65,domain:{column:1},marker:{colors:col},textinfo:'label+percent',textfont:{color:'#f5f5f7',size:11,family:'Inter'}}],{...PL,grid:{rows:1,columns:2},annotations:[{text:'Cible',x:0.2,y:0.5,font:{size:13,color:'#86868b',family:'Inter'},showarrow:false},{text:'Actuel',x:0.8,y:0.5,font:{size:13,color:'#86868b',family:'Inter'},showarrow:false}],showlegend:false,height:340},{responsive:true});}catch(e){toast(e.message,true);}}
-async function executeRebalance(){try{const o=await(await fetch('/api/rebalance')).json();const c=document.getElementById('rebalance-orders');if(!o.length){c.innerHTML='<p style="color:var(--sf-green)">Portefeuille equilibre.</p>';return;}c.innerHTML=`<table><thead><tr><th>ETF</th><th>Action</th><th>Parts</th><th>Montant</th></tr></thead><tbody>${o.map(x=>`<tr><td>${x.name||x.ticker}</td><td><span class="pill ${(x.action||'').includes('BUY')?'pill-green':'pill-red'}">${x.action||'-'}</span></td><td class="mono">${x.shares||'-'}</td><td class="mono">${x.amount?fmt(x.amount):'-'}</td></tr>`).join('')}</tbody></table>`;}catch(e){toast(e.message,true);}}
+async function executeRebalance(){try{const o=await(await fetch('/api/rebalance')).json();const c=document.getElementById('rebalance-orders');if(!o.length){c.innerHTML=`<div class="hint-cta" style="border-color:rgba(48,209,88,0.3);color:var(--sf-green);cursor:default"><span class="hint-icon">✅</span><span>Portefeuille déjà équilibré</span></div>`;return;}c.innerHTML=`<table><thead><tr><th>ETF</th><th>Action</th><th>Parts</th><th>Montant</th></tr></thead><tbody>${o.map(x=>`<tr><td>${x.name||x.ticker}</td><td><span class="pill ${(x.action||'').includes('BUY')?'pill-green':'pill-red'}">${x.action||'-'}</span></td><td class="mono">${x.shares||'-'}</td><td class="mono">${x.amount?fmt(x.amount):'-'}</td></tr>`).join('')}</tbody></table>`;}catch(e){toast(e.message,true);}}
 
 /* ═══ DCA ═══ */
 async function calculateDCA(){try{const d=await(await fetch('/api/dca?amount='+document.getElementById('dca-amount').value)).json();document.getElementById('dca-table').innerHTML=d.map(x=>`<tr><td><strong>${x.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${x.ticker}</span></td><td class="mono">${fmt(x.target_amount)}</td><td class="mono">${fmt(x.price)}</td><td class="mono">${x.shares_to_buy}</td><td class="mono">${fmt(x.real_amount)}</td></tr>`).join('');}catch(e){}}
