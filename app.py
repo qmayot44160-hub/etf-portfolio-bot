@@ -9,6 +9,7 @@ from portfolio import (
     calculate_dca_allocation, execute_dca, _init_state,
 )
 from backtest import run_backtest
+from projection import run_projection
 from market_data import get_current_prices
 from brokers import list_brokers
 from scheduler import (
@@ -155,6 +156,26 @@ def api_backtest():
     dca = request.args.get("dca", None, type=float)
     rebalance = request.args.get("rebalance", "true").lower() == "true"
     result = run_backtest(years=years, capital=capital, dca=dca, rebalance=rebalance)
+    return jsonify(result)
+
+
+# ── API: Projection ────────────────────────────────────
+
+@app.route("/api/projection")
+def api_projection():
+    """Projection Monte Carlo des gains futurs."""
+    years = request.args.get("years", 10, type=int)
+    capital = request.args.get("capital", None, type=float)
+    dca = request.args.get("dca", None, type=float)
+    n_sim = request.args.get("n_simulations", 2000, type=int)
+    inflation = request.args.get("inflation", 2.0, type=float)
+    target = request.args.get("target", None, type=float)
+    history = request.args.get("history_years", 5, type=int)
+    result = run_projection(
+        capital=capital, dca=dca, years=years,
+        n_simulations=n_sim, inflation_pct=inflation,
+        target_amount=target, history_years=history,
+    )
     return jsonify(result)
 
 

@@ -517,7 +517,7 @@
         .hero > * { position: relative; z-index: 1; }
         #view-portfolio .hero { --hero-glow: rgba(41,151,255,0.14); }
         #view-dca .hero       { --hero-glow: rgba(48,209,88,0.12); }
-        #view-backtest .hero  { --hero-glow: rgba(191,90,242,0.12); }
+        #view-projection .hero  { --hero-glow: rgba(191,90,242,0.12); }
         #view-crypto .hero    { --hero-glow: rgba(255,159,10,0.12); }
         #view-trading .hero   { --hero-glow: rgba(100,210,255,0.12); }
         #view-scanner .hero   { --hero-glow: rgba(48,209,88,0.10); }
@@ -609,7 +609,7 @@
         <div class="globalheader-links">
             <button class="globalheader-link active" data-view="portfolio">Portefeuille</button>
             <button class="globalheader-link" data-view="dca">DCA</button>
-            <button class="globalheader-link" data-view="backtest">Backtest</button>
+            <button class="globalheader-link" data-view="projection">Projection</button>
             <button class="globalheader-link" data-view="crypto">Crypto</button>
             <button class="globalheader-link" data-view="trading">Trading</button>
             <button class="globalheader-link" data-view="scanner">Scanner</button>
@@ -683,103 +683,125 @@
 <!-- ═══════════════════════════════════════════════════════
      BACKTEST
      ═══════════════════════════════════════════════════════ -->
-<div id="view-backtest">
+<div id="view-projection">
     <div class="hero">
-        <h1 class="hero-title">Backtest</h1>
-        <p class="hero-subtitle">Simulez et analysez votre strategie sur l'historique reel. Benchmark, drawdowns, heatmap.</p>
+        <h1 class="hero-title">Projection future</h1>
+        <p class="hero-subtitle">Estimation Monte Carlo de vos gains futurs. Calibrée sur l'historique réel de votre portefeuille.</p>
     </div>
     <div class="section">
         <!-- Paramètres -->
         <div class="dcard">
-            <div class="dcard-title">Paramètres de simulation</div>
+            <div class="dcard-title">Paramètres de projection</div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:20px">
                 <div class="form-group" style="margin-bottom:0">
-                    <div class="form-label">Période</div>
-                    <select id="bt-years" class="ainput">
-                        <option value="1">1 an</option>
-                        <option value="3">3 ans</option>
-                        <option value="5" selected>5 ans</option>
-                        <option value="10">10 ans</option>
-                        <option value="15">15 ans</option>
-                    </select>
-                </div>
-                <div class="form-group" style="margin-bottom:0">
                     <div class="form-label">Capital initial (€)</div>
-                    <input type="number" id="bt-capital" value="10000" min="100" step="500" class="ainput">
+                    <input type="number" id="pj-capital" value="10000" min="0" step="500" class="ainput">
                 </div>
                 <div class="form-group" style="margin-bottom:0">
                     <div class="form-label">DCA mensuel (€)</div>
-                    <input type="number" id="bt-dca" value="500" min="0" step="50" class="ainput">
+                    <input type="number" id="pj-dca" value="500" min="0" step="50" class="ainput">
                 </div>
                 <div class="form-group" style="margin-bottom:0">
-                    <div class="form-label">Rééquilibrage</div>
-                    <select id="bt-rebalance" class="ainput">
-                        <option value="true">Activé</option>
-                        <option value="false">Désactivé</option>
+                    <div class="form-label">Horizon</div>
+                    <select id="pj-years" class="ainput">
+                        <option value="3">3 ans</option>
+                        <option value="5">5 ans</option>
+                        <option value="10" selected>10 ans</option>
+                        <option value="15">15 ans</option>
+                        <option value="20">20 ans</option>
+                        <option value="30">30 ans</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <div class="form-label">Objectif (€) — optionnel</div>
+                    <input type="number" id="pj-target" value="100000" min="0" step="1000" class="ainput">
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <div class="form-label">Inflation annuelle (%)</div>
+                    <input type="number" id="pj-inflation" value="2" min="0" max="15" step="0.5" class="ainput">
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <div class="form-label">Simulations</div>
+                    <select id="pj-nsim" class="ainput">
+                        <option value="500">500 (rapide)</option>
+                        <option value="2000" selected>2000 (standard)</option>
+                        <option value="5000">5000 (précis)</option>
                     </select>
                 </div>
             </div>
             <div style="text-align:center">
-                <button class="abtn abtn-blue" onclick="runBacktest()" id="bt-btn">Lancer le backtest</button>
+                <button class="abtn abtn-blue" onclick="runProjection()" id="pj-btn">Lancer la projection</button>
             </div>
+            <p style="text-align:center;color:var(--sf-text-muted);font-size:0.78rem;margin-top:14px">
+                Simulation Monte Carlo par mouvement brownien géométrique. Les rendements futurs ne sont pas garantis.
+            </p>
         </div>
 
-        <div id="bt-results" style="display:none">
+        <div id="pj-results" style="display:none">
             <!-- KPIs principaux -->
             <div class="stat-grid stat-grid-3" style="margin-top:8px">
-                <div class="stat-card accent-blue"><div class="stat-label">Valeur finale</div><div class="stat-value" id="bt-final">--</div><div class="stat-sub" id="bt-period"></div></div>
-                <div class="stat-card"><div class="stat-label">Gain net</div><div class="stat-value" id="bt-gain">--</div><div class="stat-sub" id="bt-gain-pct"></div></div>
-                <div class="stat-card"><div class="stat-label">Rendement annualisé</div><div class="stat-value" id="bt-annual">--</div><div class="stat-sub" id="bt-vs-bench"></div></div>
+                <div class="stat-card accent-blue"><div class="stat-label">Valeur médiane (P50)</div><div class="stat-value" id="pj-median">--</div><div class="stat-sub" id="pj-horizon"></div></div>
+                <div class="stat-card"><div class="stat-label">Gain médian</div><div class="stat-value" id="pj-gain">--</div><div class="stat-sub" id="pj-gain-pct"></div></div>
+                <div class="stat-card"><div class="stat-label">Total investi</div><div class="stat-value" id="pj-invested">--</div><div class="stat-sub" id="pj-invested-detail"></div></div>
             </div>
 
-            <!-- Métriques avancées -->
+            <!-- Bandes de confiance -->
             <div class="metrics">
-                <div class="mbox"><div class="mbox-label">Sharpe</div><div class="mbox-val" id="bt-sharpe">--</div></div>
-                <div class="mbox"><div class="mbox-label">Sortino</div><div class="mbox-val" id="bt-sortino">--</div></div>
-                <div class="mbox"><div class="mbox-label">Calmar</div><div class="mbox-val" id="bt-calmar">--</div></div>
-                <div class="mbox"><div class="mbox-label">Max Drawdown</div><div class="mbox-val red" id="bt-dd">--</div></div>
-                <div class="mbox"><div class="mbox-label">Volatilité</div><div class="mbox-val" id="bt-vol">--</div></div>
-                <div class="mbox"><div class="mbox-label">VaR 95%</div><div class="mbox-val red" id="bt-var">--</div></div>
-                <div class="mbox"><div class="mbox-label">CVaR 95%</div><div class="mbox-val red" id="bt-cvar">--</div></div>
-                <div class="mbox"><div class="mbox-label">Mois positifs</div><div class="mbox-val green" id="bt-pos-months">--</div></div>
+                <div class="mbox"><div class="mbox-label">Pessimiste (P5)</div><div class="mbox-val red" id="pj-p5">--</div></div>
+                <div class="mbox"><div class="mbox-label">P25</div><div class="mbox-val" id="pj-p25">--</div></div>
+                <div class="mbox"><div class="mbox-label">Médiane (P50)</div><div class="mbox-val" id="pj-p50">--</div></div>
+                <div class="mbox"><div class="mbox-label">P75</div><div class="mbox-val" id="pj-p75">--</div></div>
+                <div class="mbox"><div class="mbox-label">Optimiste (P95)</div><div class="mbox-val green" id="pj-p95">--</div></div>
+                <div class="mbox"><div class="mbox-label">Valeur réelle (après inflation)</div><div class="mbox-val" id="pj-real">--</div></div>
             </div>
 
-            <!-- Best / worst year + rebalance info -->
-            <div class="stat-grid stat-grid-3" style="margin-bottom:20px">
-                <div class="stat-card"><div class="stat-label">Meilleure année</div><div class="stat-value green" id="bt-best-year">--</div><div class="stat-sub" id="bt-best-year-label"></div></div>
-                <div class="stat-card"><div class="stat-label">Pire année</div><div class="stat-value red" id="bt-worst-year">--</div><div class="stat-sub" id="bt-worst-year-label"></div></div>
-                <div class="stat-card"><div class="stat-label">Total investi</div><div class="stat-value" id="bt-invested">--</div><div class="stat-sub" id="bt-rebalance-count"></div></div>
+            <!-- Probabilités -->
+            <div class="stat-grid stat-grid-4" style="margin-bottom:20px">
+                <div class="stat-card"><div class="stat-label">Proba. objectif atteint</div><div class="stat-value green" id="pj-prob-target">--</div><div class="stat-sub" id="pj-prob-target-label"></div></div>
+                <div class="stat-card"><div class="stat-label">Proba. doubler la mise</div><div class="stat-value" id="pj-prob-double">--</div><div class="stat-sub">Valeur ≥ 2× investi</div></div>
+                <div class="stat-card"><div class="stat-label">Proba. tripler la mise</div><div class="stat-value" id="pj-prob-triple">--</div><div class="stat-sub">Valeur ≥ 3× investi</div></div>
+                <div class="stat-card"><div class="stat-label">Proba. de perte</div><div class="stat-value red" id="pj-prob-loss">--</div><div class="stat-sub">Valeur &lt; investi</div></div>
             </div>
 
-            <!-- Graphique principal : portefeuille + investi + benchmark -->
+            <!-- Graphique principal : fan chart -->
             <div class="dcard">
-                <div class="dcard-title">Performance vs Benchmark (S&P 500)</div>
-                <div id="bt-chart" style="height:420px"></div>
+                <div class="dcard-title">Trajectoire probable (bandes de confiance)</div>
+                <div id="pj-fan-chart" style="height:460px"></div>
+                <p style="color:var(--sf-text-muted);font-size:0.78rem;margin-top:10px">
+                    La bande sombre = intervalle P25–P75 (50% des scénarios). La bande claire = P5–P95 (90% des scénarios).
+                </p>
             </div>
 
-            <!-- Graphique drawdown -->
+            <!-- Graphique scénarios déterministes -->
             <div class="dcard">
-                <div class="dcard-title">Drawdown</div>
-                <div id="bt-dd-chart" style="height:240px"></div>
+                <div class="dcard-title">Scénarios : Pessimiste · Médian · Optimiste</div>
+                <div id="pj-scenarios-chart" style="height:360px"></div>
+                <div id="pj-scenarios-table" style="margin-top:16px"></div>
             </div>
 
-            <!-- Comparaison avec/sans rééquilibrage -->
-            <div id="bt-rebal-compare" class="dcard" style="display:none">
-                <div class="dcard-title">Avec vs Sans rééquilibrage</div>
-                <div id="bt-rebal-table"></div>
-            </div>
-
-            <!-- Heatmap rendements mensuels -->
+            <!-- Distribution des valeurs finales -->
             <div class="dcard">
-                <div class="dcard-title">Rendements mensuels</div>
-                <div id="bt-heatmap" style="height:auto;overflow-x:auto"></div>
+                <div class="dcard-title">Distribution des valeurs finales (histogramme)</div>
+                <div id="pj-distribution-chart" style="height:300px"></div>
             </div>
 
-            <!-- Contribution par ETF -->
+            <!-- Table annuelle -->
             <div class="dcard">
-                <div class="dcard-title">Contribution par ETF</div>
-                <div id="bt-contribution-chart" style="height:300px"></div>
-                <div id="bt-contribution-table" style="margin-top:16px"></div>
+                <div class="dcard-title">Projection année par année</div>
+                <div id="pj-yearly-table" style="overflow-x:auto"></div>
+            </div>
+
+            <!-- Projection par ETF -->
+            <div class="dcard">
+                <div class="dcard-title">Projection par ETF</div>
+                <div id="pj-etf-chart" style="height:300px"></div>
+                <div id="pj-etf-table" style="margin-top:16px"></div>
+            </div>
+
+            <!-- Calibration -->
+            <div class="dcard" style="background:rgba(255,255,255,0.02)">
+                <div class="dcard-title">Calibration du modèle</div>
+                <div id="pj-calibration" style="color:var(--sf-text-secondary);font-size:0.9rem;line-height:1.7"></div>
             </div>
         </div>
     </div>
@@ -1142,94 +1164,127 @@ async function executeRebalance(){try{const o=await(await fetch('/api/rebalance'
 async function calculateDCA(){try{const d=await(await fetch('/api/dca?amount='+document.getElementById('dca-amount').value)).json();document.getElementById('dca-table').innerHTML=d.map(x=>`<tr><td><strong>${x.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${x.ticker}</span></td><td class="mono">${fmt(x.target_amount)}</td><td class="mono">${fmt(x.price)}</td><td class="mono">${x.shares_to_buy}</td><td class="mono">${fmt(x.real_amount)}</td></tr>`).join('');}catch(e){}}
 async function executeDCA(){try{const d=await(await fetch('/api/dca/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:parseFloat(document.getElementById('dca-amount').value)})})).json();toast('DCA: '+d.length+' ordres');refreshPortfolio();}catch(e){toast(e.message,true);}}
 
-/* ═══ Backtest ═══ */
-async function runBacktest(){
-    const btn=document.getElementById('bt-btn');
-    btn.disabled=true;btn.textContent='Calcul en cours...';
-    const years=document.getElementById('bt-years').value;
-    const capital=document.getElementById('bt-capital').value;
-    const dca=document.getElementById('bt-dca').value;
-    const rebalance=document.getElementById('bt-rebalance').value;
+/* ═══ Projection future ═══ */
+async function runProjection(){
+    const btn=document.getElementById('pj-btn');
+    btn.disabled=true;btn.textContent='Simulation en cours...';
+    const capital=document.getElementById('pj-capital').value;
+    const dca=document.getElementById('pj-dca').value;
+    const years=document.getElementById('pj-years').value;
+    const target=document.getElementById('pj-target').value;
+    const inflation=document.getElementById('pj-inflation').value;
+    const nsim=document.getElementById('pj-nsim').value;
     try{
-        const d=await(await fetch(`/api/backtest?years=${years}&capital=${capital}&dca=${dca}&rebalance=${rebalance}`)).json();
+        const url=`/api/projection?capital=${capital}&dca=${dca}&years=${years}&target=${target}&inflation=${inflation}&n_simulations=${nsim}`;
+        const d=await(await fetch(url)).json();
         if(d.error){toast(d.error,true);return;}
-        document.getElementById('bt-results').style.display='block';
+        document.getElementById('pj-results').style.display='block';
 
         // KPIs
-        animateVal(document.getElementById('bt-final'),d.final_value,'','€');
-        document.getElementById('bt-period').textContent=d.start_date+' → '+d.end_date;
-        const g=document.getElementById('bt-gain');
-        g.className='stat-value '+(d.gain>=0?'green':'red');
-        animateVal(g,d.gain,'','€');
-        document.getElementById('bt-gain-pct').textContent=(d.gain_pct>=0?'+':'')+d.gain_pct+'%';
-        document.getElementById('bt-annual').textContent=(d.annualized_return_pct>=0?'+':'')+d.annualized_return_pct+'%';
+        animateVal(document.getElementById('pj-median'),d.final.p50,'','€');
+        document.getElementById('pj-horizon').textContent=d.params.years+' ans • '+d.params.n_simulations+' simulations';
+        const g=document.getElementById('pj-gain');
+        g.className='stat-value '+(d.final.gain_p50>=0?'green':'red');
+        animateVal(g,d.final.gain_p50,'','€');
+        document.getElementById('pj-gain-pct').textContent=(d.final.gain_pct_p50>=0?'+':'')+d.final.gain_pct_p50+'%';
+        animateVal(document.getElementById('pj-invested'),d.params.total_invested,'','€');
+        document.getElementById('pj-invested-detail').textContent=`${fmt(d.params.capital)} + ${fmt(d.params.dca)}/mois`;
 
-        // vs benchmark
-        if(d.benchmark&&!d.benchmark.error){
-            const diff=d.annualized_return_pct-d.benchmark.annualized_return_pct;
-            document.getElementById('bt-vs-bench').innerHTML=`vs S&P 500: <span style="color:${diff>=0?'var(--sf-green)':'var(--sf-red)'}">${diff>=0?'+':''}${diff.toFixed(1)}%</span>`;
+        // Bandes de confiance
+        document.getElementById('pj-p5').textContent=fmt(d.final.p5);
+        document.getElementById('pj-p25').textContent=fmt(d.final.p25);
+        document.getElementById('pj-p50').textContent=fmt(d.final.p50);
+        document.getElementById('pj-p75').textContent=fmt(d.final.p75);
+        document.getElementById('pj-p95').textContent=fmt(d.final.p95);
+        document.getElementById('pj-real').textContent=fmt(d.final.real_p50);
+
+        // Probabilités
+        if(d.probabilities.target!==null){
+            document.getElementById('pj-prob-target').textContent=d.probabilities.target+'%';
+            document.getElementById('pj-prob-target-label').textContent='Objectif '+fmt(d.probabilities.target_amount);
+        }else{
+            document.getElementById('pj-prob-target').textContent='--';
+        }
+        document.getElementById('pj-prob-double').textContent=d.probabilities.double+'%';
+        document.getElementById('pj-prob-triple').textContent=d.probabilities.triple+'%';
+        document.getElementById('pj-prob-loss').textContent=d.probabilities.loss+'%';
+
+        // ── Fan chart : bandes de confiance + médiane + échantillon trajectoires ──
+        const x=d.dates;
+        const fanTraces=[];
+        // Bande P5-P95 (claire)
+        fanTraces.push({x,y:d.percentiles.p95,name:'P95',type:'scatter',mode:'lines',line:{width:0},showlegend:false,hoverinfo:'skip'});
+        fanTraces.push({x,y:d.percentiles.p5,name:'P5-P95 (90%)',type:'scatter',mode:'lines',line:{width:0},fill:'tonexty',fillcolor:'rgba(41,151,255,0.12)',hoverinfo:'skip'});
+        // Bande P25-P75 (foncée)
+        fanTraces.push({x,y:d.percentiles.p75,name:'P75',type:'scatter',mode:'lines',line:{width:0},showlegend:false,hoverinfo:'skip'});
+        fanTraces.push({x,y:d.percentiles.p25,name:'P25-P75 (50%)',type:'scatter',mode:'lines',line:{width:0},fill:'tonexty',fillcolor:'rgba(41,151,255,0.28)',hoverinfo:'skip'});
+        // Échantillon de 30 trajectoires fines (fantôme)
+        const sample=d.sample_paths.slice(0,30);
+        sample.forEach((p,i)=>{
+            fanTraces.push({x,y:p,type:'scatter',mode:'lines',line:{color:'rgba(255,255,255,0.04)',width:0.8},showlegend:false,hoverinfo:'skip'});
+        });
+        // Médiane
+        fanTraces.push({x,y:d.percentiles.p50,name:'Médiane (P50)',type:'scatter',mode:'lines',line:{color:'#2997ff',width:2.5}});
+        // Ligne investi
+        const invested=x.map((_,i)=>d.params.capital + d.params.dca * i);
+        fanTraces.push({x,y:invested,name:'Capital investi',type:'scatter',mode:'lines',line:{color:'rgba(255,255,255,0.3)',width:1.2,dash:'dot'}});
+        // Objectif (si défini)
+        if(d.probabilities.target_amount){
+            fanTraces.push({x:[x[0],x[x.length-1]],y:[d.probabilities.target_amount,d.probabilities.target_amount],name:'Objectif',type:'scatter',mode:'lines',line:{color:'#30d158',width:1.5,dash:'dash'}});
+        }
+        Plotly.newPlot('pj-fan-chart',fanTraces,{...PL,height:460,legend:{orientation:'h',y:-0.18,font:{color:'#86868b',size:11}}},{responsive:true});
+
+        // ── Scénarios déterministes ──
+        const sc=d.scenarios;
+        const scX=x; // mêmes dates
+        Plotly.newPlot('pj-scenarios-chart',[
+            {x:scX,y:sc.bull.history,name:`Optimiste (+${sc.bull.annual_rate_pct}%/an)`,type:'scatter',mode:'lines',line:{color:'#30d158',width:2}},
+            {x:scX,y:sc.base.history,name:`Médian (${sc.base.annual_rate_pct}%/an)`,type:'scatter',mode:'lines',line:{color:'#2997ff',width:2.5}},
+            {x:scX,y:sc.bear.history,name:`Pessimiste (${sc.bear.annual_rate_pct}%/an)`,type:'scatter',mode:'lines',line:{color:'#ff453a',width:2}},
+            {x:scX,y:invested,name:'Investi',type:'scatter',mode:'lines',line:{color:'rgba(255,255,255,0.3)',width:1,dash:'dot'}},
+        ],{...PL,height:360,legend:{orientation:'h',y:-0.18,font:{color:'#86868b',size:11}}},{responsive:true});
+
+        document.getElementById('pj-scenarios-table').innerHTML=`<table><thead><tr><th>Scénario</th><th>Rendement/an</th><th>Valeur finale</th><th>Gain</th><th>Gain %</th></tr></thead><tbody>
+            <tr><td style="color:var(--sf-green)"><strong>Optimiste</strong></td><td class="mono">+${sc.bull.annual_rate_pct}%</td><td class="mono green">${fmt(sc.bull.final_value)}</td><td class="mono green">+${fmt(sc.bull.gain)}</td><td class="mono green">+${sc.bull.gain_pct}%</td></tr>
+            <tr><td style="color:var(--sf-blue)"><strong>Médian</strong></td><td class="mono">${sc.base.annual_rate_pct}%</td><td class="mono">${fmt(sc.base.final_value)}</td><td class="mono ${sc.base.gain>=0?'green':'red'}">${sc.base.gain>=0?'+':''}${fmt(sc.base.gain)}</td><td class="mono ${sc.base.gain_pct>=0?'green':'red'}">${sc.base.gain_pct>=0?'+':''}${sc.base.gain_pct}%</td></tr>
+            <tr><td style="color:var(--sf-red)"><strong>Pessimiste</strong></td><td class="mono">${sc.bear.annual_rate_pct}%</td><td class="mono ${sc.bear.final_value>=d.params.total_invested?'':'red'}">${fmt(sc.bear.final_value)}</td><td class="mono ${sc.bear.gain>=0?'green':'red'}">${sc.bear.gain>=0?'+':''}${fmt(sc.bear.gain)}</td><td class="mono ${sc.bear.gain_pct>=0?'green':'red'}">${sc.bear.gain_pct>=0?'+':''}${sc.bear.gain_pct}%</td></tr>
+        </tbody></table>`;
+
+        // ── Distribution des valeurs finales (histogramme depuis percentiles) ──
+        // Approximation depuis échantillon + percentiles : utiliser les valeurs finales des sample_paths
+        const finalSample=d.sample_paths.map(p=>p[p.length-1]);
+        Plotly.newPlot('pj-distribution-chart',[{
+            x:finalSample,type:'histogram',nbinsx:30,marker:{color:'rgba(41,151,255,0.55)',line:{color:'rgba(41,151,255,1)',width:1}},name:'Échantillon'
+        }],{...PL,height:300,xaxis:{...PL.xaxis,title:'Valeur finale (€)'},yaxis:{...PL.yaxis,title:'Fréquence'},shapes:[
+            {type:'line',x0:d.final.p50,x1:d.final.p50,y0:0,y1:1,yref:'paper',line:{color:'#2997ff',width:2,dash:'dash'}},
+            {type:'line',x0:d.params.total_invested,x1:d.params.total_invested,y0:0,y1:1,yref:'paper',line:{color:'rgba(255,255,255,0.4)',width:1.5,dash:'dot'}},
+        ]},{responsive:true});
+
+        // ── Table annuelle ──
+        document.getElementById('pj-yearly-table').innerHTML=`<table><thead><tr><th>Année</th><th>Investi</th><th>Pessimiste (P5)</th><th>Médiane (P50)</th><th>Optimiste (P95)</th><th>Gain médian</th></tr></thead><tbody>${d.yearly.map(y=>`
+            <tr><td><strong>Année ${y.year}</strong></td><td class="mono">${fmt(y.invested)}</td><td class="mono" style="color:var(--sf-red)">${fmt(y.p5)}</td><td class="mono" style="color:var(--sf-blue)"><strong>${fmt(y.p50)}</strong></td><td class="mono" style="color:var(--sf-green)">${fmt(y.p95)}</td><td class="mono ${y.gain_p50>=0?'green':'red'}">${y.gain_p50>=0?'+':''}${fmt(y.gain_p50)}</td></tr>
+        `).join('')}</tbody></table>`;
+
+        // ── Projection par ETF ──
+        if(d.etf_projection&&d.etf_projection.length){
+            const ep=d.etf_projection;
+            Plotly.newPlot('pj-etf-chart',[{x:ep.map(e=>e.name),y:ep.map(e=>e.projected_gain),type:'bar',marker:{color:ep.map(e=>e.projected_gain>=0?'rgba(48,209,88,0.7)':'rgba(255,69,58,0.7)'),cornerradius:6},text:ep.map(e=>'+'+fmt(e.projected_gain)),textposition:'auto'}],{...PL,height:300},{responsive:true});
+            document.getElementById('pj-etf-table').innerHTML=`<table><thead><tr><th>ETF</th><th>Poids</th><th>μ annuel</th><th>σ annuelle</th><th>Valeur projetée</th><th>Gain projeté</th></tr></thead><tbody>${ep.map(e=>`
+                <tr><td><strong>${e.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${e.ticker}</span></td><td class="mono">${e.weight}%</td><td class="mono" style="color:${e.mu_annual_pct>=0?'var(--sf-green)':'var(--sf-red)'}">${e.mu_annual_pct>=0?'+':''}${e.mu_annual_pct}%</td><td class="mono">${e.sigma_annual_pct}%</td><td class="mono">${fmt(e.projected_value)}</td><td class="mono ${e.projected_gain>=0?'green':'red'}"><strong>${e.projected_gain>=0?'+':''}${fmt(e.projected_gain)}</strong> (${e.projected_gain_pct>=0?'+':''}${e.projected_gain_pct}%)</td></tr>
+            `).join('')}</tbody></table>`;
         }
 
-        // Métriques
-        document.getElementById('bt-sharpe').textContent=d.sharpe_ratio;
-        document.getElementById('bt-sortino').textContent=d.sortino_ratio||'--';
-        document.getElementById('bt-calmar').textContent=d.calmar_ratio||'--';
-        document.getElementById('bt-dd').textContent=d.max_drawdown_pct+'%';
-        document.getElementById('bt-vol').textContent=d.volatility_pct+'%';
-        document.getElementById('bt-var').textContent=d.var_95_pct+'%';
-        document.getElementById('bt-cvar').textContent=d.cvar_95_pct+'%';
-        document.getElementById('bt-pos-months').textContent=d.pct_positive_months+'%';
-
-        // Best/worst year
-        if(d.best_year){document.getElementById('bt-best-year').textContent='+'+d.best_year.return+'%';document.getElementById('bt-best-year-label').textContent=d.best_year.year;}
-        if(d.worst_year){document.getElementById('bt-worst-year').textContent=d.worst_year.return+'%';document.getElementById('bt-worst-year-label').textContent=d.worst_year.year;}
-        animateVal(document.getElementById('bt-invested'),d.total_invested,'','€');
-        document.getElementById('bt-rebalance-count').textContent=d.rebalance_enabled?d.rebalance_count+' rééquilibrages':'Sans rééquilibrage';
-
-        // Graphique principal
-        const traces=[
-            {x:d.portfolio_history.map(p=>p.date),y:d.portfolio_history.map(p=>p.value),name:'Portefeuille',type:'scatter',mode:'lines',line:{color:'#2997ff',width:2.5},fill:'tozeroy',fillcolor:'rgba(41,151,255,0.06)'},
-            {x:d.invested_history.map(p=>p.date),y:d.invested_history.map(p=>p.invested),name:'Capital investi',type:'scatter',mode:'lines',line:{color:'rgba(255,255,255,0.2)',width:1,dash:'dot'}}
-        ];
-        if(d.benchmark&&d.benchmark.history){
-            traces.push({x:d.benchmark.history.map(p=>p.date),y:d.benchmark.history.map(p=>p.value),name:'S&P 500 (benchmark)',type:'scatter',mode:'lines',line:{color:'#ff9f0a',width:1.5,dash:'dash'}});
-        }
-        Plotly.newPlot('bt-chart',traces,{...PL,height:420,legend:{orientation:'h',y:-0.15,font:{color:'#86868b',size:11}}},{responsive:true});
-
-        // Drawdown chart
-        if(d.drawdown_history){
-            Plotly.newPlot('bt-dd-chart',[{x:d.drawdown_history.map(p=>p.date),y:d.drawdown_history.map(p=>p.dd),name:'Drawdown',type:'scatter',mode:'lines',line:{color:'#ff453a',width:1.5},fill:'tozeroy',fillcolor:'rgba(255,69,58,0.08)'}],{...PL,height:240,yaxis:{...PL.yaxis,ticksuffix:'%'}},{responsive:true});
-        }
-
-        // Comparaison avec/sans rééquilibrage
-        if(d.without_rebalance&&d.rebalance_enabled){
-            document.getElementById('bt-rebal-compare').style.display='block';
-            const nr=d.without_rebalance;
-            document.getElementById('bt-rebal-table').innerHTML=`<table><thead><tr><th></th><th>Avec rééquilibrage</th><th>Sans rééquilibrage</th><th>Différence</th></tr></thead><tbody>
-            <tr><td>Valeur finale</td><td class="mono green">${fmt(d.final_value)}</td><td class="mono">${fmt(nr.final_value)}</td><td class="mono" style="color:${d.final_value>=nr.final_value?'var(--sf-green)':'var(--sf-red)'}">${d.final_value>=nr.final_value?'+':''}${fmt(d.final_value-nr.final_value)}</td></tr>
-            <tr><td>Gain %</td><td class="mono green">${d.gain_pct}%</td><td class="mono">${nr.gain_pct}%</td><td class="mono" style="color:${d.gain_pct>=nr.gain_pct?'var(--sf-green)':'var(--sf-red)'}">${(d.gain_pct-nr.gain_pct).toFixed(1)}%</td></tr>
-            <tr><td>Sharpe</td><td class="mono">${d.sharpe_ratio}</td><td class="mono">${nr.sharpe_ratio}</td><td class="mono" style="color:${d.sharpe_ratio>=nr.sharpe_ratio?'var(--sf-green)':'var(--sf-red)'}">${(d.sharpe_ratio-nr.sharpe_ratio).toFixed(2)}</td></tr>
-            <tr><td>Max Drawdown</td><td class="mono">${d.max_drawdown_pct}%</td><td class="mono">${nr.max_drawdown_pct}%</td><td class="mono" style="color:${d.max_drawdown_pct>=nr.max_drawdown_pct?'var(--sf-red)':'var(--sf-green)'}">${(d.max_drawdown_pct-nr.max_drawdown_pct).toFixed(1)}%</td></tr>
-            </tbody></table>`;
-        }
-
-        // Heatmap mensuelle
-        if(d.monthly_heatmap){
-            const hm=d.monthly_heatmap;
-            const years=hm.data.map(r=>r.year);
-            const z=hm.data.map(r=>r.months);
-            Plotly.newPlot('bt-heatmap',[{z,x:hm.months,y:years.map(String),type:'heatmap',colorscale:[[0,'rgba(255,69,58,0.8)'],[0.5,'rgba(255,255,255,0.05)'],[1,'rgba(48,209,88,0.8)']],zmid:0,text:z.map(row=>row.map(v=>v!=null?v.toFixed(1)+'%':'N/A')),texttemplate:'%{text}',textfont:{size:10,color:'#fff'},showscale:false,hoverongaps:false}],{...PL,height:Math.max(180,years.length*34+60),margin:{t:20,b:40,l:50,r:10},yaxis:{autorange:'reversed',tickfont:{size:11}}},{responsive:true});
-        }
-
-        // Contribution par ETF
-        if(d.etf_contribution&&d.etf_contribution.length){
-            const ec=d.etf_contribution;
-            Plotly.newPlot('bt-contribution-chart',[{x:ec.map(e=>e.name),y:ec.map(e=>e.contribution_pct),type:'bar',marker:{color:ec.map(e=>e.contribution_pct>=0?'rgba(48,209,88,0.7)':'rgba(255,69,58,0.7)'),cornerradius:6},text:ec.map(e=>e.contribution_pct.toFixed(1)+'%'),textposition:'auto'}],{...PL,height:300,yaxis:{...PL.yaxis,ticksuffix:'%'}},{responsive:true});
-            document.getElementById('bt-contribution-table').innerHTML=`<table><thead><tr><th>ETF</th><th>Poids</th><th>Perf. individuelle</th><th>Contribution</th></tr></thead><tbody>${ec.map(e=>`<tr><td><strong>${e.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${e.ticker}</span></td><td class="mono">${e.weight}%</td><td class="mono" style="color:${e.return_pct>=0?'var(--sf-green)':'var(--sf-red)'}">${e.return_pct>=0?'+':''}${e.return_pct}%</td><td class="mono" style="color:${e.contribution_pct>=0?'var(--sf-green)':'var(--sf-red)'}"><strong>${e.contribution_pct>=0?'+':''}${e.contribution_pct}%</strong></td></tr>`).join('')}</tbody></table>`;
-        }
+        // ── Calibration ──
+        document.getElementById('pj-calibration').innerHTML=`
+            Rendement annuel espéré (μ) : <strong style="color:${d.calibration.mu_annual_pct>=0?'var(--sf-green)':'var(--sf-red)'}">${d.calibration.mu_annual_pct>=0?'+':''}${d.calibration.mu_annual_pct}%</strong><br>
+            Volatilité annuelle (σ) : <strong>${d.calibration.sigma_annual_pct}%</strong><br>
+            Historique utilisé : <strong>${d.calibration.history_years} ans</strong> sur <strong>${d.calibration.tickers.length} ETFs</strong><br>
+            Modèle : mouvement brownien géométrique (log-normal), DCA appliqué mensuellement en fin de période.<br>
+            <span style="color:var(--sf-text-muted);font-size:0.82rem">Limitation : le modèle suppose que la volatilité et le rendement futurs ressemblent au passé récent. Les chocs extrêmes (krachs, guerres) ne sont pas sur-représentés.</span>
+        `;
 
     }catch(e){toast(e.message,true);}
-    finally{btn.disabled=false;btn.textContent='Lancer le backtest';}
+    finally{btn.disabled=false;btn.textContent='Lancer la projection';}
 }
 
 /* ═══ Broker ═══ */
@@ -1355,6 +1410,10 @@ const GLOSSARY = {
     "Portfolio Heat": "Pourcentage du capital total actuellement en risque sur l'ensemble des positions ouvertes.",
     "Spread": "Écart entre le prix d'achat (ask) et de vente (bid). Représente le coût implicite d'une transaction.",
     "Slippage": "Différence entre le prix espéré et le prix réel d'exécution d'un ordre, souvent dû à la liquidité insuffisante.",
+    "Monte Carlo": "Méthode de simulation qui génère des milliers de trajectoires aléatoires pour estimer la distribution des résultats futurs possibles. Utilisée pour projeter les gains avec une marge d'incertitude.",
+    "Percentile": "Seuil statistique. Ex : P50 = médiane (50% des scénarios font mieux, 50% font moins bien). P5 = scénario pessimiste (seuls 5% des cas font pire). P95 = scénario optimiste (seuls 5% des cas font mieux).",
+    "Inflation": "Perte de pouvoir d'achat au fil du temps. Un portefeuille qui gagne 5%/an avec 2% d'inflation a un rendement réel de seulement 3%. Les projections affichent aussi la valeur 'réelle' ajustée.",
+    "GBM": "Geometric Brownian Motion — Modèle mathématique supposant que les prix suivent une distribution log-normale avec drift (μ) et volatilité (σ). Base de Black-Scholes et du Monte Carlo financier.",
 };
 
 const tipPopup = document.getElementById('tooltip-popup');
@@ -1393,6 +1452,7 @@ function loadGlossaire(){
     const categories = {
         "Performance": ["Sharpe Ratio","Sortino Ratio","Calmar Ratio","Profit Factor","Expectancy","Win Rate"],
         "Risque": ["VaR 95%","CVaR 95%","Drawdown","Volatilité","Portfolio Heat","Circuit Breaker"],
+        "Projection": ["Monte Carlo","Percentile","Inflation","GBM"],
         "Stratégie": ["DCA","Rééquilibrage","Mean Reversion","Kelly Criterion","TWAP","Slippage"],
         "Marchés & Indices": ["ETF","MSCI World","S&P 500","Benchmark","Spread"],
         "Analyse Technique": ["RSI","ADX","Hurst Exponent","Z-Score"],
@@ -1428,12 +1488,12 @@ function toggleGlossaryItem(el){
    ═══════════════════════════════════════════════════════ */
 function injectTooltips(){
     const map = {
-        'bt-sharpe': 'Sharpe Ratio',
-        'bt-sortino': 'Sortino Ratio',
-        'bt-calmar': 'Calmar Ratio',
-        'bt-dd': 'Drawdown',
-        'bt-var': 'VaR 95%',
-        'bt-cvar': 'CVaR 95%',
+        'pj-p5': 'Percentile',
+        'pj-p50': 'Percentile',
+        'pj-p95': 'Percentile',
+        'pj-real': 'Inflation',
+        'pj-prob-loss': 'Monte Carlo',
+        'pj-prob-target': 'Monte Carlo',
         'perf-sharpe': 'Sharpe Ratio',
         'perf-sortino': 'Sortino Ratio',
         'perf-calmar': 'Calmar Ratio',
@@ -1456,7 +1516,7 @@ refreshPortfolio();
 refreshStatus();
 setTimeout(() => { initCustomSelects(); injectTooltips(); }, 200);
 
-// Re-init selects when backtest section becomes visible
+// Re-init selects when projection section becomes visible
 document.querySelectorAll('.globalheader-link').forEach(btn => {
     btn.addEventListener('click', () => {
         setTimeout(initCustomSelects, 50);

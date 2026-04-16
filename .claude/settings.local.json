@@ -30,7 +30,16 @@
       "Bash(kill %1)",
       "WebFetch(domain:etf-portfolio-bot-production.up.railway.app)",
       "Bash(gh api:*)",
-      "Bash(gh pr:*)"
+      "Bash(gh pr:*)",
+      "Bash(python -c \"from app import app; print\\('OK - app loads successfully'\\)\")",
+      "Bash(venv\\\\Scripts\\\\python -c \"from app import app; print\\('OK - app loads successfully'\\)\")",
+      "Bash(./venv/Scripts/python.exe -c \"from app import app; print\\('OK - app loads successfully'\\)\")",
+      "Bash(./venv/Scripts/python.exe -c \"from app import app; print\\('OK'\\)\")",
+      "WebFetch(domain:www.apple.com)",
+      "Bash(python -c \"from app import app; print\\('App loads OK'\\)\")",
+      "Bash(python -c \"from app import app; print\\('OK'\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('projection.py',encoding='utf-8'\\).read\\(\\)\\); print\\('projection.py OK'\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('app.py',encoding='utf-8'\\).read\\(\\)\\); print\\('app.py OK'\\)\")"
     ]
   }
 }
