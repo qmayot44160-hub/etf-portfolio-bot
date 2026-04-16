@@ -24,13 +24,24 @@ class MEXCBroker(BaseBroker):
 
     def connect(self) -> bool:
         import ccxt
+        # MEXC : "spot" → spot, "futures" → swap (terminologie ccxt)
+        ccxt_type = "swap" if self.wallet_type == "futures" else "spot"
         self.exchange = ccxt.mexc({
             "apiKey": self.api_key,
             "secret": self.secret_key,
-            "options": {"defaultType": self.wallet_type},
+            "options": {"defaultType": ccxt_type},
         })
-        # Test connexion en récupérant le solde
-        balance = self.exchange.fetch_balance()
+        try:
+            balance = self.exchange.fetch_balance()
+        except Exception:
+            # Fallback : certaines clés n'ont accès qu'au spot
+            self.exchange = ccxt.mexc({
+                "apiKey": self.api_key,
+                "secret": self.secret_key,
+                "options": {"defaultType": "spot"},
+            })
+            balance = self.exchange.fetch_balance()
+            self.wallet_type = "spot"
         if balance:
             self._connected = True
             return True
