@@ -600,26 +600,101 @@
 <div id="view-backtest">
     <div class="hero">
         <h1 class="hero-title">Backtest</h1>
-        <p class="hero-subtitle">Simulez la performance historique de votre strategie DCA.</p>
+        <p class="hero-subtitle">Simulez et analysez votre strategie sur l'historique reel. Benchmark, drawdowns, heatmap.</p>
     </div>
     <div class="section">
-        <div class="actions">
-            <select id="bt-years" class="ainput" style="width:130px;text-align:center"><option value="1">1 an</option><option value="3">3 ans</option><option value="5" selected>5 ans</option><option value="10">10 ans</option></select>
-            <button class="abtn abtn-blue" onclick="runBacktest()" id="bt-btn">Lancer le backtest</button>
+        <!-- Paramètres -->
+        <div class="dcard">
+            <div class="dcard-title">Paramètres de simulation</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:20px">
+                <div class="form-group" style="margin-bottom:0">
+                    <div class="form-label">Période</div>
+                    <select id="bt-years" class="ainput">
+                        <option value="1">1 an</option>
+                        <option value="3">3 ans</option>
+                        <option value="5" selected>5 ans</option>
+                        <option value="10">10 ans</option>
+                        <option value="15">15 ans</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <div class="form-label">Capital initial (€)</div>
+                    <input type="number" id="bt-capital" value="10000" min="100" step="500" class="ainput">
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <div class="form-label">DCA mensuel (€)</div>
+                    <input type="number" id="bt-dca" value="500" min="0" step="50" class="ainput">
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <div class="form-label">Rééquilibrage</div>
+                    <select id="bt-rebalance" class="ainput">
+                        <option value="true">Activé</option>
+                        <option value="false">Désactivé</option>
+                    </select>
+                </div>
+            </div>
+            <div style="text-align:center">
+                <button class="abtn abtn-blue" onclick="runBacktest()" id="bt-btn">Lancer le backtest</button>
+            </div>
         </div>
+
         <div id="bt-results" style="display:none">
-            <div class="stat-grid stat-grid-3">
-                <div class="stat-card"><div class="stat-label">Valeur finale</div><div class="stat-value" id="bt-final">--</div></div>
-                <div class="stat-card"><div class="stat-label">Gain</div><div class="stat-value" id="bt-gain">--</div><div class="stat-sub" id="bt-gain-pct"></div></div>
-                <div class="stat-card"><div class="stat-label">Rendement annualise</div><div class="stat-value" id="bt-annual">--</div></div>
+            <!-- KPIs principaux -->
+            <div class="stat-grid stat-grid-3" style="margin-top:8px">
+                <div class="stat-card accent-blue"><div class="stat-label">Valeur finale</div><div class="stat-value" id="bt-final">--</div><div class="stat-sub" id="bt-period"></div></div>
+                <div class="stat-card"><div class="stat-label">Gain net</div><div class="stat-value" id="bt-gain">--</div><div class="stat-sub" id="bt-gain-pct"></div></div>
+                <div class="stat-card"><div class="stat-label">Rendement annualisé</div><div class="stat-value" id="bt-annual">--</div><div class="stat-sub" id="bt-vs-bench"></div></div>
             </div>
+
+            <!-- Métriques avancées -->
             <div class="metrics">
-                <div class="mbox"><div class="mbox-label">Volatilite</div><div class="mbox-val" id="bt-vol">--</div></div>
                 <div class="mbox"><div class="mbox-label">Sharpe</div><div class="mbox-val" id="bt-sharpe">--</div></div>
-                <div class="mbox"><div class="mbox-label">Max Drawdown</div><div class="mbox-val" id="bt-dd">--</div></div>
-                <div class="mbox"><div class="mbox-label">Investi</div><div class="mbox-val" id="bt-invested">--</div></div>
+                <div class="mbox"><div class="mbox-label">Sortino</div><div class="mbox-val" id="bt-sortino">--</div></div>
+                <div class="mbox"><div class="mbox-label">Calmar</div><div class="mbox-val" id="bt-calmar">--</div></div>
+                <div class="mbox"><div class="mbox-label">Max Drawdown</div><div class="mbox-val red" id="bt-dd">--</div></div>
+                <div class="mbox"><div class="mbox-label">Volatilité</div><div class="mbox-val" id="bt-vol">--</div></div>
+                <div class="mbox"><div class="mbox-label">VaR 95%</div><div class="mbox-val red" id="bt-var">--</div></div>
+                <div class="mbox"><div class="mbox-label">CVaR 95%</div><div class="mbox-val red" id="bt-cvar">--</div></div>
+                <div class="mbox"><div class="mbox-label">Mois positifs</div><div class="mbox-val green" id="bt-pos-months">--</div></div>
             </div>
-            <div class="dcard"><div id="bt-chart" class="chart-box"></div></div>
+
+            <!-- Best / worst year + rebalance info -->
+            <div class="stat-grid stat-grid-3" style="margin-bottom:20px">
+                <div class="stat-card"><div class="stat-label">Meilleure année</div><div class="stat-value green" id="bt-best-year">--</div><div class="stat-sub" id="bt-best-year-label"></div></div>
+                <div class="stat-card"><div class="stat-label">Pire année</div><div class="stat-value red" id="bt-worst-year">--</div><div class="stat-sub" id="bt-worst-year-label"></div></div>
+                <div class="stat-card"><div class="stat-label">Total investi</div><div class="stat-value" id="bt-invested">--</div><div class="stat-sub" id="bt-rebalance-count"></div></div>
+            </div>
+
+            <!-- Graphique principal : portefeuille + investi + benchmark -->
+            <div class="dcard">
+                <div class="dcard-title">Performance vs Benchmark (S&P 500)</div>
+                <div id="bt-chart" style="height:420px"></div>
+            </div>
+
+            <!-- Graphique drawdown -->
+            <div class="dcard">
+                <div class="dcard-title">Drawdown</div>
+                <div id="bt-dd-chart" style="height:240px"></div>
+            </div>
+
+            <!-- Comparaison avec/sans rééquilibrage -->
+            <div id="bt-rebal-compare" class="dcard" style="display:none">
+                <div class="dcard-title">Avec vs Sans rééquilibrage</div>
+                <div id="bt-rebal-table"></div>
+            </div>
+
+            <!-- Heatmap rendements mensuels -->
+            <div class="dcard">
+                <div class="dcard-title">Rendements mensuels</div>
+                <div id="bt-heatmap" style="height:auto;overflow-x:auto"></div>
+            </div>
+
+            <!-- Contribution par ETF -->
+            <div class="dcard">
+                <div class="dcard-title">Contribution par ETF</div>
+                <div id="bt-contribution-chart" style="height:300px"></div>
+                <div id="bt-contribution-table" style="margin-top:16px"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -967,7 +1042,94 @@ async function calculateDCA(){try{const d=await(await fetch('/api/dca?amount='+d
 async function executeDCA(){try{const d=await(await fetch('/api/dca/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:parseFloat(document.getElementById('dca-amount').value)})})).json();toast('DCA: '+d.length+' ordres');refreshPortfolio();}catch(e){toast(e.message,true);}}
 
 /* ═══ Backtest ═══ */
-async function runBacktest(){const btn=document.getElementById('bt-btn');btn.disabled=true;btn.textContent='Calcul...';try{const d=await(await fetch('/api/backtest?years='+document.getElementById('bt-years').value)).json();if(d.error){toast(d.error,true);return;}document.getElementById('bt-results').style.display='block';document.getElementById('bt-final').textContent=fmt(d.final_value);const g=document.getElementById('bt-gain');g.textContent=fmt(d.gain);g.className='stat-value '+(d.gain>=0?'green':'red');document.getElementById('bt-gain-pct').textContent=pct(d.gain_pct);document.getElementById('bt-annual').textContent=pct(d.annualized_return_pct);document.getElementById('bt-vol').textContent=d.volatility_pct+'%';document.getElementById('bt-sharpe').textContent=d.sharpe_ratio;document.getElementById('bt-dd').textContent=d.max_drawdown_pct+'%';document.getElementById('bt-invested').textContent=fmt(d.total_invested);Plotly.newPlot('bt-chart',[{x:d.portfolio_history.map(p=>p.date),y:d.portfolio_history.map(p=>p.value),name:'Portefeuille',type:'scatter',mode:'lines',line:{color:'#2997ff',width:2},fill:'tozeroy',fillcolor:'rgba(41,151,255,0.06)'},{x:d.invested_history.map(p=>p.date),y:d.invested_history.map(p=>p.invested),name:'Investi',type:'scatter',mode:'lines',line:{color:'#6e6e73',width:1,dash:'dash'}}],{...PL,height:360},{responsive:true});}catch(e){toast(e.message,true);}finally{btn.disabled=false;btn.textContent='Lancer le backtest';}}
+async function runBacktest(){
+    const btn=document.getElementById('bt-btn');
+    btn.disabled=true;btn.textContent='Calcul en cours...';
+    const years=document.getElementById('bt-years').value;
+    const capital=document.getElementById('bt-capital').value;
+    const dca=document.getElementById('bt-dca').value;
+    const rebalance=document.getElementById('bt-rebalance').value;
+    try{
+        const d=await(await fetch(`/api/backtest?years=${years}&capital=${capital}&dca=${dca}&rebalance=${rebalance}`)).json();
+        if(d.error){toast(d.error,true);return;}
+        document.getElementById('bt-results').style.display='block';
+
+        // KPIs
+        animateVal(document.getElementById('bt-final'),d.final_value,'','€');
+        document.getElementById('bt-period').textContent=d.start_date+' → '+d.end_date;
+        const g=document.getElementById('bt-gain');
+        g.className='stat-value '+(d.gain>=0?'green':'red');
+        animateVal(g,d.gain,'','€');
+        document.getElementById('bt-gain-pct').textContent=(d.gain_pct>=0?'+':'')+d.gain_pct+'%';
+        document.getElementById('bt-annual').textContent=(d.annualized_return_pct>=0?'+':'')+d.annualized_return_pct+'%';
+
+        // vs benchmark
+        if(d.benchmark&&!d.benchmark.error){
+            const diff=d.annualized_return_pct-d.benchmark.annualized_return_pct;
+            document.getElementById('bt-vs-bench').innerHTML=`vs S&P 500: <span style="color:${diff>=0?'var(--sf-green)':'var(--sf-red)'}">${diff>=0?'+':''}${diff.toFixed(1)}%</span>`;
+        }
+
+        // Métriques
+        document.getElementById('bt-sharpe').textContent=d.sharpe_ratio;
+        document.getElementById('bt-sortino').textContent=d.sortino_ratio||'--';
+        document.getElementById('bt-calmar').textContent=d.calmar_ratio||'--';
+        document.getElementById('bt-dd').textContent=d.max_drawdown_pct+'%';
+        document.getElementById('bt-vol').textContent=d.volatility_pct+'%';
+        document.getElementById('bt-var').textContent=d.var_95_pct+'%';
+        document.getElementById('bt-cvar').textContent=d.cvar_95_pct+'%';
+        document.getElementById('bt-pos-months').textContent=d.pct_positive_months+'%';
+
+        // Best/worst year
+        if(d.best_year){document.getElementById('bt-best-year').textContent='+'+d.best_year.return+'%';document.getElementById('bt-best-year-label').textContent=d.best_year.year;}
+        if(d.worst_year){document.getElementById('bt-worst-year').textContent=d.worst_year.return+'%';document.getElementById('bt-worst-year-label').textContent=d.worst_year.year;}
+        animateVal(document.getElementById('bt-invested'),d.total_invested,'','€');
+        document.getElementById('bt-rebalance-count').textContent=d.rebalance_enabled?d.rebalance_count+' rééquilibrages':'Sans rééquilibrage';
+
+        // Graphique principal
+        const traces=[
+            {x:d.portfolio_history.map(p=>p.date),y:d.portfolio_history.map(p=>p.value),name:'Portefeuille',type:'scatter',mode:'lines',line:{color:'#2997ff',width:2.5},fill:'tozeroy',fillcolor:'rgba(41,151,255,0.06)'},
+            {x:d.invested_history.map(p=>p.date),y:d.invested_history.map(p=>p.invested),name:'Capital investi',type:'scatter',mode:'lines',line:{color:'rgba(255,255,255,0.2)',width:1,dash:'dot'}}
+        ];
+        if(d.benchmark&&d.benchmark.history){
+            traces.push({x:d.benchmark.history.map(p=>p.date),y:d.benchmark.history.map(p=>p.value),name:'S&P 500 (benchmark)',type:'scatter',mode:'lines',line:{color:'#ff9f0a',width:1.5,dash:'dash'}});
+        }
+        Plotly.newPlot('bt-chart',traces,{...PL,height:420,legend:{orientation:'h',y:-0.15,font:{color:'#86868b',size:11}}},{responsive:true});
+
+        // Drawdown chart
+        if(d.drawdown_history){
+            Plotly.newPlot('bt-dd-chart',[{x:d.drawdown_history.map(p=>p.date),y:d.drawdown_history.map(p=>p.dd),name:'Drawdown',type:'scatter',mode:'lines',line:{color:'#ff453a',width:1.5},fill:'tozeroy',fillcolor:'rgba(255,69,58,0.08)'}],{...PL,height:240,yaxis:{...PL.yaxis,ticksuffix:'%'}},{responsive:true});
+        }
+
+        // Comparaison avec/sans rééquilibrage
+        if(d.without_rebalance&&d.rebalance_enabled){
+            document.getElementById('bt-rebal-compare').style.display='block';
+            const nr=d.without_rebalance;
+            document.getElementById('bt-rebal-table').innerHTML=`<table><thead><tr><th></th><th>Avec rééquilibrage</th><th>Sans rééquilibrage</th><th>Différence</th></tr></thead><tbody>
+            <tr><td>Valeur finale</td><td class="mono green">${fmt(d.final_value)}</td><td class="mono">${fmt(nr.final_value)}</td><td class="mono" style="color:${d.final_value>=nr.final_value?'var(--sf-green)':'var(--sf-red)'}">${d.final_value>=nr.final_value?'+':''}${fmt(d.final_value-nr.final_value)}</td></tr>
+            <tr><td>Gain %</td><td class="mono green">${d.gain_pct}%</td><td class="mono">${nr.gain_pct}%</td><td class="mono" style="color:${d.gain_pct>=nr.gain_pct?'var(--sf-green)':'var(--sf-red)'}">${(d.gain_pct-nr.gain_pct).toFixed(1)}%</td></tr>
+            <tr><td>Sharpe</td><td class="mono">${d.sharpe_ratio}</td><td class="mono">${nr.sharpe_ratio}</td><td class="mono" style="color:${d.sharpe_ratio>=nr.sharpe_ratio?'var(--sf-green)':'var(--sf-red)'}">${(d.sharpe_ratio-nr.sharpe_ratio).toFixed(2)}</td></tr>
+            <tr><td>Max Drawdown</td><td class="mono">${d.max_drawdown_pct}%</td><td class="mono">${nr.max_drawdown_pct}%</td><td class="mono" style="color:${d.max_drawdown_pct>=nr.max_drawdown_pct?'var(--sf-red)':'var(--sf-green)'}">${(d.max_drawdown_pct-nr.max_drawdown_pct).toFixed(1)}%</td></tr>
+            </tbody></table>`;
+        }
+
+        // Heatmap mensuelle
+        if(d.monthly_heatmap){
+            const hm=d.monthly_heatmap;
+            const years=hm.data.map(r=>r.year);
+            const z=hm.data.map(r=>r.months);
+            Plotly.newPlot('bt-heatmap',[{z,x:hm.months,y:years.map(String),type:'heatmap',colorscale:[[0,'rgba(255,69,58,0.8)'],[0.5,'rgba(255,255,255,0.05)'],[1,'rgba(48,209,88,0.8)']],zmid:0,text:z.map(row=>row.map(v=>v!=null?v.toFixed(1)+'%':'N/A')),texttemplate:'%{text}',textfont:{size:10,color:'#fff'},showscale:false,hoverongaps:false}],{...PL,height:Math.max(180,years.length*34+60),margin:{t:20,b:40,l:50,r:10},yaxis:{autorange:'reversed',tickfont:{size:11}}},{responsive:true});
+        }
+
+        // Contribution par ETF
+        if(d.etf_contribution&&d.etf_contribution.length){
+            const ec=d.etf_contribution;
+            Plotly.newPlot('bt-contribution-chart',[{x:ec.map(e=>e.name),y:ec.map(e=>e.contribution_pct),type:'bar',marker:{color:ec.map(e=>e.contribution_pct>=0?'rgba(48,209,88,0.7)':'rgba(255,69,58,0.7)'),cornerradius:6},text:ec.map(e=>e.contribution_pct.toFixed(1)+'%'),textposition:'auto'}],{...PL,height:300,yaxis:{...PL.yaxis,ticksuffix:'%'}},{responsive:true});
+            document.getElementById('bt-contribution-table').innerHTML=`<table><thead><tr><th>ETF</th><th>Poids</th><th>Perf. individuelle</th><th>Contribution</th></tr></thead><tbody>${ec.map(e=>`<tr><td><strong>${e.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${e.ticker}</span></td><td class="mono">${e.weight}%</td><td class="mono" style="color:${e.return_pct>=0?'var(--sf-green)':'var(--sf-red)'}">${e.return_pct>=0?'+':''}${e.return_pct}%</td><td class="mono" style="color:${e.contribution_pct>=0?'var(--sf-green)':'var(--sf-red)'}"><strong>${e.contribution_pct>=0?'+':''}${e.contribution_pct}%</strong></td></tr>`).join('')}</tbody></table>`;
+        }
+
+    }catch(e){toast(e.message,true);}
+    finally{btn.disabled=false;btn.textContent='Lancer le backtest';}
+}
 
 /* ═══ Broker ═══ */
 const BF={ibkr:[{id:'host',label:'TWS Host',type:'text',value:'127.0.0.1'},{id:'port',label:'Port',type:'number',value:'7497'},{id:'client_id',label:'Client ID',type:'number',value:'1'}],degiro:[{id:'username',label:'Username',type:'text',value:''},{id:'password',label:'Password',type:'password',value:''},{id:'totp_secret',label:'TOTP',type:'text',value:''},{id:'one_time_password',label:'OTP',type:'text',value:''}],alpaca:[{id:'api_key',label:'API Key',type:'text',value:''},{id:'secret_key',label:'Secret',type:'password',value:''}],mexc:[{id:'api_key',label:'API Key',type:'text',value:''},{id:'secret_key',label:'Secret Key',type:'password',value:''},{id:'wallet_type',label:'Wallet',type:'select',value:'spot',options:[{v:'spot',l:'Spot (trading crypto)'},{v:'futures',l:'Futures / Swap (contrats)'}]}]};

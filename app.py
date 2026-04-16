@@ -149,9 +149,12 @@ def api_dca_execute():
 
 @app.route("/api/backtest")
 def api_backtest():
-    """Lance un backtest."""
+    """Lance un backtest avancé."""
     years = request.args.get("years", 5, type=int)
-    result = run_backtest(years=years)
+    capital = request.args.get("capital", None, type=float)
+    dca = request.args.get("dca", None, type=float)
+    rebalance = request.args.get("rebalance", "true").lower() == "true"
+    result = run_backtest(years=years, capital=capital, dca=dca, rebalance=rebalance)
     return jsonify(result)
 
 
