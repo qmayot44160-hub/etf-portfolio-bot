@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 portfolio_state.json
 .env
+mdp bot etf.txt
+*.secret*
+.claude/settings.local.json

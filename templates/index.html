@@ -764,6 +764,39 @@
             .ctx-banner { font-size: 0.68rem; gap: 10px; padding: 6px 12px; }
             .page { padding-top: 86px; }
         }
+
+        /* ════════════════════════════════════════════════
+           SF-STYLE ICONS (inline SVG, currentColor)
+           ════════════════════════════════════════════════ */
+        .sfi {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 1em; height: 1em; vertical-align: -0.125em;
+            flex-shrink: 0;
+        }
+        .sfi svg {
+            width: 100%; height: 100%;
+            stroke: currentColor; fill: none;
+            stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .sfi.filled svg { fill: currentColor; }
+        .sfi-lg { width: 1.5em; height: 1.5em; }
+        .sfi-xl { width: 2em; height: 2em; }
+        .sfi-sm { width: 0.85em; height: 0.85em; }
+
+        /* Action & shortcut tile icons — larger, boxed */
+        .action-icon .sfi { width: 22px; height: 22px; }
+        .shortcut-tile-icon .sfi { width: 26px; height: 26px; color: var(--sf-blue); }
+        .shortcut-tile:hover .shortcut-tile-icon .sfi { color: var(--sf-blue); }
+        .nav-icon .sfi { width: 15px; height: 15px; opacity: 0.8; }
+
+        /* Color helpers for icon context */
+        .sfi.c-blue { color: var(--sf-blue); }
+        .sfi.c-green { color: var(--sf-green); }
+        .sfi.c-red { color: var(--sf-red); }
+        .sfi.c-orange { color: var(--sf-orange); }
+        .sfi.c-purple { color: var(--sf-purple); }
+        .sfi.c-teal { color: var(--sf-teal); }
+        .sfi.c-muted { color: var(--sf-text-muted); }
     </style>
 </head>
 <body>
@@ -780,27 +813,27 @@
             <div class="nav-group" data-group="trading">
                 <button class="nav-group-trigger">Trading</button>
                 <div class="nav-dropdown">
-                    <button class="nav-dropdown-item" data-view="portfolio"><span class="nav-icon">📊</span>Portefeuille ETF</button>
-                    <button class="nav-dropdown-item" data-view="dca"><span class="nav-icon">💶</span>DCA mensuel</button>
-                    <button class="nav-dropdown-item" data-view="crypto"><span class="nav-icon">₿</span>Crypto</button>
-                    <button class="nav-dropdown-item" data-view="trading"><span class="nav-icon">⚡</span>Auto-Trader</button>
+                    <button class="nav-dropdown-item" data-view="portfolio"><span class="nav-icon" data-icon="chart"></span>Portefeuille ETF</button>
+                    <button class="nav-dropdown-item" data-view="dca"><span class="nav-icon" data-icon="euro"></span>DCA mensuel</button>
+                    <button class="nav-dropdown-item" data-view="crypto"><span class="nav-icon" data-icon="bitcoin"></span>Crypto</button>
+                    <button class="nav-dropdown-item" data-view="trading"><span class="nav-icon" data-icon="bolt"></span>Auto-Trader</button>
                 </div>
             </div>
 
             <div class="nav-group" data-group="analyse">
                 <button class="nav-group-trigger">Analyse</button>
                 <div class="nav-dropdown">
-                    <button class="nav-dropdown-item" data-view="analytics"><span class="nav-icon">📈</span>Performance</button>
-                    <button class="nav-dropdown-item" data-view="projection"><span class="nav-icon">🔮</span>Projection</button>
-                    <button class="nav-dropdown-item" data-view="scanner"><span class="nav-icon">🔎</span>Scanner</button>
+                    <button class="nav-dropdown-item" data-view="analytics"><span class="nav-icon" data-icon="chartUp"></span>Performance</button>
+                    <button class="nav-dropdown-item" data-view="projection"><span class="nav-icon" data-icon="trending"></span>Projection</button>
+                    <button class="nav-dropdown-item" data-view="scanner"><span class="nav-icon" data-icon="search"></span>Scanner</button>
                 </div>
             </div>
 
             <div class="nav-group" data-group="config">
                 <button class="nav-group-trigger">Configuration</button>
                 <div class="nav-dropdown">
-                    <button class="nav-dropdown-item" data-view="broker"><span class="nav-icon">🔌</span>Connexions brokers</button>
-                    <button class="nav-dropdown-item" data-view="auto"><span class="nav-icon">⏰</span>Automatisation</button>
+                    <button class="nav-dropdown-item" data-view="broker"><span class="nav-icon" data-icon="plug"></span>Connexions brokers</button>
+                    <button class="nav-dropdown-item" data-view="auto"><span class="nav-icon" data-icon="clock"></span>Automatisation</button>
                 </div>
             </div>
 
@@ -809,7 +842,7 @@
         </div>
         <div style="display:flex;align-items:center;gap:12px">
             <div id="mode-badge" style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;background:rgba(255,159,10,0.15);color:#ff9f0a;border:1px solid rgba(255,159,10,0.35)">PAPER</div>
-            <button id="kill-switch-btn" onclick="triggerKillSwitch()" title="Arrêt d'urgence du bot" style="background:rgba(255,69,58,0.1);color:#ff453a;border:1px solid rgba(255,69,58,0.4);border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">🚨 KILL</button>
+            <button id="kill-switch-btn" onclick="triggerKillSwitch()" title="Arrêt d'urgence du bot" style="background:rgba(255,69,58,0.1);color:#ff453a;border:1px solid rgba(255,69,58,0.4);border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px"><span class="sfi" data-icon="power"></span>KILL</button>
             <div id="bot-status" class="globalheader-status"><span class="dot" style="background:var(--sf-orange)"></span> Simulation</div>
         </div>
     </div>
@@ -861,10 +894,10 @@
 
         <!-- Prochaines actions -->
         <div class="dcard">
-            <div class="dcard-title">🎯 Que faire maintenant ?</div>
+            <div class="dcard-title" style="display:flex;align-items:center;gap:10px"><span class="sfi sfi-lg c-blue" data-icon="target"></span>Que faire maintenant&nbsp;?</div>
             <div class="action-list" id="home-actions">
                 <div class="action-card suggest">
-                    <div class="action-icon">⏳</div>
+                    <div class="action-icon"><span class="sfi c-blue" data-icon="hourglass"></span></div>
                     <div class="action-body">
                         <div class="action-title">Analyse de l'état en cours...</div>
                         <div class="action-desc">Patiente un instant.</div>
@@ -875,35 +908,35 @@
 
         <!-- Raccourcis -->
         <div class="dcard">
-            <div class="dcard-title">🚀 Raccourcis</div>
+            <div class="dcard-title" style="display:flex;align-items:center;gap:10px"><span class="sfi sfi-lg c-blue" data-icon="sparkles"></span>Raccourcis</div>
             <div class="shortcut-grid">
                 <button class="shortcut-tile" onclick="showView('portfolio')">
-                    <div class="shortcut-tile-icon">📊</div>
+                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="chart"></span></div>
                     <div class="shortcut-tile-title">Portefeuille ETF</div>
                     <div class="shortcut-tile-desc">Allocation + positions</div>
                 </button>
                 <button class="shortcut-tile" onclick="showView('crypto')">
-                    <div class="shortcut-tile-icon">₿</div>
+                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="bitcoin"></span></div>
                     <div class="shortcut-tile-title">Crypto</div>
                     <div class="shortcut-tile-desc">Portefeuille crypto live</div>
                 </button>
                 <button class="shortcut-tile" onclick="showView('trading')">
-                    <div class="shortcut-tile-icon">⚡</div>
+                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="bolt"></span></div>
                     <div class="shortcut-tile-title">Auto-Trader</div>
                     <div class="shortcut-tile-desc">Bot de trading auto</div>
                 </button>
                 <button class="shortcut-tile" onclick="showView('scanner')">
-                    <div class="shortcut-tile-icon">🔎</div>
+                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="search"></span></div>
                     <div class="shortcut-tile-title">Scanner</div>
                     <div class="shortcut-tile-desc">Opportunités du marché</div>
                 </button>
                 <button class="shortcut-tile" onclick="showView('projection')">
-                    <div class="shortcut-tile-icon">🔮</div>
+                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="trending"></span></div>
                     <div class="shortcut-tile-title">Projection</div>
                     <div class="shortcut-tile-desc">Monte Carlo, objectifs</div>
                 </button>
                 <button class="shortcut-tile" onclick="showView('securite')">
-                    <div class="shortcut-tile-icon">🛡️</div>
+                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="shield"></span></div>
                     <div class="shortcut-tile-title">Sécurité & Backups</div>
                     <div class="shortcut-tile-desc">Kill-switch, Telegram</div>
                 </button>
@@ -943,7 +976,7 @@
                 <div class="dcard-label" style="margin-bottom:0">Reequilibrage ETF</div>
                 <button class="abtn abtn-blue abtn-sm" onclick="executeRebalance()">Calculer</button>
             </div>
-            <div id="rebalance-orders"><div class="hint-cta" onclick="executeRebalance()"><span class="hint-icon">⚖️</span><span>Calculer les ordres de rééquilibrage</span></div></div>
+            <div id="rebalance-orders"><div class="hint-cta" onclick="executeRebalance()"><span class="hint-icon" data-icon="scale"></span><span>Calculer les ordres de rééquilibrage</span></div></div>
         </div>
     </div>
 </div>
@@ -1319,7 +1352,7 @@
                         <span style="font-size:0.88rem;font-weight:500">Analyse en temps reel</span>
                         <button class="abtn abtn-dark abtn-sm" onclick="analyzeAll()">Scanner</button>
                     </div>
-                    <div id="signals-list" style="flex:1;overflow-y:auto;max-height:600px"><div class="hint-cta" onclick="analyzeAll()"><span class="hint-icon">🔍</span><span>Lancer l'analyse du marché</span></div></div>
+                    <div id="signals-list" style="flex:1;overflow-y:auto;max-height:600px"><div class="hint-cta" onclick="analyzeAll()"><span class="hint-icon" data-icon="search"></span><span>Lancer l'analyse du marché</span></div></div>
                 </div>
             </div>
         </div>
@@ -1358,7 +1391,7 @@
         <div class="grid-2col">
             <div class="dcard">
                 <div class="dcard-title">Top Opportunites</div>
-                <div id="scan-results-list"><div class="hint-cta" onclick="runFullScan()"><span class="hint-icon">🚀</span><span>Lancer un scan complet du marché</span></div></div>
+                <div id="scan-results-list"><div class="hint-cta" onclick="runFullScan()"><span class="hint-icon" data-icon="sparkles"></span><span>Lancer un scan complet du marché</span></div></div>
             </div>
             <div class="dcard">
                 <div class="dcard-title">Top Movers</div>
@@ -1405,7 +1438,7 @@
                     <div class="dcard-label" style="margin-bottom:0">Reequilibrage Crypto</div>
                     <button class="abtn abtn-blue abtn-sm" onclick="cryptoRebalance()">Calculer</button>
                 </div>
-                <div id="crypto-rebalance-orders"><div class="hint-cta" onclick="cryptoRebalance()"><span class="hint-icon">⚖️</span><span>Calculer les ordres de rééquilibrage</span></div></div>
+                <div id="crypto-rebalance-orders"><div class="hint-cta" onclick="cryptoRebalance()"><span class="hint-icon" data-icon="scale"></span><span>Calculer les ordres de rééquilibrage</span></div></div>
             </div>
         </div>
     </div>
@@ -1518,7 +1551,7 @@
                 Stoppe instantanément toutes les activités du bot : trader auto, scheduler DCA/rebalance, et bloque tout nouvel ordre jusqu'à réactivation manuelle.
             </p>
             <div style="display:flex;gap:12px;margin-top:16px;align-items:center">
-                <button class="link-more" style="color:#ff453a" onclick="triggerKillSwitch()">🚨 Activer kill-switch</button>
+                <button class="link-more" style="color:#ff453a;display:inline-flex;align-items:center;gap:6px" onclick="triggerKillSwitch()"><span class="sfi" data-icon="power"></span>Activer kill-switch</button>
                 <button class="link-more" onclick="releaseKillSwitch()">Désactiver (confirme)</button>
             </div>
         </div>
@@ -1574,7 +1607,7 @@
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
                 <div class="dcard-label" style="margin-bottom:0">Backups automatiques</div>
                 <div>
-                    <button class="link-more" onclick="createBackup()">📦 Créer un backup maintenant</button>
+                    <button class="link-more" style="display:inline-flex;align-items:center;gap:6px" onclick="createBackup()"><span class="sfi" data-icon="inbox"></span>Créer un backup maintenant</button>
                 </div>
             </div>
             <p style="color:var(--sf-text-muted);font-size:13px;margin-top:4px">
@@ -1605,6 +1638,54 @@
 <div class="toast" id="toast"></div>
 
 <script>
+/* ═══════════════════════════════════════════════════════
+   ICON LIBRARY — inline SVG, hérite de currentColor
+   ═══════════════════════════════════════════════════════ */
+const ICN = {
+    home: '<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a2 2 0 01-2 2h-4v-7h-6v7H5a2 2 0 01-2-2v-9z"/></svg>',
+    chart: '<svg viewBox="0 0 24 24"><path d="M4 20V10m6 10V4m6 16v-7m6 7V8"/></svg>',
+    chartUp: '<svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 7-8"/><path d="M14 7h6v6"/></svg>',
+    euro: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M16 9a4 4 0 00-7 2.5h5M9 13.5a4 4 0 007 2.5M7 11h5m-5 2.5h5"/></svg>',
+    bitcoin: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 7v10m2-10v10m-2-5h4.5a2 2 0 000-4H9m0 4h5a2 2 0 010 4H9M11 5v2m0 10v2m2-14v2m0 10v2"/></svg>',
+    bolt: '<svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>',
+    search: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>',
+    sparkles: '<svg viewBox="0 0 24 24"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5z"/><path d="M19 14l.8 2L22 17l-2.2 1-.8 2-.8-2-2.2-1 2.2-1 .8-2zM5 15l.6 1.5L7 17l-1.4.5L5 19l-.6-1.5L3 17l1.4-.5L5 15z"/></svg>',
+    shield: '<svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>',
+    plug: '<svg viewBox="0 0 24 24"><path d="M9 2v4m6-4v4M7 6h10v5a5 5 0 01-10 0V6zM12 16v6"/></svg>',
+    clock: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>',
+    target: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>',
+    rocket: '<svg viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1-2 4-2 4s3-.5 4-2c.5-.9.5-2.5-.5-3.5s-2.6-1-3.5 0"/><path d="M12 15l-3-3a12 12 0 015-8l3-1 1 3a12 12 0 01-8 5"/><path d="M12 15l2 4c2-1 4-3 4-6M9 12l-4-2c1-2 3-4 6-4"/><circle cx="14.5" cy="9.5" r="1.2"/></svg>',
+    flask: '<svg viewBox="0 0 24 24"><path d="M10 3v6l-5 9a2 2 0 002 3h10a2 2 0 002-3l-5-9V3"/><path d="M9 3h6M7.5 14h9"/></svg>',
+    alert: '<svg viewBox="0 0 24 24"><path d="M12 3L2 20h20L12 3z"/><path d="M12 10v5m0 2.5v.5" stroke-linecap="round"/></svg>',
+    check: '<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>',
+    checkCircle: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>',
+    xCircle: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6m0-6l-6 6"/></svg>',
+    hourglass: '<svg viewBox="0 0 24 24"><path d="M6 3h12M6 21h12M7 3v4a5 5 0 005 5 5 5 0 005-5V3M7 21v-4a5 5 0 015-5 5 5 0 015 5v4"/></svg>',
+    phone: '<svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>',
+    refresh: '<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0115-6.7L21 8M21 3v5h-5M21 12a9 9 0 01-15 6.7L3 16M3 21v-5h5"/></svg>',
+    briefcase: '<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2M3 13h18"/></svg>',
+    inbox: '<svg viewBox="0 0 24 24"><path d="M3 13l3-8h12l3 8v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6z"/><path d="M3 13h5l1 3h6l1-3h5"/></svg>',
+    bank: '<svg viewBox="0 0 24 24"><path d="M3 21h18M3 10h18M12 3L3 8v2h18V8l-9-5zM6 10v11M10 10v11M14 10v11M18 10v11"/></svg>',
+    scale: '<svg viewBox="0 0 24 24"><path d="M12 3v18M3 7l9-2 9 2M6 7l-3 8a4 4 0 008 0L8 7M18 7l-3 8a4 4 0 008 0l-3-8"/></svg>',
+    power: '<svg viewBox="0 0 24 24"><path d="M12 3v10M6.5 7A8 8 0 1017.5 7"/></svg>',
+    beaker: '<svg viewBox="0 0 24 24"><path d="M9 3v7L4 19a2 2 0 002 3h12a2 2 0 002-3l-5-9V3M9 3h6M6 14h12"/></svg>',
+    trending: '<svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-9"/><path d="M14 6h7v7"/></svg>',
+};
+function icon(name, extraClass=''){
+    const svg = ICN[name] || ICN.target;
+    return '<span class="sfi '+extraClass+'" aria-hidden="true">'+svg+'</span>';
+}
+// Auto-render static icons: <i class="sfi" data-icon="name"></i>
+function renderStaticIcons(){
+    document.querySelectorAll('[data-icon]').forEach(el=>{
+        const n = el.dataset.icon;
+        if(ICN[n] && !el.querySelector('svg')){
+            el.classList.add('sfi');
+            el.innerHTML = ICN[n];
+        }
+    });
+}
+
 const fmt=n=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(n);
 const fmtU=n=>'$'+Number(n).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const pct=n=>(n>=0?'+':'')+n.toFixed(2)+'%';
@@ -1653,8 +1734,8 @@ function showView(v){
         g.querySelector('.nav-group-trigger').classList.toggle('has-active', hasActive);
         g.classList.remove('open'); // close dropdown after navigation
     });
-    // Re-init selects & tooltips after section mount
-    setTimeout(()=>{ if(typeof initCustomSelects==='function')initCustomSelects(); if(typeof injectTooltips==='function')injectTooltips(); },350);
+    // Re-init selects, tooltips & icons after section mount
+    setTimeout(()=>{ if(typeof initCustomSelects==='function')initCustomSelects(); if(typeof injectTooltips==='function')injectTooltips(); if(typeof renderStaticIcons==='function')renderStaticIcons(); },350);
 }
 
 document.querySelectorAll('.globalheader-link').forEach(btn=>{
@@ -1705,8 +1786,8 @@ function emptyState(icon, title, sub='') {
 async function refreshStatus(){try{const d=await(await fetch('/api/status')).json();const cs=await(await fetch('/api/crypto/status')).json();const b=document.getElementById('bot-status');if(d.broker_connected||cs.connected){const names=[];if(d.broker_connected)names.push(d.broker_name);if(cs.connected)names.push(cs.broker_name);b.innerHTML=`<span class="dot" style="background:var(--sf-green);animation:pulse 2s infinite;border-radius:50%"></span> <strong>${names.join(' + ')}</strong> <span class="pill pill-green" style="font-size:0.6rem;animation:pulse 2s infinite">LIVE</span>`;b.style.color='var(--sf-green)';}else{b.innerHTML='<span class="dot" style="background:var(--sf-orange)"></span> Non connecté';b.style.color='var(--sf-text-secondary)';}}catch(e){}}
 
 /* ═══ Portfolio ═══ */
-async function refreshPortfolio(){refreshStatus();try{const d=await(await fetch('/api/portfolio')).json();if(d.mode==='not_connected'){document.getElementById('total-value').textContent='--';document.getElementById('cash-value').textContent='--';document.getElementById('total-mode').textContent='Non connecté';document.getElementById('positions-count').textContent='0';document.getElementById('etf-count').textContent='';document.getElementById('positions-table').innerHTML=`<tr><td colspan="8">${emptyState('🏦','Aucun broker ETF connecté','Connectez Interactive Brokers, Degiro ou Alpaca via l\'onglet Connexions.')}</td></tr>`;document.getElementById('allocation-chart').innerHTML=emptyState('📊','En attente de données','Connectez un broker ETF pour voir votre allocation.');return;}animateVal(document.getElementById('total-value'),d.total_value,'','€');animateVal(document.getElementById('cash-value'),d.cash,'','€');document.getElementById('total-mode').textContent=d.mode==='live'?d.broker:'--';const ap=d.positions.filter(p=>p.shares>0);document.getElementById('positions-count').textContent=ap.length;document.getElementById('etf-count').textContent=d.positions.length+' ETFs suivis';document.getElementById('positions-table').innerHTML=d.positions.map(p=>{const dc=Math.abs(p.drift)>=5?(p.drift>0?'pill-red':'pill-green'):'pill-gray';const dCol=p.drift>0?'var(--sf-red)':p.drift<0?'var(--sf-green)':'var(--sf-text-muted)';return`<tr><td><strong>${p.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${p.ticker}</span></td><td style="color:var(--sf-text-secondary)">${p.category}</td><td class="mono">${p.shares}</td><td class="mono">${p.price?fmt(p.price):'--'}</td><td class="mono">${fmt(p.value)}</td><td>${p.target_pct}%</td><td>${p.current_pct}%</td><td><span class="pill ${dc}">${pct(p.drift)}</span><div class="dbar"><div class="dbar-fill" style="width:${Math.min(Math.abs(p.drift)*5,100)}%;background:${dCol}"></div></div></td></tr>`;}).join('');const lbl=d.positions.map(p=>p.name),tgt=d.positions.map(p=>p.target_pct),cur=d.positions.map(p=>p.current_pct),col=['#2997ff','#30d158','#ff9f0a','#bf5af2','#ff453a','#64d2ff'];Plotly.newPlot('allocation-chart',[{values:tgt.map(v=>Math.max(v,0.1)),labels:lbl,name:'Cible',type:'pie',hole:0.65,domain:{column:0},marker:{colors:col},textinfo:'label+percent',textfont:{color:'#f5f5f7',size:11,family:'Inter'}},{values:cur.map(v=>Math.max(v,0.1)),labels:lbl,name:'Actuel',type:'pie',hole:0.65,domain:{column:1},marker:{colors:col},textinfo:'label+percent',textfont:{color:'#f5f5f7',size:11,family:'Inter'}}],{...PL,grid:{rows:1,columns:2},annotations:[{text:'Cible',x:0.2,y:0.5,font:{size:13,color:'#86868b',family:'Inter'},showarrow:false},{text:'Actuel',x:0.8,y:0.5,font:{size:13,color:'#86868b',family:'Inter'},showarrow:false}],showlegend:false,height:340},{responsive:true});}catch(e){toast(e.message,true);}}
-async function executeRebalance(){try{const o=await(await fetch('/api/rebalance')).json();const c=document.getElementById('rebalance-orders');if(!o.length){c.innerHTML=`<div class="hint-cta" style="border-color:rgba(48,209,88,0.3);color:var(--sf-green);cursor:default"><span class="hint-icon">✅</span><span>Portefeuille déjà équilibré</span></div>`;return;}c.innerHTML=`<table><thead><tr><th>ETF</th><th>Action</th><th>Parts</th><th>Montant</th></tr></thead><tbody>${o.map(x=>`<tr><td>${x.name||x.ticker}</td><td><span class="pill ${(x.action||'').includes('BUY')?'pill-green':'pill-red'}">${x.action||'-'}</span></td><td class="mono">${x.shares||'-'}</td><td class="mono">${x.amount?fmt(x.amount):'-'}</td></tr>`).join('')}</tbody></table>`;}catch(e){toast(e.message,true);}}
+async function refreshPortfolio(){refreshStatus();try{const d=await(await fetch('/api/portfolio')).json();if(d.mode==='not_connected'){document.getElementById('total-value').textContent='--';document.getElementById('cash-value').textContent='--';document.getElementById('total-mode').textContent='Non connecté';document.getElementById('positions-count').textContent='0';document.getElementById('etf-count').textContent='';document.getElementById('positions-table').innerHTML=`<tr><td colspan="8">${emptyState(icon('bank','c-muted sfi-xl'),'Aucun broker ETF connecté','Connectez Interactive Brokers, Degiro ou Alpaca via l\'onglet Connexions.')}</td></tr>`;document.getElementById('allocation-chart').innerHTML=emptyState(icon('chart','c-muted sfi-xl'),'En attente de données','Connectez un broker ETF pour voir votre allocation.');return;}animateVal(document.getElementById('total-value'),d.total_value,'','€');animateVal(document.getElementById('cash-value'),d.cash,'','€');document.getElementById('total-mode').textContent=d.mode==='live'?d.broker:'--';const ap=d.positions.filter(p=>p.shares>0);document.getElementById('positions-count').textContent=ap.length;document.getElementById('etf-count').textContent=d.positions.length+' ETFs suivis';document.getElementById('positions-table').innerHTML=d.positions.map(p=>{const dc=Math.abs(p.drift)>=5?(p.drift>0?'pill-red':'pill-green'):'pill-gray';const dCol=p.drift>0?'var(--sf-red)':p.drift<0?'var(--sf-green)':'var(--sf-text-muted)';return`<tr><td><strong>${p.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${p.ticker}</span></td><td style="color:var(--sf-text-secondary)">${p.category}</td><td class="mono">${p.shares}</td><td class="mono">${p.price?fmt(p.price):'--'}</td><td class="mono">${fmt(p.value)}</td><td>${p.target_pct}%</td><td>${p.current_pct}%</td><td><span class="pill ${dc}">${pct(p.drift)}</span><div class="dbar"><div class="dbar-fill" style="width:${Math.min(Math.abs(p.drift)*5,100)}%;background:${dCol}"></div></div></td></tr>`;}).join('');const lbl=d.positions.map(p=>p.name),tgt=d.positions.map(p=>p.target_pct),cur=d.positions.map(p=>p.current_pct),col=['#2997ff','#30d158','#ff9f0a','#bf5af2','#ff453a','#64d2ff'];Plotly.newPlot('allocation-chart',[{values:tgt.map(v=>Math.max(v,0.1)),labels:lbl,name:'Cible',type:'pie',hole:0.65,domain:{column:0},marker:{colors:col},textinfo:'label+percent',textfont:{color:'#f5f5f7',size:11,family:'Inter'}},{values:cur.map(v=>Math.max(v,0.1)),labels:lbl,name:'Actuel',type:'pie',hole:0.65,domain:{column:1},marker:{colors:col},textinfo:'label+percent',textfont:{color:'#f5f5f7',size:11,family:'Inter'}}],{...PL,grid:{rows:1,columns:2},annotations:[{text:'Cible',x:0.2,y:0.5,font:{size:13,color:'#86868b',family:'Inter'},showarrow:false},{text:'Actuel',x:0.8,y:0.5,font:{size:13,color:'#86868b',family:'Inter'},showarrow:false}],showlegend:false,height:340},{responsive:true});}catch(e){toast(e.message,true);}}
+async function executeRebalance(){try{const o=await(await fetch('/api/rebalance')).json();const c=document.getElementById('rebalance-orders');if(!o.length){c.innerHTML=`<div class="hint-cta" style="border-color:rgba(48,209,88,0.3);color:var(--sf-green);cursor:default">${icon('checkCircle','c-green')}<span>Portefeuille déjà équilibré</span></div>`;return;}c.innerHTML=`<table><thead><tr><th>ETF</th><th>Action</th><th>Parts</th><th>Montant</th></tr></thead><tbody>${o.map(x=>`<tr><td>${x.name||x.ticker}</td><td><span class="pill ${(x.action||'').includes('BUY')?'pill-green':'pill-red'}">${x.action||'-'}</span></td><td class="mono">${x.shares||'-'}</td><td class="mono">${x.amount?fmt(x.amount):'-'}</td></tr>`).join('')}</tbody></table>`;}catch(e){toast(e.message,true);}}
 
 /* ═══ DCA ═══ */
 async function calculateDCA(){try{const d=await(await fetch('/api/dca?amount='+document.getElementById('dca-amount').value)).json();document.getElementById('dca-table').innerHTML=d.map(x=>`<tr><td><strong>${x.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${x.ticker}</span></td><td class="mono">${fmt(x.target_amount)}</td><td class="mono">${fmt(x.price)}</td><td class="mono">${x.shares_to_buy}</td><td class="mono">${fmt(x.real_amount)}</td></tr>`).join('');}catch(e){}}
@@ -2039,9 +2120,9 @@ async function loadRiskDashboard(){try{const d=await(await fetch('/api/trading/r
 
 async function analyzeAll(){const c=document.getElementById('signals-list');c.innerHTML='<p style="color:var(--sf-orange);text-align:center;padding:20px 0">Analyse en cours...</p>';try{const d=await(await fetch('/api/trading/analyze_all')).json();c.innerHTML=d.map(s=>{if(s.error)return`<div class="scan-item"><strong>${s.symbol}</strong> <span style="color:var(--sf-red)">${s.error}</span></div>`;const sc={STRONG_BUY:'pill-green',BUY:'pill-green',HOLD:'pill-gray',SELL:'pill-red',STRONG_SELL:'pill-red'}[s.signal]||'pill-gray';let extra='';if(s.quant){const q=s.quant;const rc={TRENDING_UP:'pill-green',TRENDING_DOWN:'pill-red',MEAN_REVERTING:'pill-purple',HIGH_VOLATILITY:'pill-orange',LOW_VOLATILITY:'pill-gray',BREAKOUT:'pill-blue'};extra+=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px"><span class="pill ${rc[q.regime]||'pill-gray'}" style="font-size:0.65rem">${q.regime||''}</span><span class="pill pill-gray" style="font-size:0.65rem">${q.strategies_agree||0}/${q.strategies_total||5} strats</span><span class="pill pill-gray" style="font-size:0.65rem">H:${q.hurst||'--'}</span></div>`;}if(s.intelligence){const i=s.intelligence;const sentC={EXTREME_FEAR:'pill-red',FEAR:'pill-orange',NEUTRAL:'pill-gray',GREED:'pill-green',EXTREME_GREED:'pill-green'};extra+=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px"><span class="pill ${sentC[i.sentiment]||'pill-gray'}" style="font-size:0.65rem">${i.sentiment}</span><span class="pill pill-gray" style="font-size:0.65rem">${i.market_structure}</span>${i.whale_activity==='HIGH'?'<span class="pill pill-orange" style="font-size:0.65rem">WHALE</span>':''}</div>`;}let mtf='';if(s.confirmations&&s.confirmations.length)mtf='<div style="display:flex;gap:4px;margin-top:6px">'+s.confirmations.map(x=>`<span class="pill ${x.confirms?'pill-green':'pill-red'}" style="font-size:0.62rem">${x.timeframe} ${x.confirms?'\u2713':'\u2717'}</span>`).join('')+'</div>';return`<div class="scan-item"><div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${s.symbol}</strong>${s.is_dynamic?'<span class="pill pill-blue" style="font-size:0.6rem;margin-left:6px">SCANNER</span>':''}<span style="color:var(--sf-text-muted);margin-left:8px">${fmtU(s.price)}</span></div><div><span class="pill ${sc}">${s.signal}</span><span style="color:var(--sf-text-muted);margin-left:6px;font-size:0.82rem">${s.confidence}%</span></div></div>${mtf}${extra}<div style="margin-top:6px;font-size:0.75rem;color:var(--sf-text-muted)">${(s.reasons||[]).slice(0,3).join(' \u2022 ')}</div>${s.signal.includes('BUY')||s.signal.includes('SELL')?`<button class="link-more" style="font-size:0.88rem;margin-top:8px" onclick='executeTrade(${JSON.stringify(s).replace(/\x27/g,"\\x27")})'>Executer</button>`:''}</div>`;}).join('');}catch(e){c.innerHTML=`<p style="color:var(--sf-red)">${e.message}</p>`;}}
 async function executeTrade(a){try{const d=await(await fetch('/api/trading/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(a)})).json();if(d.status==='EXECUTED')toast(a.symbol+' execute');else toast(d.reason||d.error||'Non execute',true);loadActiveTrades();}catch(e){toast(e.message,true);}}
-async function loadActiveTrades(){try{const t=await(await fetch('/api/trading/active')).json();const tb=document.getElementById('active-trades-table');if(!t.length){tb.innerHTML=`<tr><td colspan="9">${emptyState('📭','Aucun trade actif','Le bot ouvrira des positions quand un signal sera détecté.')}</td></tr>`;return;}tb.innerHTML=t.map(x=>{const pc=x.pnl>=0?'var(--sf-green)':'var(--sf-red)';return`<tr><td><strong>${x.symbol}</strong></td><td><span class="pill ${x.side==='BUY'?'pill-green':'pill-red'}">${x.side}</span></td><td class="mono">${fmtU(x.entry_price)}</td><td class="mono">${x.quantity}</td><td class="mono" style="color:var(--sf-red)">${fmtU(x.stop_loss)}</td><td class="mono" style="color:var(--sf-green)">${fmtU(x.take_profit)}</td><td>${x.trailing_active?'<span class="pill pill-green" style="font-size:0.65rem">ON</span>':'-'}</td><td style="color:${pc}"><strong>${fmtU(x.pnl)}</strong><br><span style="font-size:0.75rem">${x.pnl_pct?x.pnl_pct.toFixed(2)+'%':''}</span></td><td><button class="abtn abtn-danger abtn-sm" onclick="closeTrade('${x.symbol}')">Fermer</button></td></tr>`;}).join('');}catch(e){}}
+async function loadActiveTrades(){try{const t=await(await fetch('/api/trading/active')).json();const tb=document.getElementById('active-trades-table');if(!t.length){tb.innerHTML=`<tr><td colspan="9">${emptyState(icon('inbox','c-muted sfi-xl'),'Aucun trade actif','Le bot ouvrira des positions quand un signal sera détecté.')}</td></tr>`;return;}tb.innerHTML=t.map(x=>{const pc=x.pnl>=0?'var(--sf-green)':'var(--sf-red)';return`<tr><td><strong>${x.symbol}</strong></td><td><span class="pill ${x.side==='BUY'?'pill-green':'pill-red'}">${x.side}</span></td><td class="mono">${fmtU(x.entry_price)}</td><td class="mono">${x.quantity}</td><td class="mono" style="color:var(--sf-red)">${fmtU(x.stop_loss)}</td><td class="mono" style="color:var(--sf-green)">${fmtU(x.take_profit)}</td><td>${x.trailing_active?'<span class="pill pill-green" style="font-size:0.65rem">ON</span>':'-'}</td><td style="color:${pc}"><strong>${fmtU(x.pnl)}</strong><br><span style="font-size:0.75rem">${x.pnl_pct?x.pnl_pct.toFixed(2)+'%':''}</span></td><td><button class="abtn abtn-danger abtn-sm" onclick="closeTrade('${x.symbol}')">Fermer</button></td></tr>`;}).join('');}catch(e){}}
 async function closeTrade(s){if(!confirm('Fermer '+s+' ?'))return;await fetch('/api/trading/close',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({symbol:s})});toast(s+' ferme');loadActiveTrades();loadTradeHistory();loadPerformance();}
-async function loadTradeHistory(){try{const t=await(await fetch('/api/trading/history')).json();const tb=document.getElementById('trade-history-table');if(!t.length){tb.innerHTML=`<tr><td colspan="8">${emptyState('📋','Historique vide','Les trades terminés apparaîtront ici.')}</td></tr>`;return;}tb.innerHTML=t.slice().reverse().map(x=>{const pc=x.pnl>=0?'var(--sf-green)':'var(--sf-red)';const sl={SL_HIT:'Stop Loss',TP_HIT:'Take Profit',TRAILING_SL:'Trailing',MANUAL_CLOSE:'Manuel'};const slc={TP_HIT:'var(--sf-green)',SL_HIT:'var(--sf-red)',TRAILING_SL:'var(--sf-orange)',MANUAL_CLOSE:'var(--sf-text-secondary)'};return`<tr><td><strong>${x.symbol}</strong></td><td><span class="pill ${x.side==='BUY'?'pill-green':'pill-red'}">${x.side}</span></td><td class="mono">${fmtU(x.entry_price)}</td><td class="mono">${x.close_price?fmtU(x.close_price):'--'}</td><td class="mono" style="color:${pc};font-weight:600">${fmtU(x.pnl)}</td><td style="color:${pc}">${x.pnl_pct?x.pnl_pct.toFixed(2)+'%':'--'}</td><td style="color:${slc[x.status]||'var(--sf-text-secondary)'}">${sl[x.status]||x.status}</td><td style="color:var(--sf-text-muted);font-size:0.78rem">${x.closed_at?new Date(x.closed_at).toLocaleString('fr-FR'):'--'}</td></tr>`;}).join('');}catch(e){}}
+async function loadTradeHistory(){try{const t=await(await fetch('/api/trading/history')).json();const tb=document.getElementById('trade-history-table');if(!t.length){tb.innerHTML=`<tr><td colspan="8">${emptyState(icon('inbox','c-muted sfi-xl'),'Historique vide','Les trades terminés apparaîtront ici.')}</td></tr>`;return;}tb.innerHTML=t.slice().reverse().map(x=>{const pc=x.pnl>=0?'var(--sf-green)':'var(--sf-red)';const sl={SL_HIT:'Stop Loss',TP_HIT:'Take Profit',TRAILING_SL:'Trailing',MANUAL_CLOSE:'Manuel'};const slc={TP_HIT:'var(--sf-green)',SL_HIT:'var(--sf-red)',TRAILING_SL:'var(--sf-orange)',MANUAL_CLOSE:'var(--sf-text-secondary)'};return`<tr><td><strong>${x.symbol}</strong></td><td><span class="pill ${x.side==='BUY'?'pill-green':'pill-red'}">${x.side}</span></td><td class="mono">${fmtU(x.entry_price)}</td><td class="mono">${x.close_price?fmtU(x.close_price):'--'}</td><td class="mono" style="color:${pc};font-weight:600">${fmtU(x.pnl)}</td><td style="color:${pc}">${x.pnl_pct?x.pnl_pct.toFixed(2)+'%':'--'}</td><td style="color:${slc[x.status]||'var(--sf-text-secondary)'}">${sl[x.status]||x.status}</td><td style="color:var(--sf-text-muted);font-size:0.78rem">${x.closed_at?new Date(x.closed_at).toLocaleString('fr-FR'):'--'}</td></tr>`;}).join('');}catch(e){}}
 
 /* ═══ Scanner ═══ */
 async function loadScannerCached(){try{const d=await(await fetch('/api/trading/scan/results')).json();if(d.results&&d.results.length)renderScanResults(d);loadTopMovers();}catch(e){}}
@@ -2291,19 +2372,21 @@ async function loadSecurite(){
 }
 
 async function togglePaperMode(enabled){
-    if(!enabled && !confirm('⚠️ Passer en LIVE : des ordres RÉELS seront envoyés au broker. Confirmer ?'))return;
+    if(!enabled && !confirm('Passer en LIVE : des ordres RÉELS seront envoyés au broker. Confirmer ?'))return;
     await fetch('/api/settings/paper-mode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled})});
     loadSecurite();
     refreshStatus();
+    loadContextBanner();
 }
 
 async function triggerKillSwitch(){
     const reason = prompt('Raison du kill-switch ?', 'Arrêt manuel');
     if(reason === null)return;
     await fetch('/api/kill-switch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reason})});
-    alert('🚨 Kill-switch activé. Le bot est arrêté.');
+    toast('Kill-switch activé — le bot est arrêté', true);
     loadSecurite();
     refreshStatus();
+    loadContextBanner();
 }
 
 async function releaseKillSwitch(){
@@ -2339,7 +2422,7 @@ async function saveTelegram(){
 
 async function testTelegram(){
     const r = await (await fetch('/api/notifications/test',{method:'POST'})).json();
-    alert(r.sent ? '✅ Message test envoyé — vérifie Telegram.' : '❌ Échec : vérifie token + chat_id + activation.');
+    toast(r.sent ? 'Message test envoyé — vérifie Telegram' : 'Échec : vérifie token + chat_id + activation', !r.sent);
 }
 
 /* ═══ Health ═══ */
@@ -2348,7 +2431,7 @@ async function loadHealth(){
         const h = await (await fetch('/api/health')).json();
         const statusEl = document.getElementById('health-status');
         const colors = { healthy: '#32d74b', stale: '#ff9f0a', never_seen: '#8e8e93', unknown: '#ff453a' };
-        const labels = { healthy: '🟢 Sain', stale: '🟡 Inactif', never_seen: '⚪ Aucune donnée', unknown: '🔴 Inconnu' };
+        const labels = { healthy: 'Sain', stale: 'Inactif', never_seen: 'Aucune donnée', unknown: 'Inconnu' };
         statusEl.textContent = labels[h.health] || h.health;
         statusEl.style.color = colors[h.health] || '#e6ecf4';
         document.getElementById('health-last-seen').textContent = h.last_seen_at ? ('Vu : '+new Date(h.last_seen_at).toLocaleString('fr-FR')) : 'Jamais';
@@ -2392,20 +2475,20 @@ async function loadBackups(){
 async function createBackup(){
     const r = await (await fetch('/api/backups/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({label:'manual'})})).json();
     if(r.status === 'ok'){
-        alert(`✅ Backup créé : ${r.backup_id} (${r.size_kb} KB, ${r.files_count} fichiers)`);
+        toast(`Backup créé : ${r.backup_id} (${r.size_kb} KB, ${r.files_count} fichiers)`);
     }else{
-        alert(`❌ Erreur : ${r.message || 'inconnue'}`);
+        toast('Erreur : '+(r.message || 'inconnue'), true);
     }
     loadBackups();
 }
 
 async function restoreBackup(id){
-    if(!confirm(`⚠️ Restaurer le backup ${id} ?\n\nTous tes fichiers actuels seront remplacés. Un safety backup sera créé automatiquement avant.`))return;
+    if(!confirm(`Restaurer le backup ${id} ?\n\nTous tes fichiers actuels seront remplacés. Un safety backup sera créé automatiquement avant.`))return;
     const r = await (await fetch('/api/backups/restore',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({backup_id:id})})).json();
     if(r.status === 'ok'){
-        alert(`✅ Restauration OK.\n\n${r.restored_files.length} fichiers restaurés.\nSafety backup : ${r.safety_backup}\n\n⚠️ Recharge la page pour prendre en compte.`);
+        alert(`Restauration OK.\n\n${r.restored_files.length} fichiers restaurés.\nSafety backup : ${r.safety_backup}\n\nRecharge la page pour prendre en compte.`);
     }else{
-        alert(`❌ Erreur : ${r.message}`);
+        toast('Erreur : '+r.message, true);
     }
     loadBackups();
 }
@@ -2478,7 +2561,7 @@ async function loadContextBanner(){
         }
         // Kill-switch
         if(s.killSwitch){
-            items.push(`<div class="ctx-item"><span class="ctx-dot red"></span><strong style="color:var(--sf-red)">🚨 KILL-SWITCH ACTIF</strong> · <button class="ctx-link" onclick="releaseKillSwitch()">Désactiver</button></div>`);
+            items.push(`<div class="ctx-item"><span class="ctx-dot red"></span><strong style="color:var(--sf-red);display:inline-flex;align-items:center;gap:5px">${icon('alert','c-red')} KILL-SWITCH ACTIF</strong> · <button class="ctx-link" onclick="releaseKillSwitch()">Désactiver</button></div>`);
         }
         // Telegram
         if(!s.telegramEnabled){
@@ -2500,7 +2583,7 @@ async function loadHome(){
 
         // Subtitle contextuel
         let sub;
-        if(s.killSwitch) sub = '🚨 Kill-switch actif — aucun trade ne sera exécuté.';
+        if(s.killSwitch) sub = 'Kill-switch actif — aucun trade ne sera exécuté.';
         else if(!s.broker && !s.cryptoBroker) sub = 'Commence par connecter un broker pour activer le bot.';
         else if(s.paperMode) sub = 'Ton bot tourne en mode simulation (PAPER). Aucun ordre réel.';
         else sub = 'Ton bot est opérationnel en mode LIVE. Trades réels activés.';
@@ -2516,50 +2599,59 @@ async function loadHome(){
             document.getElementById('home-total-sub').textContent = 'Aucun broker connecté';
         }
         const modeEl = document.getElementById('home-mode');
-        modeEl.textContent = s.paperMode ? '🧪 PAPER' : '🟢 LIVE';
+        modeEl.innerHTML = s.paperMode
+            ? `<span style="display:inline-flex;align-items:center;gap:8px">${icon('flask','c-orange')} PAPER</span>`
+            : `<span style="display:inline-flex;align-items:center;gap:8px">${icon('checkCircle','c-green')} LIVE</span>`;
         modeEl.style.color = s.paperMode ? 'var(--sf-orange)' : 'var(--sf-green)';
         document.getElementById('home-mode-sub').textContent = s.paperMode ? 'Simulation' : 'Ordres réels';
 
         const healthEl = document.getElementById('home-health');
-        const hMap2 = {healthy:['🟢 Sain','var(--sf-green)'], stale:['🟡 Inactif','var(--sf-orange)'],
-                       unknown:['🔴 Inconnu','var(--sf-red)'], never_seen:['⚪ N/A','var(--sf-text-muted)']};
-        const [hlbl, hcol] = hMap2[s.health] || ['—','var(--sf-text-muted)'];
-        healthEl.textContent = hlbl; healthEl.style.color = hcol;
+        const hMap2 = {
+            healthy:    ['Sain',    'var(--sf-green)',      'checkCircle'],
+            stale:      ['Inactif', 'var(--sf-orange)',     'clock'],
+            unknown:    ['Inconnu', 'var(--sf-red)',        'alert'],
+            never_seen: ['N/A',     'var(--sf-text-muted)', 'hourglass'],
+        };
+        const [hlbl, hcol, hicon] = hMap2[s.health] || ['—','var(--sf-text-muted)','hourglass'];
+        healthEl.innerHTML = `<span style="display:inline-flex;align-items:center;gap:8px">${icon(hicon)} ${hlbl}</span>`;
+        healthEl.style.color = hcol;
         document.getElementById('home-health-sub').textContent = s.uptime ? 'Uptime '+s.uptime : 'Pas de données';
 
         document.getElementById('home-positions').textContent = s.positions;
         document.getElementById('home-positions-sub').textContent = s.trades24+' trades (24h) · '+s.errors24+' erreurs';
 
-        // Actions suggérées
+        // Actions suggérées — chaque action = icône SVG + classe de couleur
         const actions = [];
         if(s.killSwitch){
-            actions.push({cls:'urgent',icon:'🚨',title:'Désactiver le kill-switch',desc:'Tant qu\'il est actif, aucun trade ne passera.',fn:"releaseKillSwitch()"});
+            actions.push({cls:'urgent',ico:'alert',title:'Désactiver le kill-switch',desc:'Tant qu\'il est actif, aucun trade ne passera.',fn:"releaseKillSwitch()"});
         }
         if(!s.broker && !s.cryptoBroker){
-            actions.push({cls:'urgent',icon:'🔌',title:'Connecter un broker',desc:'Indispensable pour que le bot trade réellement.',fn:"showView('broker')"});
+            actions.push({cls:'urgent',ico:'plug',title:'Connecter un broker',desc:'Indispensable pour que le bot trade réellement.',fn:"showView('broker')"});
         }
         if(!s.telegramEnabled){
-            actions.push({cls:'warn',icon:'📱',title:'Activer les notifications Telegram',desc:'Pour être alerté des trades, erreurs et heartbeats.',fn:"showView('securite')"});
+            actions.push({cls:'warn',ico:'phone',title:'Activer les notifications Telegram',desc:'Pour être alerté des trades, erreurs et heartbeats.',fn:"showView('securite')"});
         }
         if(s.errors24 > 5){
-            actions.push({cls:'warn',icon:'⚠️',title:`${s.errors24} erreurs dans les 24h`,desc:'Consulte les logs pour investiguer.',fn:"showView('securite')"});
+            actions.push({cls:'warn',ico:'alert',title:`${s.errors24} erreurs dans les 24h`,desc:'Consulte les logs pour investiguer.',fn:"showView('securite')"});
         }
         if(!s.paperMode && (s.broker || s.cryptoBroker)){
-            actions.push({cls:'suggest',icon:'🧪',title:'Essayer le mode PAPER d\'abord',desc:'Valide ta stratégie sans risque avant le LIVE.',fn:"showView('securite')"});
+            actions.push({cls:'suggest',ico:'flask',title:'Essayer le mode PAPER d\'abord',desc:'Valide ta stratégie sans risque avant le LIVE.',fn:"showView('securite')"});
         }
         if(s.paperMode && (s.broker || s.cryptoBroker)){
-            actions.push({cls:'suggest',icon:'📊',title:'Lancer un scan d\'opportunités',desc:'Détecte les signaux sur les marchés en temps réel.',fn:"showView('scanner')"});
+            actions.push({cls:'suggest',ico:'search',title:'Lancer un scan d\'opportunités',desc:'Détecte les signaux sur les marchés en temps réel.',fn:"showView('scanner')"});
         }
         if(s.totalValue === null && (s.broker || s.cryptoBroker)){
-            actions.push({cls:'suggest',icon:'💼',title:'Configurer ton portefeuille ETF',desc:'Définis ton allocation cible pour lancer le DCA.',fn:"showView('portfolio')"});
+            actions.push({cls:'suggest',ico:'briefcase',title:'Configurer ton portefeuille ETF',desc:'Définis ton allocation cible pour lancer le DCA.',fn:"showView('portfolio')"});
         }
         // Si rien à faire → message positif
         if(!actions.length){
-            actions.push({cls:'ok',icon:'✅',title:'Tout est en ordre',desc:'Ton bot tourne bien. Tu peux consulter les performances ou lancer un scan.',fn:"showView('analytics')"});
+            actions.push({cls:'ok',ico:'checkCircle',title:'Tout est en ordre',desc:'Ton bot tourne bien. Tu peux consulter les performances ou lancer un scan.',fn:"showView('analytics')"});
         }
+        // Couleur de l'icône selon cls
+        const iconColorByClass = {urgent:'c-red',warn:'c-orange',suggest:'c-blue',ok:'c-green'};
         document.getElementById('home-actions').innerHTML = actions.map(a=>
             `<div class="action-card ${a.cls}" onclick="${a.fn}">
-                <div class="action-icon">${a.icon}</div>
+                <div class="action-icon">${icon(a.ico, iconColorByClass[a.cls]||'c-blue')}</div>
                 <div class="action-body">
                     <div class="action-title">${a.title}</div>
                     <div class="action-desc">${a.desc}</div>
@@ -2571,12 +2663,13 @@ async function loadHome(){
 }
 
 /* ═══ Boot ═══ */
+renderStaticIcons();
 loadHome();
 loadContextBanner();
 refreshStatus();
 // Refresh banner toutes les 30s
 setInterval(loadContextBanner, 30000);
-setTimeout(() => { initCustomSelects(); injectTooltips(); }, 200);
+setTimeout(() => { initCustomSelects(); injectTooltips(); renderStaticIcons(); }, 200);
 
 // Navigation re-init handled inside showView() — no duplicate handler needed.
 </script>
