@@ -30,6 +30,7 @@ from settings import (
 )
 import notifications as notif
 import paper_broker
+import backups
 
 app = Flask(__name__)
 app.secret_key = get_flask_secret()
@@ -177,6 +178,44 @@ def api_paper_trades():
 @app.route("/api/paper/reset", methods=["POST"])
 def api_paper_reset():
     return jsonify(paper_broker.reset_paper())
+
+
+# ── API: Backups ───────────────────────────────────────
+
+@app.route("/api/backups")
+def api_backups_list():
+    return jsonify(backups.list_backups())
+
+
+@app.route("/api/backups/create", methods=["POST"])
+def api_backups_create():
+    data = request.get_json() or {}
+    return jsonify(backups.create_backup(label=data.get("label")))
+
+
+@app.route("/api/backups/restore", methods=["POST"])
+def api_backups_restore():
+    data = request.get_json() or {}
+    backup_id = data.get("backup_id")
+    if not backup_id:
+        return jsonify({"status": "error", "message": "backup_id manquant"}), 400
+    return jsonify(backups.restore_backup(backup_id))
+
+
+@app.route("/api/backups/delete", methods=["POST"])
+def api_backups_delete():
+    data = request.get_json() or {}
+    backup_id = data.get("backup_id")
+    if not backup_id:
+        return jsonify({"status": "error", "message": "backup_id manquant"}), 400
+    return jsonify(backups.delete_backup(backup_id))
+
+
+@app.route("/api/backups/prune", methods=["POST"])
+def api_backups_prune():
+    data = request.get_json() or {}
+    keep = data.get("keep_days", 14)
+    return jsonify(backups.prune_old_backups(int(keep)))
 
 
 # ── API: Bot Status ────────────────────────────────────

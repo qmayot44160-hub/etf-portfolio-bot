@@ -1275,6 +1275,19 @@
             <div class="dcard-label">Paper portfolio</div>
             <div id="paper-portfolio" style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">—</div>
         </div>
+
+        <div class="dcard">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <div class="dcard-label" style="margin-bottom:0">Backups automatiques</div>
+                <div>
+                    <button class="link-more" onclick="createBackup()">📦 Créer un backup maintenant</button>
+                </div>
+            </div>
+            <p style="color:var(--sf-text-muted);font-size:13px;margin-top:4px">
+                Snapshot ZIP quotidien de toutes tes configs + états (portfolio, trades, settings, Telegram). Rétention automatique : <b>14 jours</b>. Stockés dans le volume Railway.
+            </p>
+            <div id="backups-list" style="margin-top:14px;font-size:13px">Chargement…</div>
+        </div>
     </div>
 </div>
 
@@ -1951,6 +1964,7 @@ async function loadSecurite(){
         const pos = Object.entries(p.positions||{}).map(([s,d])=>`${s}: ${d.quantity} @ ${d.avg_price.toFixed(4)}`).join(' · ') || 'Aucune position';
         document.getElementById('paper-portfolio').innerHTML = `<b>Cash paper :</b> ${(p.cash||0).toFixed(2)} $ · <b>Positions :</b> ${pos}`;
     }catch(e){}
+    loadBackups();
 }
 
 async function togglePaperMode(enabled){
@@ -2003,6 +2017,63 @@ async function saveTelegram(){
 async function testTelegram(){
     const r = await (await fetch('/api/notifications/test',{method:'POST'})).json();
     alert(r.sent ? '✅ Message test envoyé — vérifie Telegram.' : '❌ Échec : vérifie token + chat_id + activation.');
+}
+
+/* ═══ Backups ═══ */
+async function loadBackups(){
+    try{
+        const list = await (await fetch('/api/backups')).json();
+        const box = document.getElementById('backups-list');
+        if(!box)return;
+        if(!list || !list.length){
+            box.innerHTML = '<p style="color:var(--sf-text-muted)">Aucun backup pour le moment. Le prochain snapshot automatique aura lieu à 03:30 UTC.</p>';
+            return;
+        }
+        let html = '<table style="width:100%"><thead><tr><th>Date</th><th>Label</th><th>Fichiers</th><th>Taille</th><th>Actions</th></tr></thead><tbody>';
+        for(const b of list){
+            const date = new Date(b.created_at).toLocaleString('fr-FR');
+            const label = b.label || '—';
+            html += `<tr>
+                <td>${date}</td>
+                <td>${label}</td>
+                <td>${b.files_count}</td>
+                <td>${b.size_kb} KB</td>
+                <td>
+                    <button class="link-more" style="font-size:11px;padding:4px 10px" onclick="restoreBackup('${b.backup_id}')">Restaurer</button>
+                    <button class="link-more" style="font-size:11px;padding:4px 10px;color:#ff453a" onclick="deleteBackup('${b.backup_id}')">Supprimer</button>
+                </td>
+            </tr>`;
+        }
+        html += '</tbody></table>';
+        box.innerHTML = html;
+    }catch(e){ console.error(e); }
+}
+
+async function createBackup(){
+    const r = await (await fetch('/api/backups/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({label:'manual'})})).json();
+    if(r.status === 'ok'){
+        alert(`✅ Backup créé : ${r.backup_id} (${r.size_kb} KB, ${r.files_count} fichiers)`);
+    }else{
+        alert(`❌ Erreur : ${r.message || 'inconnue'}`);
+    }
+    loadBackups();
+}
+
+async function restoreBackup(id){
+    if(!confirm(`⚠️ Restaurer le backup ${id} ?\n\nTous tes fichiers actuels seront remplacés. Un safety backup sera créé automatiquement avant.`))return;
+    const r = await (await fetch('/api/backups/restore',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({backup_id:id})})).json();
+    if(r.status === 'ok'){
+        alert(`✅ Restauration OK.\n\n${r.restored_files.length} fichiers restaurés.\nSafety backup : ${r.safety_backup}\n\n⚠️ Recharge la page pour prendre en compte.`);
+    }else{
+        alert(`❌ Erreur : ${r.message}`);
+    }
+    loadBackups();
+}
+
+async function deleteBackup(id){
+    if(!confirm(`Supprimer le backup ${id} ?`))return;
+    await fetch('/api/backups/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({backup_id:id})});
+    loadBackups();
 }
 
 /* ═══ Boot ═══ */

@@ -100,7 +100,7 @@ def setup_scheduled_jobs(config: dict = None):
     scheduler = get_scheduler()
 
     # Supprimer les jobs existants
-    for job_id in ["auto_dca", "auto_rebalance"]:
+    for job_id in ["auto_dca", "auto_rebalance", "daily_backup"]:
         try:
             scheduler.remove_job(job_id)
         except Exception:
@@ -123,6 +123,18 @@ def setup_scheduled_jobs(config: dict = None):
             CronTrigger(day_of_week=config["rebalance_day"], hour=config["rebalance_hour"], minute=0),
             id="auto_rebalance",
             name="Rééquilibrage hebdomadaire",
+            replace_existing=True,
+        )
+
+    # Backup quotidien (activé par défaut, désactivable via config)
+    if config.get("backup_enabled", True):
+        from backups import daily_backup_job
+        hour = config.get("backup_hour", 3)
+        scheduler.add_job(
+            daily_backup_job,
+            CronTrigger(hour=hour, minute=30),
+            id="daily_backup",
+            name=f"Backup quotidien ({hour:02d}:30)",
             replace_existing=True,
         )
 
