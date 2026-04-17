@@ -218,12 +218,37 @@
             font-size: 1.3rem; font-weight: 600;
             letter-spacing: -0.02em;
             margin-bottom: 20px;
+            display: flex; align-items: center; gap: 12px;
         }
+        .dcard-title .sfi { color: var(--sf-blue); width: 1.3em; height: 1.3em; }
         .dcard-label {
             font-size: 0.68rem; font-weight: 500;
             text-transform: uppercase; letter-spacing: 0.08em;
             color: var(--sf-text-muted); margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
         }
+        .dcard-label .sfi { width: 1.1em; height: 1.1em; opacity: 0.9; }
+
+        /* Hero badge — large icon above title for strong identity */
+        .hero-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 56px; height: 56px; border-radius: 18px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: 22px;
+        }
+        .hero-badge .sfi { width: 28px; height: 28px; color: var(--hero-accent, var(--sf-blue)); }
+        #view-portfolio .hero-badge { --hero-accent: #2997ff; box-shadow: 0 0 40px rgba(41,151,255,0.12); }
+        #view-dca .hero-badge        { --hero-accent: #30d158; box-shadow: 0 0 40px rgba(48,209,88,0.12); }
+        #view-projection .hero-badge { --hero-accent: #bf5af2; box-shadow: 0 0 40px rgba(191,90,242,0.12); }
+        #view-analytics .hero-badge  { --hero-accent: #30d158; box-shadow: 0 0 40px rgba(48,209,88,0.12); }
+        #view-crypto .hero-badge     { --hero-accent: #ff9f0a; box-shadow: 0 0 40px rgba(255,159,10,0.12); }
+        #view-trading .hero-badge    { --hero-accent: #64d2ff; box-shadow: 0 0 40px rgba(100,210,255,0.12); }
+        #view-scanner .hero-badge    { --hero-accent: #30d158; box-shadow: 0 0 40px rgba(48,209,88,0.12); }
+        #view-broker .hero-badge     { --hero-accent: #ff453a; box-shadow: 0 0 40px rgba(255,69,58,0.12); }
+        #view-auto .hero-badge       { --hero-accent: #bf5af2; box-shadow: 0 0 40px rgba(191,90,242,0.12); }
+        #view-securite .hero-badge   { --hero-accent: #30d158; box-shadow: 0 0 40px rgba(48,209,88,0.12); }
+        #view-glossaire .hero-badge  { --hero-accent: #64d2ff; box-shadow: 0 0 40px rgba(100,210,255,0.12); }
 
         /* ════════════════════════════════════════════════
            TABLES
@@ -950,6 +975,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-portfolio">
     <div class="hero">
+        <div class="hero-badge"><span class="sfi" data-icon="chart"></span></div>
         <h1 class="hero-title">Portefeuille</h1>
         <p class="hero-subtitle">Vue d'ensemble de votre allocation ETF diversifiee, inspiree des meilleures pratiques Finary.</p>
         <div class="hero-links">
@@ -964,16 +990,16 @@
             <div class="stat-card"><div class="stat-label">Positions</div><div class="stat-value" id="positions-count"><span class="skel skel-val"></span></div><div class="stat-sub" id="etf-count"></div></div>
         </div>
         <div class="dcard">
-            <div class="dcard-label">Allocation</div>
+            <div class="dcard-label"><span class="sfi" data-icon="chart"></span>Allocation</div>
             <div id="allocation-chart" class="chart-box"></div>
         </div>
         <div class="dcard">
-            <div class="dcard-label">Positions detaillees</div>
+            <div class="dcard-label"><span class="sfi" data-icon="briefcase"></span>Positions détaillées</div>
             <table><thead><tr><th>ETF</th><th>Categorie</th><th>Parts</th><th>Prix</th><th>Valeur</th><th>Cible</th><th>Actuel</th><th>Ecart</th></tr></thead><tbody id="positions-table"></tbody></table>
         </div>
         <div class="dcard">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-                <div class="dcard-label" style="margin-bottom:0">Reequilibrage ETF</div>
+                <div class="dcard-label" style="margin-bottom:0"><span class="sfi" data-icon="scale"></span>Rééquilibrage ETF</div>
                 <button class="abtn abtn-blue abtn-sm" onclick="executeRebalance()">Calculer</button>
             </div>
             <div id="rebalance-orders"><div class="hint-cta" onclick="executeRebalance()"><span class="hint-icon" data-icon="scale"></span><span>Calculer les ordres de rééquilibrage</span></div></div>
@@ -986,6 +1012,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-dca">
     <div class="hero bg-alt">
+        <div class="hero-badge"><span class="sfi" data-icon="euro"></span></div>
         <h1 class="hero-title">Dollar Cost Averaging</h1>
         <p class="hero-subtitle">Investissez regulierement, sans vous soucier du timing.</p>
     </div>
@@ -1007,13 +1034,14 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-projection">
     <div class="hero">
+        <div class="hero-badge"><span class="sfi" data-icon="trending"></span></div>
         <h1 class="hero-title">Projection future</h1>
         <p class="hero-subtitle">Estimation Monte Carlo de vos gains futurs. Calibrée sur l'historique réel de votre portefeuille.</p>
     </div>
     <div class="section">
         <!-- Paramètres -->
         <div class="dcard">
-            <div class="dcard-title">Paramètres de projection</div>
+            <div class="dcard-title"><span class="sfi" data-icon="clock"></span>Paramètres de projection</div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:20px">
                 <div class="form-group" style="margin-bottom:0">
                     <div class="form-label">Capital initial (€)</div>
@@ -1087,7 +1115,7 @@
 
             <!-- Graphique principal : fan chart -->
             <div class="dcard">
-                <div class="dcard-title">Trajectoire probable (bandes de confiance)</div>
+                <div class="dcard-title"><span class="sfi" data-icon="trending"></span>Trajectoire probable (bandes de confiance)</div>
                 <div id="pj-fan-chart" style="height:460px"></div>
                 <p style="color:var(--sf-text-muted);font-size:0.78rem;margin-top:10px">
                     La bande sombre = intervalle P25–P75 (50% des scénarios). La bande claire = P5–P95 (90% des scénarios).
@@ -1096,33 +1124,33 @@
 
             <!-- Graphique scénarios déterministes -->
             <div class="dcard">
-                <div class="dcard-title">Scénarios : Pessimiste · Médian · Optimiste</div>
+                <div class="dcard-title"><span class="sfi" data-icon="chart"></span>Scénarios : Pessimiste · Médian · Optimiste</div>
                 <div id="pj-scenarios-chart" style="height:360px"></div>
                 <div id="pj-scenarios-table" style="margin-top:16px"></div>
             </div>
 
             <!-- Distribution des valeurs finales -->
             <div class="dcard">
-                <div class="dcard-title">Distribution des valeurs finales (histogramme)</div>
+                <div class="dcard-title"><span class="sfi" data-icon="chartUp"></span>Distribution des valeurs finales (histogramme)</div>
                 <div id="pj-distribution-chart" style="height:300px"></div>
             </div>
 
             <!-- Table annuelle -->
             <div class="dcard">
-                <div class="dcard-title">Projection année par année</div>
+                <div class="dcard-title"><span class="sfi" data-icon="clock"></span>Projection année par année</div>
                 <div id="pj-yearly-table" style="overflow-x:auto"></div>
             </div>
 
             <!-- Projection par ETF -->
             <div class="dcard">
-                <div class="dcard-title">Projection par ETF</div>
+                <div class="dcard-title"><span class="sfi" data-icon="briefcase"></span>Projection par ETF</div>
                 <div id="pj-etf-chart" style="height:300px"></div>
                 <div id="pj-etf-table" style="margin-top:16px"></div>
             </div>
 
             <!-- Calibration -->
             <div class="dcard" style="background:rgba(255,255,255,0.02)">
-                <div class="dcard-title">Calibration du modèle</div>
+                <div class="dcard-title"><span class="sfi" data-icon="target"></span>Calibration du modèle</div>
                 <div id="pj-calibration" style="color:var(--sf-text-secondary);font-size:0.9rem;line-height:1.7"></div>
             </div>
         </div>
@@ -1134,6 +1162,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-analytics">
     <div class="hero">
+        <div class="hero-badge"><span class="sfi" data-icon="chartUp"></span></div>
         <h1 class="hero-title">Analyse avancée</h1>
         <p class="hero-subtitle">Optimisation Markowitz, corrélations, stress tests, régime de marché. Niveau institutionnel.</p>
         <div class="hero-links">
@@ -1196,7 +1225,7 @@
 
             <!-- ── Frontière efficiente ── -->
             <div class="dcard">
-                <div class="dcard-title">Frontière efficiente (Markowitz)</div>
+                <div class="dcard-title"><span class="sfi" data-icon="trending"></span>Frontière efficiente (Markowitz)</div>
                 <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:12px">
                     Chaque point = un portefeuille. La ligne = meilleur rendement possible pour chaque niveau de risque.
                 </p>
@@ -1206,7 +1235,7 @@
 
             <!-- ── Matrice de corrélation ── -->
             <div class="dcard">
-                <div class="dcard-title">Matrice de corrélation</div>
+                <div class="dcard-title"><span class="sfi" data-icon="chart"></span>Matrice de corrélation</div>
                 <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:12px">
                     Rouge = forte corrélation (mauvaise diversification). Bleu = actifs décorrélés (bonne diversif).
                 </p>
@@ -1215,7 +1244,7 @@
 
             <!-- ── Contribution au risque ── -->
             <div class="dcard">
-                <div class="dcard-title">Contribution au risque par ETF</div>
+                <div class="dcard-title"><span class="sfi" data-icon="shield"></span>Contribution au risque par ETF</div>
                 <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:12px">
                     Poids vs contribution réelle à la volatilité globale. Si la contribution dépasse le poids, l'ETF est un driver de risque.
                 </p>
@@ -1225,7 +1254,7 @@
 
             <!-- ── Stress tests ── -->
             <div class="dcard">
-                <div class="dcard-title">Stress tests historiques</div>
+                <div class="dcard-title"><span class="sfi" data-icon="alert"></span>Stress tests historiques</div>
                 <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:12px">
                     Performance qu'aurait eu votre portefeuille actuel lors de chocs passés.
                 </p>
@@ -1235,13 +1264,13 @@
 
             <!-- ── Rolling metrics ── -->
             <div class="dcard">
-                <div class="dcard-title">Métriques glissantes (fenêtre 3 mois)</div>
+                <div class="dcard-title"><span class="sfi" data-icon="clock"></span>Métriques glissantes (fenêtre 3 mois)</div>
                 <div id="an-rolling-chart" style="height:360px"></div>
             </div>
 
             <!-- ── Kelly Criterion ── -->
             <div class="dcard">
-                <div class="dcard-title">Allocation Kelly (¼ Kelly — sécurisé)</div>
+                <div class="dcard-title"><span class="sfi" data-icon="target"></span>Allocation Kelly (¼ Kelly — sécurisé)</div>
                 <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:12px">
                     Fraction optimale à allouer selon Kelly, réduite à 25% pour limiter la volatilité (pratique institutionnelle).
                 </p>
@@ -1256,6 +1285,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-trading">
     <div class="hero bg-alt">
+        <div class="hero-badge"><span class="sfi" data-icon="bolt"></span></div>
         <h1 class="hero-title">Trading Institutionnel</h1>
         <p class="hero-subtitle">Multi-strategie quantitative. Gestion du risque niveau hedge fund. Execution intelligente.</p>
         <div class="hero-links">
@@ -1290,8 +1320,8 @@
             <div class="mbox"><div class="mbox-label">P&L Jour</div><div class="mbox-val" id="risk-daily-pnl">--</div></div>
         </div>
         <div class="grid-2col">
-            <div class="dcard"><div class="dcard-label">Courbe P&L</div><div id="pnl-chart" class="chart-box"></div></div>
-            <div class="dcard"><div class="dcard-label">P&L Mensuel</div><div id="monthly-pnl-chart" class="chart-box"></div></div>
+            <div class="dcard"><div class="dcard-label"><span class="sfi" data-icon="chartUp"></span>Courbe P&L</div><div id="pnl-chart" class="chart-box"></div></div>
+            <div class="dcard"><div class="dcard-label"><span class="sfi" data-icon="chart"></span>P&L Mensuel</div><div id="monthly-pnl-chart" class="chart-box"></div></div>
         </div>
 
         <!-- Config + Signals -->
@@ -1341,7 +1371,7 @@
                 <button class="abtn abtn-blue" onclick="saveTraderConfig()" style="width:100%;margin-top:24px">Sauvegarder la configuration</button>
             </div>
             <div class="dcard" style="display:flex;flex-direction:column">
-                <div class="dcard-title">Signaux</div>
+                <div class="dcard-title"><span class="sfi" data-icon="sparkles"></span>Signaux</div>
                 <div style="display:flex;gap:10px;margin-bottom:16px">
                     <input type="text" id="new-token-input" class="ainput" placeholder="Ajouter un token..." style="flex:1">
                     <button class="abtn abtn-dark abtn-sm" onclick="addToken()">+</button>
@@ -1359,11 +1389,11 @@
 
         <!-- Trades -->
         <div class="dcard">
-            <div class="dcard-title">Trades actifs</div>
+            <div class="dcard-title"><span class="sfi" data-icon="bolt"></span>Trades actifs</div>
             <table><thead><tr><th>Token</th><th>Side</th><th>Entree</th><th>Qty</th><th>SL</th><th>TP</th><th>Trailing</th><th>P&L</th><th></th></tr></thead><tbody id="active-trades-table"></tbody></table>
         </div>
         <div class="dcard">
-            <div class="dcard-title">Historique</div>
+            <div class="dcard-title"><span class="sfi" data-icon="inbox"></span>Historique</div>
             <table><thead><tr><th>Token</th><th>Side</th><th>Entree</th><th>Sortie</th><th>P&L</th><th>%</th><th>Statut</th><th>Date</th></tr></thead><tbody id="trade-history-table"></tbody></table>
         </div>
     </div>
@@ -1374,6 +1404,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-scanner">
     <div class="hero">
+        <div class="hero-badge"><span class="sfi" data-icon="search"></span></div>
         <h1 class="hero-title">Market Scanner</h1>
         <p class="hero-subtitle">Analyse en temps reel de +1000 paires pour trouver les meilleures opportunites du marche.</p>
         <div class="hero-links">
@@ -1390,11 +1421,11 @@
         </div>
         <div class="grid-2col">
             <div class="dcard">
-                <div class="dcard-title">Top Opportunites</div>
+                <div class="dcard-title"><span class="sfi" data-icon="trending"></span>Top Opportunites</div>
                 <div id="scan-results-list"><div class="hint-cta" onclick="runFullScan()"><span class="hint-icon" data-icon="sparkles"></span><span>Lancer un scan complet du marché</span></div></div>
             </div>
             <div class="dcard">
-                <div class="dcard-title">Top Movers</div>
+                <div class="dcard-title"><span class="sfi" data-icon="chartUp"></span>Top Movers</div>
                 <div style="margin-bottom:20px"><div style="font-size:0.78rem;font-weight:600;color:var(--sf-green);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em">Gainers</div><div id="top-gainers"></div></div>
                 <div style="margin-bottom:20px"><div style="font-size:0.78rem;font-weight:600;color:var(--sf-red);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em">Losers</div><div id="top-losers"></div></div>
                 <div><div style="font-size:0.78rem;font-weight:600;color:var(--sf-blue);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em">Volume</div><div id="top-volume"></div></div>
@@ -1408,6 +1439,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-crypto">
     <div class="hero bg-alt">
+        <div class="hero-badge"><span class="sfi" data-icon="bitcoin"></span></div>
         <h1 class="hero-title">Crypto</h1>
         <p class="hero-subtitle">Gerez votre portefeuille crypto sur MEXC. DCA et reequilibrage automatique.</p>
     </div>
@@ -1422,9 +1454,9 @@
                 <div class="stat-card accent-green"><div class="stat-label">USDT libre</div><div class="stat-value" id="crypto-cash"><span class="skel skel-val"></span></div></div>
                 <div class="stat-card"><div class="stat-label">Tokens</div><div class="stat-value" id="crypto-count"><span class="skel skel-val"></span></div></div>
             </div>
-            <div class="dcard"><div class="dcard-label">Positions</div><table><thead><tr><th>Token</th><th>Cat.</th><th>Qty</th><th>Prix</th><th>Valeur</th><th>Cible</th><th>Actuel</th><th>Ecart</th></tr></thead><tbody id="crypto-positions-table"></tbody></table></div>
+            <div class="dcard"><div class="dcard-label"><span class="sfi" data-icon="briefcase"></span>Positions</div><table><thead><tr><th>Token</th><th>Cat.</th><th>Qty</th><th>Prix</th><th>Valeur</th><th>Cible</th><th>Actuel</th><th>Ecart</th></tr></thead><tbody id="crypto-positions-table"></tbody></table></div>
             <div class="dcard">
-                <div class="dcard-label">DCA Crypto</div>
+                <div class="dcard-label"><span class="sfi" data-icon="bitcoin"></span>DCA Crypto</div>
                 <div style="display:flex;gap:14px;align-items:center;justify-content:center;margin-bottom:16px;flex-wrap:wrap">
                     <input type="number" id="crypto-dca-amount" value="200" min="10" step="10" class="ainput" style="width:140px;text-align:center">
                     <span style="color:var(--sf-text-secondary)">USDT</span>
@@ -1435,7 +1467,7 @@
             </div>
             <div class="dcard">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-                    <div class="dcard-label" style="margin-bottom:0">Reequilibrage Crypto</div>
+                    <div class="dcard-label" style="margin-bottom:0"><span class="sfi" data-icon="scale"></span>Reequilibrage Crypto</div>
                     <button class="abtn abtn-blue abtn-sm" onclick="cryptoRebalance()">Calculer</button>
                 </div>
                 <div id="crypto-rebalance-orders"><div class="hint-cta" onclick="cryptoRebalance()"><span class="hint-icon" data-icon="scale"></span><span>Calculer les ordres de rééquilibrage</span></div></div>
@@ -1449,6 +1481,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-broker">
     <div class="hero">
+        <div class="hero-badge"><span class="sfi" data-icon="plug"></span></div>
         <h1 class="hero-title">Connexions</h1>
         <p class="hero-subtitle">Gerez vos brokers ETF et exchanges crypto.</p>
     </div>
@@ -1457,14 +1490,14 @@
 
         <!-- ETF Brokers -->
         <div class="dcard" style="margin-top:24px">
-            <div class="dcard-title">Brokers ETF</div>
+            <div class="dcard-title"><span class="sfi" data-icon="bank"></span>Brokers ETF</div>
             <p style="color:var(--sf-text-secondary);font-size:0.85rem;margin-bottom:16px">Pour gerer votre portefeuille ETF (MSCI World, S&P 500, etc.)</p>
             <div class="stat-grid stat-grid-3" id="etf-broker-list"></div>
         </div>
 
         <!-- Crypto Exchanges -->
         <div class="dcard" style="margin-top:24px">
-            <div class="dcard-title">Exchanges Crypto</div>
+            <div class="dcard-title"><span class="sfi" data-icon="bitcoin"></span>Exchanges Crypto</div>
             <p style="color:var(--sf-text-secondary);font-size:0.85rem;margin-bottom:16px">Pour le trading crypto, DCA et le bot de trading automatique.</p>
             <div class="stat-grid stat-grid-3" id="crypto-exchange-list"></div>
         </div>
@@ -1484,13 +1517,14 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-auto">
     <div class="hero bg-alt">
+        <div class="hero-badge"><span class="sfi" data-icon="clock"></span></div>
         <h1 class="hero-title">Automatisation</h1>
         <p class="hero-subtitle">Configurez vos DCA et reequilibrages automatiques.</p>
     </div>
     <div class="section">
         <div class="grid-2col">
             <div class="dcard">
-                <div class="dcard-title">DCA Automatique</div>
+                <div class="dcard-title"><span class="sfi" data-icon="euro"></span>DCA Automatique</div>
                 <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
                     <label class="atoggle"><input type="checkbox" id="auto-dca-enabled" onchange="updateScheduler()"><span class="atoggle-track"></span></label>
                     <span>Activer le DCA auto</span>
@@ -1502,7 +1536,7 @@
                 </div>
             </div>
             <div class="dcard">
-                <div class="dcard-title">Reequilibrage Auto</div>
+                <div class="dcard-title"><span class="sfi" data-icon="scale"></span>Reequilibrage Auto</div>
                 <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
                     <label class="atoggle"><input type="checkbox" id="auto-rebal-enabled" onchange="updateScheduler()"><span class="atoggle-track"></span></label>
                     <span>Activer</span>
@@ -1513,7 +1547,7 @@
                 </div>
             </div>
         </div>
-        <div class="dcard"><div class="dcard-title">Jobs planifies</div><div id="scheduled-jobs"><p style="color:var(--sf-text-muted)">Aucun job planifie</p></div></div>
+        <div class="dcard"><div class="dcard-title"><span class="sfi" data-icon="clock"></span>Jobs planifies</div><div id="scheduled-jobs"><p style="color:var(--sf-text-muted)">Aucun job planifie</p></div></div>
     </div>
 </div>
 
@@ -1522,6 +1556,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-securite">
     <div class="hero">
+        <div class="hero-badge"><span class="sfi" data-icon="shield"></span></div>
         <h1 class="hero-title">Sécurité & Notifications</h1>
         <p class="hero-subtitle">Mode d'exécution, kill-switch, alertes Telegram, authentification.</p>
     </div>
@@ -1533,7 +1568,7 @@
         </div>
 
         <div class="dcard">
-            <div class="dcard-label">Mode PAPER / LIVE</div>
+            <div class="dcard-label"><span class="sfi" data-icon="flask"></span>Mode PAPER / LIVE</div>
             <p style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">
                 En mode <b>PAPER</b>, aucun ordre réel n'est envoyé aux brokers : les trades sont simulés avec un portefeuille virtuel.
                 Passez en <b>LIVE</b> uniquement après avoir testé votre stratégie sur plusieurs semaines.
@@ -1546,7 +1581,7 @@
         </div>
 
         <div class="dcard">
-            <div class="dcard-label">Kill-switch d'urgence</div>
+            <div class="dcard-label"><span class="sfi" data-icon="power"></span>Kill-switch d'urgence</div>
             <p style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">
                 Stoppe instantanément toutes les activités du bot : trader auto, scheduler DCA/rebalance, et bloque tout nouvel ordre jusqu'à réactivation manuelle.
             </p>
@@ -1557,7 +1592,7 @@
         </div>
 
         <div class="dcard">
-            <div class="dcard-label">Notifications Telegram</div>
+            <div class="dcard-label"><span class="sfi" data-icon="phone"></span>Notifications Telegram</div>
             <p style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">
                 Reçois les trades, erreurs, kill-switch et résumés quotidiens. Crée un bot via <b>@BotFather</b> sur Telegram et récupère ton chat_id via <b>@userinfobot</b>.
             </p>
@@ -1587,12 +1622,12 @@
         </div>
 
         <div class="dcard">
-            <div class="dcard-label">Paper portfolio</div>
+            <div class="dcard-label"><span class="sfi" data-icon="flask"></span>Paper portfolio</div>
             <div id="paper-portfolio" style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">—</div>
         </div>
 
         <div class="dcard">
-            <div class="dcard-label">Santé du bot</div>
+            <div class="dcard-label"><span class="sfi" data-icon="checkCircle"></span>Santé du bot</div>
             <p style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">
                 Heartbeat quotidien Telegram à <b>09:00 UTC</b>. Notification automatique à chaque démarrage/redéploiement. Endpoint public <code>/health</code> pour monitoring externe (UptimeRobot, etc.).
             </p>
@@ -1605,7 +1640,7 @@
 
         <div class="dcard">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                <div class="dcard-label" style="margin-bottom:0">Backups automatiques</div>
+                <div class="dcard-label" style="margin-bottom:0"><span class="sfi" data-icon="inbox"></span>Backups automatiques</div>
                 <div>
                     <button class="link-more" style="display:inline-flex;align-items:center;gap:6px" onclick="createBackup()"><span class="sfi" data-icon="inbox"></span>Créer un backup maintenant</button>
                 </div>
@@ -1623,6 +1658,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-glossaire">
     <div class="hero bg-alt">
+        <div class="hero-badge"><span class="sfi" data-icon="beaker"></span></div>
         <h1 class="hero-title">Glossaire</h1>
         <p class="hero-subtitle">Définitions de tous les termes financiers et techniques utilisés dans l'application.</p>
     </div>
