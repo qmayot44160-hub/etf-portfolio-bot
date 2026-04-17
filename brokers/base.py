@@ -95,9 +95,63 @@ class BaseBroker(ABC):
         pass
 
     @abstractmethod
-    def place_order(self, order: BrokerOrder) -> BrokerOrder:
-        """Place un ordre. Retourne l'ordre avec son statut mis à jour."""
+    def _place_order_impl(self, order: BrokerOrder) -> BrokerOrder:
+        """Implémentation broker-spécifique. NE PAS appeler directement — passer par place_order()."""
         pass
+
+    def place_order(self, order: BrokerOrder) -> BrokerOrder:
+        """
+        Place un ordre. Intercepte via kill-switch + paper mode global.
+        - Si kill-switch actif : rejette.
+        - Si paper_mode : simule via paper_broker.
+        - Sinon : délègue à _place_order_impl (broker réel).
+        """
+        try:
+            from settings import is_kill_switch_active, is_paper_mode, load_settings
+        except Exception:
+            return self._place_order_impl(order)
+
+        if is_kill_switch_active():
+            reason = load_settings().get("kill_switch_reason", "")
+            order.status = f"rejected:kill_switch:{reason}"
+            return order
+
+        if is_paper_mode():
+            try:
+                import paper_broker
+                from market_data import get_current_prices
+                # Prix de référence : limit_price si fourni, sinon dernier prix marché
+                px = order.limit_price
+                if not px:
+                    prices = get_current_prices()
+                    px = prices.get(order.ticker, 0) or 0
+                if not px:
+                    order.status = "rejected:paper_no_price"
+                    return order
+                sim = paper_broker.simulate_order(
+                    symbol=order.ticker,
+                    side=order.side.value if hasattr(order.side, "value") else str(order.side),
+                    quantity=order.quantity,
+                    price=px,
+                    order_type=(order.order_type.value if hasattr(order.order_type, "value") else "market").lower(),
+                    broker=self.name,
+                )
+                order.order_id = sim.get("id")
+                order.status = sim.get("status", "filled")
+                order.filled_price = px
+                order.filled_at = sim.get("timestamp")
+                try:
+                    from notifications import notify_trade_opened
+                    notify_trade_opened(order.ticker, order.side.value, px, order.quantity, 0, 0, paper=True)
+                except Exception:
+                    pass
+                return order
+            except Exception as e:
+                order.status = f"rejected:paper_error:{e}"
+                return order
+
+        # Mode LIVE
+        return self._place_order_impl(order)
 
     @abstractmethod
     def get_order_status(self, order_id: str) -> BrokerOrder:

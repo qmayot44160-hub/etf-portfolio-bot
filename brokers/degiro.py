@@ -175,7 +175,7 @@ class DegiroBroker(BaseBroker):
         account = self.get_account()
         return account.total_value
 
-    def place_order(self, order: BrokerOrder) -> BrokerOrder:
+    def _place_order_impl(self, order: BrokerOrder) -> BrokerOrder:
         self._check_connected()
         from degiro_connector.trading.models.order import (
             Order as DegiroOrder, Action, OrderType as DOrderType, TimeType,

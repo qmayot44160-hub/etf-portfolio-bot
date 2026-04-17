@@ -130,7 +130,7 @@ class MEXCBroker(BaseBroker):
         account = self.get_account()
         return account.total_value
 
-    def place_order(self, order: BrokerOrder) -> BrokerOrder:
+    def _place_order_impl(self, order: BrokerOrder) -> BrokerOrder:
         self._check_connected()
         symbol = order.ticker if "/" in order.ticker else f"{order.ticker}/USDT"
         side = "buy" if order.side == OrderSide.BUY else "sell"

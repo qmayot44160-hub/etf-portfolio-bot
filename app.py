@@ -2,7 +2,7 @@
 Dashboard web Flask pour le bot ETF.
 """
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, session, redirect, url_for
 from bot_engine import BotEngine
 from portfolio import (
     load_state, get_portfolio_value, calculate_rebalance,
@@ -20,11 +20,74 @@ from scheduler import (
 from config import PORTFOLIO, DCA_MONTHLY, CRYPTO_PORTFOLIO, CRYPTO_DCA_MONTHLY
 from crypto_engine import CryptoEngine
 from auto_trader import AutoTrader
+from security import (
+    get_flask_secret, is_auth_enabled, verify_password, login_required,
+)
+from settings import (
+    load_settings, save_settings,
+    is_kill_switch_active, trigger_kill_switch, release_kill_switch,
+    is_paper_mode, set_paper_mode,
+)
+import notifications as notif
+import paper_broker
 
 app = Flask(__name__)
+app.secret_key = get_flask_secret()
 engine = BotEngine()
 crypto = CryptoEngine()
 trader = AutoTrader()
+
+
+# ── Auth ───────────────────────────────────────────────
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if not is_auth_enabled():
+        return redirect("/")
+    if request.method == "POST":
+        pwd = request.form.get("password", "")
+        if verify_password(pwd):
+            session["auth_ok"] = True
+            session.permanent = True
+            return redirect("/")
+        return render_template("login.html", error="Mot de passe incorrect."), 401
+    if session.get("auth_ok"):
+        return redirect("/")
+    return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
+
+
+@app.route("/api/auth/status")
+def api_auth_status():
+    return jsonify({
+        "auth_enabled": is_auth_enabled(),
+        "logged_in": session.get("auth_ok", False) or not is_auth_enabled(),
+    })
+
+
+# ── Auth Guard global ─────────────────────────────────
+_AUTH_WHITELIST = {"/login", "/logout", "/api/auth/status", "/static"}
+
+
+@app.before_request
+def _global_auth_guard():
+    if not is_auth_enabled():
+        return None
+    path = request.path or "/"
+    # Whitelist (prefix match pour /static)
+    for wl in _AUTH_WHITELIST:
+        if path == wl or path.startswith(wl + "/"):
+            return None
+    if session.get("auth_ok"):
+        return None
+    if path.startswith("/api/"):
+        return jsonify({"error": "Authentification requise", "auth_required": True}), 401
+    return redirect("/login")
 
 
 # ── Pages ──────────────────────────────────────────────
@@ -32,6 +95,88 @@ trader = AutoTrader()
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+# ── API: Settings (kill-switch, paper mode) ───────────
+
+@app.route("/api/settings")
+def api_settings():
+    """Retourne les settings globaux (kill-switch, paper mode)."""
+    s = load_settings()
+    s["auth_enabled"] = is_auth_enabled()
+    return jsonify(s)
+
+
+@app.route("/api/settings/paper-mode", methods=["POST"])
+def api_settings_paper_mode():
+    data = request.get_json() or {}
+    enabled = bool(data.get("enabled", True))
+    cfg = set_paper_mode(enabled)
+    return jsonify({"status": "ok", "paper_mode": cfg["paper_mode"]})
+
+
+@app.route("/api/kill-switch", methods=["POST"])
+def api_kill_switch():
+    """Active le kill-switch : stoppe le trader + bloque ordres."""
+    data = request.get_json() or {}
+    reason = data.get("reason", "Activation manuelle via UI")
+    # Stop auto-trader
+    try:
+        trader.stop()
+    except Exception as e:
+        print(f"[KillSwitch] trader.stop() error: {e}")
+    # Annule les jobs scheduler
+    try:
+        cfg = load_scheduler_config()
+        cfg["dca_enabled"] = False
+        cfg["rebalance_enabled"] = False
+        save_scheduler_config(cfg)
+        setup_scheduled_jobs(cfg)
+    except Exception as e:
+        print(f"[KillSwitch] scheduler disable error: {e}")
+    state = trigger_kill_switch(reason)
+    return jsonify({"status": "killed", "settings": state})
+
+
+@app.route("/api/kill-switch/release", methods=["POST"])
+def api_kill_switch_release():
+    """Désactive le kill-switch (action humaine)."""
+    state = release_kill_switch()
+    return jsonify({"status": "released", "settings": state})
+
+
+# ── API: Notifications (Telegram) ──────────────────────
+
+@app.route("/api/notifications/config", methods=["GET", "POST"])
+def api_notifications_config():
+    if request.method == "POST":
+        data = request.get_json() or {}
+        notif.save_config(data)
+        return jsonify({"status": "ok", "config": notif.get_config_safe()})
+    return jsonify(notif.get_config_safe())
+
+
+@app.route("/api/notifications/test", methods=["POST"])
+def api_notifications_test():
+    return jsonify(notif.test_notification())
+
+
+# ── API: Paper trading ────────────────────────────────
+
+@app.route("/api/paper/portfolio")
+def api_paper_portfolio():
+    return jsonify(paper_broker.get_paper_portfolio())
+
+
+@app.route("/api/paper/trades")
+def api_paper_trades():
+    limit = request.args.get("limit", 50, type=int)
+    return jsonify(paper_broker.get_paper_trades(limit))
+
+
+@app.route("/api/paper/reset", methods=["POST"])
+def api_paper_reset():
+    return jsonify(paper_broker.reset_paper())
 
 
 # ── API: Bot Status ────────────────────────────────────

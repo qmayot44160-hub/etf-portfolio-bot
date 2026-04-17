@@ -617,9 +617,14 @@
             <button class="globalheader-link" data-view="scanner">Scanner</button>
             <button class="globalheader-link" data-view="broker">Connexions</button>
             <button class="globalheader-link" data-view="auto">Automatisation</button>
+            <button class="globalheader-link" data-view="securite">Sécurité</button>
             <button class="globalheader-link" data-view="glossaire">Glossaire</button>
         </div>
-        <div id="bot-status" class="globalheader-status"><span class="dot" style="background:var(--sf-orange)"></span> Simulation</div>
+        <div style="display:flex;align-items:center;gap:12px">
+            <div id="mode-badge" style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;background:rgba(255,159,10,0.15);color:#ff9f0a;border:1px solid rgba(255,159,10,0.35)">PAPER</div>
+            <button id="kill-switch-btn" onclick="triggerKillSwitch()" title="Arrêt d'urgence du bot" style="background:rgba(255,69,58,0.1);color:#ff453a;border:1px solid rgba(255,69,58,0.4);border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">🚨 KILL</button>
+            <div id="bot-status" class="globalheader-status"><span class="dot" style="background:var(--sf-orange)"></span> Simulation</div>
+        </div>
     </div>
 </nav>
 
@@ -1198,6 +1203,82 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
+     SÉCURITÉ & NOTIFICATIONS
+     ═══════════════════════════════════════════════════════ -->
+<div id="view-securite">
+    <div class="hero">
+        <h1 class="hero-title">Sécurité & Notifications</h1>
+        <p class="hero-subtitle">Mode d'exécution, kill-switch, alertes Telegram, authentification.</p>
+    </div>
+    <div class="section">
+        <div class="stat-grid stat-grid-3">
+            <div class="stat-card"><div class="stat-label">Mode d'exécution</div><div class="stat-value" id="sec-mode">—</div><div class="stat-sub" id="sec-mode-sub"></div></div>
+            <div class="stat-card"><div class="stat-label">Kill-switch</div><div class="stat-value" id="sec-kill">—</div><div class="stat-sub" id="sec-kill-sub"></div></div>
+            <div class="stat-card"><div class="stat-label">Authentification</div><div class="stat-value" id="sec-auth">—</div><div class="stat-sub">Via variable d'env APP_PASSWORD</div></div>
+        </div>
+
+        <div class="dcard">
+            <div class="dcard-label">Mode PAPER / LIVE</div>
+            <p style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">
+                En mode <b>PAPER</b>, aucun ordre réel n'est envoyé aux brokers : les trades sont simulés avec un portefeuille virtuel.
+                Passez en <b>LIVE</b> uniquement après avoir testé votre stratégie sur plusieurs semaines.
+            </p>
+            <div style="display:flex;gap:12px;margin-top:16px;align-items:center">
+                <button class="link-more" onclick="togglePaperMode(true)">Activer PAPER</button>
+                <button class="link-more" onclick="togglePaperMode(false)" style="color:#ff453a">Passer en LIVE</button>
+                <button class="link-more" onclick="resetPaper()">Réinitialiser paper</button>
+            </div>
+        </div>
+
+        <div class="dcard">
+            <div class="dcard-label">Kill-switch d'urgence</div>
+            <p style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">
+                Stoppe instantanément toutes les activités du bot : trader auto, scheduler DCA/rebalance, et bloque tout nouvel ordre jusqu'à réactivation manuelle.
+            </p>
+            <div style="display:flex;gap:12px;margin-top:16px;align-items:center">
+                <button class="link-more" style="color:#ff453a" onclick="triggerKillSwitch()">🚨 Activer kill-switch</button>
+                <button class="link-more" onclick="releaseKillSwitch()">Désactiver (confirme)</button>
+            </div>
+        </div>
+
+        <div class="dcard">
+            <div class="dcard-label">Notifications Telegram</div>
+            <p style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">
+                Reçois les trades, erreurs, kill-switch et résumés quotidiens. Crée un bot via <b>@BotFather</b> sur Telegram et récupère ton chat_id via <b>@userinfobot</b>.
+            </p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
+                <div>
+                    <label style="font-size:12px;color:var(--sf-text-muted)">Bot Token</label>
+                    <input type="password" id="tg-token" placeholder="123456:AAE..." style="width:100%;background:var(--sf-bg);border:1px solid var(--sf-border);color:var(--sf-text);border-radius:6px;padding:8px 10px;font-size:13px">
+                    <div id="tg-token-mask" style="font-size:11px;color:var(--sf-text-muted);margin-top:4px"></div>
+                </div>
+                <div>
+                    <label style="font-size:12px;color:var(--sf-text-muted)">Chat ID</label>
+                    <input type="text" id="tg-chat" placeholder="123456789" style="width:100%;background:var(--sf-bg);border:1px solid var(--sf-border);color:var(--sf-text);border-radius:6px;padding:8px 10px;font-size:13px">
+                </div>
+            </div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:13px">
+                <label><input type="checkbox" id="tg-enabled"> Activer Telegram</label>
+                <label><input type="checkbox" id="tg-trades" checked> Trades</label>
+                <label><input type="checkbox" id="tg-errors" checked> Erreurs</label>
+                <label><input type="checkbox" id="tg-kill" checked> Kill-switch</label>
+                <label><input type="checkbox" id="tg-daily" checked> Résumé quotidien</label>
+                <label><input type="checkbox" id="tg-regime" checked> Changement de régime</label>
+            </div>
+            <div style="display:flex;gap:12px;margin-top:16px">
+                <button class="link-more" onclick="saveTelegram()">Enregistrer</button>
+                <button class="link-more" onclick="testTelegram()">Envoyer test</button>
+            </div>
+        </div>
+
+        <div class="dcard">
+            <div class="dcard-label">Paper portfolio</div>
+            <div id="paper-portfolio" style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">—</div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
      GLOSSAIRE
      ═══════════════════════════════════════════════════════ -->
 <div id="view-glossaire">
@@ -1238,7 +1319,7 @@ function showView(v){
             next.style.transform='translateY(0)';
         });
         window.scrollTo({top:0,behavior:'smooth'});
-        const loaders={portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire};
+        const loaders={portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire,securite:loadSecurite};
         if(loaders[v])loaders[v]();
     };
     if(current&&current!==next){
@@ -1833,9 +1914,101 @@ function injectTooltips(){
     });
 }
 
+/* ═══ Sécurité & Notifications ═══ */
+async function loadSecurite(){
+    try{
+        const s = await (await fetch('/api/settings')).json();
+        const mode = s.paper_mode ? 'PAPER' : 'LIVE';
+        document.getElementById('sec-mode').textContent = mode;
+        document.getElementById('sec-mode').style.color = s.paper_mode ? '#ff9f0a' : '#32d74b';
+        document.getElementById('sec-mode-sub').textContent = s.paper_mode ? 'Ordres simulés' : 'Ordres réels envoyés au broker';
+        document.getElementById('sec-kill').textContent = s.kill_switch ? 'ACTIF' : 'INACTIF';
+        document.getElementById('sec-kill').style.color = s.kill_switch ? '#ff453a' : '#32d74b';
+        document.getElementById('sec-kill-sub').textContent = s.kill_switch ? (s.kill_switch_reason || '') : 'Bot opérationnel';
+        document.getElementById('sec-auth').textContent = s.auth_enabled ? 'Activée' : 'Désactivée';
+        document.getElementById('sec-auth').style.color = s.auth_enabled ? '#32d74b' : '#ff9f0a';
+        // Badge global
+        const badge = document.getElementById('mode-badge');
+        if(badge){
+            badge.textContent = mode;
+            if(s.paper_mode){ badge.style.background='rgba(255,159,10,0.15)'; badge.style.color='#ff9f0a'; badge.style.borderColor='rgba(255,159,10,0.35)'; }
+            else { badge.style.background='rgba(50,215,75,0.15)'; badge.style.color='#32d74b'; badge.style.borderColor='rgba(50,215,75,0.35)'; }
+        }
+    }catch(e){ console.error(e); }
+    try{
+        const tg = await (await fetch('/api/notifications/config')).json();
+        document.getElementById('tg-enabled').checked = !!tg.telegram_enabled;
+        document.getElementById('tg-chat').value = tg.telegram_chat_id || '';
+        document.getElementById('tg-token-mask').textContent = tg.telegram_bot_token_masked ? 'Token actuel : '+tg.telegram_bot_token_masked : '';
+        document.getElementById('tg-trades').checked = tg.notify_trades !== false;
+        document.getElementById('tg-errors').checked = tg.notify_errors !== false;
+        document.getElementById('tg-kill').checked = tg.notify_kill_switch !== false;
+        document.getElementById('tg-daily').checked = tg.notify_daily_summary !== false;
+        document.getElementById('tg-regime').checked = tg.notify_regime_change !== false;
+    }catch(e){ console.error(e); }
+    try{
+        const p = await (await fetch('/api/paper/portfolio')).json();
+        const pos = Object.entries(p.positions||{}).map(([s,d])=>`${s}: ${d.quantity} @ ${d.avg_price.toFixed(4)}`).join(' · ') || 'Aucune position';
+        document.getElementById('paper-portfolio').innerHTML = `<b>Cash paper :</b> ${(p.cash||0).toFixed(2)} $ · <b>Positions :</b> ${pos}`;
+    }catch(e){}
+}
+
+async function togglePaperMode(enabled){
+    if(!enabled && !confirm('⚠️ Passer en LIVE : des ordres RÉELS seront envoyés au broker. Confirmer ?'))return;
+    await fetch('/api/settings/paper-mode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled})});
+    loadSecurite();
+    refreshStatus();
+}
+
+async function triggerKillSwitch(){
+    const reason = prompt('Raison du kill-switch ?', 'Arrêt manuel');
+    if(reason === null)return;
+    await fetch('/api/kill-switch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reason})});
+    alert('🚨 Kill-switch activé. Le bot est arrêté.');
+    loadSecurite();
+    refreshStatus();
+}
+
+async function releaseKillSwitch(){
+    if(!confirm('Désactiver le kill-switch et reprendre les activités ?'))return;
+    await fetch('/api/kill-switch/release',{method:'POST'});
+    loadSecurite();
+    refreshStatus();
+}
+
+async function resetPaper(){
+    if(!confirm('Réinitialiser le portefeuille paper ?'))return;
+    await fetch('/api/paper/reset',{method:'POST'});
+    loadSecurite();
+}
+
+async function saveTelegram(){
+    const payload = {
+        telegram_enabled: document.getElementById('tg-enabled').checked,
+        telegram_chat_id: document.getElementById('tg-chat').value.trim(),
+        notify_trades: document.getElementById('tg-trades').checked,
+        notify_errors: document.getElementById('tg-errors').checked,
+        notify_kill_switch: document.getElementById('tg-kill').checked,
+        notify_daily_summary: document.getElementById('tg-daily').checked,
+        notify_regime_change: document.getElementById('tg-regime').checked,
+    };
+    const tok = document.getElementById('tg-token').value.trim();
+    if(tok)payload.telegram_bot_token = tok;
+    await fetch('/api/notifications/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    document.getElementById('tg-token').value = '';
+    alert('Configuration Telegram enregistrée.');
+    loadSecurite();
+}
+
+async function testTelegram(){
+    const r = await (await fetch('/api/notifications/test',{method:'POST'})).json();
+    alert(r.sent ? '✅ Message test envoyé — vérifie Telegram.' : '❌ Échec : vérifie token + chat_id + activation.');
+}
+
 /* ═══ Boot ═══ */
 refreshPortfolio();
 refreshStatus();
+loadSecurite();
 setTimeout(() => { initCustomSelects(); injectTooltips(); }, 200);
 
 // Navigation re-init handled inside showView() — no duplicate handler needed.

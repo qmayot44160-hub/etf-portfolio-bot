@@ -78,7 +78,7 @@ class AlpacaBroker(BaseBroker):
         account = self.api.get_account()
         return float(account.portfolio_value)
 
-    def place_order(self, order: BrokerOrder) -> BrokerOrder:
+    def _place_order_impl(self, order: BrokerOrder) -> BrokerOrder:
         self._check_connected()
         try:
             side = "buy" if order.side == OrderSide.BUY else "sell"
