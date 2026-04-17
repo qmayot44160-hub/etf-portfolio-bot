@@ -597,6 +597,173 @@
         }
         .stat-delta.up { color: var(--sf-green); }
         .stat-delta.down { color: var(--sf-red); }
+
+        /* ════════════════════════════════════════════════
+           GROUPED NAV (dropdown sections)
+           ════════════════════════════════════════════════ */
+        .nav-group { position: relative; }
+        .nav-group-trigger {
+            font-size: 0.7rem; color: var(--sf-text-secondary);
+            background: none; border: none; font-family: inherit;
+            padding: 0 12px; line-height: 44px; cursor: pointer;
+            transition: color 0.3s; letter-spacing: 0;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .nav-group-trigger::after {
+            content: '▾'; font-size: 0.6rem; opacity: 0.6;
+            transition: transform 0.25s;
+        }
+        .nav-group-trigger:hover { color: var(--sf-text); }
+        .nav-group-trigger.has-active { color: var(--sf-text); }
+        .nav-group.open .nav-group-trigger::after { transform: rotate(180deg); }
+        .nav-group.open .nav-group-trigger { color: var(--sf-text); }
+
+        .nav-dropdown {
+            position: absolute; top: 100%; left: 50%; transform: translateX(-50%) translateY(-6px);
+            background: rgba(28,28,30,0.96);
+            backdrop-filter: saturate(180%) blur(20px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            min-width: 180px; padding: 6px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 9998;
+        }
+        .nav-group.open .nav-dropdown {
+            opacity: 1; transform: translateX(-50%) translateY(0);
+            pointer-events: all;
+        }
+        .nav-dropdown-item {
+            display: block; width: 100%;
+            padding: 10px 14px; font-size: 0.78rem;
+            color: var(--sf-text-secondary);
+            background: none; border: none; font-family: inherit;
+            text-align: left; cursor: pointer; border-radius: 8px;
+            transition: background 0.15s, color 0.15s;
+        }
+        .nav-dropdown-item:hover { background: rgba(255,255,255,0.06); color: var(--sf-text); }
+        .nav-dropdown-item.active { color: var(--sf-blue); background: rgba(41,151,255,0.08); }
+        .nav-dropdown-item .nav-icon { margin-right: 8px; opacity: 0.7; }
+
+        /* ════════════════════════════════════════════════
+           CONTEXT BANNER (persistent status bar)
+           ════════════════════════════════════════════════ */
+        .ctx-banner {
+            position: fixed; top: 44px; left: 0; right: 0; z-index: 9998;
+            background: rgba(16,16,16,0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 8px 24px;
+            font-size: 0.74rem;
+            display: flex; align-items: center; justify-content: center;
+            gap: 20px; flex-wrap: wrap;
+            color: var(--sf-text-secondary);
+            transition: background 0.3s;
+        }
+        .ctx-banner.warn { background: rgba(255,159,10,0.08); border-bottom-color: rgba(255,159,10,0.3); }
+        .ctx-banner.danger { background: rgba(255,69,58,0.10); border-bottom-color: rgba(255,69,58,0.3); }
+        .ctx-item { display: inline-flex; align-items: center; gap: 6px; }
+        .ctx-item strong { color: var(--sf-text); font-weight: 600; }
+        .ctx-dot { width: 7px; height: 7px; border-radius: 50%; }
+        .ctx-dot.green { background: var(--sf-green); box-shadow: 0 0 6px rgba(48,209,88,0.6); }
+        .ctx-dot.orange { background: var(--sf-orange); box-shadow: 0 0 6px rgba(255,159,10,0.6); }
+        .ctx-dot.red { background: var(--sf-red); box-shadow: 0 0 6px rgba(255,69,58,0.6); }
+        .ctx-dot.gray { background: var(--sf-text-muted); }
+        .ctx-link {
+            color: var(--sf-blue); cursor: pointer;
+            border: none; background: none; font-family: inherit;
+            font-size: inherit; padding: 0;
+        }
+        .ctx-link:hover { text-decoration: underline; }
+
+        .page { padding-top: 78px; } /* nav 44 + banner ~34 */
+
+        /* ════════════════════════════════════════════════
+           HOME DASHBOARD
+           ════════════════════════════════════════════════ */
+        .home-hero {
+            padding: 60px 24px 30px; text-align: center;
+            max-width: 900px; margin: 0 auto;
+        }
+        .home-greeting {
+            font-size: 0.85rem; color: var(--sf-text-muted);
+            text-transform: uppercase; letter-spacing: 0.08em;
+            margin-bottom: 14px;
+        }
+        .home-title {
+            font-size: clamp(2.2rem, 5vw, 3.6rem);
+            font-weight: 700; letter-spacing: -0.04em; line-height: 1.05;
+            background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .home-subtitle {
+            font-size: 1.1rem; color: var(--sf-text-secondary);
+            margin-bottom: 30px;
+        }
+
+        /* Action cards (next steps) */
+        .action-list {
+            display: flex; flex-direction: column; gap: 12px;
+            margin-bottom: 32px;
+        }
+        .action-card {
+            display: flex; align-items: center; gap: 18px;
+            background: var(--sf-bg-card); border-radius: 16px;
+            padding: 18px 22px; cursor: pointer;
+            transition: transform 0.25s, background 0.25s;
+            border-left: 3px solid transparent;
+            text-align: left;
+        }
+        .action-card:hover { transform: translateX(4px); background: var(--sf-bg-card-hover); }
+        .action-card.urgent { border-left-color: var(--sf-red); }
+        .action-card.warn { border-left-color: var(--sf-orange); }
+        .action-card.suggest { border-left-color: var(--sf-blue); }
+        .action-card.ok { border-left-color: var(--sf-green); opacity: 0.85; cursor: default; }
+        .action-card.ok:hover { transform: none; background: var(--sf-bg-card); }
+        .action-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; flex-shrink: 0;
+        }
+        .action-card.urgent .action-icon { background: rgba(255,69,58,0.12); }
+        .action-card.warn .action-icon { background: rgba(255,159,10,0.12); }
+        .action-card.suggest .action-icon { background: rgba(41,151,255,0.12); }
+        .action-card.ok .action-icon { background: rgba(48,209,88,0.12); }
+        .action-body { flex: 1; }
+        .action-title { font-size: 0.98rem; font-weight: 600; color: var(--sf-text); margin-bottom: 3px; }
+        .action-desc { font-size: 0.82rem; color: var(--sf-text-secondary); }
+        .action-arrow { color: var(--sf-text-muted); font-size: 1.1rem; }
+
+        /* Quick shortcut tiles */
+        .shortcut-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px; margin-top: 24px;
+        }
+        .shortcut-tile {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px; padding: 20px;
+            cursor: pointer; text-align: left;
+            transition: all 0.25s; color: var(--sf-text);
+            font-family: inherit;
+        }
+        .shortcut-tile:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: var(--sf-blue);
+            transform: translateY(-2px);
+        }
+        .shortcut-tile-icon { font-size: 1.5rem; margin-bottom: 8px; }
+        .shortcut-tile-title { font-size: 0.92rem; font-weight: 600; margin-bottom: 2px; }
+        .shortcut-tile-desc { font-size: 0.76rem; color: var(--sf-text-muted); }
+
+        @media (max-width: 760px) {
+            .globalheader-links { gap: 0; }
+            .nav-group-trigger, .globalheader-link { padding: 0 8px; font-size: 0.66rem; }
+            .ctx-banner { font-size: 0.68rem; gap: 10px; padding: 6px 12px; }
+            .page { padding-top: 86px; }
+        }
     </style>
 </head>
 <body>
@@ -608,15 +775,35 @@
     <div class="globalheader-inner">
         <div class="globalheader-logo">PortfolioQuant</div>
         <div class="globalheader-links">
-            <button class="globalheader-link active" data-view="portfolio">Portefeuille</button>
-            <button class="globalheader-link" data-view="dca">DCA</button>
-            <button class="globalheader-link" data-view="projection">Projection</button>
-            <button class="globalheader-link" data-view="analytics">Analyse</button>
-            <button class="globalheader-link" data-view="crypto">Crypto</button>
-            <button class="globalheader-link" data-view="trading">Trading</button>
-            <button class="globalheader-link" data-view="scanner">Scanner</button>
-            <button class="globalheader-link" data-view="broker">Connexions</button>
-            <button class="globalheader-link" data-view="auto">Automatisation</button>
+            <button class="globalheader-link active" data-view="home">Accueil</button>
+
+            <div class="nav-group" data-group="trading">
+                <button class="nav-group-trigger">Trading</button>
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-item" data-view="portfolio"><span class="nav-icon">📊</span>Portefeuille ETF</button>
+                    <button class="nav-dropdown-item" data-view="dca"><span class="nav-icon">💶</span>DCA mensuel</button>
+                    <button class="nav-dropdown-item" data-view="crypto"><span class="nav-icon">₿</span>Crypto</button>
+                    <button class="nav-dropdown-item" data-view="trading"><span class="nav-icon">⚡</span>Auto-Trader</button>
+                </div>
+            </div>
+
+            <div class="nav-group" data-group="analyse">
+                <button class="nav-group-trigger">Analyse</button>
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-item" data-view="analytics"><span class="nav-icon">📈</span>Performance</button>
+                    <button class="nav-dropdown-item" data-view="projection"><span class="nav-icon">🔮</span>Projection</button>
+                    <button class="nav-dropdown-item" data-view="scanner"><span class="nav-icon">🔎</span>Scanner</button>
+                </div>
+            </div>
+
+            <div class="nav-group" data-group="config">
+                <button class="nav-group-trigger">Configuration</button>
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-item" data-view="broker"><span class="nav-icon">🔌</span>Connexions brokers</button>
+                    <button class="nav-dropdown-item" data-view="auto"><span class="nav-icon">⏰</span>Automatisation</button>
+                </div>
+            </div>
+
             <button class="globalheader-link" data-view="securite">Sécurité</button>
             <button class="globalheader-link" data-view="glossaire">Glossaire</button>
         </div>
@@ -628,12 +815,107 @@
     </div>
 </nav>
 
+<!-- ═══════════════════════════════════════════════════════
+     CONTEXT BANNER (état temps réel)
+     ═══════════════════════════════════════════════════════ -->
+<div id="ctx-banner" class="ctx-banner">
+    <div class="ctx-item"><span class="ctx-dot gray"></span><span>Chargement de l'état...</span></div>
+</div>
+
 <div class="page">
+
+<!-- ═══════════════════════════════════════════════════════
+     ACCUEIL (Dashboard)
+     ═══════════════════════════════════════════════════════ -->
+<div id="view-home" class="show">
+    <div class="home-hero">
+        <div class="home-greeting" id="home-greeting">Bienvenue</div>
+        <h1 class="home-title">Tableau de bord</h1>
+        <p class="home-subtitle" id="home-subtitle">Chargement de votre état...</p>
+    </div>
+
+    <div class="section">
+        <!-- KPIs rapides -->
+        <div class="stat-grid stat-grid-4" id="home-stats">
+            <div class="stat-card accent-blue">
+                <div class="stat-label">Valeur totale</div>
+                <div class="stat-value" id="home-total"><span class="skel skel-val"></span></div>
+                <div class="stat-sub" id="home-total-sub">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Mode actif</div>
+                <div class="stat-value" id="home-mode" style="font-size:1.6rem">—</div>
+                <div class="stat-sub" id="home-mode-sub">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Santé du bot</div>
+                <div class="stat-value" id="home-health" style="font-size:1.6rem">—</div>
+                <div class="stat-sub" id="home-health-sub">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Positions ouvertes</div>
+                <div class="stat-value" id="home-positions">—</div>
+                <div class="stat-sub" id="home-positions-sub">—</div>
+            </div>
+        </div>
+
+        <!-- Prochaines actions -->
+        <div class="dcard">
+            <div class="dcard-title">🎯 Que faire maintenant ?</div>
+            <div class="action-list" id="home-actions">
+                <div class="action-card suggest">
+                    <div class="action-icon">⏳</div>
+                    <div class="action-body">
+                        <div class="action-title">Analyse de l'état en cours...</div>
+                        <div class="action-desc">Patiente un instant.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Raccourcis -->
+        <div class="dcard">
+            <div class="dcard-title">🚀 Raccourcis</div>
+            <div class="shortcut-grid">
+                <button class="shortcut-tile" onclick="showView('portfolio')">
+                    <div class="shortcut-tile-icon">📊</div>
+                    <div class="shortcut-tile-title">Portefeuille ETF</div>
+                    <div class="shortcut-tile-desc">Allocation + positions</div>
+                </button>
+                <button class="shortcut-tile" onclick="showView('crypto')">
+                    <div class="shortcut-tile-icon">₿</div>
+                    <div class="shortcut-tile-title">Crypto</div>
+                    <div class="shortcut-tile-desc">Portefeuille crypto live</div>
+                </button>
+                <button class="shortcut-tile" onclick="showView('trading')">
+                    <div class="shortcut-tile-icon">⚡</div>
+                    <div class="shortcut-tile-title">Auto-Trader</div>
+                    <div class="shortcut-tile-desc">Bot de trading auto</div>
+                </button>
+                <button class="shortcut-tile" onclick="showView('scanner')">
+                    <div class="shortcut-tile-icon">🔎</div>
+                    <div class="shortcut-tile-title">Scanner</div>
+                    <div class="shortcut-tile-desc">Opportunités du marché</div>
+                </button>
+                <button class="shortcut-tile" onclick="showView('projection')">
+                    <div class="shortcut-tile-icon">🔮</div>
+                    <div class="shortcut-tile-title">Projection</div>
+                    <div class="shortcut-tile-desc">Monte Carlo, objectifs</div>
+                </button>
+                <button class="shortcut-tile" onclick="showView('securite')">
+                    <div class="shortcut-tile-icon">🛡️</div>
+                    <div class="shortcut-tile-title">Sécurité & Backups</div>
+                    <div class="shortcut-tile-desc">Kill-switch, Telegram</div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════════════
      PORTEFEUILLE
      ═══════════════════════════════════════════════════════ -->
-<div id="view-portfolio" class="show">
+<div id="view-portfolio">
     <div class="hero">
         <h1 class="hero-title">Portefeuille</h1>
         <p class="hero-subtitle">Vue d'ensemble de votre allocation ETF diversifiee, inspiree des meilleures pratiques Finary.</p>
@@ -1344,7 +1626,7 @@ function showView(v){
             next.style.transform='translateY(0)';
         });
         window.scrollTo({top:0,behavior:'smooth'});
-        const loaders={portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire,securite:loadSecurite};
+        const loaders={home:loadHome,portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire,securite:loadSecurite};
         if(loaders[v])loaders[v]();
     };
     if(current&&current!==next){
@@ -1358,9 +1640,18 @@ function showView(v){
     }else if(!current){
         activate();
     }
-    // Sync nav highlight
+    // Sync nav highlight (top-level flat links)
     document.querySelectorAll('.globalheader-link').forEach(b=>{
         b.classList.toggle('active', b.dataset.view===v);
+    });
+    // Sync nav dropdown items + parent group highlight
+    document.querySelectorAll('.nav-dropdown-item').forEach(b=>{
+        b.classList.toggle('active', b.dataset.view===v);
+    });
+    document.querySelectorAll('.nav-group').forEach(g=>{
+        const hasActive = !!g.querySelector('.nav-dropdown-item.active');
+        g.querySelector('.nav-group-trigger').classList.toggle('has-active', hasActive);
+        g.classList.remove('open'); // close dropdown after navigation
     });
     // Re-init selects & tooltips after section mount
     setTimeout(()=>{ if(typeof initCustomSelects==='function')initCustomSelects(); if(typeof injectTooltips==='function')injectTooltips(); },350);
@@ -1368,6 +1659,25 @@ function showView(v){
 
 document.querySelectorAll('.globalheader-link').forEach(btn=>{
     btn.addEventListener('click',()=>showView(btn.dataset.view));
+});
+document.querySelectorAll('.nav-dropdown-item').forEach(btn=>{
+    btn.addEventListener('click',()=>showView(btn.dataset.view));
+});
+// Toggle nav group dropdowns
+document.querySelectorAll('.nav-group-trigger').forEach(trig=>{
+    trig.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        const group = trig.closest('.nav-group');
+        const wasOpen = group.classList.contains('open');
+        document.querySelectorAll('.nav-group').forEach(g=>g.classList.remove('open'));
+        if(!wasOpen) group.classList.add('open');
+    });
+});
+// Close dropdowns when clicking outside
+document.addEventListener('click',(e)=>{
+    if(!e.target.closest('.nav-group')){
+        document.querySelectorAll('.nav-group').forEach(g=>g.classList.remove('open'));
+    }
 });
 
 function toast(msg,err){const t=document.getElementById('toast');t.textContent=msg;t.style.background=err?'rgba(255,69,58,0.9)':'var(--sf-bg-card)';t.style.color=err?'#fff':'var(--sf-text)';t.style.display='block';setTimeout(()=>t.style.display='none',3200);}
@@ -2106,10 +2416,166 @@ async function deleteBackup(id){
     loadBackups();
 }
 
+/* ═══════════════════════════════════════════════════════
+   HOME DASHBOARD + CONTEXT BANNER
+   ═══════════════════════════════════════════════════════ */
+
+// Collecte centralisée de l'état (utilisé par home + banner)
+async function collectAppState(){
+    const state = { broker:false, brokerName:'', cryptoBroker:false, cryptoBrokerName:'',
+                    paperMode:true, killSwitch:false, telegramEnabled:false,
+                    health:'unknown', uptime:null, totalValue:null, positions:0,
+                    lastSeen:null, trades24:0, errors24:0 };
+    const fetches = await Promise.allSettled([
+        fetch('/api/status').then(r=>r.json()),
+        fetch('/api/crypto/status').then(r=>r.json()),
+        fetch('/api/settings').then(r=>r.json()),
+        fetch('/api/notifications/config').then(r=>r.json()),
+        fetch('/api/health').then(r=>r.json()),
+        fetch('/api/portfolio').then(r=>r.json()),
+    ]);
+    const [st, cst, set, notif, hlt, pf] = fetches.map(f => f.status==='fulfilled'?f.value:null);
+    if(st){ state.broker = !!st.broker_connected; state.brokerName = st.broker_name || ''; }
+    if(cst){ state.cryptoBroker = !!cst.connected; state.cryptoBrokerName = cst.broker_name || ''; }
+    if(set){ state.paperMode = set.paper_mode !== false; state.killSwitch = !!set.kill_switch_active; }
+    if(notif){ state.telegramEnabled = !!notif.telegram_enabled && !!notif.telegram_chat_id; }
+    if(hlt){ state.health = hlt.health || 'unknown'; state.uptime = hlt.uptime_human;
+             state.lastSeen = hlt.last_seen_at; state.trades24 = hlt.trades_last_24h||0;
+             state.errors24 = hlt.errors_last_24h||0; }
+    if(pf && pf.mode !== 'not_connected'){
+        state.totalValue = pf.total_value;
+        state.positions = (pf.positions||[]).filter(p=>p.shares>0).length;
+    }
+    return state;
+}
+
+// Bannière contextuelle en haut
+async function loadContextBanner(){
+    try{
+        const s = await collectAppState();
+        const banner = document.getElementById('ctx-banner');
+        if(!banner)return;
+        // Classe globale selon criticité
+        banner.classList.remove('warn','danger');
+        if(s.killSwitch) banner.classList.add('danger');
+        else if(!s.broker && !s.cryptoBroker) banner.classList.add('warn');
+
+        const items = [];
+        // Mode
+        const modeColor = s.paperMode ? 'orange' : 'green';
+        const modeLabel = s.paperMode ? 'PAPER' : 'LIVE';
+        items.push(`<div class="ctx-item"><span class="ctx-dot ${modeColor}"></span>Mode <strong>${modeLabel}</strong></div>`);
+        // Santé
+        const hMap = {healthy:['green','Sain'], stale:['orange','Inactif'], unknown:['red','Inconnu'], never_seen:['gray','Jamais vu']};
+        const [hc,hl] = hMap[s.health] || ['gray', s.health];
+        items.push(`<div class="ctx-item"><span class="ctx-dot ${hc}"></span>Bot <strong>${hl}</strong>${s.uptime?' · '+s.uptime:''}</div>`);
+        // Broker
+        if(s.broker || s.cryptoBroker){
+            const names = [s.brokerName, s.cryptoBrokerName].filter(Boolean).join(' + ');
+            items.push(`<div class="ctx-item"><span class="ctx-dot green"></span>${names}</div>`);
+        }else{
+            items.push(`<div class="ctx-item"><span class="ctx-dot gray"></span>Aucun broker · <button class="ctx-link" onclick="showView('broker')">Connecter</button></div>`);
+        }
+        // Kill-switch
+        if(s.killSwitch){
+            items.push(`<div class="ctx-item"><span class="ctx-dot red"></span><strong style="color:var(--sf-red)">🚨 KILL-SWITCH ACTIF</strong> · <button class="ctx-link" onclick="releaseKillSwitch()">Désactiver</button></div>`);
+        }
+        // Telegram
+        if(!s.telegramEnabled){
+            items.push(`<div class="ctx-item"><span class="ctx-dot gray"></span>Telegram OFF · <button class="ctx-link" onclick="showView('securite')">Activer</button></div>`);
+        }
+        banner.innerHTML = items.join('');
+    }catch(e){ console.error('ctx-banner', e); }
+}
+
+// Dashboard d'accueil
+async function loadHome(){
+    try{
+        const s = await collectAppState();
+
+        // Salutation heure de la journée
+        const h = new Date().getHours();
+        const greet = h<6?'Bonne nuit':h<12?'Bonjour':h<18?'Bon après-midi':'Bonsoir';
+        document.getElementById('home-greeting').textContent = greet;
+
+        // Subtitle contextuel
+        let sub;
+        if(s.killSwitch) sub = '🚨 Kill-switch actif — aucun trade ne sera exécuté.';
+        else if(!s.broker && !s.cryptoBroker) sub = 'Commence par connecter un broker pour activer le bot.';
+        else if(s.paperMode) sub = 'Ton bot tourne en mode simulation (PAPER). Aucun ordre réel.';
+        else sub = 'Ton bot est opérationnel en mode LIVE. Trades réels activés.';
+        document.getElementById('home-subtitle').textContent = sub;
+
+        // KPIs
+        const totalEl = document.getElementById('home-total');
+        if(s.totalValue !== null){
+            totalEl.innerHTML = ''; animateVal(totalEl, s.totalValue, '', '€', 0);
+            document.getElementById('home-total-sub').textContent = s.brokerName || '—';
+        }else{
+            totalEl.textContent = '—';
+            document.getElementById('home-total-sub').textContent = 'Aucun broker connecté';
+        }
+        const modeEl = document.getElementById('home-mode');
+        modeEl.textContent = s.paperMode ? '🧪 PAPER' : '🟢 LIVE';
+        modeEl.style.color = s.paperMode ? 'var(--sf-orange)' : 'var(--sf-green)';
+        document.getElementById('home-mode-sub').textContent = s.paperMode ? 'Simulation' : 'Ordres réels';
+
+        const healthEl = document.getElementById('home-health');
+        const hMap2 = {healthy:['🟢 Sain','var(--sf-green)'], stale:['🟡 Inactif','var(--sf-orange)'],
+                       unknown:['🔴 Inconnu','var(--sf-red)'], never_seen:['⚪ N/A','var(--sf-text-muted)']};
+        const [hlbl, hcol] = hMap2[s.health] || ['—','var(--sf-text-muted)'];
+        healthEl.textContent = hlbl; healthEl.style.color = hcol;
+        document.getElementById('home-health-sub').textContent = s.uptime ? 'Uptime '+s.uptime : 'Pas de données';
+
+        document.getElementById('home-positions').textContent = s.positions;
+        document.getElementById('home-positions-sub').textContent = s.trades24+' trades (24h) · '+s.errors24+' erreurs';
+
+        // Actions suggérées
+        const actions = [];
+        if(s.killSwitch){
+            actions.push({cls:'urgent',icon:'🚨',title:'Désactiver le kill-switch',desc:'Tant qu\'il est actif, aucun trade ne passera.',fn:"releaseKillSwitch()"});
+        }
+        if(!s.broker && !s.cryptoBroker){
+            actions.push({cls:'urgent',icon:'🔌',title:'Connecter un broker',desc:'Indispensable pour que le bot trade réellement.',fn:"showView('broker')"});
+        }
+        if(!s.telegramEnabled){
+            actions.push({cls:'warn',icon:'📱',title:'Activer les notifications Telegram',desc:'Pour être alerté des trades, erreurs et heartbeats.',fn:"showView('securite')"});
+        }
+        if(s.errors24 > 5){
+            actions.push({cls:'warn',icon:'⚠️',title:`${s.errors24} erreurs dans les 24h`,desc:'Consulte les logs pour investiguer.',fn:"showView('securite')"});
+        }
+        if(!s.paperMode && (s.broker || s.cryptoBroker)){
+            actions.push({cls:'suggest',icon:'🧪',title:'Essayer le mode PAPER d\'abord',desc:'Valide ta stratégie sans risque avant le LIVE.',fn:"showView('securite')"});
+        }
+        if(s.paperMode && (s.broker || s.cryptoBroker)){
+            actions.push({cls:'suggest',icon:'📊',title:'Lancer un scan d\'opportunités',desc:'Détecte les signaux sur les marchés en temps réel.',fn:"showView('scanner')"});
+        }
+        if(s.totalValue === null && (s.broker || s.cryptoBroker)){
+            actions.push({cls:'suggest',icon:'💼',title:'Configurer ton portefeuille ETF',desc:'Définis ton allocation cible pour lancer le DCA.',fn:"showView('portfolio')"});
+        }
+        // Si rien à faire → message positif
+        if(!actions.length){
+            actions.push({cls:'ok',icon:'✅',title:'Tout est en ordre',desc:'Ton bot tourne bien. Tu peux consulter les performances ou lancer un scan.',fn:"showView('analytics')"});
+        }
+        document.getElementById('home-actions').innerHTML = actions.map(a=>
+            `<div class="action-card ${a.cls}" onclick="${a.fn}">
+                <div class="action-icon">${a.icon}</div>
+                <div class="action-body">
+                    <div class="action-title">${a.title}</div>
+                    <div class="action-desc">${a.desc}</div>
+                </div>
+                ${a.cls!=='ok'?'<div class="action-arrow">›</div>':''}
+            </div>`
+        ).join('');
+    }catch(e){ console.error('loadHome', e); }
+}
+
 /* ═══ Boot ═══ */
-refreshPortfolio();
+loadHome();
+loadContextBanner();
 refreshStatus();
-loadSecurite();
+// Refresh banner toutes les 30s
+setInterval(loadContextBanner, 30000);
 setTimeout(() => { initCustomSelects(); injectTooltips(); }, 200);
 
 // Navigation re-init handled inside showView() — no duplicate handler needed.
