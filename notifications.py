@@ -15,9 +15,11 @@ import json
 import time
 import requests
 from datetime import datetime
+from data_paths import data_path
 
 
-NOTIF_CONFIG_FILE = "notifications_config.json"
+NOTIF_CONFIG_FILE = data_path("notifications_config.json")
+NOTIF_LOG_FILE = data_path("notifications.log")
 
 
 def _load_config() -> dict:
@@ -111,7 +113,7 @@ def notify(message: str, category: str = "info", force: bool = False) -> bool:
     # Log local
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     try:
-        with open("notifications.log", "a", encoding="utf-8") as f:
+        with open(NOTIF_LOG_FILE, "a", encoding="utf-8") as f:
             f.write(f"[{timestamp}] [{category.upper()}] {message}\n")
     except Exception:
         pass

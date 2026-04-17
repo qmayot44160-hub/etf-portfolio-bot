@@ -28,9 +28,11 @@ from market_intelligence import MarketIntelligence
 from market_scanner import MarketScanner
 
 
-TRADES_FILE = "trades_history.json"
-ACTIVE_TRADES_FILE = "active_trades.json"
-TRADER_CONFIG_FILE = "trader_config.json"
+from data_paths import data_path
+
+TRADES_FILE = data_path("trades_history.json")
+ACTIVE_TRADES_FILE = data_path("active_trades.json")
+TRADER_CONFIG_FILE = data_path("trader_config.json")
 
 
 @dataclass

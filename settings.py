@@ -8,8 +8,9 @@ import os
 import json
 import time
 from datetime import datetime
+from data_paths import data_path
 
-SETTINGS_FILE = "settings.json"
+SETTINGS_FILE = data_path("settings.json")
 
 
 def _default() -> dict:

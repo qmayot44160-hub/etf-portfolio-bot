@@ -7,8 +7,9 @@ import os
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from data_paths import data_path
 
-SCHEDULER_CONFIG_FILE = "scheduler_config.json"
+SCHEDULER_CONFIG_FILE = data_path("scheduler_config.json")
 _scheduler = None
 _bot_engine = None
 

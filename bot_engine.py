@@ -10,8 +10,9 @@ from config import PORTFOLIO, DCA_MONTHLY, REBALANCE_THRESHOLD_PCT
 from brokers import get_broker, list_brokers, BrokerOrder, OrderSide, OrderType
 from brokers.base import BaseBroker
 from market_data import get_current_prices
+from data_paths import data_path
 
-BROKER_CONFIG_FILE = "broker_config.json"
+BROKER_CONFIG_FILE = data_path("broker_config.json")
 
 
 class BotEngine:

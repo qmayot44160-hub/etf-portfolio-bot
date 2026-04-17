@@ -22,8 +22,10 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass, asdict
 from typing import Optional
 
-SCANNER_CONFIG_FILE = "scanner_config.json"
-SCANNER_CACHE_FILE = "scanner_cache.json"
+from data_paths import data_path
+
+SCANNER_CONFIG_FILE = data_path("scanner_config.json")
+SCANNER_CACHE_FILE = data_path("scanner_cache.json")
 
 
 @dataclass

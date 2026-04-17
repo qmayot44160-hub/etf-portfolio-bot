@@ -8,6 +8,9 @@ from datetime import datetime
 from config import CRYPTO_PORTFOLIO, CRYPTO_DCA_MONTHLY, REBALANCE_THRESHOLD_PCT
 from brokers import get_broker
 from brokers.base import BaseBroker
+from data_paths import data_path
+
+CRYPTO_CONFIG_FILE = data_path("crypto_config.json")
 
 
 class CryptoEngine:
@@ -16,8 +19,8 @@ class CryptoEngine:
         self._load_config()
 
     def _load_config(self):
-        if os.path.exists("crypto_config.json"):
-            with open("crypto_config.json", "r") as f:
+        if os.path.exists(CRYPTO_CONFIG_FILE):
+            with open(CRYPTO_CONFIG_FILE, "r") as f:
                 config = json.load(f)
             broker_id = config.get("broker_id")
             credentials = config.get("credentials", {})
@@ -34,7 +37,7 @@ class CryptoEngine:
             self.broker = get_broker(broker_id, credentials)
             success = self.broker.connect()
             if success:
-                with open("crypto_config.json", "w") as f:
+                with open(CRYPTO_CONFIG_FILE, "w") as f:
                     json.dump({
                         "broker_id": broker_id,
                         "credentials": credentials,
@@ -49,8 +52,8 @@ class CryptoEngine:
         if self.broker:
             self.broker.disconnect()
             self.broker = None
-        if os.path.exists("crypto_config.json"):
-            os.remove("crypto_config.json")
+        if os.path.exists(CRYPTO_CONFIG_FILE):
+            os.remove(CRYPTO_CONFIG_FILE)
         return {"status": "disconnected"}
 
     def get_status(self) -> dict:

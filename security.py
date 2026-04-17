@@ -16,6 +16,7 @@ import secrets
 import base64
 from functools import wraps
 from flask import request, session, jsonify, redirect, url_for
+from data_paths import data_path
 
 
 # ─────────────────────────────────────────────────────────
@@ -25,7 +26,7 @@ from flask import request, session, jsonify, redirect, url_for
 APP_PASSWORD_ENV = "APP_PASSWORD"         # Mot de passe de l'app
 FERNET_KEY_ENV = "FERNET_KEY"             # Clé de chiffrement (base64)
 SECRET_KEY_ENV = "FLASK_SECRET_KEY"       # Session Flask
-KEY_FILE = ".secret_key"                  # Fallback local (gitignored)
+KEY_FILE = data_path(".secret_key")       # Fallback local (gitignored)
 
 
 def get_flask_secret() -> str:
@@ -89,7 +90,7 @@ def _get_fernet_key() -> bytes:
     if env_key:
         return env_key.encode()
 
-    key_path = ".fernet_key"
+    key_path = data_path(".fernet_key")
     if os.path.exists(key_path):
         with open(key_path, "rb") as f:
             return f.read().strip()

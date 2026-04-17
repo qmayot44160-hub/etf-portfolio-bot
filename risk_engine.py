@@ -20,8 +20,10 @@ from dataclasses import dataclass, asdict
 from typing import Optional
 
 
-RISK_CONFIG_FILE = "risk_config.json"
-RISK_LOG_FILE = "risk_log.json"
+from data_paths import data_path
+
+RISK_CONFIG_FILE = data_path("risk_config.json")
+RISK_LOG_FILE = data_path("risk_log.json")
 
 
 @dataclass

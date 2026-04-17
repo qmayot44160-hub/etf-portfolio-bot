@@ -7,8 +7,9 @@ import os
 from datetime import datetime
 from config import PORTFOLIO, INITIAL_CAPITAL, DCA_MONTHLY, REBALANCE_THRESHOLD_PCT
 from market_data import get_current_prices
+from data_paths import data_path
 
-PORTFOLIO_FILE = "portfolio_state.json"
+PORTFOLIO_FILE = data_path("portfolio_state.json")
 
 
 def load_state() -> dict:

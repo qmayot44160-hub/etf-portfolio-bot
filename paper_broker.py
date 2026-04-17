@@ -8,9 +8,10 @@ import os
 import json
 import time
 from datetime import datetime
+from data_paths import data_path
 
-PAPER_FILE = "paper_trades.json"
-PAPER_STATE_FILE = "paper_state.json"
+PAPER_FILE = data_path("paper_trades.json")
+PAPER_STATE_FILE = data_path("paper_state.json")
 
 
 def _load_state() -> dict:
