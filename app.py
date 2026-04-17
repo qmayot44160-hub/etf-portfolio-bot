@@ -10,6 +10,7 @@ from portfolio import (
 )
 from backtest import run_backtest
 from projection import run_projection
+from analytics import full_analytics
 from market_data import get_current_prices
 from brokers import list_brokers
 from scheduler import (
@@ -157,6 +158,15 @@ def api_backtest():
     rebalance = request.args.get("rebalance", "true").lower() == "true"
     result = run_backtest(years=years, capital=capital, dca=dca, rebalance=rebalance)
     return jsonify(result)
+
+
+# ── API: Analytics ─────────────────────────────────────
+
+@app.route("/api/analytics")
+def api_analytics():
+    """Analyse quantitative avancée : optimisation, corrélations, stress tests, régime."""
+    years = request.args.get("years", 5, type=int)
+    return jsonify(full_analytics(years=years))
 
 
 # ── API: Projection ────────────────────────────────────

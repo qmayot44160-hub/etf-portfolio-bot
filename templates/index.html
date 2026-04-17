@@ -524,6 +524,7 @@
         #view-broker .hero    { --hero-glow: rgba(255,69,58,0.10); }
         #view-auto .hero      { --hero-glow: rgba(191,90,242,0.10); }
         #view-glossaire .hero { --hero-glow: rgba(100,210,255,0.10); }
+        #view-analytics .hero { --hero-glow: rgba(48,209,88,0.10); }
 
         /* ════════════════════════════════════════════════
            SKELETON LOADING
@@ -610,6 +611,7 @@
             <button class="globalheader-link active" data-view="portfolio">Portefeuille</button>
             <button class="globalheader-link" data-view="dca">DCA</button>
             <button class="globalheader-link" data-view="projection">Projection</button>
+            <button class="globalheader-link" data-view="analytics">Analyse</button>
             <button class="globalheader-link" data-view="crypto">Crypto</button>
             <button class="globalheader-link" data-view="trading">Trading</button>
             <button class="globalheader-link" data-view="scanner">Scanner</button>
@@ -802,6 +804,128 @@
             <div class="dcard" style="background:rgba(255,255,255,0.02)">
                 <div class="dcard-title">Calibration du modèle</div>
                 <div id="pj-calibration" style="color:var(--sf-text-secondary);font-size:0.9rem;line-height:1.7"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     ANALYSE QUANTITATIVE AVANCÉE
+     ═══════════════════════════════════════════════════════ -->
+<div id="view-analytics">
+    <div class="hero">
+        <h1 class="hero-title">Analyse avancée</h1>
+        <p class="hero-subtitle">Optimisation Markowitz, corrélations, stress tests, régime de marché. Niveau institutionnel.</p>
+        <div class="hero-links">
+            <button class="link-more" onclick="loadAnalytics()">Lancer l'analyse</button>
+        </div>
+    </div>
+    <div class="section">
+        <!-- Paramètres + bouton -->
+        <div class="dcard">
+            <div class="dcard-title">Paramètres</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:16px">
+                <div class="form-group" style="margin-bottom:0">
+                    <div class="form-label">Historique</div>
+                    <select id="an-years" class="ainput">
+                        <option value="3">3 ans</option>
+                        <option value="5" selected>5 ans</option>
+                        <option value="10">10 ans</option>
+                    </select>
+                </div>
+            </div>
+            <div style="text-align:center">
+                <button class="abtn abtn-blue" onclick="loadAnalytics()" id="an-btn">Calculer l'analyse complète</button>
+            </div>
+        </div>
+
+        <div id="an-results" style="display:none">
+            <!-- ── Régime + KPIs ── -->
+            <div class="stat-grid stat-grid-4" style="margin-top:8px">
+                <div class="stat-card accent-blue">
+                    <div class="stat-label">Régime de marché</div>
+                    <div class="stat-value" id="an-regime-label" style="font-size:1.4rem">--</div>
+                    <div class="stat-sub" id="an-regime-sub"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Sharpe portefeuille</div>
+                    <div class="stat-value" id="an-sharpe">--</div>
+                    <div class="stat-sub" id="an-sortino-sub"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Ratio de diversification</div>
+                    <div class="stat-value" id="an-div">--</div>
+                    <div class="stat-sub" id="an-div-label"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Corrélation moyenne</div>
+                    <div class="stat-value" id="an-avg-corr">--</div>
+                    <div class="stat-sub">Entre ETFs</div>
+                </div>
+            </div>
+
+            <!-- Tail risk -->
+            <div class="metrics">
+                <div class="mbox"><div class="mbox-label">Skewness</div><div class="mbox-val" id="an-skew">--</div></div>
+                <div class="mbox"><div class="mbox-label">Kurtosis</div><div class="mbox-val" id="an-kurt">--</div></div>
+                <div class="mbox"><div class="mbox-label">VaR 99%</div><div class="mbox-val red" id="an-var99">--</div></div>
+                <div class="mbox"><div class="mbox-label">CVaR 99%</div><div class="mbox-val red" id="an-cvar99">--</div></div>
+                <div class="mbox"><div class="mbox-label">Pire jour</div><div class="mbox-val red" id="an-worst">--</div></div>
+                <div class="mbox"><div class="mbox-label">Meilleur jour</div><div class="mbox-val green" id="an-best">--</div></div>
+            </div>
+
+            <!-- ── Frontière efficiente ── -->
+            <div class="dcard">
+                <div class="dcard-title">Frontière efficiente (Markowitz)</div>
+                <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:12px">
+                    Chaque point = un portefeuille. La ligne = meilleur rendement possible pour chaque niveau de risque.
+                </p>
+                <div id="an-frontier-chart" style="height:480px"></div>
+                <div id="an-frontier-table" style="margin-top:16px"></div>
+            </div>
+
+            <!-- ── Matrice de corrélation ── -->
+            <div class="dcard">
+                <div class="dcard-title">Matrice de corrélation</div>
+                <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:12px">
+                    Rouge = forte corrélation (mauvaise diversification). Bleu = actifs décorrélés (bonne diversif).
+                </p>
+                <div id="an-corr-chart" style="height:auto"></div>
+            </div>
+
+            <!-- ── Contribution au risque ── -->
+            <div class="dcard">
+                <div class="dcard-title">Contribution au risque par ETF</div>
+                <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:12px">
+                    Poids vs contribution réelle à la volatilité globale. Si la contribution dépasse le poids, l'ETF est un driver de risque.
+                </p>
+                <div id="an-risk-contrib-chart" style="height:320px"></div>
+                <div id="an-risk-contrib-table" style="margin-top:16px"></div>
+            </div>
+
+            <!-- ── Stress tests ── -->
+            <div class="dcard">
+                <div class="dcard-title">Stress tests historiques</div>
+                <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:12px">
+                    Performance qu'aurait eu votre portefeuille actuel lors de chocs passés.
+                </p>
+                <div id="an-stress-chart" style="height:340px"></div>
+                <div id="an-stress-table" style="margin-top:16px"></div>
+            </div>
+
+            <!-- ── Rolling metrics ── -->
+            <div class="dcard">
+                <div class="dcard-title">Métriques glissantes (fenêtre 3 mois)</div>
+                <div id="an-rolling-chart" style="height:360px"></div>
+            </div>
+
+            <!-- ── Kelly Criterion ── -->
+            <div class="dcard">
+                <div class="dcard-title">Allocation Kelly (¼ Kelly — sécurisé)</div>
+                <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:12px">
+                    Fraction optimale à allouer selon Kelly, réduite à 25% pour limiter la volatilité (pratique institutionnelle).
+                </p>
+                <div id="an-kelly-table" style="overflow-x:auto"></div>
             </div>
         </div>
     </div>
@@ -1287,6 +1411,175 @@ async function runProjection(){
     finally{btn.disabled=false;btn.textContent='Lancer la projection';}
 }
 
+/* ═══ Analyse quantitative avancée ═══ */
+const REGIME_COLOR={bull:'var(--sf-green)',bear:'var(--sf-red)',crisis:'var(--sf-red)',neutral:'var(--sf-blue)',volatile:'#ff9f0a'};
+
+async function loadAnalytics(){
+    const btn=document.getElementById('an-btn');
+    btn.disabled=true;btn.textContent='Analyse en cours (20-40s)...';
+    const years=document.getElementById('an-years').value;
+    try{
+        const d=await(await fetch(`/api/analytics?years=${years}`)).json();
+        if(d.error){toast(d.error,true);return;}
+        document.getElementById('an-results').style.display='block';
+
+        // ── Régime ──
+        if(d.regime&&!d.regime.error){
+            const r=d.regime;
+            const lbl=document.getElementById('an-regime-label');
+            lbl.textContent=r.label;
+            lbl.style.color=REGIME_COLOR[r.regime]||'var(--sf-text)';
+            document.getElementById('an-regime-sub').innerHTML=
+                `SPY ${fmt(r.spy_price)} • ${r.vs_sma_pct>=0?'+':''}${r.vs_sma_pct}% vs SMA200 • DD ${r.drawdown_pct}%`;
+        }
+
+        // ── Stats portefeuille ──
+        const st=d.portfolio_stats||{};
+        document.getElementById('an-sharpe').textContent=st.sharpe||'--';
+        document.getElementById('an-sortino-sub').textContent=`Sortino ${st.sortino||'--'} • Calmar ${st.calmar||'--'}`;
+
+        // Diversification
+        const dv=d.diversification_ratio||{};
+        document.getElementById('an-div').textContent=dv.value||'--';
+        document.getElementById('an-div-label').textContent=dv.interpretation||'';
+
+        // Corrélation moyenne
+        const cm=d.correlation||{};
+        document.getElementById('an-avg-corr').textContent=cm.average!==undefined?cm.average:'--';
+
+        // ── Tail risk ──
+        const tr=d.tail_risk||{};
+        document.getElementById('an-skew').textContent=tr.skewness!==undefined?tr.skewness:'--';
+        document.getElementById('an-kurt').textContent=tr.kurtosis!==undefined?tr.kurtosis:'--';
+        document.getElementById('an-var99').textContent=tr.var_99_pct!==undefined?tr.var_99_pct+'%':'--';
+        document.getElementById('an-cvar99').textContent=tr.cvar_99_pct!==undefined?tr.cvar_99_pct+'%':'--';
+        document.getElementById('an-worst').textContent=tr.worst_day_pct!==undefined?tr.worst_day_pct+'%':'--';
+        document.getElementById('an-best').textContent=tr.best_day_pct!==undefined?'+'+tr.best_day_pct+'%':'--';
+
+        // ── Frontière efficiente ──
+        const ef=d.efficient_frontier||{};
+        if(ef.random_cloud){
+            const cloud=ef.random_cloud;
+            const traces=[
+                // Nuage de portfolios aléatoires colorés par Sharpe
+                {x:cloud.map(p=>p.volatility_pct),y:cloud.map(p=>p.return_pct),
+                 mode:'markers',type:'scatter',name:'Portfolios possibles',
+                 marker:{size:5,color:cloud.map(p=>p.sharpe),colorscale:'Viridis',showscale:true,colorbar:{title:'Sharpe',titlefont:{color:'#86868b',size:10},tickfont:{color:'#86868b',size:10}}},
+                 hovertemplate:'Vol: %{x:.2f}%<br>Rend: %{y:.2f}%<extra></extra>'},
+            ];
+            if(ef.frontier){
+                traces.push({x:ef.frontier.map(p=>p.volatility_pct),y:ef.frontier.map(p=>p.return_pct),
+                    mode:'lines',type:'scatter',name:'Frontière efficiente',line:{color:'#30d158',width:3},hoverinfo:'skip'});
+            }
+            // Points remarquables
+            const marker=(p,c,sym)=>({x:[p.volatility_pct],y:[p.return_pct],mode:'markers+text',type:'scatter',name:p.label,
+                marker:{size:18,color:c,symbol:sym,line:{color:'#000',width:2}},
+                text:[p.label],textposition:'top center',textfont:{color:c,size:11}});
+            if(ef.current)      traces.push(marker(ef.current,      '#2997ff','circle'));
+            if(ef.max_sharpe)   traces.push(marker(ef.max_sharpe,   '#bf5af2','star'));
+            if(ef.min_variance) traces.push(marker(ef.min_variance, '#30d158','diamond'));
+            if(ef.risk_parity)  traces.push(marker(ef.risk_parity,  '#64d2ff','square'));
+            if(ef.equal_weight) traces.push(marker(ef.equal_weight, '#ff9f0a','triangle-up'));
+
+            Plotly.newPlot('an-frontier-chart',traces,{...PL,height:480,
+                xaxis:{...PL.xaxis,title:'Volatilité annuelle (%)',ticksuffix:'%'},
+                yaxis:{...PL.yaxis,title:'Rendement annuel (%)',ticksuffix:'%'},
+                showlegend:false},{responsive:true});
+
+            // Table comparative
+            const pts=[ef.current,ef.max_sharpe,ef.min_variance,ef.risk_parity,ef.equal_weight].filter(x=>x);
+            document.getElementById('an-frontier-table').innerHTML=`<table><thead><tr><th>Portefeuille</th><th>Rendement espéré</th><th>Volatilité</th><th>Sharpe</th><th>Composition</th></tr></thead><tbody>${pts.map(p=>`
+                <tr>
+                    <td><strong style="color:${p.color}">${p.label}</strong></td>
+                    <td class="mono ${p.return_pct>=0?'green':'red'}">${p.return_pct>=0?'+':''}${p.return_pct}%</td>
+                    <td class="mono">${p.volatility_pct}%</td>
+                    <td class="mono"><strong>${p.sharpe}</strong></td>
+                    <td style="font-size:0.78rem;color:var(--sf-text-secondary)">${p.weights.filter(w=>w.weight_pct>=1).map(w=>`${w.ticker} ${w.weight_pct}%`).join(' · ')}</td>
+                </tr>`).join('')}</tbody></table>`;
+        }
+
+        // ── Matrice de corrélation (heatmap) ──
+        if(cm.matrix){
+            Plotly.newPlot('an-corr-chart',[{
+                z:cm.matrix,x:cm.tickers,y:cm.tickers,type:'heatmap',
+                colorscale:[[0,'rgba(41,151,255,0.85)'],[0.5,'rgba(255,255,255,0.05)'],[1,'rgba(255,69,58,0.85)']],
+                zmin:-1,zmax:1,text:cm.matrix.map(row=>row.map(v=>v.toFixed(2))),
+                texttemplate:'%{text}',textfont:{size:11,color:'#fff'},showscale:true,
+                colorbar:{tickfont:{color:'#86868b',size:10}}
+            }],{...PL,height:Math.max(260,cm.tickers.length*42+60),margin:{t:20,b:50,l:60,r:10}},{responsive:true});
+        }
+
+        // ── Contribution au risque ──
+        if(st.risk_contribution){
+            const rc=st.risk_contribution;
+            Plotly.newPlot('an-risk-contrib-chart',[
+                {x:rc.map(r=>r.name),y:rc.map(r=>r.weight_pct),name:'Poids',type:'bar',
+                 marker:{color:'rgba(41,151,255,0.55)',cornerradius:4}},
+                {x:rc.map(r=>r.name),y:rc.map(r=>r.risk_contribution_pct),name:'Contribution au risque',type:'bar',
+                 marker:{color:'rgba(255,69,58,0.65)',cornerradius:4}},
+            ],{...PL,height:320,barmode:'group',yaxis:{...PL.yaxis,ticksuffix:'%'},
+               legend:{orientation:'h',y:-0.25,font:{color:'#86868b',size:11}}},{responsive:true});
+
+            document.getElementById('an-risk-contrib-table').innerHTML=`<table><thead><tr><th>ETF</th><th>Poids</th><th>Contribution au risque</th><th>Ratio</th></tr></thead><tbody>${rc.map(r=>{
+                const ratio=r.weight_pct>0?(r.risk_contribution_pct/r.weight_pct):0;
+                const overweight=ratio>1.2;
+                return `<tr><td><strong>${r.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${r.ticker}</span></td>
+                <td class="mono">${r.weight_pct}%</td>
+                <td class="mono" style="color:${overweight?'var(--sf-red)':'var(--sf-text)'}">${r.risk_contribution_pct}%</td>
+                <td class="mono" style="color:${overweight?'var(--sf-red)':ratio<0.8?'var(--sf-green)':'var(--sf-text-secondary)'}"><strong>${ratio.toFixed(2)}×</strong></td></tr>`;
+            }).join('')}</tbody></table>`;
+        }
+
+        // ── Stress tests ──
+        if(d.stress_tests&&d.stress_tests.length){
+            const s=d.stress_tests;
+            Plotly.newPlot('an-stress-chart',[{
+                x:s.map(x=>x.name),y:s.map(x=>x.portfolio_return_pct),type:'bar',
+                marker:{color:s.map(x=>x.portfolio_return_pct>=0?'rgba(48,209,88,0.7)':'rgba(255,69,58,0.75)'),cornerradius:6},
+                text:s.map(x=>(x.portfolio_return_pct>=0?'+':'')+x.portfolio_return_pct+'%'),textposition:'auto'
+            }],{...PL,height:340,yaxis:{...PL.yaxis,ticksuffix:'%'}},{responsive:true});
+
+            document.getElementById('an-stress-table').innerHTML=`<table><thead><tr><th>Scénario</th><th>Période</th><th>Performance portefeuille</th><th>Max DD</th></tr></thead><tbody>${s.map(x=>`
+                <tr>
+                    <td><strong>${x.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${x.description}</span></td>
+                    <td class="mono" style="font-size:0.78rem">${x.period}</td>
+                    <td class="mono ${x.portfolio_return_pct>=0?'green':'red'}"><strong>${x.portfolio_return_pct>=0?'+':''}${x.portfolio_return_pct}%</strong></td>
+                    <td class="mono red">${x.portfolio_max_dd_pct}%</td>
+                </tr>`).join('')}</tbody></table>`;
+        }
+
+        // ── Rolling metrics ──
+        if(d.rolling){
+            const r=d.rolling;
+            Plotly.newPlot('an-rolling-chart',[
+                {x:r.dates,y:r.rolling_sharpe,name:'Sharpe (3m)',type:'scatter',mode:'lines',line:{color:'#2997ff',width:1.8},yaxis:'y1'},
+                {x:r.dates,y:r.rolling_vol_pct,name:'Volatilité % (3m)',type:'scatter',mode:'lines',line:{color:'#ff9f0a',width:1.8},yaxis:'y2'},
+                {x:r.dates,y:r.rolling_drawdown_pct,name:'Drawdown % (roulant)',type:'scatter',mode:'lines',line:{color:'#ff453a',width:1.5,dash:'dot'},yaxis:'y2',fill:'tozeroy',fillcolor:'rgba(255,69,58,0.06)'},
+            ],{...PL,height:360,
+                yaxis:{...PL.yaxis,title:'Sharpe',side:'left'},
+                yaxis2:{...PL.yaxis,title:'%',side:'right',overlaying:'y',ticksuffix:'%'},
+                legend:{orientation:'h',y:-0.2,font:{color:'#86868b',size:11}}
+            },{responsive:true});
+        }
+
+        // ── Kelly Criterion table ──
+        if(d.kelly){
+            document.getElementById('an-kelly-table').innerHTML=`<table><thead><tr><th>ETF</th><th>μ annuel</th><th>σ annuelle</th><th>Kelly complet</th><th>¼ Kelly</th><th>Allocation suggérée</th></tr></thead><tbody>${d.kelly.map(k=>`
+                <tr>
+                    <td><strong>${k.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${k.ticker}</span></td>
+                    <td class="mono ${k.mu_annual_pct>=0?'green':'red'}">${k.mu_annual_pct>=0?'+':''}${k.mu_annual_pct}%</td>
+                    <td class="mono">${k.sigma_annual_pct}%</td>
+                    <td class="mono">${k.kelly_full_pct}%</td>
+                    <td class="mono">${k.kelly_quarter_pct}%</td>
+                    <td class="mono" style="color:var(--sf-blue)"><strong>${k.normalized_allocation_pct}%</strong></td>
+                </tr>`).join('')}</tbody></table>`;
+        }
+
+        toast('Analyse complète terminée');
+    }catch(e){toast(e.message,true);}
+    finally{btn.disabled=false;btn.textContent='Calculer l\'analyse complète';}
+}
+
 /* ═══ Broker ═══ */
 const BF={ibkr:[{id:'host',label:'TWS Host',type:'text',value:'127.0.0.1'},{id:'port',label:'Port',type:'number',value:'7497'},{id:'client_id',label:'Client ID',type:'number',value:'1'}],degiro:[{id:'username',label:'Username',type:'text',value:''},{id:'password',label:'Password',type:'password',value:''},{id:'totp_secret',label:'TOTP',type:'text',value:''},{id:'one_time_password',label:'OTP',type:'text',value:''}],alpaca:[{id:'api_key',label:'API Key',type:'text',value:''},{id:'secret_key',label:'Secret',type:'password',value:''}],mexc:[{id:'api_key',label:'API Key',type:'text',value:''},{id:'secret_key',label:'Secret Key',type:'password',value:''},{id:'wallet_type',label:'Wallet',type:'select',value:'spot',options:[{v:'spot',l:'Spot (trading crypto)'},{v:'futures',l:'Futures / Swap (contrats)'}]}]};
 const CRYPTO_BROKERS=['mexc'];
@@ -1414,6 +1707,18 @@ const GLOSSARY = {
     "Percentile": "Seuil statistique. Ex : P50 = médiane (50% des scénarios font mieux, 50% font moins bien). P5 = scénario pessimiste (seuls 5% des cas font pire). P95 = scénario optimiste (seuls 5% des cas font mieux).",
     "Inflation": "Perte de pouvoir d'achat au fil du temps. Un portefeuille qui gagne 5%/an avec 2% d'inflation a un rendement réel de seulement 3%. Les projections affichent aussi la valeur 'réelle' ajustée.",
     "GBM": "Geometric Brownian Motion — Modèle mathématique supposant que les prix suivent une distribution log-normale avec drift (μ) et volatilité (σ). Base de Black-Scholes et du Monte Carlo financier.",
+    "Markowitz": "Théorie moderne du portefeuille (1952) — Pour un niveau de risque donné, il existe un portefeuille optimal qui maximise le rendement espéré. L'ensemble de ces portefeuilles forme la frontière efficiente.",
+    "Frontière efficiente": "Courbe qui représente l'ensemble des portefeuilles offrant le meilleur rendement possible pour chaque niveau de risque. Tout ce qui est en dessous est sous-optimal.",
+    "Max Sharpe": "Portefeuille qui maximise le ratio de Sharpe (rendement par unité de risque). Considéré comme le 'meilleur' portefeuille en termes d'efficacité.",
+    "Min Variance": "Portefeuille qui minimise la volatilité totale, quel que soit le rendement. Adapté aux profils très averses au risque.",
+    "Risk Parity": "Stratégie où chaque actif contribue de manière égale au risque total, plutôt qu'un poids égal en capital. Utilisée par Bridgewater (All Weather).",
+    "Ratio de diversification": "Volatilité moyenne pondérée des actifs / volatilité du portefeuille. DR > 1 signifie que la diversification réduit effectivement le risque. Plus c'est haut, mieux c'est.",
+    "Skewness": "Asymétrie de la distribution des rendements. Skew négatif = pertes extrêmes plus probables que gains extrêmes (mauvais). Skew positif = l'inverse (bon).",
+    "Kurtosis": "Mesure l'épaisseur des queues de distribution. Kurtosis > 3 (excess > 0) = queues épaisses, événements extrêmes plus fréquents que ne le prédit une loi normale.",
+    "Régime de marché": "Phase macro actuelle des marchés : Bull (haussier), Bear (baissier), Crise (DD > 20%), Volatile (vol > 30%), Neutre (consolidation). Influence la stratégie à adopter.",
+    "Stress test": "Simulation de l'impact qu'aurait un choc historique (krach 2008, COVID, etc.) sur le portefeuille actuel. Outil clé de la gestion du risque bancaire.",
+    "Contribution au risque": "Part du risque total apportée par chaque actif. Un actif peut avoir 10% du poids mais 30% de la contribution au risque s'il est très volatil ou corrélé aux autres.",
+    "Rolling metrics": "Métriques calculées sur une fenêtre glissante (ex: Sharpe sur 3 mois) pour détecter l'évolution du comportement du portefeuille dans le temps.",
 };
 
 const tipPopup = document.getElementById('tooltip-popup');
@@ -1451,8 +1756,9 @@ function T(term) {
 function loadGlossaire(){
     const categories = {
         "Performance": ["Sharpe Ratio","Sortino Ratio","Calmar Ratio","Profit Factor","Expectancy","Win Rate"],
-        "Risque": ["VaR 95%","CVaR 95%","Drawdown","Volatilité","Portfolio Heat","Circuit Breaker"],
+        "Risque": ["VaR 95%","CVaR 95%","Drawdown","Volatilité","Portfolio Heat","Circuit Breaker","Skewness","Kurtosis"],
         "Projection": ["Monte Carlo","Percentile","Inflation","GBM"],
+        "Analyse avancée": ["Markowitz","Frontière efficiente","Max Sharpe","Min Variance","Risk Parity","Ratio de diversification","Régime de marché","Stress test","Contribution au risque","Rolling metrics"],
         "Stratégie": ["DCA","Rééquilibrage","Mean Reversion","Kelly Criterion","TWAP","Slippage"],
         "Marchés & Indices": ["ETF","MSCI World","S&P 500","Benchmark","Spread"],
         "Analyse Technique": ["RSI","ADX","Hurst Exponent","Z-Score"],
@@ -1494,6 +1800,14 @@ function injectTooltips(){
         'pj-real': 'Inflation',
         'pj-prob-loss': 'Monte Carlo',
         'pj-prob-target': 'Monte Carlo',
+        'an-sharpe': 'Sharpe Ratio',
+        'an-div': 'Ratio de diversification',
+        'an-avg-corr': 'Markowitz',
+        'an-skew': 'Skewness',
+        'an-kurt': 'Kurtosis',
+        'an-var99': 'VaR 95%',
+        'an-cvar99': 'CVaR 95%',
+        'an-regime-label': 'Régime de marché',
         'perf-sharpe': 'Sharpe Ratio',
         'perf-sortino': 'Sortino Ratio',
         'perf-calmar': 'Calmar Ratio',

@@ -39,7 +39,9 @@
       "Bash(python -c \"from app import app; print\\('App loads OK'\\)\")",
       "Bash(python -c \"from app import app; print\\('OK'\\)\")",
       "Bash(python -c \"import ast; ast.parse\\(open\\('projection.py',encoding='utf-8'\\).read\\(\\)\\); print\\('projection.py OK'\\)\")",
-      "Bash(python -c \"import ast; ast.parse\\(open\\('app.py',encoding='utf-8'\\).read\\(\\)\\); print\\('app.py OK'\\)\")"
+      "Bash(python -c \"import ast; ast.parse\\(open\\('app.py',encoding='utf-8'\\).read\\(\\)\\); print\\('app.py OK'\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('analytics.py',encoding='utf-8'\\).read\\(\\)\\); print\\('analytics.py OK'\\)\")",
+      "Bash(python -c ' *)"
     ]
   }
 }
