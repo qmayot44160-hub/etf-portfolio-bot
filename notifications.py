@@ -55,11 +55,16 @@ def save_config(cfg: dict) -> dict:
 
 
 def get_config_safe() -> dict:
-    """Config pour l'UI : masque le token."""
+    """Config pour l'UI : masque le token (en clair, pas le chiffré)."""
     cfg = _load_config()
     token = cfg.get("telegram_bot_token", "")
     if token:
-        cfg["telegram_bot_token_masked"] = "●●●●●●" + token[-4:] if len(token) > 4 else "●●●●"
+        # Déchiffre pour afficher les VRAIS 4 derniers caractères (confort UX)
+        plain = _decrypt_token(cfg)
+        if len(plain) > 4:
+            cfg["telegram_bot_token_masked"] = "●●●●●●" + plain[-4:]
+        else:
+            cfg["telegram_bot_token_masked"] = "●●●●"
         cfg["telegram_bot_token"] = ""  # jamais renvoyé au client
     return cfg
 
