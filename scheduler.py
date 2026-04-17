@@ -100,7 +100,7 @@ def setup_scheduled_jobs(config: dict = None):
     scheduler = get_scheduler()
 
     # Supprimer les jobs existants
-    for job_id in ["auto_dca", "auto_rebalance", "daily_backup"]:
+    for job_id in ["auto_dca", "auto_rebalance", "daily_backup", "daily_heartbeat"]:
         try:
             scheduler.remove_job(job_id)
         except Exception:
@@ -135,6 +135,18 @@ def setup_scheduled_jobs(config: dict = None):
             CronTrigger(hour=hour, minute=30),
             id="daily_backup",
             name=f"Backup quotidien ({hour:02d}:30)",
+            replace_existing=True,
+        )
+
+    # Heartbeat quotidien Telegram (activé par défaut)
+    if config.get("heartbeat_enabled", True):
+        from health import daily_heartbeat_job
+        hour = config.get("heartbeat_hour", 9)  # 09:00 par défaut
+        scheduler.add_job(
+            daily_heartbeat_job,
+            CronTrigger(hour=hour, minute=0),
+            id="daily_heartbeat",
+            name=f"Heartbeat quotidien Telegram ({hour:02d}:00)",
             replace_existing=True,
         )
 

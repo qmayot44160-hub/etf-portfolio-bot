@@ -1277,6 +1277,18 @@
         </div>
 
         <div class="dcard">
+            <div class="dcard-label">Santé du bot</div>
+            <p style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">
+                Heartbeat quotidien Telegram à <b>09:00 UTC</b>. Notification automatique à chaque démarrage/redéploiement. Endpoint public <code>/health</code> pour monitoring externe (UptimeRobot, etc.).
+            </p>
+            <div class="stat-grid stat-grid-3" style="margin-top:14px">
+                <div class="stat-card"><div class="stat-label">État</div><div class="stat-value" id="health-status" style="font-size:18px">—</div><div class="stat-sub" id="health-last-seen">—</div></div>
+                <div class="stat-card"><div class="stat-label">Uptime</div><div class="stat-value" id="health-uptime" style="font-size:18px">—</div><div class="stat-sub" id="health-startups">— démarrages</div></div>
+                <div class="stat-card"><div class="stat-label">Activité (24h)</div><div class="stat-value" id="health-activity" style="font-size:18px">—</div><div class="stat-sub" id="health-errors">— erreurs</div></div>
+            </div>
+        </div>
+
+        <div class="dcard">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
                 <div class="dcard-label" style="margin-bottom:0">Backups automatiques</div>
                 <div>
@@ -1964,6 +1976,7 @@ async function loadSecurite(){
         const pos = Object.entries(p.positions||{}).map(([s,d])=>`${s}: ${d.quantity} @ ${d.avg_price.toFixed(4)}`).join(' · ') || 'Aucune position';
         document.getElementById('paper-portfolio').innerHTML = `<b>Cash paper :</b> ${(p.cash||0).toFixed(2)} $ · <b>Positions :</b> ${pos}`;
     }catch(e){}
+    loadHealth();
     loadBackups();
 }
 
@@ -2017,6 +2030,23 @@ async function saveTelegram(){
 async function testTelegram(){
     const r = await (await fetch('/api/notifications/test',{method:'POST'})).json();
     alert(r.sent ? '✅ Message test envoyé — vérifie Telegram.' : '❌ Échec : vérifie token + chat_id + activation.');
+}
+
+/* ═══ Health ═══ */
+async function loadHealth(){
+    try{
+        const h = await (await fetch('/api/health')).json();
+        const statusEl = document.getElementById('health-status');
+        const colors = { healthy: '#32d74b', stale: '#ff9f0a', never_seen: '#8e8e93', unknown: '#ff453a' };
+        const labels = { healthy: '🟢 Sain', stale: '🟡 Inactif', never_seen: '⚪ Aucune donnée', unknown: '🔴 Inconnu' };
+        statusEl.textContent = labels[h.health] || h.health;
+        statusEl.style.color = colors[h.health] || '#e6ecf4';
+        document.getElementById('health-last-seen').textContent = h.last_seen_at ? ('Vu : '+new Date(h.last_seen_at).toLocaleString('fr-FR')) : 'Jamais';
+        document.getElementById('health-uptime').textContent = h.uptime_human || '—';
+        document.getElementById('health-startups').textContent = (h.startup_count||0)+' démarrages';
+        document.getElementById('health-activity').textContent = (h.trades_last_24h||0)+' trades';
+        document.getElementById('health-errors').textContent = (h.errors_last_24h||0)+' erreurs';
+    }catch(e){ console.error(e); }
 }
 
 /* ═══ Backups ═══ */

@@ -31,6 +31,7 @@ from settings import (
 import notifications as notif
 import paper_broker
 import backups
+import health
 
 app = Flask(__name__)
 app.secret_key = get_flask_secret()
@@ -72,11 +73,17 @@ def api_auth_status():
 
 
 # ── Auth Guard global ─────────────────────────────────
-_AUTH_WHITELIST = {"/login", "/logout", "/api/auth/status", "/static"}
+_AUTH_WHITELIST = {"/login", "/logout", "/api/auth/status", "/static", "/health"}
 
 
 @app.before_request
 def _global_auth_guard():
+    # Heartbeat : à chaque hit, mettre à jour last_seen
+    try:
+        health.touch()
+    except Exception:
+        pass
+
     if not is_auth_enabled():
         return None
     path = request.path or "/"
@@ -89,6 +96,34 @@ def _global_auth_guard():
     if path.startswith("/api/"):
         return jsonify({"error": "Authentification requise", "auth_required": True}), 401
     return redirect("/login")
+
+
+# ── Health endpoint (public, pas d'auth) ──────────────
+
+@app.route("/health")
+def health_check():
+    """Public endpoint pour UptimeRobot / Railway Healthcheck."""
+    status = health.get_status()
+    # Retourne 503 si stale (pas vu depuis > 30 min)
+    http_code = 200 if status["health"] in ("healthy", "never_seen") else 503
+    return jsonify(status), http_code
+
+
+@app.route("/api/health")
+def api_health():
+    return jsonify(health.get_status())
+
+
+@app.errorhandler(500)
+def _handle_500(e):
+    """Capture les erreurs 500 pour le compteur health + notification Telegram."""
+    try:
+        health.record_error()
+        from notifications import notify_error
+        notify_error(f"Erreur 500 sur {request.path}: {e}", source="flask")
+    except Exception:
+        pass
+    return jsonify({"error": "Erreur serveur", "detail": str(e)}), 500
 
 
 # ── Pages ──────────────────────────────────────────────
@@ -622,9 +657,15 @@ def api_reset():
 
 def init_app():
     """Initialisation au démarrage."""
+    # Enregistre le démarrage + notifie Telegram
+    try:
+        health.record_startup()
+    except Exception as e:
+        print(f"[Startup] health.record_startup error: {e}")
+
+    # Force setup des jobs scheduler (inclut daily_backup + daily_heartbeat désormais)
     config = load_scheduler_config()
-    if config.get("dca_enabled") or config.get("rebalance_enabled"):
-        setup_scheduled_jobs(config)
+    setup_scheduled_jobs(config)
 
     # Auto-connect trader to MEXC if crypto engine is connected
     if crypto.broker and crypto.broker.connected:
