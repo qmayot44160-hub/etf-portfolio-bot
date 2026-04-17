@@ -1224,36 +1224,44 @@ const PL={paper_bgcolor:'transparent',plot_bgcolor:'transparent',font:{family:'I
 let selectedBrokerId=null;
 
 /* ═══ Apple-style view transitions ═══ */
-document.querySelectorAll('.globalheader-link').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-        const v=btn.dataset.view;
-        // Fade out current
-        const current=document.querySelector('[id^="view-"].show');
-        if(current){
-            current.style.opacity='0';
-            current.style.transform='translateY(20px)';
-            setTimeout(()=>{
-                current.classList.remove('show');
-                current.style.display='none';
-                // Fade in new
-                const next=document.getElementById('view-'+v);
-                next.style.display='block';
-                next.style.opacity='0';
-                next.style.transform='translateY(20px)';
-                requestAnimationFrame(()=>{
-                    next.classList.add('show');
-                    next.style.opacity='1';
-                    next.style.transform='translateY(0)';
-                });
-                window.scrollTo({top:0,behavior:'smooth'});
-                // Load data
-                const loaders={portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler};
-                if(loaders[v])loaders[v]();
-            },300);
-        }
-        document.querySelectorAll('.globalheader-link').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
+function showView(v){
+    const next=document.getElementById('view-'+v);
+    if(!next)return;
+    const current=document.querySelector('[id^="view-"].show');
+    const activate=()=>{
+        next.style.display='block';
+        next.style.opacity='0';
+        next.style.transform='translateY(20px)';
+        requestAnimationFrame(()=>{
+            next.classList.add('show');
+            next.style.opacity='1';
+            next.style.transform='translateY(0)';
+        });
+        window.scrollTo({top:0,behavior:'smooth'});
+        const loaders={portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire};
+        if(loaders[v])loaders[v]();
+    };
+    if(current&&current!==next){
+        current.style.opacity='0';
+        current.style.transform='translateY(20px)';
+        setTimeout(()=>{
+            current.classList.remove('show');
+            current.style.display='none';
+            activate();
+        },300);
+    }else if(!current){
+        activate();
+    }
+    // Sync nav highlight
+    document.querySelectorAll('.globalheader-link').forEach(b=>{
+        b.classList.toggle('active', b.dataset.view===v);
     });
+    // Re-init selects & tooltips after section mount
+    setTimeout(()=>{ if(typeof initCustomSelects==='function')initCustomSelects(); if(typeof injectTooltips==='function')injectTooltips(); },350);
+}
+
+document.querySelectorAll('.globalheader-link').forEach(btn=>{
+    btn.addEventListener('click',()=>showView(btn.dataset.view));
 });
 
 function toast(msg,err){const t=document.getElementById('toast');t.textContent=msg;t.style.background=err?'rgba(255,69,58,0.9)':'var(--sf-bg-card)';t.style.color=err?'#fff':'var(--sf-text)';t.style.display='block';setTimeout(()=>t.style.display='none',3200);}
@@ -1830,13 +1838,7 @@ refreshPortfolio();
 refreshStatus();
 setTimeout(() => { initCustomSelects(); injectTooltips(); }, 200);
 
-// Re-init selects when projection section becomes visible
-document.querySelectorAll('.globalheader-link').forEach(btn => {
-    btn.addEventListener('click', () => {
-        setTimeout(initCustomSelects, 50);
-        if (btn.dataset.view === 'glossaire') loadGlossaire();
-    });
-});
+// Navigation re-init handled inside showView() — no duplicate handler needed.
 </script>
 </body>
 </html>
