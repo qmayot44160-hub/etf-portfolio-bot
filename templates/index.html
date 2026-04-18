@@ -822,6 +822,219 @@
         .sfi.c-purple { color: var(--sf-purple); }
         .sfi.c-teal { color: var(--sf-teal); }
         .sfi.c-muted { color: var(--sf-text-muted); }
+
+        /* ════════════════════════════════════════════════
+           DA+ : HERO EYEBROW (Stripe/Linear-style tag)
+           ════════════════════════════════════════════════ */
+        .hero-eyebrow {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 5px 14px; border-radius: 99px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.66rem; font-weight: 600;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--sf-text-secondary);
+            margin-bottom: 20px;
+            backdrop-filter: blur(12px);
+        }
+        .hero-eyebrow .dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--hero-accent, var(--sf-blue));
+            box-shadow: 0 0 10px var(--hero-accent, var(--sf-blue));
+        }
+        #view-portfolio .hero-eyebrow  { --hero-accent: #2997ff; }
+        #view-dca .hero-eyebrow        { --hero-accent: #30d158; }
+        #view-projection .hero-eyebrow { --hero-accent: #bf5af2; }
+        #view-analytics .hero-eyebrow  { --hero-accent: #30d158; }
+        #view-crypto .hero-eyebrow     { --hero-accent: #ff9f0a; }
+        #view-trading .hero-eyebrow    { --hero-accent: #64d2ff; }
+        #view-scanner .hero-eyebrow    { --hero-accent: #30d158; }
+        #view-broker .hero-eyebrow     { --hero-accent: #ff453a; }
+        #view-auto .hero-eyebrow       { --hero-accent: #bf5af2; }
+        #view-securite .hero-eyebrow   { --hero-accent: #30d158; }
+        #view-glossaire .hero-eyebrow  { --hero-accent: #64d2ff; }
+
+        /* ════════════════════════════════════════════════
+           DA+ : BUTTONS (gradient, lift on hover)
+           ════════════════════════════════════════════════ */
+        .abtn {
+            position: relative;
+            overflow: hidden;
+            gap: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .abtn::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent 50%);
+            opacity: 0; transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .abtn:hover::before { opacity: 1; }
+        .abtn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+        .abtn:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+        .abtn-blue { background: linear-gradient(180deg, #2997ff 0%, #0077ed 100%); }
+        .abtn-blue:hover { background: linear-gradient(180deg, #3ba4ff 0%, #0d84ff 100%); }
+        .abtn-danger { background: linear-gradient(180deg, #ff6b61 0%, #e03e35 100%); }
+        .abtn .sfi { flex-shrink: 0; }
+
+        /* ════════════════════════════════════════════════
+           DA+ : DCARD HOVER GLOW (gradient border reveal)
+           ════════════════════════════════════════════════ */
+        .dcard {
+            border: 1px solid transparent;
+            transition: border-color 0.4s, box-shadow 0.4s, transform 0.3s;
+        }
+        .dcard::after {
+            content: ''; position: absolute; inset: 0;
+            border-radius: inherit; padding: 1px;
+            background: linear-gradient(135deg, rgba(41,151,255,0.5), rgba(48,209,88,0.15), transparent 65%);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+            opacity: 0; transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        .dcard:hover::after { opacity: 1; }
+        .dcard:hover { box-shadow: 0 14px 44px rgba(0,0,0,0.5); }
+
+        /* ════════════════════════════════════════════════
+           DA+ : STAT CARDS PREMIUM (gradient + top line)
+           ════════════════════════════════════════════════ */
+        .stat-card {
+            background: linear-gradient(180deg, rgba(29,29,31,1) 0%, rgba(22,22,24,1) 100%);
+            border: 1px solid rgba(255,255,255,0.04);
+            position: relative; overflow: hidden;
+        }
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+        }
+        .stat-card.accent-blue::before  { background: linear-gradient(90deg, transparent, rgba(41,151,255,0.6), transparent); }
+        .stat-card.accent-green::before { background: linear-gradient(90deg, transparent, rgba(48,209,88,0.6), transparent); }
+        .stat-card.accent-red::before   { background: linear-gradient(90deg, transparent, rgba(255,69,58,0.6), transparent); }
+        .stat-card.accent-blue, .stat-card.accent-green, .stat-card.accent-red { border-top: none; }
+
+        /* ════════════════════════════════════════════════
+           DA+ : PILL WITH DOT INDICATOR
+           ════════════════════════════════════════════════ */
+        .pill.pill-dot::before {
+            content: ''; display: inline-block;
+            width: 6px; height: 6px; border-radius: 50%;
+            background: currentColor; margin-right: 7px;
+            box-shadow: 0 0 6px currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        /* ════════════════════════════════════════════════
+           DA+ : TOAST 2.0 — slide-in, icon, accent bar
+           ════════════════════════════════════════════════ */
+        .toast2 {
+            position: fixed; top: 90px; right: 24px; z-index: 100000;
+            display: flex; align-items: center; gap: 14px;
+            min-width: 280px; max-width: 440px;
+            padding: 14px 18px 14px 16px;
+            background: rgba(32,32,34,0.95);
+            backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            box-shadow: 0 14px 56px rgba(0,0,0,0.7), 0 2px 8px rgba(0,0,0,0.3);
+            color: var(--sf-text); font-size: 0.88rem;
+            transform: translateX(120%); opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.3s;
+            overflow: hidden;
+        }
+        .toast2.show { transform: translateX(0); opacity: 1; }
+        .toast2::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+            background: var(--toast-accent, var(--sf-blue));
+        }
+        .toast2.success { --toast-accent: var(--sf-green); }
+        .toast2.error   { --toast-accent: var(--sf-red); }
+        .toast2.warn    { --toast-accent: var(--sf-orange); }
+        .toast2-ico {
+            width: 32px; height: 32px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.05); flex-shrink: 0;
+            color: var(--toast-accent, var(--sf-blue));
+        }
+        .toast2-ico .sfi { width: 18px; height: 18px; }
+        .toast2-body { flex: 1; line-height: 1.4; }
+
+        /* ════════════════════════════════════════════════
+           DA+ : CARD ENTRANCE STAGGER on view change
+           ════════════════════════════════════════════════ */
+        [id^="view-"].show .dcard,
+        [id^="view-"].show .stat-card {
+            animation: cardIn 0.6s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        [id^="view-"].show .dcard:nth-of-type(1) { animation-delay: 0.05s; }
+        [id^="view-"].show .dcard:nth-of-type(2) { animation-delay: 0.12s; }
+        [id^="view-"].show .dcard:nth-of-type(3) { animation-delay: 0.19s; }
+        [id^="view-"].show .dcard:nth-of-type(4) { animation-delay: 0.26s; }
+        [id^="view-"].show .dcard:nth-of-type(5) { animation-delay: 0.33s; }
+        [id^="view-"].show .stat-grid .stat-card:nth-child(1) { animation-delay: 0.03s; }
+        [id^="view-"].show .stat-grid .stat-card:nth-child(2) { animation-delay: 0.08s; }
+        [id^="view-"].show .stat-grid .stat-card:nth-child(3) { animation-delay: 0.13s; }
+        [id^="view-"].show .stat-grid .stat-card:nth-child(4) { animation-delay: 0.18s; }
+
+        /* ════════════════════════════════════════════════
+           DA+ : HERO BADGE — floating + pulsing halo
+           ════════════════════════════════════════════════ */
+        .hero-badge {
+            position: relative; z-index: 1;
+            animation: badgeFloat 4s ease-in-out infinite;
+        }
+        .hero-badge::after {
+            content: ''; position: absolute; inset: -6px;
+            border-radius: 24px;
+            background: var(--hero-accent, var(--sf-blue));
+            opacity: 0.18; filter: blur(22px);
+            z-index: -1;
+            animation: haloPulse 3s ease-in-out infinite;
+        }
+        @keyframes badgeFloat {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-3px); }
+        }
+        @keyframes haloPulse {
+            0%, 100% { opacity: 0.15; }
+            50%      { opacity: 0.32; }
+        }
+
+        /* ════════════════════════════════════════════════
+           DA+ : LINK-MORE animated arrow
+           ════════════════════════════════════════════════ */
+        .link-more { transition: color 0.25s; }
+        .link-more:hover { text-decoration: none; color: #5fb3ff; }
+        .link-more::after { transition: transform 0.25s; display: inline-block; }
+        .link-more:hover::after { transform: translateX(4px); }
+
+        /* ════════════════════════════════════════════════
+           DA+ : SECTION INTRO pattern
+           ════════════════════════════════════════════════ */
+        .section-intro {
+            display: flex; flex-direction: column; gap: 8px;
+            margin-bottom: 28px; padding-top: 12px;
+        }
+        .section-intro-eyebrow {
+            font-size: 0.66rem; font-weight: 600;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--sf-blue);
+        }
+        .section-intro-title {
+            font-size: 1.8rem; font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+        .section-intro-sub {
+            font-size: 0.95rem; color: var(--sf-text-secondary);
+            max-width: 640px; line-height: 1.5;
+        }
+
+        /* Ensure ainput hover feedback */
+        .ainput:hover { border-color: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
@@ -975,6 +1188,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-portfolio">
     <div class="hero">
+        <div class="hero-eyebrow"><span class="dot"></span>Patrimoine · ETF</div>
         <div class="hero-badge"><span class="sfi" data-icon="chart"></span></div>
         <h1 class="hero-title">Portefeuille</h1>
         <p class="hero-subtitle">Vue d'ensemble de votre allocation ETF diversifiee, inspiree des meilleures pratiques Finary.</p>
@@ -1012,6 +1226,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-dca">
     <div class="hero bg-alt">
+        <div class="hero-eyebrow"><span class="dot"></span>Investissement récurrent</div>
         <div class="hero-badge"><span class="sfi" data-icon="euro"></span></div>
         <h1 class="hero-title">Dollar Cost Averaging</h1>
         <p class="hero-subtitle">Investissez regulierement, sans vous soucier du timing.</p>
@@ -1034,6 +1249,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-projection">
     <div class="hero">
+        <div class="hero-eyebrow"><span class="dot"></span>Monte Carlo</div>
         <div class="hero-badge"><span class="sfi" data-icon="trending"></span></div>
         <h1 class="hero-title">Projection future</h1>
         <p class="hero-subtitle">Estimation Monte Carlo de vos gains futurs. Calibrée sur l'historique réel de votre portefeuille.</p>
@@ -1162,6 +1378,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-analytics">
     <div class="hero">
+        <div class="hero-eyebrow"><span class="dot"></span>Risque · Performance</div>
         <div class="hero-badge"><span class="sfi" data-icon="chartUp"></span></div>
         <h1 class="hero-title">Analyse avancée</h1>
         <p class="hero-subtitle">Optimisation Markowitz, corrélations, stress tests, régime de marché. Niveau institutionnel.</p>
@@ -1285,6 +1502,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-trading">
     <div class="hero bg-alt">
+        <div class="hero-eyebrow"><span class="dot"></span>Bot automatique · Crypto</div>
         <div class="hero-badge"><span class="sfi" data-icon="bolt"></span></div>
         <h1 class="hero-title">Trading Institutionnel</h1>
         <p class="hero-subtitle">Multi-strategie quantitative. Gestion du risque niveau hedge fund. Execution intelligente.</p>
@@ -1404,6 +1622,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-scanner">
     <div class="hero">
+        <div class="hero-eyebrow"><span class="dot"></span>Opportunités · Temps réel</div>
         <div class="hero-badge"><span class="sfi" data-icon="search"></span></div>
         <h1 class="hero-title">Market Scanner</h1>
         <p class="hero-subtitle">Analyse en temps reel de +1000 paires pour trouver les meilleures opportunites du marche.</p>
@@ -1439,6 +1658,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-crypto">
     <div class="hero bg-alt">
+        <div class="hero-eyebrow"><span class="dot"></span>Actifs numériques</div>
         <div class="hero-badge"><span class="sfi" data-icon="bitcoin"></span></div>
         <h1 class="hero-title">Crypto</h1>
         <p class="hero-subtitle">Gerez votre portefeuille crypto sur MEXC. DCA et reequilibrage automatique.</p>
@@ -1481,6 +1701,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-broker">
     <div class="hero">
+        <div class="hero-eyebrow"><span class="dot"></span>Brokers · Exchanges</div>
         <div class="hero-badge"><span class="sfi" data-icon="plug"></span></div>
         <h1 class="hero-title">Connexions</h1>
         <p class="hero-subtitle">Gerez vos brokers ETF et exchanges crypto.</p>
@@ -1517,6 +1738,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-auto">
     <div class="hero bg-alt">
+        <div class="hero-eyebrow"><span class="dot"></span>Scheduler · Jobs</div>
         <div class="hero-badge"><span class="sfi" data-icon="clock"></span></div>
         <h1 class="hero-title">Automatisation</h1>
         <p class="hero-subtitle">Configurez vos DCA et reequilibrages automatiques.</p>
@@ -1556,6 +1778,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-securite">
     <div class="hero">
+        <div class="hero-eyebrow"><span class="dot"></span>Kill-switch · Telegram · Backups</div>
         <div class="hero-badge"><span class="sfi" data-icon="shield"></span></div>
         <h1 class="hero-title">Sécurité & Notifications</h1>
         <p class="hero-subtitle">Mode d'exécution, kill-switch, alertes Telegram, authentification.</p>
@@ -1658,6 +1881,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-glossaire">
     <div class="hero bg-alt">
+        <div class="hero-eyebrow"><span class="dot"></span>Lexique · Définitions</div>
         <div class="hero-badge"><span class="sfi" data-icon="beaker"></span></div>
         <h1 class="hero-title">Glossaire</h1>
         <p class="hero-subtitle">Définitions de tous les termes financiers et techniques utilisés dans l'application.</p>
@@ -1797,7 +2021,32 @@ document.addEventListener('click',(e)=>{
     }
 });
 
-function toast(msg,err){const t=document.getElementById('toast');t.textContent=msg;t.style.background=err?'rgba(255,69,58,0.9)':'var(--sf-bg-card)';t.style.color=err?'#fff':'var(--sf-text)';t.style.display='block';setTimeout(()=>t.style.display='none',3200);}
+/* Toast 2.0 — slide-in, icône, accent bar. Auto-stacks verticalement. */
+function toast(msg, type){
+    // type compat : true => error, false/undef => success, else literal string
+    if(type === true) type = 'error';
+    else if(!type) type = 'success';
+    const typeIcons = {success:'checkCircle', error:'xCircle', warn:'alert', info:'target'};
+    const ico = typeIcons[type] || 'checkCircle';
+
+    const el = document.createElement('div');
+    el.className = 'toast2 ' + type;
+    el.innerHTML = `<div class="toast2-ico">${icon(ico)}</div><div class="toast2-body">${msg}</div>`;
+
+    // Stack offset si d'autres toasts présents
+    const existing = document.querySelectorAll('.toast2');
+    const offset = 90 + existing.length * 70;
+    el.style.top = offset + 'px';
+
+    document.body.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('show'));
+
+    const duration = type === 'error' ? 5000 : 3200;
+    setTimeout(() => {
+        el.classList.remove('show');
+        setTimeout(() => el.remove(), 500);
+    }, duration);
+}
 
 /* ── Animated counter ── */
 function animateVal(el, val, prefix='', suffix='', decimals=2) {
