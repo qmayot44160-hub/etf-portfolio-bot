@@ -1005,6 +1005,128 @@
         }
 
         /* ════════════════════════════════════════════════
+           DA+ : COMMAND PALETTE (⌘K)
+           ════════════════════════════════════════════════ */
+        .cmdk-overlay {
+            position: fixed; inset: 0; z-index: 10000;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(14px) saturate(160%);
+            -webkit-backdrop-filter: blur(14px) saturate(160%);
+            display: none; align-items: flex-start; justify-content: center;
+            padding-top: 12vh; opacity: 0; transition: opacity 0.22s ease;
+        }
+        .cmdk-overlay.show { display: flex; opacity: 1; }
+        .cmdk-panel {
+            width: min(620px, 92vw);
+            background: linear-gradient(180deg, rgba(38,38,40,0.96), rgba(28,28,30,0.96));
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 16px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(10,132,255,0.08) inset;
+            overflow: hidden;
+            transform: translateY(-12px) scale(0.98);
+            opacity: 0;
+            transition: transform 0.28s cubic-bezier(0.2,0.9,0.2,1), opacity 0.28s ease;
+        }
+        .cmdk-overlay.show .cmdk-panel { transform: translateY(0) scale(1); opacity: 1; }
+        .cmdk-search {
+            display: flex; align-items: center; gap: 12px;
+            padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .cmdk-search .sfi { width: 18px; height: 18px; color: #86868b; }
+        .cmdk-search input {
+            flex: 1; background: transparent; border: none; outline: none;
+            color: #f5f5f7; font-size: 1.02rem; font-family: inherit;
+            letter-spacing: -0.01em;
+        }
+        .cmdk-search input::placeholder { color: #6e6e73; }
+        .cmdk-kbd {
+            font-size: 0.68rem; color: #86868b;
+            padding: 3px 7px; border-radius: 5px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            font-family: 'SF Mono', monospace;
+        }
+        .cmdk-list {
+            max-height: 54vh; overflow-y: auto; padding: 6px;
+        }
+        .cmdk-section {
+            font-size: 0.66rem; font-weight: 600;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            color: #6e6e73; padding: 10px 12px 6px;
+        }
+        .cmdk-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 12px; border-radius: 10px;
+            cursor: pointer; transition: background 0.15s;
+            color: #f5f5f7;
+        }
+        .cmdk-item:hover, .cmdk-item.active {
+            background: rgba(10,132,255,0.14);
+        }
+        .cmdk-item-ico {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: var(--sf-blue); flex-shrink: 0;
+        }
+        .cmdk-item.active .cmdk-item-ico {
+            background: rgba(10,132,255,0.18);
+            border-color: rgba(10,132,255,0.3);
+        }
+        .cmdk-item-ico .sfi { width: 16px; height: 16px; }
+        .cmdk-item-body { flex: 1; min-width: 0; }
+        .cmdk-item-title {
+            font-size: 0.9rem; font-weight: 500;
+            letter-spacing: -0.01em;
+        }
+        .cmdk-item-sub {
+            font-size: 0.76rem; color: #86868b; margin-top: 1px;
+        }
+        .cmdk-item-arrow {
+            color: #48484a; transition: transform 0.2s, color 0.2s;
+        }
+        .cmdk-item.active .cmdk-item-arrow {
+            color: var(--sf-blue); transform: translateX(3px);
+        }
+        .cmdk-empty {
+            padding: 40px 20px; text-align: center;
+            color: #6e6e73; font-size: 0.88rem;
+        }
+        .cmdk-footer {
+            display: flex; align-items: center; gap: 14px;
+            padding: 10px 16px; border-top: 1px solid rgba(255,255,255,0.06);
+            background: rgba(0,0,0,0.22);
+            font-size: 0.72rem; color: #86868b;
+        }
+        .cmdk-footer-item { display: flex; align-items: center; gap: 5px; }
+        .cmdk-hint {
+            position: fixed; bottom: 18px; right: 18px; z-index: 50;
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 12px; border-radius: 10px;
+            background: rgba(28,28,30,0.75);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.06);
+            font-size: 0.72rem; color: #86868b;
+            cursor: pointer; transition: all 0.2s;
+            opacity: 0; transform: translateY(6px);
+            animation: cmdkHintIn 0.6s 1.5s ease forwards;
+        }
+        .cmdk-hint:hover {
+            background: rgba(38,38,40,0.9);
+            color: #f5f5f7; transform: translateY(-1px);
+        }
+        @keyframes cmdkHintIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 720px) {
+            .cmdk-hint { display: none; }
+            .cmdk-overlay { padding-top: 6vh; }
+            .cmdk-panel { width: 96vw; }
+        }
+
+        /* ════════════════════════════════════════════════
            DA+ : LINK-MORE animated arrow
            ════════════════════════════════════════════════ */
         .link-more { transition: color 0.25s; }
@@ -1092,6 +1214,30 @@
 <div id="ctx-banner" class="ctx-banner">
     <div class="ctx-item"><span class="ctx-dot gray"></span><span>Chargement de l'état...</span></div>
 </div>
+
+<!-- ═══════════════════════════════════════════════════════
+     COMMAND PALETTE (⌘K / Ctrl+K)
+     ═══════════════════════════════════════════════════════ -->
+<div id="cmdk" class="cmdk-overlay" onclick="if(event.target===this)closeCmdK()">
+    <div class="cmdk-panel" role="dialog" aria-modal="true" aria-label="Palette de commandes">
+        <div class="cmdk-search">
+            <span class="sfi" data-icon="search"></span>
+            <input id="cmdk-input" type="text" placeholder="Rechercher une page, une action…" autocomplete="off" spellcheck="false">
+            <span class="cmdk-kbd">ESC</span>
+        </div>
+        <div class="cmdk-list" id="cmdk-list"></div>
+        <div class="cmdk-footer">
+            <span class="cmdk-footer-item"><span class="cmdk-kbd">↑↓</span> Naviguer</span>
+            <span class="cmdk-footer-item"><span class="cmdk-kbd">↵</span> Ouvrir</span>
+            <span class="cmdk-footer-item" style="margin-left:auto">Palette</span>
+        </div>
+    </div>
+</div>
+<button class="cmdk-hint" onclick="openCmdK()" aria-label="Ouvrir la palette">
+    <span class="sfi" data-icon="search" style="width:12px;height:12px"></span>
+    <span>Recherche rapide</span>
+    <span class="cmdk-kbd">⌘K</span>
+</button>
 
 <div class="page">
 
@@ -1930,6 +2076,7 @@ const ICN = {
     power: '<svg viewBox="0 0 24 24"><path d="M12 3v10M6.5 7A8 8 0 1017.5 7"/></svg>',
     beaker: '<svg viewBox="0 0 24 24"><path d="M9 3v7L4 19a2 2 0 002 3h12a2 2 0 002-3l-5-9V3M9 3h6M6 14h12"/></svg>',
     trending: '<svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-9"/><path d="M14 6h7v7"/></svg>',
+    arrowRight: '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 };
 function icon(name, extraClass=''){
     const svg = ICN[name] || ICN.target;
@@ -1949,7 +2096,9 @@ function renderStaticIcons(){
 const fmt=n=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(n);
 const fmtU=n=>'$'+Number(n).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const pct=n=>(n>=0?'+':'')+n.toFixed(2)+'%';
-const PL={paper_bgcolor:'transparent',plot_bgcolor:'transparent',font:{family:'Inter',color:'#6e6e73',size:11},xaxis:{gridcolor:'rgba(255,255,255,0.04)',color:'#6e6e73',linecolor:'rgba(255,255,255,0.04)',zeroline:false},yaxis:{gridcolor:'rgba(255,255,255,0.04)',color:'#6e6e73',linecolor:'rgba(255,255,255,0.04)',zeroline:false},margin:{t:12,b:36,l:56,r:12},legend:{font:{color:'#86868b'}},hoverlabel:{font:{family:'Inter'}}};
+/* ═══ Unified brand chart palette ═══ */
+const BRAND_COLORWAY=['#0a84ff','#30d158','#bf5af2','#ff9f0a','#64d2ff','#ff453a','#ffd60a','#ff375f'];
+const PL={paper_bgcolor:'transparent',plot_bgcolor:'transparent',colorway:BRAND_COLORWAY,font:{family:'Inter, -apple-system, SF Pro Display, sans-serif',color:'#6e6e73',size:11},xaxis:{gridcolor:'rgba(255,255,255,0.04)',color:'#6e6e73',linecolor:'rgba(255,255,255,0.04)',zeroline:false,tickfont:{color:'#86868b'}},yaxis:{gridcolor:'rgba(255,255,255,0.04)',color:'#6e6e73',linecolor:'rgba(255,255,255,0.04)',zeroline:false,tickfont:{color:'#86868b'}},margin:{t:12,b:36,l:56,r:12},legend:{font:{color:'#86868b',size:11}},hoverlabel:{font:{family:'Inter',color:'#f5f5f7',size:12},bgcolor:'rgba(28,28,30,0.95)',bordercolor:'rgba(255,255,255,0.1)'}};
 let selectedBrokerId=null;
 
 /* ═══ Apple-style view transitions ═══ */
@@ -2047,6 +2196,126 @@ function toast(msg, type){
         setTimeout(() => el.remove(), 500);
     }, duration);
 }
+
+/* ═══════════════════════════════════════════════════════
+   COMMAND PALETTE (⌘K / Ctrl+K)
+   Recherche floue + navigation clavier.
+   ═══════════════════════════════════════════════════════ */
+const CMDK_ITEMS = [
+    {section:'Navigation', ico:'home',     title:'Tableau de bord',        sub:'Vue d\'ensemble', view:'home',       kw:'accueil dashboard home'},
+    {section:'Navigation', ico:'chart',    title:'Portefeuille ETF',       sub:'Patrimoine · lignes · perf', view:'portfolio',  kw:'etf portfolio patrimoine positions'},
+    {section:'Navigation', ico:'euro',     title:'DCA Simulation',         sub:'Dollar-Cost Averaging', view:'dca',        kw:'dca simulation moyenne'},
+    {section:'Navigation', ico:'chartUp',  title:'Projection Monte Carlo', sub:'Scénarios long terme', view:'projection', kw:'projection monte carlo simulation futur'},
+    {section:'Navigation', ico:'flask',    title:'Analytics avancés',      sub:'Frontière efficiente · stress', view:'analytics',  kw:'analytics analyse frontiere risque stress'},
+    {section:'Navigation', ico:'bitcoin',  title:'Crypto',                 sub:'Portefeuille crypto', view:'crypto',     kw:'crypto bitcoin ethereum'},
+    {section:'Navigation', ico:'bolt',     title:'Trading',                sub:'Passage d\'ordres', view:'trading',    kw:'trading ordres achat vente'},
+    {section:'Navigation', ico:'search',   title:'Scanner marché',         sub:'Opportunités temps réel', view:'scanner',    kw:'scanner opportunites signaux'},
+    {section:'Navigation', ico:'plug',     title:'Brokers & Exchanges',    sub:'Connexions API', view:'broker',     kw:'broker exchange connexion api ibkr binance'},
+    {section:'Navigation', ico:'clock',    title:'Automatisation',         sub:'Planificateur de tâches', view:'auto',       kw:'auto scheduler automatique planification'},
+    {section:'Navigation', ico:'shield',   title:'Sécurité & Monitoring',  sub:'Telegram · kill-switch', view:'securite',   kw:'securite telegram kill switch monitoring'},
+    {section:'Navigation', ico:'beaker',   title:'Glossaire',              sub:'Définitions', view:'glossaire',  kw:'glossaire lexique definitions'},
+    {section:'Actions',    ico:'power',    title:'Kill-switch (urgence)',  sub:'Stopper immédiatement le bot', action:()=>triggerKillSwitch(), kw:'kill switch arret urgence stop'},
+    {section:'Actions',    ico:'refresh',  title:'Rafraîchir le portefeuille', sub:'Recharger les données', action:()=>{if(typeof refreshPortfolio==='function')refreshPortfolio();}, kw:'refresh rafraichir reload'},
+    {section:'Actions',    ico:'refresh',  title:'Relancer le scanner',    sub:'Forcer une analyse', action:()=>{if(typeof runScanner==='function')runScanner();}, kw:'scanner analyse force'},
+];
+let cmdkIdx = 0, cmdkFiltered = [];
+
+function fuzzyMatch(text, q){
+    if(!q) return 1;
+    text = text.toLowerCase(); q = q.toLowerCase();
+    if(text.includes(q)) return 100 - text.indexOf(q);
+    let ti=0, qi=0, score=0, streak=0;
+    while(ti<text.length && qi<q.length){
+        if(text[ti]===q[qi]){ qi++; streak++; score += streak; }
+        else streak = 0;
+        ti++;
+    }
+    return qi===q.length ? score : 0;
+}
+
+function renderCmdK(q){
+    const list = document.getElementById('cmdk-list');
+    const scored = CMDK_ITEMS.map(it => ({it, s: fuzzyMatch(it.title + ' ' + it.sub + ' ' + (it.kw||''), q)}))
+        .filter(x => x.s > 0)
+        .sort((a,b) => b.s - a.s);
+    cmdkFiltered = scored.map(x => x.it);
+    cmdkIdx = 0;
+    if(!cmdkFiltered.length){
+        list.innerHTML = '<div class="cmdk-empty">Aucun résultat pour « '+(q||'')+' »</div>';
+        return;
+    }
+    const grouped = {};
+    cmdkFiltered.forEach((it,i) => {
+        (grouped[it.section] = grouped[it.section]||[]).push({it,i});
+    });
+    list.innerHTML = Object.keys(grouped).map(sec => {
+        return '<div class="cmdk-section">'+sec+'</div>' +
+            grouped[sec].map(({it,i}) =>
+                `<div class="cmdk-item${i===cmdkIdx?' active':''}" data-idx="${i}">
+                    <div class="cmdk-item-ico">${icon(it.ico)}</div>
+                    <div class="cmdk-item-body">
+                        <div class="cmdk-item-title">${it.title}</div>
+                        <div class="cmdk-item-sub">${it.sub||''}</div>
+                    </div>
+                    <div class="cmdk-item-arrow">${icon('arrowRight')}</div>
+                </div>`
+            ).join('');
+    }).join('');
+    list.querySelectorAll('.cmdk-item').forEach(el => {
+        el.addEventListener('click', () => { cmdkIdx = +el.dataset.idx; executeCmdK(); });
+        el.addEventListener('mouseenter', () => {
+            cmdkIdx = +el.dataset.idx;
+            list.querySelectorAll('.cmdk-item').forEach(e => e.classList.toggle('active', +e.dataset.idx===cmdkIdx));
+        });
+    });
+}
+
+function executeCmdK(){
+    const it = cmdkFiltered[cmdkIdx];
+    if(!it) return;
+    closeCmdK();
+    if(it.view) showView(it.view);
+    else if(it.action) it.action();
+}
+
+function openCmdK(){
+    const ov = document.getElementById('cmdk');
+    const inp = document.getElementById('cmdk-input');
+    inp.value = '';
+    renderCmdK('');
+    ov.classList.add('show');
+    setTimeout(()=>inp.focus(), 30);
+}
+
+function closeCmdK(){
+    document.getElementById('cmdk').classList.remove('show');
+}
+
+document.addEventListener('keydown', (e) => {
+    const open = document.getElementById('cmdk').classList.contains('show');
+    if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='k'){
+        e.preventDefault();
+        open ? closeCmdK() : openCmdK();
+        return;
+    }
+    if(!open) return;
+    if(e.key==='Escape'){ e.preventDefault(); closeCmdK(); }
+    else if(e.key==='ArrowDown'){ e.preventDefault(); if(cmdkFiltered.length){cmdkIdx=(cmdkIdx+1)%cmdkFiltered.length; updateCmdKActive();} }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); if(cmdkFiltered.length){cmdkIdx=(cmdkIdx-1+cmdkFiltered.length)%cmdkFiltered.length; updateCmdKActive();} }
+    else if(e.key==='Enter'){ e.preventDefault(); executeCmdK(); }
+});
+
+function updateCmdKActive(){
+    const items = document.querySelectorAll('.cmdk-item');
+    items.forEach(el => el.classList.toggle('active', +el.dataset.idx===cmdkIdx));
+    const act = document.querySelector('.cmdk-item.active');
+    if(act) act.scrollIntoView({block:'nearest'});
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const inp = document.getElementById('cmdk-input');
+    if(inp) inp.addEventListener('input', (e) => renderCmdK(e.target.value));
+});
 
 /* ── Animated counter ── */
 function animateVal(el, val, prefix='', suffix='', decimals=2) {
