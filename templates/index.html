@@ -159,72 +159,75 @@
             transition: all 0.22s ease;
             font-family: inherit;
         }
-        .hdr-chip .sfi { width: 12px; height: 12px; }
+        .hdr-chip .sfi { width: 12px; height: 12px; opacity: 0.85; }
         .hdr-chip .chip-dot {
-            width: 6px; height: 6px; border-radius: 50%;
+            width: 5px; height: 5px; border-radius: 50%;
             background: currentColor;
-            box-shadow: 0 0 6px currentColor;
+            box-shadow: 0 0 3px currentColor;
+            opacity: 0.9;
         }
 
-        /* PAPER / LIVE mode badge */
+        /* PAPER / LIVE mode badge — glass neutre + accent couleur discret */
         .mode-chip {
+            color: #d6d6d9;
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.09);
+        }
+        .mode-chip .chip-dot {
             color: var(--sf-orange);
-            background: linear-gradient(180deg, rgba(255,159,10,0.14), rgba(255,159,10,0.06));
-            border-color: rgba(255,159,10,0.28);
-            box-shadow: 0 0 0 1px rgba(255,159,10,0.08) inset, 0 2px 10px rgba(255,159,10,0.08);
+            background: var(--sf-orange);
+            box-shadow: 0 0 3px rgba(255,159,10,0.5);
+            animation: blink 2.4s infinite;
         }
-        .mode-chip.live {
-            color: var(--sf-green);
-            background: linear-gradient(180deg, rgba(48,209,88,0.14), rgba(48,209,88,0.06));
-            border-color: rgba(48,209,88,0.28);
-            box-shadow: 0 0 0 1px rgba(48,209,88,0.08) inset, 0 2px 10px rgba(48,209,88,0.1);
+        .mode-chip.live .chip-dot {
+            background: var(--sf-green);
+            box-shadow: 0 0 3px rgba(48,209,88,0.5);
         }
-        .mode-chip .chip-dot { animation: blink 2s infinite; }
 
-        /* Kill switch — translucide, glow rouge au hover, pulse en idle */
+        /* Kill switch — neutre en repos, glow rouge au hover seulement */
         .kill-chip {
             cursor: pointer;
-            color: var(--sf-red);
-            background: linear-gradient(180deg, rgba(255,69,58,0.12), rgba(255,69,58,0.05));
-            border-color: rgba(255,69,58,0.3);
-            box-shadow: 0 0 0 1px rgba(255,69,58,0.06) inset;
+            color: #d6d6d9;
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.09);
             position: relative; overflow: hidden;
+        }
+        .kill-chip .sfi {
+            color: var(--sf-red);
+            opacity: 0.85;
+            transition: opacity 0.22s ease;
         }
         .kill-chip::before {
             content: ''; position: absolute; inset: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(255,69,58,0.3), transparent 70%);
+            background: radial-gradient(circle at 50% 50%, rgba(255,69,58,0.28), transparent 70%);
             opacity: 0; transition: opacity 0.25s ease;
             pointer-events: none;
         }
         .kill-chip:hover {
             color: #fff;
-            border-color: rgba(255,69,58,0.55);
+            border-color: rgba(255,69,58,0.45);
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(255,69,58,0.3), 0 0 0 1px rgba(255,69,58,0.25) inset;
+            box-shadow: 0 6px 18px rgba(255,69,58,0.22);
         }
-        .kill-chip:hover::before { opacity: 0.7; }
+        .kill-chip:hover .sfi { opacity: 1; }
+        .kill-chip:hover::before { opacity: 0.6; }
         .kill-chip:active { transform: translateY(0); }
-        .kill-chip .sfi { animation: killPulse 2.4s ease-in-out infinite; }
-        @keyframes killPulse {
-            0%, 100% { opacity: 0.75; transform: scale(1); }
-            50%      { opacity: 1; transform: scale(1.08); }
-        }
 
-        /* Bot status pill — aligné sur la famille */
+        /* Bot status pill — neutre + petit dot coloré */
         .globalheader-status {
             height: 26px; padding: 0 10px;
             font-size: 0.66rem; font-weight: 600;
             letter-spacing: 0.04em;
             border-radius: 8px;
-            background: linear-gradient(180deg, rgba(48,209,88,0.1), rgba(48,209,88,0.04));
-            border: 1px solid rgba(48,209,88,0.22);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.09);
             backdrop-filter: blur(12px) saturate(160%);
             -webkit-backdrop-filter: blur(12px) saturate(160%);
-            color: var(--sf-green);
+            color: #d6d6d9;
             gap: 6px;
         }
         .globalheader-status .dot {
-            width: 6px; height: 6px; box-shadow: 0 0 6px currentColor;
+            width: 5px; height: 5px; box-shadow: 0 0 3px currentColor; opacity: 0.9;
         }
         @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
         @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(48,209,88,0.4)}50%{opacity:0.85;box-shadow:0 0 8px 2px rgba(48,209,88,0.25)} }
@@ -967,11 +970,11 @@
         .ctx-banner.danger { background: rgba(255,69,58,0.10); border-bottom-color: rgba(255,69,58,0.3); }
         .ctx-item { display: inline-flex; align-items: center; gap: 6px; }
         .ctx-item strong { color: var(--sf-text); font-weight: 600; }
-        .ctx-dot { width: 7px; height: 7px; border-radius: 50%; }
-        .ctx-dot.green { background: var(--sf-green); box-shadow: 0 0 6px rgba(48,209,88,0.6); }
-        .ctx-dot.orange { background: var(--sf-orange); box-shadow: 0 0 6px rgba(255,159,10,0.6); }
-        .ctx-dot.red { background: var(--sf-red); box-shadow: 0 0 6px rgba(255,69,58,0.6); }
-        .ctx-dot.gray { background: var(--sf-text-muted); }
+        .ctx-dot { width: 6px; height: 6px; border-radius: 50%; opacity: 0.9; }
+        .ctx-dot.green  { background: var(--sf-green);  box-shadow: 0 0 3px rgba(48,209,88,0.4); }
+        .ctx-dot.orange { background: var(--sf-orange); box-shadow: 0 0 3px rgba(255,159,10,0.4); }
+        .ctx-dot.red    { background: var(--sf-red);    box-shadow: 0 0 3px rgba(255,69,58,0.4); }
+        .ctx-dot.gray   { background: var(--sf-text-muted); }
         .ctx-link {
             color: var(--sf-blue); cursor: pointer;
             border: none; background: none; font-family: inherit;
