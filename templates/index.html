@@ -1428,30 +1428,43 @@
 
         /* ════════════════════════════════════════════════
            DA+ : AVATAR + USER MENU POPOVER
+           Même grammaire visuelle que les .hdr-chip : glass
+           translucide + backdrop blur. La couleur personnelle
+           apparaît via une fine bague colorée (pas un fond solide).
            ════════════════════════════════════════════════ */
         .avatar-btn {
             display: inline-flex; align-items: center; justify-content: center;
             width: 28px; height: 28px; border-radius: 50%;
-            background: var(--avatar-bg, var(--sf-blue));
-            color: #fff; font-size: 0.68rem; font-weight: 700;
-            letter-spacing: 0.02em;
-            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.04);
+            color: var(--sf-text);
+            font-size: 0.64rem; font-weight: 700;
+            letter-spacing: 0.04em;
+            border: 1px solid rgba(255,255,255,0.1);
             cursor: pointer; font-family: inherit;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
-            transition: transform 0.2s, box-shadow 0.2s;
+            backdrop-filter: blur(12px) saturate(160%);
+            -webkit-backdrop-filter: blur(12px) saturate(160%);
+            box-shadow:
+                0 0 0 1.5px var(--avatar-bg, var(--sf-blue)) inset,
+                0 0 0 2.5px rgba(0,0,0,0.5) inset,
+                0 0 8px -2px var(--avatar-bg, var(--sf-blue));
+            transition: all 0.22s ease;
             position: relative;
         }
         .avatar-btn:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 14px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.2),
-                        0 0 0 3px rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.18);
+            box-shadow:
+                0 0 0 1.5px var(--avatar-bg, var(--sf-blue)) inset,
+                0 0 0 2.5px rgba(0,0,0,0.5) inset,
+                0 4px 14px -2px var(--avatar-bg, var(--sf-blue)),
+                0 0 0 3px rgba(255,255,255,0.04);
         }
         .avatar-btn::after {
             content: ''; position: absolute; right: -1px; bottom: -1px;
-            width: 8px; height: 8px; border-radius: 50%;
+            width: 6px; height: 6px; border-radius: 50%;
             background: var(--sf-green);
-            border: 2px solid #000;
-            box-shadow: 0 0 4px var(--sf-green);
+            border: 1.5px solid #0a0a0a;
+            opacity: 0.85;
         }
 
         .user-menu {
