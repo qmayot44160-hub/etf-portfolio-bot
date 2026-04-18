@@ -32,6 +32,7 @@ import notifications as notif
 import paper_broker
 import backups
 import health
+import profile_store
 
 app = Flask(__name__)
 app.secret_key = get_flask_secret()
@@ -213,6 +214,59 @@ def api_paper_trades():
 @app.route("/api/paper/reset", methods=["POST"])
 def api_paper_reset():
     return jsonify(paper_broker.reset_paper())
+
+
+# ── API: Profil utilisateur ────────────────────────────
+
+@app.route("/api/profile", methods=["GET"])
+def api_profile_get():
+    return jsonify(profile_store.load_profile())
+
+
+@app.route("/api/profile", methods=["PUT", "POST"])
+def api_profile_update():
+    data = request.get_json() or {}
+    updated = profile_store.save_profile(data)
+    profile_store.log_event("profile_update", f"Champs modifiés : {', '.join(data.keys())}")
+    return jsonify({"status": "ok", "profile": updated})
+
+
+@app.route("/api/profile/export")
+def api_profile_export():
+    """Export complet RGPD — tout ce que l'app sait sur l'utilisateur."""
+    from flask import Response
+    import json as _json
+    payload = profile_store.full_export()
+    body = _json.dumps(payload, indent=2, ensure_ascii=False, default=str)
+    profile_store.log_event("data_export", f"Export complet ({len(body)} bytes)")
+    return Response(
+        body,
+        mimetype="application/json",
+        headers={
+            "Content-Disposition": f'attachment; filename="portfolio-quant-export-{datetime_tag()}.json"'
+        },
+    )
+
+
+@app.route("/api/profile/reset", methods=["POST"])
+def api_profile_reset():
+    """Remet le profil aux valeurs par défaut (ne touche pas au portefeuille)."""
+    data = request.get_json() or {}
+    if data.get("confirm") != "RESET":
+        return jsonify({"status": "error", "message": "Confirmation manquante (envoyer {confirm: 'RESET'})"}), 400
+    profile = profile_store.reset_profile()
+    return jsonify({"status": "ok", "profile": profile})
+
+
+@app.route("/api/audit-log")
+def api_audit_log():
+    limit = int(request.args.get("limit", 100))
+    return jsonify({"entries": profile_store.get_audit_log(limit)})
+
+
+def datetime_tag() -> str:
+    from datetime import datetime as _dt
+    return _dt.utcnow().strftime("%Y%m%d-%H%M%S")
 
 
 # ── API: Backups ───────────────────────────────────────

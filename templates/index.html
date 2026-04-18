@@ -73,6 +73,30 @@
             body::before { animation: none; }
         }
 
+        /* User-controlled preferences (toggles in Settings > Apparence) */
+        body.no-aurora::before { display: none; }
+        body.no-grain::after { display: none; }
+        body.reduce-motion::before { animation: none; }
+        body.reduce-motion .hero-title,
+        body.reduce-motion .home-title,
+        body.reduce-motion .dcard::before,
+        body.reduce-motion .cmdk-hint,
+        body.reduce-motion .skel,
+        body.reduce-motion .prog > span::after {
+            animation: none !important;
+        }
+        body.no-anim *, body.no-anim *::before, body.no-anim *::after {
+            animation: none !important;
+            transition: none !important;
+        }
+        body[data-density="compact"] .dcard { padding: 14px; }
+        body[data-density="compact"] .stat-card { padding: 14px; }
+        body[data-density="compact"] .section { margin-bottom: 28px; }
+        body[data-density="compact"] td, body[data-density="compact"] th { padding: 9px 12px; }
+        body[data-density="confortable"] .dcard { padding: 28px; }
+        body[data-density="confortable"] .stat-card { padding: 28px; }
+        body[data-density="confortable"] .section { margin-bottom: 60px; }
+
         /* ════════════════════════════════════════════════
            APPLE NAV BAR
            ════════════════════════════════════════════════ */
@@ -1403,6 +1427,335 @@
         }
 
         /* ════════════════════════════════════════════════
+           DA+ : AVATAR + USER MENU POPOVER
+           ════════════════════════════════════════════════ */
+        .avatar-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; border-radius: 50%;
+            background: var(--avatar-bg, var(--sf-blue));
+            color: #fff; font-size: 0.68rem; font-weight: 700;
+            letter-spacing: 0.02em;
+            border: 1px solid rgba(255,255,255,0.12);
+            cursor: pointer; font-family: inherit;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        .avatar-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.2),
+                        0 0 0 3px rgba(255,255,255,0.06);
+        }
+        .avatar-btn::after {
+            content: ''; position: absolute; right: -1px; bottom: -1px;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--sf-green);
+            border: 2px solid #000;
+            box-shadow: 0 0 4px var(--sf-green);
+        }
+
+        .user-menu {
+            position: fixed; top: 48px; right: 22px; z-index: 9998;
+            width: 280px;
+            background: linear-gradient(180deg, rgba(38,38,40,0.97), rgba(28,28,30,0.97));
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(10,132,255,0.06) inset;
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            padding: 8px;
+            opacity: 0; transform: translateY(-8px) scale(0.98);
+            pointer-events: none;
+            transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.2,0.9,0.2,1);
+        }
+        .user-menu.show {
+            opacity: 1; transform: translateY(0) scale(1);
+            pointer-events: all;
+        }
+        .user-menu-header {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 10px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: 6px;
+        }
+        .user-menu-header .avatar-btn {
+            width: 42px; height: 42px; font-size: 0.95rem; cursor: default;
+        }
+        .user-menu-header .avatar-btn::after { display: none; }
+        .user-menu-info { flex: 1; min-width: 0; }
+        .user-menu-name {
+            font-size: 0.92rem; font-weight: 600;
+            color: var(--sf-text); letter-spacing: -0.01em;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .user-menu-email {
+            font-size: 0.76rem; color: var(--sf-text-secondary);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+        .user-menu-item {
+            display: flex; align-items: center; gap: 11px;
+            padding: 9px 11px; border-radius: 8px;
+            color: var(--sf-text); font-size: 0.86rem;
+            cursor: pointer; transition: background 0.15s;
+            border: none; background: transparent; width: 100%;
+            text-align: left; font-family: inherit;
+        }
+        .user-menu-item:hover { background: rgba(10,132,255,0.14); }
+        .user-menu-item .sfi { width: 16px; height: 16px; color: var(--sf-text-secondary); }
+        .user-menu-item:hover .sfi { color: var(--sf-blue); }
+        .user-menu-item.danger { color: var(--sf-red); }
+        .user-menu-item.danger:hover { background: rgba(255,69,58,0.12); }
+        .user-menu-item.danger .sfi { color: var(--sf-red); }
+        .user-menu-divider {
+            height: 1px; background: rgba(255,255,255,0.06);
+            margin: 6px 0;
+        }
+        .user-menu-footer {
+            padding: 10px 12px 6px;
+            font-size: 0.7rem; color: var(--sf-text-muted);
+            letter-spacing: 0.03em;
+        }
+
+        /* ════════════════════════════════════════════════
+           DA+ : SETTINGS VIEW (rail + content)
+           ════════════════════════════════════════════════ */
+        .settings-layout {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 32px;
+            max-width: 1024px; margin: 0 auto;
+            padding: 40px 22px 80px;
+        }
+        .settings-rail {
+            position: sticky; top: 70px; align-self: start;
+            display: flex; flex-direction: column; gap: 2px;
+            padding: 8px; border-radius: 14px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .settings-rail-header {
+            padding: 8px 10px 14px;
+            font-size: 0.66rem; font-weight: 600;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--sf-text-muted);
+        }
+        .settings-rail-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 12px; border-radius: 9px;
+            font-size: 0.86rem; color: var(--sf-text-secondary);
+            cursor: pointer; transition: all 0.18s;
+            border: none; background: transparent; width: 100%;
+            text-align: left; font-family: inherit;
+            position: relative;
+        }
+        .settings-rail-item:hover {
+            background: rgba(255,255,255,0.04);
+            color: var(--sf-text);
+        }
+        .settings-rail-item.active {
+            background: linear-gradient(90deg, rgba(10,132,255,0.16), rgba(10,132,255,0.04));
+            color: var(--sf-text);
+        }
+        .settings-rail-item.active::before {
+            content: ''; position: absolute;
+            left: 0; top: 8px; bottom: 8px;
+            width: 3px; border-radius: 2px;
+            background: var(--sf-blue);
+        }
+        .settings-rail-item .sfi { width: 15px; height: 15px; flex-shrink: 0; }
+        .settings-content {
+            min-height: 60vh;
+        }
+        .settings-panel {
+            display: none;
+            animation: settingsPanelIn 0.32s cubic-bezier(0.2,0.9,0.2,1);
+        }
+        .settings-panel.active { display: block; }
+        @keyframes settingsPanelIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .settings-panel-header {
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .settings-panel-title {
+            font-size: 1.8rem; font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+        .settings-panel-sub {
+            font-size: 0.95rem; color: var(--sf-text-secondary);
+            margin-top: 6px; line-height: 1.5;
+            max-width: 600px;
+        }
+        .settings-group {
+            margin-bottom: 28px;
+            padding: 20px; border-radius: 14px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .settings-group-title {
+            font-size: 0.72rem; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--sf-text-muted);
+            margin-bottom: 14px;
+        }
+        .settings-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 11px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            gap: 18px;
+        }
+        .settings-row:last-child { border-bottom: none; }
+        .settings-row-label {
+            font-size: 0.9rem; color: var(--sf-text);
+        }
+        .settings-row-hint {
+            font-size: 0.76rem; color: var(--sf-text-muted);
+            margin-top: 2px; max-width: 380px; line-height: 1.4;
+        }
+        .settings-row-control {
+            min-width: 180px; display: flex; justify-content: flex-end;
+        }
+        .settings-row.stack {
+            flex-direction: column; align-items: stretch;
+        }
+        .settings-row.stack .settings-row-control {
+            width: 100%; min-width: 0; margin-top: 8px;
+        }
+
+        /* Avatar picker (color swatches) */
+        .avatar-swatches {
+            display: flex; gap: 8px; flex-wrap: wrap;
+        }
+        .avatar-swatch {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 2px solid transparent; cursor: pointer;
+            transition: transform 0.18s, border-color 0.18s;
+            padding: 0;
+        }
+        .avatar-swatch:hover { transform: scale(1.08); }
+        .avatar-swatch.selected {
+            border-color: #fff;
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+        }
+
+        /* Toggle switch */
+        .toggle {
+            position: relative; display: inline-block;
+            width: 44px; height: 24px;
+        }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute; inset: 0;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px; cursor: pointer;
+            transition: all 0.25s;
+        }
+        .toggle-slider::before {
+            content: ''; position: absolute;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: #fff; top: 2px; left: 2px;
+            transition: transform 0.25s cubic-bezier(0.2,0.9,0.2,1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .toggle input:checked + .toggle-slider {
+            background: linear-gradient(180deg, var(--sf-green), #2bbb4c);
+            border-color: transparent;
+            box-shadow: 0 0 10px rgba(48,209,88,0.35);
+        }
+        .toggle input:checked + .toggle-slider::before {
+            transform: translateX(20px);
+        }
+
+        /* Segmented control */
+        .segmented {
+            display: inline-flex; padding: 2px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+        }
+        .segmented button {
+            padding: 6px 14px; border: none; background: transparent;
+            color: var(--sf-text-secondary); font-size: 0.8rem;
+            font-family: inherit; border-radius: 8px; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .segmented button:hover { color: var(--sf-text); }
+        .segmented button.active {
+            background: rgba(10,132,255,0.2);
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(10,132,255,0.25);
+        }
+
+        /* Audit log entries */
+        .audit-entry {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.84rem;
+        }
+        .audit-entry:last-child { border-bottom: none; }
+        .audit-time {
+            font-size: 0.72rem; color: var(--sf-text-muted);
+            font-variant-numeric: tabular-nums;
+            flex-shrink: 0; min-width: 120px;
+        }
+        .audit-type {
+            display: inline-block; padding: 2px 8px;
+            font-size: 0.68rem; font-weight: 600;
+            background: rgba(10,132,255,0.12); color: var(--sf-blue);
+            border-radius: 6px; margin-right: 6px;
+            letter-spacing: 0.04em;
+        }
+        .audit-details { color: var(--sf-text-secondary); flex: 1; }
+
+        /* Shortcut grid for keyboard help */
+        .kbd-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 10px;
+        }
+        .kbd-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        .kbd-item-label { font-size: 0.86rem; color: var(--sf-text-secondary); }
+        .kbd-item-keys { display: flex; gap: 4px; }
+        .kbd-key {
+            padding: 3px 8px; border-radius: 5px;
+            font-size: 0.7rem; font-family: 'SF Mono', Menlo, monospace;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.09);
+            color: var(--sf-text);
+        }
+
+        @media (max-width: 900px) {
+            .settings-layout {
+                grid-template-columns: 1fr;
+                padding: 24px 16px 60px;
+            }
+            .settings-rail {
+                position: static;
+                flex-direction: row; overflow-x: auto;
+                gap: 4px; padding: 6px;
+            }
+            .settings-rail-header { display: none; }
+            .settings-rail-item {
+                flex-shrink: 0; padding: 8px 12px;
+            }
+            .settings-rail-item.active::before { display: none; }
+        }
+
+        /* ════════════════════════════════════════════════
            DA+ : LINK-MORE animated arrow
            ════════════════════════════════════════════════ */
         .link-more { transition: color 0.25s; }
@@ -1479,6 +1832,7 @@
         <div style="display:flex;align-items:center;gap:12px">
             <div id="mode-badge" class="hdr-chip mode-chip"><span class="chip-dot"></span>PAPER</div>
             <button id="kill-switch-btn" class="hdr-chip kill-chip" onclick="triggerKillSwitch()" title="Arrêt d'urgence du bot"><span class="sfi" data-icon="power"></span>KILL</button>
+            <button id="avatar-btn" class="avatar-btn" onclick="toggleUserMenu(event)" title="Menu utilisateur" aria-haspopup="menu" aria-expanded="false">QM</button>
             <div id="bot-status" class="globalheader-status"><span class="dot" style="background:var(--sf-orange)"></span> Simulation</div>
         </div>
     </div>
@@ -1514,6 +1868,28 @@
     <span>Recherche rapide</span>
     <span class="cmdk-kbd">⌘K</span>
 </button>
+
+<!-- ═══════════════════════════════════════════════════════
+     USER MENU POPOVER
+     ═══════════════════════════════════════════════════════ -->
+<div id="user-menu" class="user-menu" role="menu" aria-label="Menu utilisateur">
+    <div class="user-menu-header">
+        <div id="user-menu-avatar" class="avatar-btn" style="pointer-events:none">QM</div>
+        <div class="user-menu-info">
+            <div class="user-menu-name" id="user-menu-name">Investisseur</div>
+            <div class="user-menu-email" id="user-menu-email">Aucune adresse définie</div>
+        </div>
+    </div>
+    <button class="user-menu-item" onclick="openSettingsPanel('profil')"><span class="sfi" data-icon="user"></span>Profil</button>
+    <button class="user-menu-item" onclick="openSettingsPanel('apparence')"><span class="sfi" data-icon="sparkles"></span>Apparence</button>
+    <button class="user-menu-item" onclick="openSettingsPanel('notifications')"><span class="sfi" data-icon="phone"></span>Notifications</button>
+    <button class="user-menu-item" onclick="openSettingsPanel('confidentialite')"><span class="sfi" data-icon="shield"></span>Confidentialité</button>
+    <button class="user-menu-item" onclick="openSettingsPanel('raccourcis')"><span class="sfi" data-icon="key"></span>Raccourcis clavier</button>
+    <div class="user-menu-divider"></div>
+    <button class="user-menu-item" onclick="openSettingsPanel('apropos')"><span class="sfi" data-icon="info"></span>À propos</button>
+    <button class="user-menu-item danger" onclick="logoutUser()"><span class="sfi" data-icon="logout"></span>Déconnexion</button>
+    <div class="user-menu-footer" id="user-menu-footer">PortfolioQuant · v1.0</div>
+</div>
 
 <div class="page">
 
@@ -2313,6 +2689,417 @@
     </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════
+     SETTINGS (rail + panels)
+     ═══════════════════════════════════════════════════════ -->
+<div id="view-settings">
+    <div class="settings-layout">
+        <!-- Rail gauche -->
+        <nav class="settings-rail" aria-label="Navigation paramètres">
+            <div class="settings-rail-header">Paramètres</div>
+            <button class="settings-rail-item active" data-panel="profil"><span class="sfi" data-icon="user"></span>Profil</button>
+            <button class="settings-rail-item" data-panel="apparence"><span class="sfi" data-icon="sparkles"></span>Apparence</button>
+            <button class="settings-rail-item" data-panel="notifications"><span class="sfi" data-icon="phone"></span>Notifications</button>
+            <button class="settings-rail-item" data-panel="confidentialite"><span class="sfi" data-icon="shield"></span>Confidentialité</button>
+            <button class="settings-rail-item" data-panel="securite"><span class="sfi" data-icon="power"></span>Sécurité</button>
+            <button class="settings-rail-item" data-panel="integrations"><span class="sfi" data-icon="plug"></span>Intégrations</button>
+            <button class="settings-rail-item" data-panel="raccourcis"><span class="sfi" data-icon="key"></span>Raccourcis</button>
+            <button class="settings-rail-item" data-panel="apropos"><span class="sfi" data-icon="info"></span>À propos</button>
+        </nav>
+
+        <!-- Content -->
+        <div class="settings-content">
+
+            <!-- ─── PROFIL ─── -->
+            <div class="settings-panel active" data-panel="profil">
+                <div class="settings-panel-header">
+                    <h1 class="settings-panel-title">Profil</h1>
+                    <p class="settings-panel-sub">Tes informations personnelles et ton profil d'investisseur. Ces données restent stockées en local.</p>
+                </div>
+
+                <div class="settings-group">
+                    <div class="settings-group-title">Identité</div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Nom affiché</div>
+                            <div class="settings-row-hint">Apparaît dans l'avatar et le menu utilisateur.</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <input id="prof-name" class="ainput" type="text" placeholder="Ton nom" maxlength="60">
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Email</div>
+                            <div class="settings-row-hint">Optionnel — pour les futures notifications email.</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <input id="prof-email" class="ainput" type="email" placeholder="toi@exemple.com">
+                        </div>
+                    </div>
+                    <div class="settings-row stack">
+                        <div>
+                            <div class="settings-row-label">Bio</div>
+                            <div class="settings-row-hint">Courte description de toi ou de ta stratégie (280 caractères max).</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <textarea id="prof-bio" class="ainput" rows="3" maxlength="280" placeholder="Ex : Investisseur long-terme · DCA mensuel sur ETF monde + crypto BTC/ETH"></textarea>
+                        </div>
+                    </div>
+                    <div class="settings-row stack">
+                        <div>
+                            <div class="settings-row-label">Couleur de l'avatar</div>
+                            <div class="settings-row-hint">Choisis la couleur du cercle utilisé dans l'avatar.</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <div class="avatar-swatches" id="prof-avatar-swatches"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <div class="settings-group-title">Profil d'investisseur</div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Tolérance au risque</div>
+                            <div class="settings-row-hint">Utilisée pour calibrer les suggestions de portefeuille.</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <div class="segmented" id="prof-risk">
+                                <button data-val="prudent">Prudent</button>
+                                <button data-val="équilibré" class="active">Équilibré</button>
+                                <button data-val="dynamique">Dynamique</button>
+                                <button data-val="agressif">Agressif</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Horizon d'investissement</div>
+                            <div class="settings-row-hint">Durée sur laquelle tu comptes rester investi.</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <div class="segmented" id="prof-horizon">
+                                <button data-val="court">Court (&lt;3 ans)</button>
+                                <button data-val="moyen">Moyen (3-10 ans)</button>
+                                <button data-val="long" class="active">Long (10+ ans)</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Niveau d'expérience</div>
+                            <div class="settings-row-hint">Adapte la profondeur des informations affichées.</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <div class="segmented" id="prof-exp">
+                                <button data-val="débutant">Débutant</button>
+                                <button data-val="intermédiaire" class="active">Intermédiaire</button>
+                                <button data-val="avancé">Avancé</button>
+                                <button data-val="expert">Expert</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">DCA mensuel cible</div>
+                            <div class="settings-row-hint">Montant que tu prévois d'investir chaque mois.</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <input id="prof-dca" class="ainput" type="number" step="50" min="0" placeholder="500" style="max-width:140px">
+                        </div>
+                    </div>
+                    <div class="settings-row stack">
+                        <div>
+                            <div class="settings-row-label">Objectifs personnels</div>
+                            <div class="settings-row-hint">Ex : constituer un apport immobilier, préparer la retraite, FIRE 2040…</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <textarea id="prof-goals" class="ainput" rows="3" maxlength="500" placeholder="Tes objectifs..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+                    <button class="abtn abtn-dark" onclick="resetProfilePanel()">Annuler</button>
+                    <button class="abtn abtn-blue" onclick="saveProfilePanel()">Enregistrer</button>
+                </div>
+            </div>
+
+            <!-- ─── APPARENCE ─── -->
+            <div class="settings-panel" data-panel="apparence">
+                <div class="settings-panel-header">
+                    <h1 class="settings-panel-title">Apparence</h1>
+                    <p class="settings-panel-sub">Personnalise le rendu visuel de l'application.</p>
+                </div>
+
+                <div class="settings-group">
+                    <div class="settings-group-title">Interface</div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Densité d'affichage</div>
+                            <div class="settings-row-hint">Compact pour plus d'infos, Confortable pour plus d'aération.</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <div class="segmented" id="app-density">
+                                <button data-val="confortable">Confortable</button>
+                                <button data-val="standard" class="active">Standard</button>
+                                <button data-val="compact">Compact</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Animations</div>
+                            <div class="settings-row-hint">Transitions, fade, hover effects sur toute l'app.</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <label class="toggle"><input type="checkbox" id="app-anim" checked><span class="toggle-slider"></span></label>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Réduire le mouvement</div>
+                            <div class="settings-row-hint">Désactive aurora, shine, spotlight (accessibilité).</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <label class="toggle"><input type="checkbox" id="app-reduce"><span class="toggle-slider"></span></label>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Fond aurora</div>
+                            <div class="settings-row-hint">Les blobs colorés qui dérivent derrière l'app.</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <label class="toggle"><input type="checkbox" id="app-aurora" checked><span class="toggle-slider"></span></label>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Grain de film</div>
+                            <div class="settings-row-hint">Texture organique subtile sur l'ensemble.</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <label class="toggle"><input type="checkbox" id="app-grain" checked><span class="toggle-slider"></span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <div class="settings-group-title">Localisation</div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Langue</div>
+                            <div class="settings-row-hint">Les textes de l'interface. (EN bientôt.)</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <div class="segmented" id="app-locale">
+                                <button data-val="fr-FR" class="active">Français</button>
+                                <button data-val="en-US">English</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Devise d'affichage</div>
+                            <div class="settings-row-hint">La devise utilisée pour les montants.</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <div class="segmented" id="app-currency">
+                                <button data-val="USD" class="active">USD</button>
+                                <button data-val="EUR">EUR</button>
+                                <button data-val="GBP">GBP</button>
+                                <button data-val="CHF">CHF</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── NOTIFICATIONS ─── -->
+            <div class="settings-panel" data-panel="notifications">
+                <div class="settings-panel-header">
+                    <h1 class="settings-panel-title">Notifications</h1>
+                    <p class="settings-panel-sub">Configure les alertes Telegram, email et événements déclencheurs.</p>
+                </div>
+                <div class="settings-group">
+                    <div class="settings-group-title">Telegram</div>
+                    <p style="font-size:0.88rem;color:var(--sf-text-secondary);margin-bottom:14px">
+                        Les réglages Telegram sont centralisés dans la page
+                        <button class="link-more" onclick="showView('securite')">Sécurité & Monitoring ›</button>
+                    </p>
+                </div>
+                <div class="settings-group">
+                    <div class="settings-group-title">À venir</div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Digest email quotidien</div>
+                            <div class="settings-row-hint">Un résumé par email chaque matin avec perf + trades.</div>
+                        </div>
+                        <div class="settings-row-control"><span class="pill pill-gray">Bientôt</span></div>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Alertes de prix</div>
+                            <div class="settings-row-hint">Seuils personnalisés par ETF / crypto.</div>
+                        </div>
+                        <div class="settings-row-control"><span class="pill pill-gray">Bientôt</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── CONFIDENTIALITÉ ─── -->
+            <div class="settings-panel" data-panel="confidentialite">
+                <div class="settings-panel-header">
+                    <h1 class="settings-panel-title">Confidentialité & données</h1>
+                    <p class="settings-panel-sub">Contrôle total sur tes données : export, journal d'activité, purge.</p>
+                </div>
+
+                <div class="settings-group">
+                    <div class="settings-group-title">Tes données</div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Export complet (RGPD)</div>
+                            <div class="settings-row-hint">Télécharge toutes tes données (profil, settings, portefeuille, logs) en JSON.</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <a class="abtn abtn-dark" href="/api/profile/export" download style="text-decoration:none">Télécharger</a>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Réinitialiser le profil</div>
+                            <div class="settings-row-hint">Remet les préférences utilisateur à zéro. N'affecte ni le portefeuille ni les brokers.</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <button class="abtn" style="background:rgba(255,69,58,0.12);color:#ff453a;border:1px solid rgba(255,69,58,0.35)" onclick="resetProfileHard()">Réinitialiser</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <div class="settings-group-title">Journal d'activité</div>
+                    <p style="font-size:0.82rem;color:var(--sf-text-muted);margin-bottom:14px">Historique des 100 derniers événements : modifications de profil, exports, kill-switch…</p>
+                    <div id="audit-log-list" style="max-height:340px;overflow-y:auto">
+                        <div class="skel skel-line" style="width:70%"></div>
+                        <div class="skel skel-line" style="width:55%"></div>
+                        <div class="skel skel-line" style="width:65%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── SÉCURITÉ (lien) ─── -->
+            <div class="settings-panel" data-panel="securite">
+                <div class="settings-panel-header">
+                    <h1 class="settings-panel-title">Sécurité</h1>
+                    <p class="settings-panel-sub">Kill-switch, monitoring, backups et authentification.</p>
+                </div>
+                <div class="settings-group">
+                    <p style="font-size:0.9rem;line-height:1.6">
+                        Les réglages de sécurité détaillés se trouvent dans la page dédiée
+                        <button class="link-more" onclick="showView('securite')">Sécurité & Monitoring ›</button>
+                        Tu y trouveras :
+                    </p>
+                    <ul style="margin:14px 0 0 20px;color:var(--sf-text-secondary);font-size:0.88rem;line-height:1.8">
+                        <li>Kill-switch et historique d'activation</li>
+                        <li>Authentification par mot de passe</li>
+                        <li>Backups automatiques</li>
+                        <li>Logs d'erreurs et heartbeat</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ─── INTÉGRATIONS ─── -->
+            <div class="settings-panel" data-panel="integrations">
+                <div class="settings-panel-header">
+                    <h1 class="settings-panel-title">Intégrations</h1>
+                    <p class="settings-panel-sub">Connexions aux brokers, exchanges et services externes.</p>
+                </div>
+                <div class="settings-group">
+                    <div class="settings-group-title">Brokers & Exchanges</div>
+                    <p style="font-size:0.9rem;line-height:1.6;margin-bottom:14px">
+                        Gère tes connexions API vers IBKR, Degiro, Binance, MEXC… dans la page dédiée
+                        <button class="link-more" onclick="showView('broker')">Brokers & Exchanges ›</button>
+                    </p>
+                </div>
+                <div class="settings-group">
+                    <div class="settings-group-title">À venir</div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Webhooks</div>
+                            <div class="settings-row-hint">POST vers une URL à chaque trade / erreur.</div>
+                        </div>
+                        <div class="settings-row-control"><span class="pill pill-gray">Bientôt</span></div>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Google Calendar</div>
+                            <div class="settings-row-hint">Ajout auto des dates de DCA et rebalancing.</div>
+                        </div>
+                        <div class="settings-row-control"><span class="pill pill-gray">Bientôt</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── RACCOURCIS ─── -->
+            <div class="settings-panel" data-panel="raccourcis">
+                <div class="settings-panel-header">
+                    <h1 class="settings-panel-title">Raccourcis clavier</h1>
+                    <p class="settings-panel-sub">Gagne du temps avec les raccourcis disponibles.</p>
+                </div>
+                <div class="settings-group">
+                    <div class="settings-group-title">Navigation</div>
+                    <div class="kbd-grid">
+                        <div class="kbd-item"><span class="kbd-item-label">Palette de commandes</span><span class="kbd-item-keys"><span class="kbd-key">⌘</span><span class="kbd-key">K</span></span></div>
+                        <div class="kbd-item"><span class="kbd-item-label">Palette (Windows/Linux)</span><span class="kbd-item-keys"><span class="kbd-key">Ctrl</span><span class="kbd-key">K</span></span></div>
+                        <div class="kbd-item"><span class="kbd-item-label">Fermer palette/menu</span><span class="kbd-item-keys"><span class="kbd-key">Esc</span></span></div>
+                        <div class="kbd-item"><span class="kbd-item-label">Naviguer dans la palette</span><span class="kbd-item-keys"><span class="kbd-key">↑</span><span class="kbd-key">↓</span></span></div>
+                        <div class="kbd-item"><span class="kbd-item-label">Valider une sélection</span><span class="kbd-item-keys"><span class="kbd-key">↵</span></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── À PROPOS ─── -->
+            <div class="settings-panel" data-panel="apropos">
+                <div class="settings-panel-header">
+                    <h1 class="settings-panel-title">À propos</h1>
+                    <p class="settings-panel-sub">PortfolioQuant — bot de gestion ETF & crypto.</p>
+                </div>
+                <div class="settings-group">
+                    <div class="settings-group-title">Application</div>
+                    <div class="settings-row">
+                        <div class="settings-row-label">Version</div>
+                        <div class="settings-row-control"><span class="pill pill-blue no-dot" id="about-version">1.0.0</span></div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-label">Profil créé le</div>
+                        <div class="settings-row-control"><span id="about-created" style="color:var(--sf-text-secondary);font-size:0.88rem">—</span></div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-label">Dernière mise à jour</div>
+                        <div class="settings-row-control"><span id="about-updated" style="color:var(--sf-text-secondary);font-size:0.88rem">—</span></div>
+                    </div>
+                </div>
+                <div class="settings-group">
+                    <div class="settings-group-title">Liens</div>
+                    <p style="font-size:0.88rem;line-height:1.8">
+                        <button class="link-more" onclick="showView('glossaire')">Glossaire des termes ›</button><br>
+                        <button class="link-more" onclick="showView('home')">Retour au tableau de bord ›</button>
+                    </p>
+                </div>
+                <div class="settings-group">
+                    <p style="font-size:0.76rem;color:var(--sf-text-muted);line-height:1.6">
+                        Construit avec Flask, Plotly, IBKR API, et beaucoup de café. Architecture mono-utilisateur,
+                        données stockées en local, chiffrement Fernet pour les credentials brokers.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 </div><!-- .page -->
 
 <!-- Tooltip popup -->
@@ -2353,6 +3140,12 @@ const ICN = {
     beaker: '<svg viewBox="0 0 24 24"><path d="M9 3v7L4 19a2 2 0 002 3h12a2 2 0 002-3l-5-9V3M9 3h6M6 14h12"/></svg>',
     trending: '<svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-9"/><path d="M14 6h7v7"/></svg>',
     arrowRight: '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    user: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>',
+    gear: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h0a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h0a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v0a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>',
+    key: '<svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M10.85 12.15L19 4M15 7l3 3"/></svg>',
+    logout: '<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>',
+    download: '<svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14" stroke-linecap="round"/></svg>',
+    info: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1" stroke-linecap="round"/></svg>',
 };
 function icon(name, extraClass=''){
     const svg = ICN[name] || ICN.target;
@@ -2392,7 +3185,7 @@ function showView(v){
             next.style.transform='translateY(0)';
         });
         window.scrollTo({top:0,behavior:'smooth'});
-        const loaders={home:loadHome,portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire,securite:loadSecurite};
+        const loaders={home:loadHome,portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire,securite:loadSecurite,settings:loadSettingsView};
         if(loaders[v])loaders[v]();
     };
     if(current&&current!==next){
@@ -2490,6 +3283,10 @@ const CMDK_ITEMS = [
     {section:'Navigation', ico:'clock',    title:'Automatisation',         sub:'Planificateur de tâches', view:'auto',       kw:'auto scheduler automatique planification'},
     {section:'Navigation', ico:'shield',   title:'Sécurité & Monitoring',  sub:'Telegram · kill-switch', view:'securite',   kw:'securite telegram kill switch monitoring'},
     {section:'Navigation', ico:'beaker',   title:'Glossaire',              sub:'Définitions', view:'glossaire',  kw:'glossaire lexique definitions'},
+    {section:'Compte',     ico:'user',     title:'Profil',                 sub:'Identité · profil investisseur', action:()=>openSettingsPanel('profil'), kw:'profil identite nom email avatar'},
+    {section:'Compte',     ico:'sparkles', title:'Apparence',              sub:'Densité · animations · langue', action:()=>openSettingsPanel('apparence'), kw:'apparence theme animations langue densite'},
+    {section:'Compte',     ico:'shield',   title:'Confidentialité',        sub:'Export · journal · RGPD', action:()=>openSettingsPanel('confidentialite'), kw:'confidentialite privacy export rgpd donnees'},
+    {section:'Compte',     ico:'key',      title:'Raccourcis clavier',     sub:'Liste des hotkeys', action:()=>openSettingsPanel('raccourcis'), kw:'raccourcis keyboard shortcuts clavier'},
     {section:'Actions',    ico:'power',    title:'Kill-switch (urgence)',  sub:'Stopper immédiatement le bot', action:()=>triggerKillSwitch(), kw:'kill switch arret urgence stop'},
     {section:'Actions',    ico:'refresh',  title:'Rafraîchir le portefeuille', sub:'Recharger les données', action:()=>{if(typeof refreshPortfolio==='function')refreshPortfolio();}, kw:'refresh rafraichir reload'},
     {section:'Actions',    ico:'refresh',  title:'Relancer le scanner',    sub:'Forcer une analyse', action:()=>{if(typeof runScanner==='function')runScanner();}, kw:'scanner analyse force'},
@@ -3544,14 +4341,336 @@ function initSpotlight(root){
     });
 }
 
+/* ═══════════════════════════════════════════════════════
+   PROFIL UTILISATEUR — load, save, apply prefs
+   ═══════════════════════════════════════════════════════ */
+const AVATAR_COLORS = ['#0a84ff','#30d158','#bf5af2','#ff9f0a','#64d2ff','#ff453a','#ffd60a','#ff375f'];
+let _profileCache = null;
+
+async function loadProfile(){
+    try {
+        const r = await fetch('/api/profile');
+        if(!r.ok) return null;
+        _profileCache = await r.json();
+        applyProfile(_profileCache);
+        return _profileCache;
+    } catch(e) {
+        console.error('loadProfile', e);
+        return null;
+    }
+}
+
+function applyProfile(p){
+    if(!p) return;
+    // Avatar header
+    const avatar = document.getElementById('avatar-btn');
+    if(avatar){
+        avatar.textContent = p.avatar_initials || 'U';
+        avatar.style.setProperty('--avatar-bg', p.avatar_color || '#0a84ff');
+    }
+    // Menu popover header
+    const menuAvatar = document.getElementById('user-menu-avatar');
+    if(menuAvatar){
+        menuAvatar.textContent = p.avatar_initials || 'U';
+        menuAvatar.style.setProperty('--avatar-bg', p.avatar_color || '#0a84ff');
+    }
+    const nameEl = document.getElementById('user-menu-name');
+    if(nameEl) nameEl.textContent = p.display_name || 'Investisseur';
+    const emailEl = document.getElementById('user-menu-email');
+    if(emailEl) emailEl.textContent = p.email || 'Aucune adresse définie';
+
+    // Apply global preferences
+    applyAppearancePrefs(p);
+}
+
+function applyAppearancePrefs(p){
+    if(!p) return;
+    const b = document.body;
+    b.classList.toggle('no-anim', !p.animations_enabled);
+    b.classList.toggle('reduce-motion', !!p.reduce_motion);
+    b.classList.toggle('no-aurora', p.show_ambient_aurora === false);
+    b.classList.toggle('no-grain', p.show_film_grain === false);
+    b.dataset.density = p.density || 'standard';
+    b.dataset.locale = p.locale || 'fr-FR';
+}
+
+async function saveProfile(updates){
+    try {
+        const r = await fetch('/api/profile', {
+            method: 'PUT',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(updates)
+        });
+        const data = await r.json();
+        if(data.status === 'ok'){
+            _profileCache = data.profile;
+            applyProfile(_profileCache);
+            return _profileCache;
+        }
+        throw new Error(data.message || 'Erreur sauvegarde');
+    } catch(e){
+        console.error('saveProfile', e);
+        toast('Erreur : '+e.message, 'error');
+        return null;
+    }
+}
+
+/* ═══ Profil panel form ═══ */
+function fillProfilePanel(p){
+    if(!p) return;
+    const el = id => document.getElementById(id);
+    if(el('prof-name'))  el('prof-name').value  = p.display_name || '';
+    if(el('prof-email')) el('prof-email').value = p.email || '';
+    if(el('prof-bio'))   el('prof-bio').value   = p.bio || '';
+    if(el('prof-dca'))   el('prof-dca').value   = p.target_monthly_dca || '';
+    if(el('prof-goals')) el('prof-goals').value = p.goals || '';
+
+    // Swatches
+    const sw = el('prof-avatar-swatches');
+    if(sw){
+        sw.innerHTML = AVATAR_COLORS.map(c =>
+            `<button class="avatar-swatch${c===p.avatar_color?' selected':''}" data-color="${c}" style="background:${c}" aria-label="Couleur ${c}"></button>`
+        ).join('');
+        sw.querySelectorAll('.avatar-swatch').forEach(b => {
+            b.addEventListener('click', () => {
+                sw.querySelectorAll('.avatar-swatch').forEach(x => x.classList.remove('selected'));
+                b.classList.add('selected');
+            });
+        });
+    }
+
+    // Segmented controls
+    setSegmented('prof-risk', p.risk_profile);
+    setSegmented('prof-horizon', p.investment_horizon);
+    setSegmented('prof-exp', p.experience_level);
+    setSegmented('app-density', p.density);
+    setSegmented('app-locale', p.locale);
+    setSegmented('app-currency', p.currency);
+
+    if(el('app-anim'))   el('app-anim').checked   = !!p.animations_enabled;
+    if(el('app-reduce')) el('app-reduce').checked = !!p.reduce_motion;
+    if(el('app-aurora')) el('app-aurora').checked = !!p.show_ambient_aurora;
+    if(el('app-grain'))  el('app-grain').checked  = !!p.show_film_grain;
+
+    if(el('about-created')) el('about-created').textContent = fmtDateTime(p.created_at);
+    if(el('about-updated')) el('about-updated').textContent = fmtDateTime(p.updated_at);
+}
+
+function setSegmented(id, val){
+    const container = document.getElementById(id);
+    if(!container) return;
+    container.querySelectorAll('button').forEach(b => {
+        b.classList.toggle('active', b.dataset.val === val);
+    });
+}
+
+function getSegmented(id){
+    const container = document.getElementById(id);
+    if(!container) return null;
+    const active = container.querySelector('button.active');
+    return active ? active.dataset.val : null;
+}
+
+function fmtDateTime(iso){
+    if(!iso) return '—';
+    try {
+        const d = new Date(iso);
+        return d.toLocaleString('fr-FR', {dateStyle:'medium', timeStyle:'short'});
+    } catch(e){ return iso; }
+}
+
+async function saveProfilePanel(){
+    const el = id => document.getElementById(id);
+    const selectedSwatch = document.querySelector('#prof-avatar-swatches .avatar-swatch.selected');
+    const updates = {
+        display_name: el('prof-name').value,
+        email: el('prof-email').value,
+        bio: el('prof-bio').value,
+        avatar_color: selectedSwatch ? selectedSwatch.dataset.color : _profileCache?.avatar_color,
+        risk_profile: getSegmented('prof-risk'),
+        investment_horizon: getSegmented('prof-horizon'),
+        experience_level: getSegmented('prof-exp'),
+        target_monthly_dca: parseFloat(el('prof-dca').value) || 0,
+        goals: el('prof-goals').value,
+    };
+    const res = await saveProfile(updates);
+    if(res) toast('Profil mis à jour', 'success');
+}
+
+function resetProfilePanel(){
+    if(_profileCache) fillProfilePanel(_profileCache);
+}
+
+async function resetProfileHard(){
+    if(!confirm('Réinitialiser toutes tes préférences ? Le portefeuille et les brokers ne sont pas touchés.')) return;
+    try {
+        const r = await fetch('/api/profile/reset', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({confirm:'RESET'})
+        });
+        const data = await r.json();
+        if(data.status === 'ok'){
+            _profileCache = data.profile;
+            applyProfile(_profileCache);
+            fillProfilePanel(_profileCache);
+            toast('Profil réinitialisé', 'success');
+        } else {
+            toast(data.message || 'Erreur', 'error');
+        }
+    } catch(e){
+        toast('Erreur : '+e.message, 'error');
+    }
+}
+
+/* ═══ Apparence auto-save on change ═══ */
+function wireAppearanceAutoSave(){
+    const binds = [
+        ['app-density', 'segmented', 'density'],
+        ['app-locale', 'segmented', 'locale'],
+        ['app-currency', 'segmented', 'currency'],
+        ['app-anim', 'toggle', 'animations_enabled'],
+        ['app-reduce', 'toggle', 'reduce_motion'],
+        ['app-aurora', 'toggle', 'show_ambient_aurora'],
+        ['app-grain', 'toggle', 'show_film_grain'],
+    ];
+    binds.forEach(([id, kind, key]) => {
+        const el = document.getElementById(id);
+        if(!el || el.__wired) return;
+        el.__wired = true;
+        if(kind === 'segmented'){
+            el.querySelectorAll('button').forEach(b => {
+                b.addEventListener('click', () => {
+                    el.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+                    b.classList.add('active');
+                    saveProfile({[key]: b.dataset.val});
+                });
+            });
+        } else if(kind === 'toggle'){
+            el.addEventListener('change', () => saveProfile({[key]: el.checked}));
+        }
+    });
+
+    // Profil segmented controls (pas auto-save, attend le clic "Enregistrer")
+    ['prof-risk','prof-horizon','prof-exp'].forEach(id => {
+        const el = document.getElementById(id);
+        if(!el || el.__wired) return;
+        el.__wired = true;
+        el.querySelectorAll('button').forEach(b => {
+            b.addEventListener('click', () => {
+                el.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+                b.classList.add('active');
+            });
+        });
+    });
+}
+
+/* Loader called by showView('settings') */
+function loadSettingsView(){
+    if(_profileCache){
+        fillProfilePanel(_profileCache);
+    } else {
+        loadProfile().then(p => { if(p) fillProfilePanel(p); });
+    }
+    wireAppearanceAutoSave();
+    // If confidentialité is the active panel, refresh audit log
+    const activePanel = document.querySelector('.settings-panel.active');
+    if(activePanel && activePanel.dataset.panel === 'confidentialite') loadAuditLog();
+}
+
+/* ═══ USER MENU POPOVER ═══ */
+function toggleUserMenu(e){
+    if(e) e.stopPropagation();
+    const menu = document.getElementById('user-menu');
+    const btn = document.getElementById('avatar-btn');
+    const open = menu.classList.toggle('show');
+    btn.setAttribute('aria-expanded', open);
+}
+function closeUserMenu(){
+    const menu = document.getElementById('user-menu');
+    menu.classList.remove('show');
+    const btn = document.getElementById('avatar-btn');
+    if(btn) btn.setAttribute('aria-expanded', 'false');
+}
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('user-menu');
+    if(!menu || !menu.classList.contains('show')) return;
+    if(!e.target.closest('#user-menu') && !e.target.closest('#avatar-btn')){
+        closeUserMenu();
+    }
+});
+document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape'){
+        const menu = document.getElementById('user-menu');
+        if(menu && menu.classList.contains('show')) closeUserMenu();
+    }
+});
+
+/* ═══ SETTINGS PANEL SWITCHER ═══ */
+function openSettingsPanel(panelId){
+    closeUserMenu();
+    showView('settings');
+    setTimeout(() => {
+        document.querySelectorAll('.settings-rail-item').forEach(b => {
+            b.classList.toggle('active', b.dataset.panel === panelId);
+        });
+        document.querySelectorAll('.settings-panel').forEach(p => {
+            p.classList.toggle('active', p.dataset.panel === panelId);
+        });
+        // Load panel-specific data
+        if(panelId === 'confidentialite') loadAuditLog();
+    }, 80);
+}
+
+function loadAuditLog(){
+    fetch('/api/audit-log?limit=100').then(r => r.json()).then(data => {
+        const list = document.getElementById('audit-log-list');
+        if(!list) return;
+        if(!data.entries || !data.entries.length){
+            list.innerHTML = '<div style="color:var(--sf-text-muted);font-size:0.82rem;padding:20px 0;text-align:center">Aucun événement enregistré.</div>';
+            return;
+        }
+        list.innerHTML = data.entries.map(e => `
+            <div class="audit-entry">
+                <div class="audit-time">${fmtDateTime(e.ts)}</div>
+                <div class="audit-details"><span class="audit-type">${(e.type||'').toUpperCase()}</span>${e.details||''}</div>
+            </div>
+        `).join('');
+    }).catch(e => console.error(e));
+}
+
+function logoutUser(){
+    if(confirm('Se déconnecter ?')) window.location.href = '/logout';
+}
+
+// Rail navigation
+document.addEventListener('click', (e) => {
+    const item = e.target.closest('.settings-rail-item');
+    if(!item) return;
+    const panel = item.dataset.panel;
+    if(!panel) return;
+    document.querySelectorAll('.settings-rail-item').forEach(b => b.classList.remove('active'));
+    item.classList.add('active');
+    document.querySelectorAll('.settings-panel').forEach(p =>
+        p.classList.toggle('active', p.dataset.panel === panel)
+    );
+    if(panel === 'confidentialite') loadAuditLog();
+});
+
 /* ═══ Boot ═══ */
 renderStaticIcons();
+loadProfile();
 loadHome();
 loadContextBanner();
 refreshStatus();
 // Refresh banner toutes les 30s
 setInterval(loadContextBanner, 30000);
-setTimeout(() => { initCustomSelects(); injectTooltips(); renderStaticIcons(); initReveal(); initSpotlight(); }, 200);
+setTimeout(() => {
+    initCustomSelects(); injectTooltips(); renderStaticIcons();
+    initReveal(); initSpotlight();
+    wireAppearanceAutoSave();
+    if(_profileCache) fillProfilePanel(_profileCache);
+}, 200);
 
 // Navigation re-init handled inside showView() — no duplicate handler needed.
 </script>
