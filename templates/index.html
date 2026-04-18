@@ -1945,6 +1945,111 @@
 
         /* Ensure ainput hover feedback */
         .ainput:hover { border-color: rgba(255,255,255,0.2); }
+
+        /* ════════════════════════════════════════════════
+           DA+ : MICRO-INTERACTIONS — alive feel
+           ════════════════════════════════════════════════ */
+
+        /* KPI value enter animation (triggered when textContent changes) */
+        @keyframes kpiValueIn {
+            0%   { opacity: 0; transform: translateY(6px) scale(0.96); filter: blur(3px); }
+            60%  { filter: blur(0); }
+            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+        .stat-value.value-in {
+            animation: kpiValueIn 0.55s cubic-bezier(0.2, 0.9, 0.2, 1);
+            will-change: transform, opacity;
+        }
+        .stat-value.value-up::after,
+        .stat-value.value-down::after {
+            content: ''; display: inline-block;
+            width: 6px; height: 6px; border-radius: 50%;
+            margin-left: 8px; vertical-align: middle;
+            animation: dotPulse 1.2s ease-out;
+        }
+        .stat-value.value-up::after   { background: var(--sf-green); box-shadow: 0 0 8px rgba(48,209,88,0.6); }
+        .stat-value.value-down::after { background: var(--sf-red);   box-shadow: 0 0 8px rgba(255,69,58,0.6); }
+        @keyframes dotPulse {
+            0%   { transform: scale(0.5); opacity: 0; }
+            30%  { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(1);   opacity: 0; }
+        }
+
+        /* Stagger children enter (rows / grids) */
+        @keyframes rowStaggerIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .stagger-children > * {
+            animation: rowStaggerIn 0.45s cubic-bezier(0.2,0.9,0.2,1) both;
+            animation-delay: calc(var(--i, 0) * 35ms);
+        }
+        /* Cap the cascade so the 30th row doesn't wait a full second */
+        .stagger-children > *:nth-child(n+15) {
+            animation-delay: calc(14 * 35ms);
+        }
+
+        /* Tactile press feedback on interactive elements */
+        .user-menu-item,
+        .nav-dropdown-item,
+        .settings-rail-item,
+        .settings-drawer-close,
+        .cmdk-hint,
+        .avatar-btn,
+        .avatar-swatch,
+        .segmented button,
+        .globalheader-link,
+        .link-more,
+        .action-card,
+        .shortcut-tile,
+        .shortcut-card,
+        .nav-group-trigger {
+            transition: transform 0.15s cubic-bezier(0.2,0.9,0.2,1),
+                        background 0.2s, color 0.2s, border-color 0.2s,
+                        box-shadow 0.2s;
+        }
+        .user-menu-item:active,
+        .nav-dropdown-item:active,
+        .settings-rail-item:active,
+        .cmdk-hint:active,
+        .avatar-swatch:active,
+        .segmented button:active,
+        .globalheader-link:active,
+        .link-more:active,
+        .shortcut-tile:active,
+        .shortcut-card:active,
+        .nav-group-trigger:active {
+            transform: scale(0.97);
+        }
+        .avatar-btn:active { transform: scale(0.92); }
+        .action-card:active { transform: scale(0.99) translateX(2px); }
+        .settings-drawer-close:active { transform: scale(0.9) rotate(90deg); }
+
+        /* Unified focus-visible ring (keyboard accessibility + polish) */
+        button:focus-visible,
+        a:focus-visible,
+        [role="button"]:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible,
+        .ainput:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(10,132,255,0.35),
+                        0 0 0 1px rgba(10,132,255,0.55) inset;
+            border-radius: inherit;
+        }
+        /* keep inputs with their own rounded radius */
+        input:focus-visible, select:focus-visible, textarea:focus-visible, .ainput:focus-visible {
+            border-radius: 10px;
+        }
+
+        /* Reduce-motion respects */
+        body.reduce-motion .stat-value.value-in,
+        body.reduce-motion .stat-value.value-up::after,
+        body.reduce-motion .stat-value.value-down::after,
+        body.reduce-motion .stagger-children > * {
+            animation: none !important;
+        }
     </style>
 </head>
 <body>
@@ -2178,7 +2283,7 @@
         </div>
         <div class="dcard">
             <div class="dcard-label"><span class="sfi" data-icon="briefcase"></span>Positions détaillées</div>
-            <table><thead><tr><th>ETF</th><th>Categorie</th><th>Parts</th><th>Prix</th><th>Valeur</th><th>Cible</th><th>Actuel</th><th>Ecart</th></tr></thead><tbody id="positions-table"></tbody></table>
+            <table><thead><tr><th>ETF</th><th>Categorie</th><th>Parts</th><th>Prix</th><th>Valeur</th><th>Cible</th><th>Actuel</th><th>Ecart</th></tr></thead><tbody id="positions-table" class="stagger-on-render"></tbody></table>
         </div>
         <div class="dcard">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -2209,7 +2314,7 @@
                 <button class="abtn abtn-blue abtn-sm" onclick="executeDCA()">Executer</button>
             </div>
         </div>
-        <div class="dcard"><table><thead><tr><th>ETF</th><th>Montant</th><th>Prix</th><th>Parts</th><th>Reel</th></tr></thead><tbody id="dca-table"></tbody></table></div>
+        <div class="dcard"><table><thead><tr><th>ETF</th><th>Montant</th><th>Prix</th><th>Parts</th><th>Reel</th></tr></thead><tbody id="dca-table" class="stagger-on-render"></tbody></table></div>
     </div>
 </div>
 
@@ -2577,11 +2682,11 @@
         <!-- Trades -->
         <div class="dcard">
             <div class="dcard-title"><span class="sfi" data-icon="bolt"></span>Trades actifs</div>
-            <table><thead><tr><th>Token</th><th>Side</th><th>Entree</th><th>Qty</th><th>SL</th><th>TP</th><th>Trailing</th><th>P&L</th><th></th></tr></thead><tbody id="active-trades-table"></tbody></table>
+            <table><thead><tr><th>Token</th><th>Side</th><th>Entree</th><th>Qty</th><th>SL</th><th>TP</th><th>Trailing</th><th>P&L</th><th></th></tr></thead><tbody id="active-trades-table" class="stagger-on-render"></tbody></table>
         </div>
         <div class="dcard">
             <div class="dcard-title"><span class="sfi" data-icon="inbox"></span>Historique</div>
-            <table><thead><tr><th>Token</th><th>Side</th><th>Entree</th><th>Sortie</th><th>P&L</th><th>%</th><th>Statut</th><th>Date</th></tr></thead><tbody id="trade-history-table"></tbody></table>
+            <table><thead><tr><th>Token</th><th>Side</th><th>Entree</th><th>Sortie</th><th>P&L</th><th>%</th><th>Statut</th><th>Date</th></tr></thead><tbody id="trade-history-table" class="stagger-on-render"></tbody></table>
         </div>
     </div>
 </div>
@@ -2643,7 +2748,7 @@
                 <div class="stat-card accent-green"><div class="stat-label">USDT libre</div><div class="stat-value" id="crypto-cash"><span class="skel skel-val"></span></div></div>
                 <div class="stat-card"><div class="stat-label">Tokens</div><div class="stat-value" id="crypto-count"><span class="skel skel-val"></span></div></div>
             </div>
-            <div class="dcard"><div class="dcard-label"><span class="sfi" data-icon="briefcase"></span>Positions</div><table><thead><tr><th>Token</th><th>Cat.</th><th>Qty</th><th>Prix</th><th>Valeur</th><th>Cible</th><th>Actuel</th><th>Ecart</th></tr></thead><tbody id="crypto-positions-table"></tbody></table></div>
+            <div class="dcard"><div class="dcard-label"><span class="sfi" data-icon="briefcase"></span>Positions</div><table><thead><tr><th>Token</th><th>Cat.</th><th>Qty</th><th>Prix</th><th>Valeur</th><th>Cible</th><th>Actuel</th><th>Ecart</th></tr></thead><tbody id="crypto-positions-table" class="stagger-on-render"></tbody></table></div>
             <div class="dcard">
                 <div class="dcard-label"><span class="sfi" data-icon="bitcoin"></span>DCA Crypto</div>
                 <div style="display:flex;gap:14px;align-items:center;justify-content:center;margin-bottom:16px;flex-wrap:wrap">
@@ -2652,7 +2757,7 @@
                     <button class="abtn abtn-dark abtn-sm" onclick="calculateCryptoDCA()">Calculer</button>
                     <button class="abtn abtn-blue abtn-sm" onclick="executeCryptoDCA()">Executer</button>
                 </div>
-                <table><thead><tr><th>Token</th><th>Montant</th><th>Prix</th><th>Qty</th><th>Reel</th></tr></thead><tbody id="crypto-dca-table"></tbody></table>
+                <table><thead><tr><th>Token</th><th>Montant</th><th>Prix</th><th>Qty</th><th>Reel</th></tr></thead><tbody id="crypto-dca-table" class="stagger-on-render"></tbody></table>
             </div>
             <div class="dcard">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -4867,6 +4972,157 @@ document.addEventListener('click', (e) => {
     if(panel === 'confidentialite') loadAuditLog();
 });
 
+/* ═══════════════════════════════════════════════════════
+   MICRO-INTERACTIONS : count-up + KPI enter + stagger
+   ═══════════════════════════════════════════════════════ */
+
+/* Parse a formatted number string → {value, prefix, suffix, decimals, raw} */
+function _parseFormattedNumber(str){
+    if(str == null) return null;
+    const s = String(str).trim();
+    const m = s.match(/^(\D*?)(-?[\d\s,.\u00a0']+)(\D*)$/);
+    if(!m) return null;
+    const prefix = m[1], raw = m[2], suffix = m[3];
+    let cleaned = raw;
+    if(raw.includes(',') && raw.includes('.')){
+        if(raw.lastIndexOf(',') > raw.lastIndexOf('.')){
+            cleaned = raw.replace(/\./g, '').replace(/,/g, '.');
+        } else {
+            cleaned = raw.replace(/,/g, '');
+        }
+    } else if(raw.includes(',')){
+        const parts = raw.split(',');
+        if(parts.length === 2 && parts[1].length > 0 && parts[1].length <= 2){
+            cleaned = raw.replace(',', '.');
+        } else {
+            cleaned = raw.replace(/,/g, '');
+        }
+    }
+    cleaned = cleaned.replace(/[\s\u00a0']/g, '');
+    const value = parseFloat(cleaned);
+    if(isNaN(value)) return null;
+    const dot = cleaned.indexOf('.');
+    const decimals = dot >= 0 ? cleaned.length - dot - 1 : 0;
+    return { value, prefix, suffix, decimals, raw };
+}
+
+/* Format number to match template separators (FR / EN) */
+function _formatLike(value, decimals, raw){
+    const useFR = raw ? raw.lastIndexOf(',') > raw.lastIndexOf('.') : true;
+    const useSpace = raw ? /[\s\u00a0]/.test(raw) : true;
+    const fixed = value.toFixed(decimals);
+    const [intPart, decPart] = fixed.split('.');
+    const neg = intPart.startsWith('-');
+    const absInt = neg ? intPart.slice(1) : intPart;
+    const sep = useSpace ? ' ' : (useFR ? '.' : ',');
+    const withSep = Math.abs(value) >= 1000
+        ? absInt.replace(/\B(?=(\d{3})+(?!\d))/g, sep)
+        : absInt;
+    const decSep = useFR ? ',' : '.';
+    const intOut = (neg ? '-' : '') + withSep;
+    return decPart !== undefined ? intOut + decSep + decPart : intOut;
+}
+
+/* Public: animate a number from current to target in the element */
+function animateCountUp(el, target, opts = {}){
+    if(!el) return;
+    const reduce = document.body.classList.contains('reduce-motion');
+    const duration = opts.duration ?? 750;
+    const parsed = _parseFormattedNumber(el.textContent);
+    const from = opts.from ?? (parsed ? parsed.value : 0);
+    const prefix = opts.prefix ?? (parsed ? parsed.prefix : '');
+    const suffix = opts.suffix ?? (parsed ? parsed.suffix : '');
+    const decimals = opts.decimals ?? (parsed ? parsed.decimals : 0);
+    const raw = parsed ? parsed.raw : null;
+    const fmt = opts.formatter || (v => prefix + _formatLike(v, decimals, raw) + suffix);
+    if(reduce || from === target || !isFinite(from) || !isFinite(target)){
+        el.textContent = fmt(target);
+        return;
+    }
+    const start = performance.now();
+    const ease = t => 1 - Math.pow(1 - t, 3);
+    (function tick(now){
+        const t = Math.min(1, (now - start) / duration);
+        const v = from + (target - from) * ease(t);
+        el.textContent = fmt(v);
+        if(t < 1) requestAnimationFrame(tick);
+    })(performance.now());
+}
+
+/* Auto-observer: when a .stat-value's text changes to a real value, play enter anim */
+let _kpiObserver = null;
+function _initKPIObserver(){
+    if(_kpiObserver) return;
+    if(document.body.classList.contains('reduce-motion')) return;
+    if(!('MutationObserver' in window)) return;
+    _kpiObserver = new MutationObserver(muts => {
+        const seen = new Set();
+        for(const m of muts){
+            const node = m.target.nodeType === 3 ? m.target.parentElement : m.target;
+            if(!node || seen.has(node)) continue;
+            const el = node.closest ? node.closest('.stat-value') : null;
+            if(!el || seen.has(el)) continue;
+            seen.add(el);
+            if(el.querySelector('.skel')) continue;
+            const txt = (el.textContent || '').trim();
+            if(!txt || txt === '—' || txt === '--') continue;
+            // Re-trigger animation
+            el.classList.remove('value-in');
+            // Force reflow to restart the anim
+            void el.offsetWidth;
+            el.classList.add('value-in');
+        }
+    });
+    document.querySelectorAll('.stat-value').forEach(el => {
+        _kpiObserver.observe(el, { childList: true, characterData: true, subtree: true });
+    });
+}
+/* Call again if new .stat-value elements are injected later */
+function refreshKPIObservers(){
+    if(!_kpiObserver) { _initKPIObserver(); return; }
+    document.querySelectorAll('.stat-value').forEach(el => {
+        if(!el.__observed){
+            _kpiObserver.observe(el, { childList: true, characterData: true, subtree: true });
+            el.__observed = true;
+        }
+    });
+}
+
+/* Apply stagger to children of a container (rows, grid items, etc.) */
+function applyStagger(container, selector){
+    if(!container) return;
+    const kids = selector ? container.querySelectorAll(selector) : container.children;
+    [...kids].forEach((el, i) => el.style.setProperty('--i', i));
+    container.classList.add('stagger-children');
+}
+
+/* Auto-wire stagger on tables that render rows dynamically — caller just adds
+   class="stagger-on-render" to a <tbody> (or any container). We observe it. */
+function _initStaggerAutoWire(){
+    if(document.body.classList.contains('reduce-motion')) return;
+    if(!('MutationObserver' in window)) return;
+    const obs = new MutationObserver(muts => {
+        for(const m of muts){
+            if(m.type !== 'childList' || !m.target.classList) continue;
+            if(!m.target.classList.contains('stagger-on-render')) continue;
+            if(!m.addedNodes || !m.addedNodes.length) continue;
+            applyStagger(m.target);
+        }
+    });
+    document.querySelectorAll('.stagger-on-render').forEach(el => {
+        obs.observe(el, { childList: true });
+        if(el.children.length) applyStagger(el);
+    });
+    // Expose so new wrappers can register (for future-added tbodies)
+    window._staggerObserver = obs;
+}
+function registerStagger(el){
+    if(!el || !window._staggerObserver) return;
+    el.classList.add('stagger-on-render');
+    window._staggerObserver.observe(el, { childList: true });
+    if(el.children.length) applyStagger(el);
+}
+
 /* ═══ Boot ═══ */
 renderStaticIcons();
 loadProfile();
@@ -4880,6 +5136,8 @@ setTimeout(() => {
     initReveal(); initSpotlight();
     wireAppearanceAutoSave();
     if(_profileCache) fillProfilePanel(_profileCache);
+    _initKPIObserver();
+    _initStaggerAutoWire();
 }, 200);
 
 // Navigation re-init handled inside showView() — no duplicate handler needed.
