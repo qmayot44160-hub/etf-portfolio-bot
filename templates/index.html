@@ -436,13 +436,96 @@
             border-bottom: 1px solid rgba(255,255,255,0.04);
             transition: background 0.18s ease;
         }
-        tbody tr { transition: background 0.2s, transform 0.2s; position: relative; }
+        tbody tr { transition: background 0.2s, transform 0.22s cubic-bezier(0.2,0.9,0.2,1); position: relative; }
         tbody tr:nth-child(even) td { background: rgba(255,255,255,0.012); }
-        tbody tr:hover td {
-            background: linear-gradient(90deg, rgba(10,132,255,0.06), rgba(10,132,255,0.02) 60%, transparent);
+        tbody tr:hover {
+            transform: translateX(2px);
         }
-        tbody tr:hover td:first-child {
-            box-shadow: inset 3px 0 0 var(--sf-blue);
+        tbody tr:hover td {
+            background: linear-gradient(90deg, rgba(10,132,255,0.08), rgba(10,132,255,0.03) 55%, transparent);
+        }
+        /* Left accent bar — grows from center on hover */
+        tbody tr td:first-child {
+            position: relative;
+        }
+        tbody tr td:first-child::before {
+            content: ''; position: absolute;
+            left: 0; top: 50%;
+            width: 3px; height: 0;
+            background: var(--sf-blue);
+            border-radius: 0 2px 2px 0;
+            transform: translateY(-50%);
+            transition: height 0.28s cubic-bezier(0.2,0.9,0.2,1);
+            box-shadow: 0 0 10px rgba(10,132,255,0.6);
+            pointer-events: none;
+        }
+        tbody tr:hover td:first-child::before {
+            height: calc(100% - 10px);
+        }
+
+        /* ════════════════════════════════════════════════
+           DA+ : SORTABLE TH + HEADER TOOLTIPS
+           ════════════════════════════════════════════════ */
+        th.sortable {
+            cursor: pointer;
+            padding-right: 24px !important;
+            user-select: none;
+            position: relative;
+            transition: color 0.2s, background 0.2s;
+        }
+        th.sortable:hover { color: var(--sf-text); background: rgba(255,255,255,0.03); }
+        th.sortable::before,
+        th.sortable::after {
+            content: ''; position: absolute;
+            right: 10px;
+            width: 0; height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            opacity: 0.3;
+            transition: opacity 0.2s, transform 0.22s cubic-bezier(0.2,0.9,0.2,1), border-color 0.2s;
+        }
+        th.sortable::before {
+            top: 50%; margin-top: -7px;
+            border-bottom: 5px solid currentColor;
+        }
+        th.sortable::after {
+            top: 50%; margin-top: 2px;
+            border-top: 5px solid currentColor;
+        }
+        th.sortable:hover::before,
+        th.sortable:hover::after { opacity: 0.55; }
+        th.sortable[data-sort="asc"]::before {
+            opacity: 1; border-bottom-color: var(--sf-blue);
+            transform: scale(1.12);
+        }
+        th.sortable[data-sort="asc"]::after { opacity: 0.15; }
+        th.sortable[data-sort="desc"]::after {
+            opacity: 1; border-top-color: var(--sf-blue);
+            transform: scale(1.12);
+        }
+        th.sortable[data-sort="desc"]::before { opacity: 0.15; }
+
+        /* Header tooltip trigger (data-tooltip on th) */
+        th[data-tooltip] {
+            cursor: help;
+            position: relative;
+        }
+        th[data-tooltip]::first-letter { /* keep style */ }
+        th[data-tooltip] > .th-tip-dot {
+            display: inline-block;
+            width: 13px; height: 13px;
+            margin-left: 5px;
+            border-radius: 50%;
+            background: rgba(10,132,255,0.18);
+            color: var(--sf-blue);
+            font-size: 9px; font-weight: 700;
+            text-align: center; line-height: 13px;
+            font-family: Georgia, serif;
+            transition: background 0.2s, color 0.2s;
+            vertical-align: middle;
+        }
+        th[data-tooltip]:hover > .th-tip-dot {
+            background: var(--sf-blue); color: #fff;
         }
         .mono { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; letter-spacing: 0.01em; }
         .td-num { text-align: right; font-variant-numeric: tabular-nums; }
@@ -2336,7 +2419,16 @@
         </div>
         <div class="dcard">
             <div class="dcard-label"><span class="sfi" data-icon="briefcase"></span>Positions détaillées</div>
-            <table><thead><tr><th>ETF</th><th>Categorie</th><th>Parts</th><th>Prix</th><th>Valeur</th><th>Cible</th><th>Actuel</th><th>Ecart</th></tr></thead><tbody id="positions-table" class="stagger-on-render"></tbody></table>
+            <table class="sortable-table"><thead><tr>
+    <th class="sortable" data-sort-type="text">ETF</th>
+    <th class="sortable" data-sort-type="text">Categorie</th>
+    <th class="sortable" data-sort-type="num">Parts</th>
+    <th class="sortable" data-sort-type="num" data-tooltip="Dernière cotation disponible de l'ETF, en devise du marché.">Prix</th>
+    <th class="sortable" data-sort-type="num" data-tooltip="Valeur totale de la ligne = parts × prix actuel.">Valeur</th>
+    <th class="sortable" data-sort-type="num" data-tooltip="Poids cible de l'ETF dans l'allocation définie.">Cible</th>
+    <th class="sortable" data-sort-type="num" data-tooltip="Poids réel actuel de l'ETF dans le portefeuille.">Actuel</th>
+    <th class="sortable" data-sort-type="num" data-tooltip="Différence entre poids actuel et cible. Vert = sous-pondéré, Rouge = sur-pondéré.">Ecart</th>
+</tr></thead><tbody id="positions-table" class="stagger-on-render"></tbody></table>
         </div>
         <div class="dcard">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -2367,7 +2459,13 @@
                 <button class="abtn abtn-blue abtn-sm" onclick="executeDCA()">Executer</button>
             </div>
         </div>
-        <div class="dcard"><table><thead><tr><th>ETF</th><th>Montant</th><th>Prix</th><th>Parts</th><th>Reel</th></tr></thead><tbody id="dca-table" class="stagger-on-render"></tbody></table></div>
+        <div class="dcard"><table class="sortable-table"><thead><tr>
+    <th class="sortable" data-sort-type="text">ETF</th>
+    <th class="sortable" data-sort-type="num" data-tooltip="Montant théorique à investir pour atteindre le poids cible ce mois.">Montant</th>
+    <th class="sortable" data-sort-type="num">Prix</th>
+    <th class="sortable" data-sort-type="num">Parts</th>
+    <th class="sortable" data-sort-type="num" data-tooltip="Montant réellement investi après arrondi au nombre entier de parts.">Reel</th>
+</tr></thead><tbody id="dca-table" class="stagger-on-render"></tbody></table></div>
     </div>
 </div>
 
@@ -2739,7 +2837,16 @@
         </div>
         <div class="dcard">
             <div class="dcard-title"><span class="sfi" data-icon="inbox"></span>Historique</div>
-            <table><thead><tr><th>Token</th><th>Side</th><th>Entree</th><th>Sortie</th><th>P&L</th><th>%</th><th>Statut</th><th>Date</th></tr></thead><tbody id="trade-history-table" class="stagger-on-render"></tbody></table>
+            <table class="sortable-table"><thead><tr>
+    <th class="sortable" data-sort-type="text">Token</th>
+    <th class="sortable" data-sort-type="text" data-tooltip="Long = pari à la hausse. Short = pari à la baisse.">Side</th>
+    <th class="sortable" data-sort-type="num">Entree</th>
+    <th class="sortable" data-sort-type="num">Sortie</th>
+    <th class="sortable" data-sort-type="num" data-tooltip="Profit & Loss réalisé sur la position.">P&L</th>
+    <th class="sortable" data-sort-type="num" data-tooltip="Rendement en % par rapport au capital engagé sur la position.">%</th>
+    <th class="sortable" data-sort-type="text">Statut</th>
+    <th class="sortable" data-sort-type="date">Date</th>
+</tr></thead><tbody id="trade-history-table" class="stagger-on-render"></tbody></table>
         </div>
     </div>
 </div>
@@ -4309,11 +4416,99 @@ function hideTooltip() { tipPopup.classList.remove('show'); }
 
 document.addEventListener('mouseover', e => {
     const icon = e.target.closest('.tip-icon');
-    if (icon) showTooltip(icon, icon.dataset.term);
+    if (icon) { showTooltip(icon, icon.dataset.term); return; }
+    // Header column tooltips (free text via data-tooltip)
+    const th = e.target.closest('th[data-tooltip]');
+    if (th) showHeaderTooltip(th);
 });
 document.addEventListener('mouseout', e => {
     if (e.target.closest('.tip-icon')) hideTooltip();
+    if (e.target.closest('th[data-tooltip]')) hideTooltip();
 });
+
+/* Tooltip libre (texte arbitraire) pour headers de colonnes */
+function showHeaderTooltip(el){
+    const text = el.getAttribute('data-tooltip');
+    if(!text) return;
+    const title = el.getAttribute('data-tooltip-title')
+        || (el.textContent || '').replace(/[iI]$/, '').trim();
+    tipPopup.innerHTML = `<strong>${title}</strong>${text}`;
+    tipPopup.classList.add('show');
+    const rect = el.getBoundingClientRect();
+    let top = rect.bottom + 8;
+    let left = rect.left;
+    if (left + 290 > window.innerWidth) left = window.innerWidth - 295;
+    if (top + 120 > window.innerHeight) top = rect.top - 120;
+    tipPopup.style.top = top + 'px';
+    tipPopup.style.left = left + 'px';
+}
+
+/* Auto-inject small "i" dot inside any th[data-tooltip] — idempotent */
+function injectHeaderTooltipDots(){
+    document.querySelectorAll('th[data-tooltip]').forEach(th => {
+        if(!th.querySelector('.th-tip-dot')){
+            const dot = document.createElement('span');
+            dot.className = 'th-tip-dot';
+            dot.textContent = 'i';
+            dot.setAttribute('aria-hidden', 'true');
+            th.appendChild(dot);
+        }
+    });
+}
+
+/* ═══════════════════════════════════════════════════════
+   SORTABLE TABLES — universal helper
+   Usage : <th class="sortable" data-sort-type="num|text|date">Col</th>
+   Puis appelle makeSortable(tableEl) (ou via class auto .sortable-table).
+   ═══════════════════════════════════════════════════════ */
+function makeSortable(table){
+    if(!table || table.__sortableWired) return;
+    table.__sortableWired = true;
+    const ths = table.querySelectorAll('thead th.sortable');
+    ths.forEach((th, colIdx) => {
+        th.addEventListener('click', () => {
+            const cur = th.getAttribute('data-sort') || 'none';
+            const next = cur === 'asc' ? 'desc' : 'asc';
+            // Reset all
+            ths.forEach(x => x.setAttribute('data-sort', 'none'));
+            th.setAttribute('data-sort', next);
+            sortTableByColumn(table, colIdx, next, th.dataset.sortType || 'auto');
+        });
+    });
+}
+function sortTableByColumn(table, colIdx, dir, type){
+    const tbody = table.querySelector('tbody');
+    if(!tbody) return;
+    const rows = [...tbody.querySelectorAll('tr')];
+    const mult = dir === 'asc' ? 1 : -1;
+    const extract = (cell) => {
+        const raw = (cell?.textContent || '').trim();
+        if(type === 'num' || type === 'auto'){
+            const parsed = _parseFormattedNumber(raw);
+            if(parsed) return { n: parsed.value, s: raw };
+        }
+        if(type === 'date'){
+            const d = Date.parse(raw);
+            if(!isNaN(d)) return { n: d, s: raw };
+        }
+        return { n: NaN, s: raw.toLowerCase() };
+    };
+    rows.sort((a, b) => {
+        const A = extract(a.cells[colIdx]);
+        const B = extract(b.cells[colIdx]);
+        if(!isNaN(A.n) && !isNaN(B.n)) return (A.n - B.n) * mult;
+        return A.s.localeCompare(B.s) * mult;
+    });
+    // Re-append in new order (preserves event listeners)
+    rows.forEach(r => tbody.appendChild(r));
+    // Re-apply stagger if present
+    if(tbody.classList.contains('stagger-on-render')){
+        applyStagger(tbody);
+    }
+}
+function initSortableTables(){
+    document.querySelectorAll('table.sortable-table').forEach(makeSortable);
+}
 
 function T(term) {
     return `${term}<span class="tip-icon" data-term="${term}" title="${term}">i</span>`;
@@ -5285,6 +5480,8 @@ setTimeout(() => {
     if(_profileCache) fillProfilePanel(_profileCache);
     _initKPIObserver();
     _initStaggerAutoWire();
+    injectHeaderTooltipDots();
+    initSortableTables();
 }, 200);
 
 // Navigation re-init handled inside showView() — no duplicate handler needed.
