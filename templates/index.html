@@ -80,6 +80,91 @@
             width: 5px; height: 5px; border-radius: 50%;
             background: var(--sf-green); animation: blink 2s infinite;
         }
+
+        /* ════════════════════════════════════════════════
+           DA+ : HEADER CHIPS (mode badge + kill switch)
+           Famille cohérente, translucide + blur + micro glow
+           ════════════════════════════════════════════════ */
+        .hdr-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            height: 26px; padding: 0 10px;
+            font-size: 0.66rem; font-weight: 600;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px) saturate(160%);
+            -webkit-backdrop-filter: blur(12px) saturate(160%);
+            transition: all 0.22s ease;
+            font-family: inherit;
+        }
+        .hdr-chip .sfi { width: 12px; height: 12px; }
+        .hdr-chip .chip-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: currentColor;
+            box-shadow: 0 0 6px currentColor;
+        }
+
+        /* PAPER / LIVE mode badge */
+        .mode-chip {
+            color: var(--sf-orange);
+            background: linear-gradient(180deg, rgba(255,159,10,0.14), rgba(255,159,10,0.06));
+            border-color: rgba(255,159,10,0.28);
+            box-shadow: 0 0 0 1px rgba(255,159,10,0.08) inset, 0 2px 10px rgba(255,159,10,0.08);
+        }
+        .mode-chip.live {
+            color: var(--sf-green);
+            background: linear-gradient(180deg, rgba(48,209,88,0.14), rgba(48,209,88,0.06));
+            border-color: rgba(48,209,88,0.28);
+            box-shadow: 0 0 0 1px rgba(48,209,88,0.08) inset, 0 2px 10px rgba(48,209,88,0.1);
+        }
+        .mode-chip .chip-dot { animation: blink 2s infinite; }
+
+        /* Kill switch — translucide, glow rouge au hover, pulse en idle */
+        .kill-chip {
+            cursor: pointer;
+            color: var(--sf-red);
+            background: linear-gradient(180deg, rgba(255,69,58,0.12), rgba(255,69,58,0.05));
+            border-color: rgba(255,69,58,0.3);
+            box-shadow: 0 0 0 1px rgba(255,69,58,0.06) inset;
+            position: relative; overflow: hidden;
+        }
+        .kill-chip::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255,69,58,0.3), transparent 70%);
+            opacity: 0; transition: opacity 0.25s ease;
+            pointer-events: none;
+        }
+        .kill-chip:hover {
+            color: #fff;
+            border-color: rgba(255,69,58,0.55);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(255,69,58,0.3), 0 0 0 1px rgba(255,69,58,0.25) inset;
+        }
+        .kill-chip:hover::before { opacity: 0.7; }
+        .kill-chip:active { transform: translateY(0); }
+        .kill-chip .sfi { animation: killPulse 2.4s ease-in-out infinite; }
+        @keyframes killPulse {
+            0%, 100% { opacity: 0.75; transform: scale(1); }
+            50%      { opacity: 1; transform: scale(1.08); }
+        }
+
+        /* Bot status pill — aligné sur la famille */
+        .globalheader-status {
+            height: 26px; padding: 0 10px;
+            font-size: 0.66rem; font-weight: 600;
+            letter-spacing: 0.04em;
+            border-radius: 8px;
+            background: linear-gradient(180deg, rgba(48,209,88,0.1), rgba(48,209,88,0.04));
+            border: 1px solid rgba(48,209,88,0.22);
+            backdrop-filter: blur(12px) saturate(160%);
+            -webkit-backdrop-filter: blur(12px) saturate(160%);
+            color: var(--sf-green);
+            gap: 6px;
+        }
+        .globalheader-status .dot {
+            width: 6px; height: 6px; box-shadow: 0 0 6px currentColor;
+        }
         @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
         @keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(48,209,88,0.4)}50%{opacity:0.85;box-shadow:0 0 8px 2px rgba(48,209,88,0.25)} }
         @keyframes shimmer { 0%{background-position:-400px 0}100%{background-position:400px 0} }
@@ -1201,8 +1286,8 @@
             <button class="globalheader-link" data-view="glossaire">Glossaire</button>
         </div>
         <div style="display:flex;align-items:center;gap:12px">
-            <div id="mode-badge" style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;background:rgba(255,159,10,0.15);color:#ff9f0a;border:1px solid rgba(255,159,10,0.35)">PAPER</div>
-            <button id="kill-switch-btn" onclick="triggerKillSwitch()" title="Arrêt d'urgence du bot" style="background:rgba(255,69,58,0.1);color:#ff453a;border:1px solid rgba(255,69,58,0.4);border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px"><span class="sfi" data-icon="power"></span>KILL</button>
+            <div id="mode-badge" class="hdr-chip mode-chip"><span class="chip-dot"></span>PAPER</div>
+            <button id="kill-switch-btn" class="hdr-chip kill-chip" onclick="triggerKillSwitch()" title="Arrêt d'urgence du bot"><span class="sfi" data-icon="power"></span>KILL</button>
             <div id="bot-status" class="globalheader-status"><span class="dot" style="background:var(--sf-orange)"></span> Simulation</div>
         </div>
     </div>
@@ -2900,9 +2985,8 @@ async function loadSecurite(){
         // Badge global
         const badge = document.getElementById('mode-badge');
         if(badge){
-            badge.textContent = mode;
-            if(s.paper_mode){ badge.style.background='rgba(255,159,10,0.15)'; badge.style.color='#ff9f0a'; badge.style.borderColor='rgba(255,159,10,0.35)'; }
-            else { badge.style.background='rgba(50,215,75,0.15)'; badge.style.color='#32d74b'; badge.style.borderColor='rgba(50,215,75,0.35)'; }
+            badge.innerHTML = '<span class="chip-dot"></span>' + mode;
+            badge.classList.toggle('live', !s.paper_mode);
         }
     }catch(e){ console.error(e); }
     try{
