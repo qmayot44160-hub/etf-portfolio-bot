@@ -1228,39 +1228,92 @@
         }
 
         /* ════════════════════════════════════════════════
-           DA+ : TOAST 2.0 — slide-in, icon, accent bar
+           DA+ : TOAST 2.0 — slide-in, icon, accent bar, progress, stack
            ════════════════════════════════════════════════ */
         .toast2 {
             position: fixed; top: 90px; right: 24px; z-index: 100000;
-            display: flex; align-items: center; gap: 14px;
-            min-width: 280px; max-width: 440px;
-            padding: 14px 18px 14px 16px;
-            background: rgba(32,32,34,0.95);
-            backdrop-filter: blur(24px) saturate(180%);
+            display: flex; align-items: center; gap: 12px;
+            min-width: 300px; max-width: 460px;
+            padding: 13px 14px 15px 18px;
+            background: rgba(22,22,26,0.94);
+            backdrop-filter: blur(26px) saturate(180%);
+            -webkit-backdrop-filter: blur(26px) saturate(180%);
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 14px;
-            box-shadow: 0 14px 56px rgba(0,0,0,0.7), 0 2px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 14px 56px rgba(0,0,0,0.7), 0 2px 8px rgba(0,0,0,0.3),
+                        inset 0 1px 0 rgba(255,255,255,0.04);
             color: var(--sf-text); font-size: 0.88rem;
             transform: translateX(120%); opacity: 0;
-            transition: transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.3s;
+            transition: transform 0.5s cubic-bezier(0.22,1,0.36,1),
+                        opacity 0.3s,
+                        top 0.35s cubic-bezier(0.2,0.9,0.2,1);
             overflow: hidden;
         }
         .toast2.show { transform: translateX(0); opacity: 1; }
+        .toast2.leaving { transform: translateX(120%); opacity: 0; }
         .toast2::before {
             content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
             background: var(--toast-accent, var(--sf-blue));
+            box-shadow: 0 0 12px var(--toast-accent, var(--sf-blue));
+            opacity: 0.85;
         }
         .toast2.success { --toast-accent: var(--sf-green); }
         .toast2.error   { --toast-accent: var(--sf-red); }
         .toast2.warn    { --toast-accent: var(--sf-orange); }
+        .toast2.info    { --toast-accent: var(--sf-blue); }
         .toast2-ico {
-            width: 32px; height: 32px; border-radius: 10px;
+            width: 34px; height: 34px; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            background: rgba(255,255,255,0.05); flex-shrink: 0;
+            background: color-mix(in srgb, var(--toast-accent) 14%, transparent);
+            border: 1px solid color-mix(in srgb, var(--toast-accent) 30%, transparent);
+            flex-shrink: 0;
             color: var(--toast-accent, var(--sf-blue));
         }
         .toast2-ico .sfi { width: 18px; height: 18px; }
-        .toast2-body { flex: 1; line-height: 1.4; }
+        .toast2-body { flex: 1; line-height: 1.4; min-width: 0; }
+        .toast2-title { font-weight: 600; letter-spacing: -0.005em; }
+        .toast2-title + .toast2-subtitle {
+            margin-top: 3px; font-size: 0.78rem;
+            color: var(--sf-text-secondary); line-height: 1.45;
+        }
+        .toast2-action {
+            margin-left: 4px; padding: 5px 11px;
+            border-radius: 7px; font-size: 0.76rem; font-weight: 600;
+            font-family: inherit; cursor: pointer; flex-shrink: 0;
+            border: 1px solid color-mix(in srgb, var(--toast-accent) 50%, transparent);
+            background: color-mix(in srgb, var(--toast-accent) 10%, transparent);
+            color: var(--toast-accent);
+            transition: background 0.15s, color 0.15s, transform 0.12s;
+        }
+        .toast2-action:hover {
+            background: var(--toast-accent); color: #000;
+        }
+        .toast2-action:active { transform: scale(0.95); }
+        .toast2-close {
+            width: 24px; height: 24px; border-radius: 50%;
+            border: none; background: rgba(255,255,255,0.04);
+            color: var(--sf-text-muted);
+            cursor: pointer; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s, color 0.15s, transform 0.2s;
+        }
+        .toast2-close:hover {
+            background: rgba(255,255,255,0.1); color: var(--sf-text);
+            transform: rotate(90deg);
+        }
+        .toast2-close .sfi { width: 12px; height: 12px; }
+        .toast2-progress {
+            position: absolute; bottom: 0; left: 0; height: 2px;
+            width: 100%;
+            background: var(--toast-accent, var(--sf-blue));
+            transform-origin: left center;
+            transform: scaleX(1);
+            opacity: 0.55;
+            box-shadow: 0 0 6px var(--toast-accent);
+        }
+        body.reduce-motion .toast2 {
+            transition: opacity 0.2s;
+        }
 
         /* ════════════════════════════════════════════════
            DA+ : CARD ENTRANCE STAGGER on view change
@@ -3529,31 +3582,125 @@ document.addEventListener('click',(e)=>{
     }
 });
 
-/* Toast 2.0 — slide-in, icône, accent bar. Auto-stacks verticalement. */
-function toast(msg, type){
-    // type compat : true => error, false/undef => success, else literal string
+/* ═══════════════════════════════════════════════════════
+   Toast 2.0 — slide-in, icône, progress bar, pause on hover,
+   stack animé, bouton close + action optionnelle.
+
+   API:
+     toast("Message")                         // success (default)
+     toast("Message", "error")                // error/warn/info/success
+     toast({title:"Titre", subtitle:"…"})     // title + subtitle
+     toast("Msg", "info", {duration: 8000})   // custom duration
+     toast("Msg", "warn", {action:{label:"Annuler", onClick:()=>…}})
+   Retourne {dismiss, el}.
+   ═══════════════════════════════════════════════════════ */
+const _toastStack = [];
+
+function toast(msg, type, opts){
+    opts = opts || {};
+    // Compat anciens appels : toast("msg", true) → error, toast("msg", false) → success
     if(type === true) type = 'error';
-    else if(!type) type = 'success';
-    const typeIcons = {success:'checkCircle', error:'xCircle', warn:'alert', info:'target'};
+    else if(type === false || type == null) type = 'success';
+    if(type === 'warning') type = 'warn';
+
+    const typeIcons = { success:'checkCircle', error:'xCircle', warn:'alert', info:'info' };
     const ico = typeIcons[type] || 'checkCircle';
+    const duration = opts.duration ?? (type === 'error' ? 6000 : 3800);
+
+    // Title vs title+subtitle
+    let title = msg, subtitle = '';
+    if(msg && typeof msg === 'object'){ title = msg.title || ''; subtitle = msg.subtitle || ''; }
+    const bodyHtml = subtitle
+        ? `<div class="toast2-title">${title}</div><div class="toast2-subtitle">${subtitle}</div>`
+        : `<div class="toast2-title">${title}</div>`;
+
+    const actionHtml = opts.action
+        ? `<button class="toast2-action" type="button">${opts.action.label || 'Action'}</button>`
+        : '';
 
     const el = document.createElement('div');
     el.className = 'toast2 ' + type;
-    el.innerHTML = `<div class="toast2-ico">${icon(ico)}</div><div class="toast2-body">${msg}</div>`;
+    el.innerHTML = `
+        <div class="toast2-ico">${icon(ico)}</div>
+        <div class="toast2-body">${bodyHtml}</div>
+        ${actionHtml}
+        <button class="toast2-close" type="button" aria-label="Fermer">${icon('xCircle')}</button>
+        <div class="toast2-progress"></div>
+    `;
 
-    // Stack offset si d'autres toasts présents
-    const existing = document.querySelectorAll('.toast2');
-    const offset = 90 + existing.length * 70;
-    el.style.top = offset + 'px';
-
+    _toastStack.push(el);
+    _restackToasts();
     document.body.appendChild(el);
     requestAnimationFrame(() => el.classList.add('show'));
 
-    const duration = type === 'error' ? 5000 : 3200;
-    setTimeout(() => {
+    const prog = el.querySelector('.toast2-progress');
+    const reduce = document.body.classList.contains('reduce-motion');
+    let remaining = duration;
+    let startedAt = performance.now();
+    let timerId = null;
+    let dismissed = false;
+
+    function startProgress(){
+        if(reduce) return;
+        // Reset to full then animate to zero over `remaining`
+        prog.style.transition = 'none';
+        prog.style.transform = 'scaleX(1)';
+        void prog.offsetWidth; // reflow
+        prog.style.transition = `transform ${remaining}ms linear`;
+        prog.style.transform = 'scaleX(0)';
+    }
+
+    function dismiss(){
+        if(dismissed) return; dismissed = true;
+        if(timerId){ clearTimeout(timerId); timerId = null; }
+        el.classList.add('leaving');
         el.classList.remove('show');
-        setTimeout(() => el.remove(), 500);
-    }, duration);
+        const idx = _toastStack.indexOf(el);
+        if(idx >= 0) _toastStack.splice(idx, 1);
+        _restackToasts();
+        setTimeout(() => el.remove(), 520);
+    }
+
+    function pause(){
+        if(dismissed) return;
+        if(timerId){ clearTimeout(timerId); timerId = null; }
+        remaining -= performance.now() - startedAt;
+        if(remaining < 100) remaining = 100;
+        // Freeze progress at current computed width
+        const computed = getComputedStyle(prog).transform;
+        prog.style.transition = 'none';
+        prog.style.transform = computed;
+    }
+    function resume(){
+        if(dismissed) return;
+        startedAt = performance.now();
+        startProgress();
+        timerId = setTimeout(dismiss, remaining);
+    }
+
+    el.addEventListener('mouseenter', pause);
+    el.addEventListener('mouseleave', resume);
+    el.querySelector('.toast2-close').addEventListener('click', dismiss);
+    const actionBtn = el.querySelector('.toast2-action');
+    if(actionBtn && opts.action){
+        actionBtn.addEventListener('click', () => {
+            try { if(typeof opts.action.onClick === 'function') opts.action.onClick(); }
+            catch(e){ console.error(e); }
+            dismiss();
+        });
+    }
+
+    // Kick off
+    requestAnimationFrame(() => startProgress());
+    timerId = setTimeout(dismiss, duration);
+
+    return { dismiss, el };
+}
+
+function _restackToasts(){
+    _toastStack.forEach((el, i) => {
+        el.style.top = (90 + i * 74) + 'px';
+    });
 }
 
 /* ═══════════════════════════════════════════════════════
