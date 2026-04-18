@@ -160,6 +160,17 @@
             font-family: inherit;
         }
         .hdr-chip .sfi { width: 12px; height: 12px; opacity: 0.85; }
+        .hdr-divider {
+            display: inline-block;
+            width: 1px; height: 22px;
+            background: linear-gradient(180deg,
+                transparent 0%,
+                rgba(255,255,255,0.14) 30%,
+                rgba(255,255,255,0.14) 70%,
+                transparent 100%);
+            margin: 0 4px;
+            flex-shrink: 0;
+        }
         .hdr-chip .chip-dot {
             width: 5px; height: 5px; border-radius: 50%;
             background: currentColor;
@@ -2465,8 +2476,9 @@
         <div style="display:flex;align-items:center;gap:12px">
             <div id="mode-badge" class="hdr-chip mode-chip"><span class="chip-dot"></span>PAPER</div>
             <button id="kill-switch-btn" class="hdr-chip kill-chip" onclick="triggerKillSwitch()" title="Arrêt d'urgence du bot"><span class="sfi" data-icon="power"></span>KILL</button>
-            <button id="avatar-btn" class="avatar-btn" onclick="toggleSettingsFromAvatar()" oncontextmenu="event.preventDefault(); toggleUserMenu(event);" title="Profil & Paramètres (clic droit pour menu rapide)" aria-haspopup="dialog">QM</button>
             <div id="bot-status" class="globalheader-status"><span class="dot" style="background:var(--sf-orange)"></span> Simulation</div>
+            <span class="hdr-divider" aria-hidden="true"></span>
+            <button id="avatar-btn" class="avatar-btn" onclick="toggleSettingsFromAvatar()" oncontextmenu="event.preventDefault(); toggleUserMenu(event);" title="Profil & Paramètres (clic droit pour menu rapide)" aria-haspopup="dialog">QM</button>
         </div>
     </div>
 </nav>
