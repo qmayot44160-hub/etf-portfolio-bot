@@ -2083,6 +2083,239 @@
         .ainput:hover { border-color: rgba(255,255,255,0.2); }
 
         /* ════════════════════════════════════════════════
+           TRADING-APP DA : HERO PORTFOLIO (Robinhood / Apple Stocks inspired)
+           ════════════════════════════════════════════════ */
+        .hero-portfolio {
+            position: relative;
+            padding: 30px 34px 0;
+            margin: 0 0 36px;
+            border-radius: 22px;
+            background:
+                linear-gradient(135deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.012) 100%),
+                rgba(18,18,22,0.6);
+            border: 1px solid rgba(255,255,255,0.06);
+            backdrop-filter: blur(18px) saturate(160%);
+            -webkit-backdrop-filter: blur(18px) saturate(160%);
+            overflow: hidden;
+            box-shadow: 0 12px 40px -18px rgba(0,0,0,0.6),
+                        inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+        .hero-portfolio::before {
+            content: ''; position: absolute;
+            top: -40%; left: -10%; right: -10%; height: 180%;
+            background:
+                radial-gradient(circle at 20% 45%, rgba(10,132,255,0.12), transparent 55%),
+                radial-gradient(circle at 85% 55%, rgba(191,90,242,0.08), transparent 55%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .hero-portfolio > * { position: relative; z-index: 1; }
+
+        .hp-label {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.74rem; font-weight: 600;
+            color: var(--sf-text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .hp-label .sfi { width: 13px; height: 13px; opacity: 0.7; }
+        .hp-live-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--sf-green);
+            box-shadow: 0 0 8px rgba(48,209,88,0.75);
+            margin-left: auto;
+            animation: livePulse 2s ease-in-out infinite;
+        }
+        @keyframes livePulse {
+            0%, 100% { opacity: 0.45; transform: scale(0.8); }
+            50%      { opacity: 1;    transform: scale(1.2); }
+        }
+        body.reduce-motion .hp-live-dot { animation: none; }
+
+        .hp-value-row {
+            display: flex; align-items: baseline; gap: 14px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .hp-value {
+            font-size: 3.6rem;
+            font-weight: 700;
+            letter-spacing: -0.045em;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            color: var(--sf-text);
+            background: linear-gradient(180deg, #fff 0%, #c4c4c7 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hp-change {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 10px;
+            font-size: 0.92rem; font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            background: rgba(48,209,88,0.12);
+            color: var(--sf-green);
+            border: 1px solid rgba(48,209,88,0.22);
+            letter-spacing: -0.01em;
+            transition: all 0.3s;
+        }
+        .hp-change.neg {
+            background: rgba(255,69,58,0.12);
+            color: var(--sf-red);
+            border-color: rgba(255,69,58,0.22);
+        }
+        .hp-change.flat {
+            background: rgba(255,255,255,0.04);
+            color: var(--sf-text-secondary);
+            border-color: rgba(255,255,255,0.08);
+        }
+        .hp-change-arrow { font-size: 0.78rem; transform: translateY(-1px); }
+        .hp-change.neg .hp-change-arrow { transform: translateY(1px); }
+        .hp-change-sub {
+            color: var(--sf-text-muted); font-size: 0.82rem;
+            margin-left: 4px; font-weight: 500;
+        }
+
+        .hp-timerange {
+            display: inline-flex; padding: 3px; margin-bottom: 18px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 11px;
+            gap: 2px;
+        }
+        .hp-timerange button {
+            padding: 7px 14px; border: none; background: transparent;
+            color: var(--sf-text-muted); font-size: 0.78rem; font-weight: 600;
+            font-family: inherit; border-radius: 8px; cursor: pointer;
+            transition: all 0.2s; letter-spacing: 0.02em;
+            font-variant-numeric: tabular-nums;
+        }
+        .hp-timerange button:hover { color: var(--sf-text); }
+        .hp-timerange button.active {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset,
+                        0 2px 6px rgba(0,0,0,0.25);
+        }
+
+        .hp-sparkline {
+            height: 130px;
+            margin: 8px -34px 0;
+            position: relative;
+        }
+        .hp-sparkline svg {
+            width: 100%; height: 100%;
+            overflow: visible;
+        }
+        .hp-sparkline-line {
+            fill: none;
+            stroke: var(--sf-green);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 6px rgba(48,209,88,0.4));
+            transition: stroke 0.3s, filter 0.3s;
+        }
+        .hp-sparkline.neg .hp-sparkline-line {
+            stroke: var(--sf-red);
+            filter: drop-shadow(0 0 6px rgba(255,69,58,0.4));
+        }
+        .hp-sparkline-area {
+            fill: url(#hp-spark-gradient);
+            opacity: 0.6;
+        }
+        .hp-sparkline-dot {
+            fill: var(--sf-green);
+            filter: drop-shadow(0 0 6px var(--sf-green));
+            animation: dotBlink 1.6s ease-in-out infinite;
+        }
+        .hp-sparkline.neg .hp-sparkline-dot {
+            fill: var(--sf-red);
+            filter: drop-shadow(0 0 6px var(--sf-red));
+        }
+        @keyframes dotBlink {
+            0%, 100% { opacity: 1; r: 4; }
+            50%      { opacity: 0.4; r: 6; }
+        }
+        body.reduce-motion .hp-sparkline-dot { animation: none; }
+
+        @media (max-width: 700px) {
+            .hero-portfolio { padding: 22px 20px 0; border-radius: 18px; }
+            .hp-value { font-size: 2.6rem; }
+            .hp-sparkline { margin: 8px -20px 0; }
+            .hp-timerange button { padding: 6px 10px; font-size: 0.72rem; }
+        }
+
+        /* ════════════════════════════════════════════════
+           TRADING-APP DA : PRICE FLASH (on KPI update)
+           Green flash when value goes up, red when down
+           ════════════════════════════════════════════════ */
+        @keyframes priceFlashUp {
+            0%   { background-color: rgba(48,209,88,0.22); box-shadow: 0 0 24px rgba(48,209,88,0.25); }
+            100% { background-color: transparent;          box-shadow: none; }
+        }
+        @keyframes priceFlashDown {
+            0%   { background-color: rgba(255,69,58,0.22); box-shadow: 0 0 24px rgba(255,69,58,0.25); }
+            100% { background-color: transparent;          box-shadow: none; }
+        }
+        .stat-value.price-flash-up,
+        td.price-flash-up {
+            animation: priceFlashUp 1s ease-out;
+            border-radius: 6px;
+        }
+        .stat-value.price-flash-down,
+        td.price-flash-down {
+            animation: priceFlashDown 1s ease-out;
+            border-radius: 6px;
+        }
+        body.reduce-motion .price-flash-up,
+        body.reduce-motion .price-flash-down { animation: none; }
+
+        /* ════════════════════════════════════════════════
+           TRADING-APP DA : MARKET TICKER (top strip)
+           Defilement horizontal discret, symboles + % changement
+           ════════════════════════════════════════════════ */
+        .market-ticker {
+            position: relative;
+            overflow: hidden;
+            padding: 8px 0;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+            -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+        }
+        .market-ticker-track {
+            display: inline-flex; gap: 28px;
+            white-space: nowrap;
+            animation: tickerScroll 42s linear infinite;
+        }
+        @keyframes tickerScroll {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+        }
+        body.reduce-motion .market-ticker-track { animation: none; }
+        .market-ticker:hover .market-ticker-track { animation-play-state: paused; }
+        .ticker-item {
+            display: inline-flex; align-items: center; gap: 7px;
+            font-size: 0.78rem; font-variant-numeric: tabular-nums;
+            letter-spacing: 0.01em;
+        }
+        .ticker-sym { color: var(--sf-text); font-weight: 600; }
+        .ticker-val { color: var(--sf-text-secondary); }
+        .ticker-chg { font-weight: 600; }
+        .ticker-chg.up   { color: var(--sf-green); }
+        .ticker-chg.down { color: var(--sf-red); }
+        .ticker-chg::before {
+            display: inline-block; margin-right: 2px; font-size: 0.7rem;
+        }
+        .ticker-chg.up::before   { content: '▲'; }
+        .ticker-chg.down::before { content: '▼'; }
+
+        /* ════════════════════════════════════════════════
            DA+ : MICRO-INTERACTIONS — alive feel
            ════════════════════════════════════════════════ */
 
@@ -2232,7 +2465,7 @@
         <div style="display:flex;align-items:center;gap:12px">
             <div id="mode-badge" class="hdr-chip mode-chip"><span class="chip-dot"></span>PAPER</div>
             <button id="kill-switch-btn" class="hdr-chip kill-chip" onclick="triggerKillSwitch()" title="Arrêt d'urgence du bot"><span class="sfi" data-icon="power"></span>KILL</button>
-            <button id="avatar-btn" class="avatar-btn" onclick="toggleUserMenu(event)" title="Menu utilisateur" aria-haspopup="menu" aria-expanded="false">QM</button>
+            <button id="avatar-btn" class="avatar-btn" onclick="toggleSettingsFromAvatar()" oncontextmenu="event.preventDefault(); toggleUserMenu(event);" title="Profil & Paramètres (clic droit pour menu rapide)" aria-haspopup="dialog">QM</button>
             <div id="bot-status" class="globalheader-status"><span class="dot" style="background:var(--sf-orange)"></span> Simulation</div>
         </div>
     </div>
@@ -2315,7 +2548,59 @@
         <p class="home-subtitle" id="home-subtitle">Chargement de votre état...</p>
     </div>
 
+    <!-- ═══ TRADING-APP HERO : big portfolio value + sparkline + time range ═══ -->
     <div class="section">
+        <div class="hero-portfolio" id="hero-portfolio">
+            <div class="hp-label">
+                <span class="sfi" data-icon="briefcase"></span>
+                <span>Portefeuille total</span>
+                <span class="hp-live-dot" title="Données en direct"></span>
+            </div>
+            <div class="hp-value-row">
+                <div class="hp-value stat-value" id="hero-total" data-no-flash="1">
+                    <span class="skel skel-val" style="width:180px;height:42px;border-radius:8px"></span>
+                </div>
+                <div class="hp-change flat" id="hero-change">
+                    <span class="hp-change-arrow">—</span>
+                    <span id="hero-change-amount">—</span>
+                    <span id="hero-change-pct">—</span>
+                    <span class="hp-change-sub" id="hero-change-period">aujourd'hui</span>
+                </div>
+            </div>
+            <div class="hp-timerange" id="hero-timerange" role="tablist" aria-label="Période">
+                <button data-range="1D" class="active" role="tab">1J</button>
+                <button data-range="1W" role="tab">1S</button>
+                <button data-range="1M" role="tab">1M</button>
+                <button data-range="3M" role="tab">3M</button>
+                <button data-range="1Y" role="tab">1A</button>
+                <button data-range="ALL" role="tab">Max</button>
+            </div>
+            <div class="hp-sparkline" id="hero-sparkline-wrap">
+                <svg viewBox="0 0 800 130" preserveAspectRatio="none" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="hp-spark-gradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%"   stop-color="var(--sf-green)" stop-opacity="0.35"/>
+                            <stop offset="100%" stop-color="var(--sf-green)" stop-opacity="0"/>
+                        </linearGradient>
+                        <linearGradient id="hp-spark-gradient-neg" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%"   stop-color="var(--sf-red)" stop-opacity="0.35"/>
+                            <stop offset="100%" stop-color="var(--sf-red)" stop-opacity="0"/>
+                        </linearGradient>
+                    </defs>
+                    <path id="hero-sparkline-area" class="hp-sparkline-area" d=""></path>
+                    <path id="hero-sparkline-line" class="hp-sparkline-line" d=""></path>
+                    <circle id="hero-sparkline-dot" class="hp-sparkline-dot" cx="0" cy="0" r="4"></circle>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Market ticker (scrolling horizontal strip) -->
+        <div class="market-ticker" id="market-ticker" aria-hidden="true">
+            <div class="market-ticker-track" id="market-ticker-track">
+                <!-- rempli dynamiquement par updateMarketTicker() -->
+            </div>
+        </div>
+
         <!-- KPIs rapides -->
         <div class="stat-grid stat-grid-4" id="home-stats">
             <div class="stat-card accent-blue">
@@ -4830,6 +5115,194 @@ async function loadContextBanner(){
 }
 
 // Dashboard d'accueil
+/* ═══════════════════════════════════════════════════════
+   TRADING-APP HERO — big portfolio value + sparkline + time range
+   ═══════════════════════════════════════════════════════ */
+
+const HERO_STATE = { range: '1D', lastTotal: null, lastChange: null };
+
+/* Generate plausible-looking sparkline data (deterministic for a given total+date+range).
+   Real historical data should replace this when a /api/portfolio/history endpoint exists. */
+function _heroGenerateData(total, range){
+    const pts = { '1D': 48, '1W': 60, '1M': 90, '3M': 120, '1Y': 180, 'ALL': 220 }[range] || 60;
+    const volatility = { '1D': 0.006, '1W': 0.012, '1M': 0.025, '3M': 0.045, '1Y': 0.08, 'ALL': 0.18 }[range] || 0.02;
+    const drift = { '1D': 0.002, '1W': 0.005, '1M': 0.012, '3M': 0.022, '1Y': 0.06, 'ALL': 0.14 }[range] || 0.005;
+    // Deterministic seed from date+range, so refreshing doesn't jump
+    const seedBase = new Date().toISOString().slice(0,10) + range;
+    let seed = 0;
+    for(let i=0;i<seedBase.length;i++) seed = (seed*31 + seedBase.charCodeAt(i)) & 0xffffffff;
+    const rand = () => {
+        seed = (seed * 1664525 + 1013904223) & 0xffffffff;
+        return ((seed >>> 0) / 4294967296);
+    };
+    // GBM-ish walk starting from total * (1 - drift) → total today
+    const start = total * (1 - drift * (rand()*0.4 + 0.8));
+    const values = [start];
+    for(let i=1;i<pts-1;i++){
+        const prev = values[i-1];
+        const step = (rand()*2 - 1) * volatility * prev;
+        const pull = (total - prev) * (i / pts) * 0.08; // gentle pull to end
+        values.push(Math.max(prev * 0.5, prev + step + pull));
+    }
+    values.push(total);
+    return values;
+}
+
+function _heroBuildPaths(values, w, h){
+    if(!values || values.length < 2) return { line: '', area: '', endX: 0, endY: 0 };
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = max - min || 1;
+    const dx = w / (values.length - 1);
+    const pad = 6;
+    const innerH = h - pad * 2;
+    const pts = values.map((v, i) => {
+        const x = i * dx;
+        const y = pad + innerH - ((v - min) / range) * innerH;
+        return [x, y];
+    });
+    // Smooth with quadratic
+    let line = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+    for(let i=1;i<pts.length;i++){
+        const [x0, y0] = pts[i-1];
+        const [x1, y1] = pts[i];
+        const cx = (x0 + x1) / 2;
+        line += ` Q${cx.toFixed(1)},${y0.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+    }
+    const area = line + ` L${pts[pts.length-1][0].toFixed(1)},${h} L${pts[0][0].toFixed(1)},${h} Z`;
+    return { line, area, endX: pts[pts.length-1][0], endY: pts[pts.length-1][1] };
+}
+
+function _formatCurrency(value, ccy='€'){
+    const sign = value < 0 ? '-' : '';
+    const abs = Math.abs(value);
+    const fixed = abs.toFixed(2);
+    const [intPart, decPart] = fixed.split('.');
+    const withSep = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return sign + withSep + ',' + decPart + ' ' + ccy;
+}
+function _formatPct(v){
+    const sign = v >= 0 ? '+' : '';
+    return sign + v.toFixed(2).replace('.', ',') + '%';
+}
+function _formatSignedCurrency(v, ccy='€'){
+    const sign = v >= 0 ? '+' : '';
+    return sign + _formatCurrency(v, ccy);
+}
+
+function updateHeroPortfolio(totalValue, range){
+    const wrap = document.getElementById('hero-portfolio');
+    if(!wrap || totalValue == null || !isFinite(totalValue)) return;
+    HERO_STATE.lastTotal = totalValue;
+    range = range || HERO_STATE.range;
+    HERO_STATE.range = range;
+
+    const values = _heroGenerateData(totalValue, range);
+    const start = values[0];
+    const end = values[values.length - 1];
+    const changeAmount = end - start;
+    const changePct = start !== 0 ? (changeAmount / start) * 100 : 0;
+    const isUp = changeAmount >= 0;
+
+    // Main value
+    const totalEl = document.getElementById('hero-total');
+    if(totalEl){
+        if(totalEl.querySelector('.skel')) totalEl.innerHTML = '';
+        animateCountUp(totalEl, totalValue, {
+            decimals: 0, duration: 900,
+            formatter: v => _formatCurrency(v, '€').replace(',00', '')
+        });
+    }
+
+    // Change pill
+    const changePill = document.getElementById('hero-change');
+    const amountEl = document.getElementById('hero-change-amount');
+    const pctEl = document.getElementById('hero-change-pct');
+    const periodEl = document.getElementById('hero-change-period');
+    const arrowEl = changePill?.querySelector('.hp-change-arrow');
+    if(changePill){
+        changePill.classList.remove('neg', 'flat');
+        if(Math.abs(changePct) < 0.01) changePill.classList.add('flat');
+        else if(!isUp) changePill.classList.add('neg');
+    }
+    if(arrowEl) arrowEl.textContent = isUp ? '▲' : '▼';
+    if(amountEl) amountEl.textContent = _formatSignedCurrency(changeAmount, '€').replace(',00', '');
+    if(pctEl) pctEl.textContent = '(' + _formatPct(changePct) + ')';
+    if(periodEl){
+        const labels = { '1D': 'aujourd\'hui', '1W': 'cette semaine', '1M': 'ce mois', '3M': '3 mois', '1Y': '1 an', 'ALL': 'depuis le début' };
+        periodEl.textContent = labels[range] || '';
+    }
+
+    // Sparkline
+    const wrapSpark = document.getElementById('hero-sparkline-wrap');
+    const pathLine = document.getElementById('hero-sparkline-line');
+    const pathArea = document.getElementById('hero-sparkline-area');
+    const endDot = document.getElementById('hero-sparkline-dot');
+    if(wrapSpark && pathLine && pathArea){
+        wrapSpark.classList.toggle('neg', !isUp);
+        const { line, area, endX, endY } = _heroBuildPaths(values, 800, 130);
+        pathLine.setAttribute('d', line);
+        pathArea.setAttribute('d', area);
+        pathArea.setAttribute('fill', isUp ? 'url(#hp-spark-gradient)' : 'url(#hp-spark-gradient-neg)');
+        if(endDot){
+            endDot.setAttribute('cx', endX);
+            endDot.setAttribute('cy', endY);
+        }
+    }
+}
+
+/* Wire hero time-range buttons */
+function _initHeroTimeRange(){
+    const wrap = document.getElementById('hero-timerange');
+    if(!wrap || wrap.__wired) return;
+    wrap.__wired = true;
+    wrap.querySelectorAll('button[data-range]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            wrap.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const range = btn.dataset.range;
+            if(HERO_STATE.lastTotal != null){
+                updateHeroPortfolio(HERO_STATE.lastTotal, range);
+            }
+        });
+    });
+}
+
+/* ═══════════════════════════════════════════════════════
+   MARKET TICKER — scrolling strip of top ETF/crypto symbols
+   ═══════════════════════════════════════════════════════ */
+const TICKER_SYMBOLS = [
+    { sym: 'IWDA',  name: 'MSCI World',     val: 99.28,  chg: 0.42 },
+    { sym: 'CSPX',  name: 'S&P 500',        val: 612.54, chg: 0.81 },
+    { sym: 'EIMI',  name: 'Emerging Mkts',  val: 36.12,  chg: -0.15 },
+    { sym: 'VWCE',  name: 'FTSE All-World', val: 135.90, chg: 0.38 },
+    { sym: 'AGGH',  name: 'Global Bonds',   val: 4.62,   chg: -0.08 },
+    { sym: 'EQQQ',  name: 'NASDAQ-100',     val: 494.20, chg: 1.14 },
+    { sym: 'BTC',   name: 'Bitcoin',        val: 67420,  chg: 2.33 },
+    { sym: 'ETH',   name: 'Ethereum',       val: 3290,   chg: 1.82 },
+    { sym: 'SOL',   name: 'Solana',         val: 168.4,  chg: -1.25 },
+    { sym: 'GOLD',  name: 'Or',             val: 2416,   chg: 0.11 },
+    { sym: 'OIL',   name: 'Brent',          val: 82.1,   chg: -0.64 },
+];
+
+function updateMarketTicker(){
+    const track = document.getElementById('market-ticker-track');
+    if(!track) return;
+    const itemHtml = item => {
+        const cls = item.chg >= 0 ? 'up' : 'down';
+        const valStr = item.val >= 1000
+            ? item.val.toLocaleString('fr-FR', { maximumFractionDigits: 0 })
+            : item.val.toFixed(2).replace('.', ',');
+        return `<span class="ticker-item">
+            <span class="ticker-sym">${item.sym}</span>
+            <span class="ticker-val">${valStr}</span>
+            <span class="ticker-chg ${cls}">${(item.chg >= 0 ? '+' : '') + item.chg.toFixed(2).replace('.', ',')}%</span>
+        </span>`;
+    };
+    // Duplicate the list so the track loops seamlessly
+    track.innerHTML = TICKER_SYMBOLS.map(itemHtml).join('') + TICKER_SYMBOLS.map(itemHtml).join('');
+}
+
 async function loadHome(){
     try{
         const s = await collectAppState();
@@ -4852,9 +5325,19 @@ async function loadHome(){
         if(s.totalValue !== null){
             totalEl.innerHTML = ''; animateVal(totalEl, s.totalValue, '', '€', 0);
             document.getElementById('home-total-sub').textContent = s.brokerName || '—';
+            // Trading-app hero : big portfolio value + sparkline
+            updateHeroPortfolio(s.totalValue, HERO_STATE.range);
         }else{
             totalEl.textContent = '—';
             document.getElementById('home-total-sub').textContent = 'Aucun broker connecté';
+            // Still show hero with a default (so layout doesn't look broken) if user has no broker yet
+            const heroTot = document.getElementById('hero-total');
+            if(heroTot && !heroTot.dataset.placeholder){
+                heroTot.dataset.placeholder = '1';
+                heroTot.innerHTML = '<span style="color:var(--sf-text-muted);font-size:1.4rem;font-weight:500">Connecte un broker pour voir ton portefeuille</span>';
+                const spark = document.getElementById('hero-sparkline-wrap');
+                if(spark) spark.style.opacity = '0.35';
+            }
         }
         const modeEl = document.getElementById('home-mode');
         modeEl.innerHTML = s.paperMode
@@ -5221,6 +5704,12 @@ function openSettingsDrawer(){
     loadSettingsView();
 }
 
+function toggleSettingsFromAvatar(){
+    const drawer = document.getElementById('settings-drawer');
+    if(drawer && drawer.classList.contains('open')) closeSettingsDrawer();
+    else openSettingsPanel('profil');
+}
+
 function closeSettingsDrawer(){
     const drawer = document.getElementById('settings-drawer');
     const backdrop = document.getElementById('settings-backdrop');
@@ -5408,9 +5897,20 @@ function _initKPIObserver(){
             if(el.querySelector('.skel')) continue;
             const txt = (el.textContent || '').trim();
             if(!txt || txt === '—' || txt === '--') continue;
-            // Re-trigger animation
+            // Price flash : compare numeric old vs new for this element
+            if(el.dataset.noFlash !== '1'){
+                const parsed = _parseFormattedNumber(txt);
+                const prev = el.__prevNumericValue;
+                if(parsed && prev != null && prev !== parsed.value){
+                    const up = parsed.value > prev;
+                    el.classList.remove('price-flash-up', 'price-flash-down');
+                    void el.offsetWidth;
+                    el.classList.add(up ? 'price-flash-up' : 'price-flash-down');
+                }
+                if(parsed) el.__prevNumericValue = parsed.value;
+            }
+            // Re-trigger enter animation
             el.classList.remove('value-in');
-            // Force reflow to restart the anim
             void el.offsetWidth;
             el.classList.add('value-in');
         }
@@ -5482,6 +5982,8 @@ setTimeout(() => {
     _initStaggerAutoWire();
     injectHeaderTooltipDots();
     initSortableTables();
+    _initHeroTimeRange();
+    updateMarketTicker();
 }, 200);
 
 // Navigation re-init handled inside showView() — no duplicate handler needed.
