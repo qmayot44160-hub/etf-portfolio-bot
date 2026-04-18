@@ -336,37 +336,110 @@
         #view-glossaire .hero-badge  { --hero-accent: #64d2ff; box-shadow: 0 0 40px rgba(100,210,255,0.12); }
 
         /* ════════════════════════════════════════════════
-           TABLES
+           TABLES — DA+ : sticky header, zebra subtile, hover glow
            ════════════════════════════════════════════════ */
-        table { width: 100%; border-collapse: collapse; }
-        th {
-            text-align: left; font-size: 0.68rem; font-weight: 500;
-            text-transform: uppercase; letter-spacing: 0.06em;
-            color: var(--sf-text-muted); padding: 12px 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        thead th {
+            position: sticky; top: 0; z-index: 2;
+            background: linear-gradient(180deg, rgba(40,40,44,0.96), rgba(28,28,30,0.96));
+            backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
         }
+        th {
+            text-align: left; font-size: 0.66rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            color: var(--sf-text-muted); padding: 13px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            white-space: nowrap;
+        }
+        th:first-child { border-top-left-radius: 10px; }
+        th:last-child  { border-top-right-radius: 10px; }
         td {
             padding: 14px; font-size: 0.88rem;
             border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: background 0.18s ease;
         }
-        tr { transition: background 0.2s; }
-        tr:hover { background: rgba(255,255,255,0.02); }
-        .mono { font-variant-numeric: tabular-nums; }
+        tbody tr { transition: background 0.2s, transform 0.2s; position: relative; }
+        tbody tr:nth-child(even) td { background: rgba(255,255,255,0.012); }
+        tbody tr:hover td {
+            background: linear-gradient(90deg, rgba(10,132,255,0.06), rgba(10,132,255,0.02) 60%, transparent);
+        }
+        tbody tr:hover td:first-child {
+            box-shadow: inset 3px 0 0 var(--sf-blue);
+        }
+        .mono { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; letter-spacing: 0.01em; }
+        .td-num { text-align: right; font-variant-numeric: tabular-nums; }
+
+        /* ════════════════════════════════════════════════
+           DA+ : SKELETON LOADERS (shimmer)
+           ════════════════════════════════════════════════ */
+        .skel {
+            display: inline-block;
+            background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0.04) 0%,
+                rgba(255,255,255,0.10) 50%,
+                rgba(255,255,255,0.04) 100%
+            );
+            background-size: 800px 100%;
+            border-radius: 6px;
+            animation: skelShimmer 1.4s linear infinite;
+            color: transparent;
+            user-select: none;
+        }
+        .skel-line   { height: 12px; width: 100%; margin: 6px 0; border-radius: 4px; }
+        .skel-title  { height: 20px; width: 60%; border-radius: 6px; }
+        .skel-circle { width: 40px; height: 40px; border-radius: 50%; }
+        .skel-card   {
+            padding: 18px; border-radius: 14px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        @keyframes skelShimmer {
+            0%   { background-position: -400px 0; }
+            100% { background-position: 400px 0; }
+        }
+
+        /* ════════════════════════════════════════════════
+           DA+ : SCROLL REVEAL
+           Chaque .reveal glisse + fade quand il entre dans le viewport.
+           ════════════════════════════════════════════════ */
+        .reveal {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity 0.7s cubic-bezier(0.2,0.9,0.2,1),
+                        transform 0.7s cubic-bezier(0.2,0.9,0.2,1);
+            will-change: opacity, transform;
+        }
+        .reveal.in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal { opacity: 1; transform: none; transition: none; }
+        }
 
         /* ════════════════════════════════════════════════
            BADGES
            ════════════════════════════════════════════════ */
         .pill {
-            display: inline-flex; align-items: center;
-            padding: 4px 12px; border-radius: 14px;
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 11px; border-radius: 14px;
             font-size: 0.72rem; font-weight: 600; letter-spacing: 0.01em;
+            border: 1px solid transparent;
+            transition: transform 0.15s, filter 0.15s;
         }
-        .pill-green { background: rgba(48,209,88,0.12); color: var(--sf-green); }
-        .pill-red { background: rgba(255,69,58,0.12); color: var(--sf-red); }
-        .pill-blue { background: rgba(41,151,255,0.12); color: var(--sf-blue); }
-        .pill-orange { background: rgba(255,159,10,0.12); color: var(--sf-orange); }
-        .pill-purple { background: rgba(191,90,242,0.12); color: var(--sf-purple); }
-        .pill-gray { background: rgba(255,255,255,0.05); color: var(--sf-text-secondary); }
+        .pill:hover { transform: translateY(-1px); filter: brightness(1.12); }
+        .pill.with-dot::before {
+            content: ''; width: 5px; height: 5px; border-radius: 50%;
+            background: currentColor; box-shadow: 0 0 5px currentColor;
+            flex-shrink: 0;
+        }
+        .pill-green  { background: linear-gradient(180deg, rgba(48,209,88,0.18), rgba(48,209,88,0.08));   color: var(--sf-green);  border-color: rgba(48,209,88,0.28); }
+        .pill-red    { background: linear-gradient(180deg, rgba(255,69,58,0.18), rgba(255,69,58,0.08));   color: var(--sf-red);    border-color: rgba(255,69,58,0.28); }
+        .pill-blue   { background: linear-gradient(180deg, rgba(10,132,255,0.18), rgba(10,132,255,0.08)); color: var(--sf-blue);   border-color: rgba(10,132,255,0.3); }
+        .pill-orange { background: linear-gradient(180deg, rgba(255,159,10,0.18), rgba(255,159,10,0.08)); color: var(--sf-orange); border-color: rgba(255,159,10,0.28); }
+        .pill-purple { background: linear-gradient(180deg, rgba(191,90,242,0.18), rgba(191,90,242,0.08)); color: var(--sf-purple); border-color: rgba(191,90,242,0.28); }
+        .pill-gray   { background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03)); color: var(--sf-text-secondary); border-color: rgba(255,255,255,0.1); }
 
         /* ════════════════════════════════════════════════
            BUTTONS — Apple style
@@ -396,18 +469,26 @@
            FORMS — Apple style
            ════════════════════════════════════════════════ */
         .ainput {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+            border: 1px solid rgba(255,255,255,0.09);
             color: var(--sf-text); padding: 12px 16px;
             border-radius: 12px; font-size: 0.94rem;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
             font-family: inherit; width: 100%;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            transition: border-color 0.22s, box-shadow 0.22s, background 0.22s;
             outline: none;
+        }
+        .ainput::placeholder { color: rgba(235,235,245,0.35); }
+        .ainput:hover {
+            border-color: rgba(255,255,255,0.18);
+            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.035));
         }
         .ainput:focus {
             border-color: var(--sf-blue);
-            box-shadow: 0 0 0 4px rgba(41,151,255,0.15);
+            background: linear-gradient(180deg, rgba(10,132,255,0.06), rgba(10,132,255,0.02));
+            box-shadow: 0 0 0 4px rgba(10,132,255,0.14), inset 0 1px 0 rgba(255,255,255,0.04);
         }
+        .ainput:disabled { opacity: 0.5; cursor: not-allowed; }
         select.ainput { display: none; } /* hidden — replaced by .cselect */
 
         /* ════════════════════════════════════════════════
@@ -2102,7 +2183,7 @@
             <p style="color:var(--sf-text-muted);font-size:13px;margin-top:4px">
                 Snapshot ZIP quotidien de toutes tes configs + états (portfolio, trades, settings, Telegram). Rétention automatique : <b>14 jours</b>. Stockés dans le volume Railway.
             </p>
-            <div id="backups-list" style="margin-top:14px;font-size:13px">Chargement…</div>
+            <div id="backups-list" style="margin-top:14px;font-size:13px"><div class="skel skel-line" style="width:80%"></div><div class="skel skel-line" style="width:60%"></div><div class="skel skel-line" style="width:70%"></div></div>
         </div>
     </div>
 </div>
@@ -3300,6 +3381,39 @@ async function loadHome(){
     }catch(e){ console.error('loadHome', e); }
 }
 
+/* ═══════════════════════════════════════════════════════
+   DA+ : SCROLL REVEAL via IntersectionObserver
+   Auto-tagge .dcard, .stat-card, .section-intro → effet glisser/fade
+   quand ils entrent dans le viewport. Re-balayage après showView().
+   ═══════════════════════════════════════════════════════ */
+const REVEAL_SELECTOR = '.dcard, .stat-card, .section-intro, .action-card, .shortcut-tile, .shortcut-card';
+const _revealObserver = ('IntersectionObserver' in window) ? new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if(e.isIntersecting){
+            e.target.classList.add('in');
+            _revealObserver.unobserve(e.target);
+        }
+    });
+}, { rootMargin: '0px 0px -40px 0px', threshold: 0.08 }) : null;
+
+function initReveal(root){
+    if(!_revealObserver) return;
+    (root||document).querySelectorAll(REVEAL_SELECTOR).forEach(el => {
+        if(el.classList.contains('reveal')) return;
+        el.classList.add('reveal');
+        // Already in view at mount? activate immediately (above-the-fold)
+        const r = el.getBoundingClientRect();
+        if(r.top < window.innerHeight - 40) el.classList.add('in');
+        else _revealObserver.observe(el);
+    });
+}
+// Re-run reveal scan after each view transition
+const _origShowView = showView;
+showView = function(v){
+    _origShowView(v);
+    setTimeout(() => initReveal(document.getElementById('view-'+v)), 380);
+};
+
 /* ═══ Boot ═══ */
 renderStaticIcons();
 loadHome();
@@ -3307,7 +3421,7 @@ loadContextBanner();
 refreshStatus();
 // Refresh banner toutes les 30s
 setInterval(loadContextBanner, 30000);
-setTimeout(() => { initCustomSelects(); injectTooltips(); renderStaticIcons(); }, 200);
+setTimeout(() => { initCustomSelects(); injectTooltips(); renderStaticIcons(); initReveal(); }, 200);
 
 // Navigation re-init handled inside showView() — no duplicate handler needed.
 </script>
