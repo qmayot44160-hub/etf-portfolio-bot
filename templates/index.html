@@ -1534,17 +1534,160 @@
         }
 
         /* ════════════════════════════════════════════════
-           DA+ : SETTINGS VIEW (rail + content)
+           DA+ : AMBIENT SIDE DECOR (vide latéral, aesthetic only)
+           ════════════════════════════════════════════════ */
+        .page-sides-decor {
+            position: fixed; inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .page-sides-decor .beam {
+            position: absolute;
+            top: 12%; bottom: 12%;
+            width: 1px;
+            background: linear-gradient(180deg,
+                transparent 0%,
+                rgba(10,132,255,0.22) 22%,
+                rgba(191,90,242,0.16) 58%,
+                rgba(48,209,88,0.12) 82%,
+                transparent 100%);
+            opacity: 0.55;
+            animation: beamShimmer 14s ease-in-out infinite alternate;
+        }
+        .page-sides-decor .beam.left  { left: 28px; }
+        .page-sides-decor .beam.right { right: 28px; animation-delay: -7s; }
+        @keyframes beamShimmer {
+            0%   { opacity: 0.35; transform: translateY(-10px); }
+            100% { opacity: 0.65; transform: translateY(10px); }
+        }
+        .page-sides-decor .edge-glow {
+            position: absolute;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.10;
+        }
+        .page-sides-decor .edge-glow.tl { top: -120px; left: -110px; background: var(--sf-blue); }
+        .page-sides-decor .edge-glow.br { bottom: -140px; right: -110px; background: var(--sf-purple); }
+        .page-sides-decor .side-dot {
+            position: absolute;
+            width: 3px; height: 3px; border-radius: 50%;
+            background: rgba(255,255,255,0.18);
+            box-shadow: 0 0 6px rgba(10,132,255,0.35);
+        }
+        .page-sides-decor .side-dot:nth-child(1) { left: 26px; top: 28%; }
+        .page-sides-decor .side-dot:nth-child(2) { left: 30px; top: 62%; background: rgba(191,90,242,0.4); box-shadow: 0 0 6px rgba(191,90,242,0.5); }
+        .page-sides-decor .side-dot:nth-child(3) { right: 26px; top: 40%; background: rgba(48,209,88,0.4); box-shadow: 0 0 6px rgba(48,209,88,0.5); }
+        .page-sides-decor .side-dot:nth-child(4) { right: 30px; top: 75%; }
+        @media (max-width: 900px) {
+            .page-sides-decor { display: none; }
+        }
+        body.reduce-motion .page-sides-decor .beam { animation: none; }
+
+        /* ════════════════════════════════════════════════
+           DA+ : SETTINGS — SIDE DRAWER (volet latéral droite)
+           ════════════════════════════════════════════════ */
+        .settings-drawer-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.42);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 950;
+        }
+        .settings-drawer-backdrop.open {
+            opacity: 1; pointer-events: auto;
+        }
+        .settings-drawer {
+            position: fixed;
+            top: 0; right: 0; bottom: 0;
+            width: min(860px, 100vw);
+            background: linear-gradient(180deg, rgba(14,14,18,0.96), rgba(10,10,14,0.94));
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border-left: 1px solid rgba(255,255,255,0.08);
+            box-shadow: -24px 0 70px -12px rgba(0,0,0,0.7), inset 1px 0 0 rgba(255,255,255,0.03);
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.2,0.9,0.2,1);
+            z-index: 1000;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+        .settings-drawer.open { transform: translateX(0); }
+        .settings-drawer::before {
+            /* accent line */
+            content: ''; position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 1px;
+            background: linear-gradient(180deg,
+                transparent,
+                rgba(10,132,255,0.4) 20%,
+                rgba(191,90,242,0.3) 60%,
+                transparent);
+            pointer-events: none;
+        }
+        .settings-drawer-header {
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 24px;
+            background: rgba(10,10,14,0.85);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            backdrop-filter: blur(20px);
+            z-index: 5;
+        }
+        .settings-drawer-title {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.95rem; font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+        .settings-drawer-title .sfi {
+            width: 16px; height: 16px;
+            color: var(--sf-blue);
+        }
+        .settings-drawer-actions {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .settings-drawer-close {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04);
+            color: var(--sf-text-secondary);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: transform 0.25s cubic-bezier(0.2,0.9,0.2,1), background 0.2s, color 0.2s;
+        }
+        .settings-drawer-close:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--sf-text);
+            transform: rotate(90deg);
+        }
+        .settings-drawer-close .sfi { width: 14px; height: 14px; }
+        .settings-drawer-body {
+            flex: 1; overflow-y: auto;
+            scrollbar-gutter: stable;
+        }
+        .settings-drawer-body::-webkit-scrollbar { width: 8px; }
+        .settings-drawer-body::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.08);
+            border-radius: 4px;
+        }
+        .settings-drawer-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        /* ════════════════════════════════════════════════
+           DA+ : SETTINGS VIEW (rail + content) — now inside drawer
            ════════════════════════════════════════════════ */
         .settings-layout {
             display: grid;
-            grid-template-columns: 220px 1fr;
-            gap: 32px;
-            max-width: 1024px; margin: 0 auto;
-            padding: 40px 22px 80px;
+            grid-template-columns: 200px 1fr;
+            gap: 24px;
+            padding: 26px 24px 60px;
         }
         .settings-rail {
-            position: sticky; top: 70px; align-self: start;
+            position: sticky; top: 16px; align-self: start;
             display: flex; flex-direction: column; gap: 2px;
             padding: 8px; border-radius: 14px;
             background: rgba(255,255,255,0.02);
@@ -1905,6 +2048,18 @@
     <button class="user-menu-item" onclick="openSettingsPanel('apropos')"><span class="sfi" data-icon="info"></span>À propos</button>
     <button class="user-menu-item danger" onclick="logoutUser()"><span class="sfi" data-icon="logout"></span>Déconnexion</button>
     <div class="user-menu-footer" id="user-menu-footer">PortfolioQuant · v1.0</div>
+</div>
+
+<!-- Ambient side decor (aesthetic only — pas de contenu utile sur les côtés) -->
+<div class="page-sides-decor" aria-hidden="true">
+    <div class="edge-glow tl"></div>
+    <div class="edge-glow br"></div>
+    <div class="beam left"></div>
+    <div class="beam right"></div>
+    <div class="side-dot"></div>
+    <div class="side-dot"></div>
+    <div class="side-dot"></div>
+    <div class="side-dot"></div>
 </div>
 
 <div class="page">
@@ -2706,9 +2861,22 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
-     SETTINGS (rail + panels)
+     SETTINGS — SIDE DRAWER (volet latéral droite)
      ═══════════════════════════════════════════════════════ -->
-<div id="view-settings">
+<div class="settings-drawer-backdrop" id="settings-backdrop" onclick="closeSettingsDrawer()"></div>
+<aside class="settings-drawer" id="settings-drawer" role="dialog" aria-modal="true" aria-labelledby="settings-drawer-title" aria-hidden="true">
+    <div class="settings-drawer-header">
+        <div class="settings-drawer-title" id="settings-drawer-title">
+            <span class="sfi" data-icon="gear"></span>
+            Paramètres
+        </div>
+        <div class="settings-drawer-actions">
+            <button class="settings-drawer-close" onclick="closeSettingsDrawer()" aria-label="Fermer les paramètres" title="Fermer (Échap)">
+                <span class="sfi" data-icon="xCircle"></span>
+            </button>
+        </div>
+    </div>
+    <div class="settings-drawer-body">
     <div class="settings-layout">
         <!-- Rail gauche -->
         <nav class="settings-rail" aria-label="Navigation paramètres">
@@ -3114,7 +3282,8 @@
 
         </div>
     </div>
-</div>
+    </div><!-- .settings-drawer-body -->
+</aside><!-- #settings-drawer -->
 
 </div><!-- .page -->
 
@@ -3201,7 +3370,7 @@ function showView(v){
             next.style.transform='translateY(0)';
         });
         window.scrollTo({top:0,behavior:'smooth'});
-        const loaders={home:loadHome,portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire,securite:loadSecurite,settings:loadSettingsView};
+        const loaders={home:loadHome,portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire,securite:loadSecurite};
         if(loaders[v])loaders[v]();
     };
     if(current&&current!==next){
@@ -4581,7 +4750,7 @@ function wireAppearanceAutoSave(){
     });
 }
 
-/* Loader called by showView('settings') */
+/* ═══ SETTINGS DRAWER ═══ */
 function loadSettingsView(){
     if(_profileCache){
         fillProfilePanel(_profileCache);
@@ -4592,6 +4761,27 @@ function loadSettingsView(){
     // If confidentialité is the active panel, refresh audit log
     const activePanel = document.querySelector('.settings-panel.active');
     if(activePanel && activePanel.dataset.panel === 'confidentialite') loadAuditLog();
+}
+
+function openSettingsDrawer(){
+    const drawer = document.getElementById('settings-drawer');
+    const backdrop = document.getElementById('settings-backdrop');
+    if(!drawer) return;
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    if(backdrop) backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    loadSettingsView();
+}
+
+function closeSettingsDrawer(){
+    const drawer = document.getElementById('settings-drawer');
+    const backdrop = document.getElementById('settings-backdrop');
+    if(!drawer) return;
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    if(backdrop) backdrop.classList.remove('open');
+    document.body.style.overflow = '';
 }
 
 /* ═══ USER MENU POPOVER ═══ */
@@ -4619,23 +4809,27 @@ document.addEventListener('keydown', (e) => {
     if(e.key === 'Escape'){
         const menu = document.getElementById('user-menu');
         if(menu && menu.classList.contains('show')) closeUserMenu();
+        const drawer = document.getElementById('settings-drawer');
+        if(drawer && drawer.classList.contains('open')) closeSettingsDrawer();
     }
 });
 
-/* ═══ SETTINGS PANEL SWITCHER ═══ */
+/* ═══ SETTINGS PANEL SWITCHER (drawer) ═══ */
 function openSettingsPanel(panelId){
     closeUserMenu();
-    showView('settings');
-    setTimeout(() => {
-        document.querySelectorAll('.settings-rail-item').forEach(b => {
-            b.classList.toggle('active', b.dataset.panel === panelId);
-        });
-        document.querySelectorAll('.settings-panel').forEach(p => {
-            p.classList.toggle('active', p.dataset.panel === panelId);
-        });
-        // Load panel-specific data
-        if(panelId === 'confidentialite') loadAuditLog();
-    }, 80);
+    openSettingsDrawer();
+    // Switch active panel
+    document.querySelectorAll('.settings-rail-item').forEach(b => {
+        b.classList.toggle('active', b.dataset.panel === panelId);
+    });
+    document.querySelectorAll('.settings-panel').forEach(p => {
+        p.classList.toggle('active', p.dataset.panel === panelId);
+    });
+    // Scroll drawer body to top when switching panels
+    const body = document.querySelector('.settings-drawer-body');
+    if(body) body.scrollTop = 0;
+    // Load panel-specific data
+    if(panelId === 'confidentialite') loadAuditLog();
 }
 
 function loadAuditLog(){
