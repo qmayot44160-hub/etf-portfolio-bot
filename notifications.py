@@ -159,6 +159,32 @@ def notify_trade_closed(symbol: str, side: str, pnl: float, pnl_pct: float,
     return notify(msg, "trades")
 
 
+def notify_smart_pick(pick: dict) -> bool:
+    """
+    Alerte Telegram pour un nouveau Smart Pick à haut score.
+    pick : dict retourné par etf_scanner (ticker, name, score, direction, reasons…).
+    """
+    ticker = pick.get("ticker") or pick.get("symbol") or "?"
+    name = pick.get("name") or ticker
+    score = pick.get("score", 0)
+    direction = pick.get("direction", "NEUTRAL")
+    chg_30d = pick.get("change_30d", 0)
+    asset_class = pick.get("asset_class", "ETF").upper()
+
+    arrow = "📈" if direction == "BULL" else "📉" if direction == "BEAR" else "➡️"
+    reasons = pick.get("reasons", [])
+    reasons_txt = "\n".join(f"• {r}" for r in reasons[:3]) if reasons else "• Opportunité détectée"
+
+    msg = (
+        f"{arrow} <b>Smart Pick détecté</b>\n\n"
+        f"<b>{ticker}</b> — {name}\n"
+        f"Classe : {asset_class} · Score : <b>{score:.0f}/100</b>\n"
+        f"30j : <b>{chg_30d:+.2f}%</b> · Direction : <b>{direction}</b>\n\n"
+        f"{reasons_txt}"
+    )
+    return notify(msg, "info")
+
+
 def notify_error(message: str, source: str = "") -> bool:
     src = f"Source : {source}\n" if source else ""
     msg = f"⚠️ <b>Erreur bot</b>\n\n{src}{message}"

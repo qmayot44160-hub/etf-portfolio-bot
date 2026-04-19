@@ -277,10 +277,17 @@ class ETFScanner:
             # Tri par score
             results.sort(key=lambda r: r.score, reverse=True)
 
+            # ── Alerte Telegram sur nouveaux picks à score élevé ──
+            try:
+                self._alert_new_high_score_picks(results)
+            except Exception as e:
+                print(f"[ETFScanner] alert error: {e}")
+
             elapsed = round(time.time() - start, 1)
             self.cache = {
                 "results": [asdict(r) for r in results],
                 "last_scan": datetime.now().isoformat(timespec="seconds"),
+                "alerted_tickers": self._get_alerted(),
                 "stats": {
                     "universe_size": len(ETF_UNIVERSE),
                     "scanned": len(results),
@@ -303,6 +310,47 @@ class ETFScanner:
             return {"status": "error", "error": str(e), "results": self.cache.get("results", [])}
         finally:
             self._scanning = False
+
+    # ─────────────────────────────────────────
+    #  Alertes Telegram sur nouveaux picks high-score
+    # ─────────────────────────────────────────
+    HIGH_SCORE_THRESHOLD = 75.0
+
+    def _get_alerted(self) -> list:
+        return self.cache.get("alerted_tickers", [])
+
+    def _alert_new_high_score_picks(self, results: List[ETFScanResult]):
+        """Envoie une alerte Telegram pour chaque ticker à score >= 75
+        qui n'a jamais été alerté (ou dont l'alerte date de > 48h)."""
+        try:
+            import notifications as notif
+        except Exception:
+            return
+
+        already = set(self.cache.get("alerted_tickers", []))
+        alerted_ts = self.cache.get("alerted_ts", {})
+        now_ts = time.time()
+        new_alerted = list(already)
+
+        for r in results[:5]:  # max top 5 pour ne pas spam
+            if r.score < self.HIGH_SCORE_THRESHOLD:
+                break
+            last_alert = alerted_ts.get(r.ticker, 0)
+            if (now_ts - last_alert) < 48 * 3600:
+                # déjà alerté récemment
+                continue
+            try:
+                payload = asdict(r)
+                payload["asset_class"] = "ETF"
+                notif.notify_smart_pick(payload)
+                alerted_ts[r.ticker] = now_ts
+                if r.ticker not in new_alerted:
+                    new_alerted.append(r.ticker)
+            except Exception as e:
+                print(f"[ETFScanner] notify fail for {r.ticker}: {e}")
+
+        self.cache["alerted_tickers"] = new_alerted[-50:]  # keep last 50
+        self.cache["alerted_ts"] = alerted_ts
 
     # ─────────────────────────────────────────
     #  Cache-only read

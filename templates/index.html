@@ -2721,6 +2721,236 @@
             overflow: hidden;
         }
 
+        /* Pick Details Modal */
+        .pick-modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.24s;
+            z-index: 1200;
+        }
+        .pick-modal-backdrop.open { opacity: 1; pointer-events: auto; }
+        .pick-modal {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, calc(-50% + 12px));
+            width: min(560px, calc(100vw - 32px));
+            max-height: 86vh;
+            overflow: hidden; display: flex; flex-direction: column;
+            background:
+                radial-gradient(ellipse at top left, rgba(10,132,255,0.1), transparent 55%),
+                linear-gradient(180deg, rgba(32,32,36,0.98), rgba(20,20,22,0.98));
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+            opacity: 0; pointer-events: none;
+            transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 1201;
+        }
+        .pick-modal.open {
+            opacity: 1; pointer-events: auto;
+            transform: translate(-50%, -50%);
+        }
+        .pm-head {
+            padding: 22px 24px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; align-items: center; gap: 14px;
+        }
+        .pm-badge {
+            width: 46px; height: 46px; border-radius: 11px;
+            background: rgba(10,132,255,0.15);
+            border: 1px solid rgba(10,132,255,0.25);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.78rem; font-weight: 700;
+            color: var(--sf-blue);
+            letter-spacing: 0.03em;
+        }
+        .pick-modal.crypto .pm-badge {
+            background: rgba(255,159,10,0.15);
+            border-color: rgba(255,159,10,0.25);
+            color: var(--sf-orange);
+        }
+        .pm-title-block { flex: 1; min-width: 0; }
+        .pm-title {
+            font-size: 1.15rem; font-weight: 650; letter-spacing: -0.01em;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .pm-subtitle {
+            font-size: 0.78rem; color: var(--sf-text-muted);
+            margin-top: 3px;
+        }
+        .pm-close {
+            width: 32px; height: 32px; border-radius: 9px;
+            background: rgba(255,255,255,0.06);
+            border: none; color: var(--sf-text-secondary);
+            cursor: pointer; transition: background 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+        }
+        .pm-close:hover { background: rgba(255,255,255,0.12); color: var(--sf-text); }
+
+        .pm-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .pm-big-spark {
+            height: 120px;
+            width: 100%;
+            margin: 6px 0 18px;
+            position: relative;
+        }
+        .pm-big-spark svg { width: 100%; height: 100%; overflow: visible; }
+        .pm-big-spark path.fill { opacity: 0.18; }
+        .pm-big-spark.up   path.line { stroke: var(--sf-green); filter: drop-shadow(0 0 4px rgba(48,209,88,0.4)); }
+        .pm-big-spark.up   path.fill { fill: var(--sf-green); }
+        .pm-big-spark.down path.line { stroke: var(--sf-red);   filter: drop-shadow(0 0 4px rgba(255,69,58,0.4)); }
+        .pm-big-spark.down path.fill { fill: var(--sf-red); }
+        .pm-big-spark path.line {
+            fill: none; stroke-width: 2;
+            stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        .pm-metrics {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 8px; margin-bottom: 18px;
+        }
+        @media (max-width: 520px) { .pm-metrics { grid-template-columns: repeat(2, 1fr); } }
+        .pm-metric {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+        .pm-metric-label {
+            font-size: 0.62rem; color: var(--sf-text-muted);
+            letter-spacing: 0.08em; text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+        .pm-metric-val {
+            font-size: 0.95rem; font-weight: 650;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.01em;
+        }
+        .pm-metric-val.up { color: var(--sf-green); }
+        .pm-metric-val.down { color: var(--sf-red); }
+
+        .pm-section-title {
+            font-size: 0.72rem; font-weight: 650;
+            color: var(--sf-text-muted);
+            letter-spacing: 0.08em; text-transform: uppercase;
+            margin: 4px 0 10px;
+        }
+        .pm-reasons {
+            display: flex; flex-direction: column; gap: 6px;
+            margin-bottom: 18px;
+        }
+        .pm-reason {
+            display: flex; align-items: flex-start; gap: 10px;
+            font-size: 0.85rem;
+            padding: 8px 12px;
+            background: rgba(10,132,255,0.06);
+            border-left: 2px solid var(--sf-blue);
+            border-radius: 0 8px 8px 0;
+            color: var(--sf-text-secondary);
+        }
+        .pm-reason::before {
+            content: '→'; color: var(--sf-blue);
+            font-weight: 700; flex-shrink: 0;
+        }
+
+        .pm-score-bar {
+            margin-bottom: 18px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 10px;
+            padding: 12px 14px;
+        }
+        .pm-score-bar-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .pm-score-bar-label {
+            font-size: 0.72rem; color: var(--sf-text-muted);
+            letter-spacing: 0.06em; text-transform: uppercase;
+        }
+        .pm-score-bar-val {
+            font-size: 1.3rem; font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+        .pm-score-bar-track {
+            height: 6px; border-radius: 3px;
+            background: rgba(255,255,255,0.06);
+            overflow: hidden;
+        }
+        .pm-score-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--sf-red), var(--sf-orange), var(--sf-green));
+            border-radius: 3px;
+            transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 0 10px rgba(48,209,88,0.3);
+        }
+
+        .pm-footer {
+            padding: 14px 24px 20px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex; gap: 10px;
+            background: rgba(0,0,0,0.2);
+        }
+        .pm-btn {
+            flex: 1;
+            padding: 11px 16px;
+            border-radius: 11px;
+            font-size: 0.88rem; font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .pm-btn-primary {
+            background: linear-gradient(135deg, #0a84ff, #0062cc);
+            color: white;
+            box-shadow: 0 6px 18px rgba(10,132,255,0.35);
+        }
+        .pm-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(10,132,255,0.45); }
+        .pm-btn-secondary {
+            background: rgba(255,255,255,0.06);
+            color: var(--sf-text-secondary);
+            border-color: rgba(255,255,255,0.08);
+        }
+        .pm-btn-secondary:hover { background: rgba(255,255,255,0.1); color: var(--sf-text); }
+
+        /* Invest button on cards */
+        .sp-invest-row {
+            margin-top: 10px;
+            display: flex; gap: 6px;
+        }
+        .sp-invest-btn {
+            flex: 1;
+            padding: 7px 10px;
+            background: rgba(10,132,255,0.1);
+            border: 1px solid rgba(10,132,255,0.2);
+            color: var(--sf-blue);
+            border-radius: 8px;
+            font-size: 0.76rem; font-weight: 550;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .sp-invest-btn:hover {
+            background: rgba(10,132,255,0.2);
+            transform: translateY(-1px);
+        }
+        .sp-invest-btn.secondary {
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.06);
+            color: var(--sf-text-muted);
+        }
+        .sp-invest-btn.secondary:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--sf-text-secondary);
+        }
+
         .sp-empty, .sp-loading {
             grid-column: 1 / -1;
             text-align: center; padding: 34px 20px;
@@ -6164,10 +6394,10 @@ function _renderSmartPickCard(p){
     // Assure la classe sur le path
     sparkHtml = sparkHtml.replace('<path ', '<path class="sl" ');
 
-    const onClick = p.asset_class === 'crypto' ? "showView('crypto')" : "showView('scanner')";
     const priceTxt = p.asset_class === 'crypto' ? `$${Number(p.price).toFixed(p.price < 1 ? 4 : 2)}` : `${Number(p.price).toFixed(2)}`;
 
-    return `<div class="sp-card ${dir}" data-class="${p.asset_class||'etf'}" onclick="${onClick}">
+    // Store pick on the DOM node for the click handler via data-idx (no JSON in attr)
+    return `<div class="sp-card ${dir}" data-class="${p.asset_class||'etf'}" data-ticker="${p.ticker||''}" onclick="openPickFromCard(this, event)">
         <div class="sp-row1">
             <div class="sp-badge">${tick}</div>
             <div class="sp-titles">
@@ -6185,7 +6415,31 @@ function _renderSmartPickCard(p){
             <div class="sp-spark ${sparkDir}">${sparkHtml}</div>
         </div>
         <div class="sp-reasons">${reason}</div>
+        <div class="sp-invest-row">
+            <button class="sp-invest-btn" onclick="event.stopPropagation();openPickFromCard(this.parentNode.parentNode)">
+                <span class="sfi" data-icon="info"></span>Détails
+            </button>
+            <button class="sp-invest-btn" onclick="event.stopPropagation();investInPick('${p.ticker||''}')">
+                <span class="sfi" data-icon="plus"></span>Investir
+            </button>
+        </div>
     </div>`;
+}
+
+// Lookup du pick complet à partir du ticker (évite de stringifier dans data-attrs)
+function openPickFromCard(cardEl, evt){
+    if(evt && evt.target && evt.target.closest && evt.target.closest('.sp-invest-row')) return;
+    const ticker = cardEl.dataset.ticker;
+    const all = [...((SP_STATE.data && SP_STATE.data.etf) || []), ...((SP_STATE.data && SP_STATE.data.crypto) || [])];
+    const pick = all.find(p => p.ticker === ticker);
+    if(pick) openPickModal(pick);
+}
+function investInPick(ticker){
+    const all = [...((SP_STATE.data && SP_STATE.data.etf) || []), ...((SP_STATE.data && SP_STATE.data.crypto) || [])];
+    const pick = all.find(p => p.ticker === ticker);
+    if(!pick) return;
+    _currentPick = pick;
+    investInCurrentPick();
 }
 
 function _sparklineFromValues(values, w, h){
@@ -6823,5 +7077,173 @@ setTimeout(() => {
 
 // Navigation re-init handled inside showView() — no duplicate handler needed.
 </script>
+
+<!-- ═══════════════════════════════════════════════════════
+     PICK DETAILS MODAL — full analysis per Smart Pick
+     ═══════════════════════════════════════════════════════ -->
+<div class="pick-modal-backdrop" id="pick-modal-backdrop" onclick="closePickModal()"></div>
+<div class="pick-modal" id="pick-modal" role="dialog" aria-modal="true" aria-labelledby="pm-title">
+    <div class="pm-head">
+        <div class="pm-badge" id="pm-badge">—</div>
+        <div class="pm-title-block">
+            <div class="pm-title" id="pm-title">—<span class="sp-dir neutral" id="pm-dir">—</span></div>
+            <div class="pm-subtitle" id="pm-subtitle">—</div>
+        </div>
+        <button class="pm-close" onclick="closePickModal()" aria-label="Fermer">✕</button>
+    </div>
+    <div class="pm-body">
+        <div class="pm-big-spark" id="pm-big-spark"></div>
+        <div class="pm-score-bar">
+            <div class="pm-score-bar-header">
+                <span class="pm-score-bar-label">Score d'opportunité</span>
+                <span class="pm-score-bar-val" id="pm-score-val">—</span>
+            </div>
+            <div class="pm-score-bar-track"><div class="pm-score-bar-fill" id="pm-score-fill" style="width:0%"></div></div>
+        </div>
+        <div class="pm-metrics" id="pm-metrics"></div>
+        <div class="pm-section-title">Pourquoi le bot l'a sélectionné</div>
+        <div class="pm-reasons" id="pm-reasons"></div>
+    </div>
+    <div class="pm-footer">
+        <button class="pm-btn pm-btn-secondary" onclick="closePickModal()">Fermer</button>
+        <button class="pm-btn pm-btn-primary" id="pm-invest" onclick="investInCurrentPick()">
+            <span class="sfi" data-icon="plus"></span>Investir
+        </button>
+    </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   PICK MODAL — gestion ouverture / rendu / actions
+   ═══════════════════════════════════════════════════════ */
+let _currentPick = null;
+
+function openPickModal(pick){
+    if(!pick) return;
+    _currentPick = pick;
+    const modal = document.getElementById('pick-modal');
+    const backdrop = document.getElementById('pick-modal-backdrop');
+    if(!modal || !backdrop) return;
+
+    const isCrypto = pick.asset_class === 'crypto';
+    modal.classList.toggle('crypto', isCrypto);
+
+    // Header
+    const tick = (pick.ticker || '').split('.')[0].slice(0, 5).toUpperCase();
+    document.getElementById('pm-badge').textContent = tick;
+    const dir = (pick.direction || 'NEUTRAL').toLowerCase();
+    const dirLbl = dir === 'bull' ? 'HAUSSIER' : dir === 'bear' ? 'BAISSIER' : 'NEUTRE';
+    document.getElementById('pm-title').innerHTML = `${pick.ticker || pick.name}<span class="sp-dir ${dir}">${dirLbl}</span>`;
+    document.getElementById('pm-subtitle').textContent = `${pick.name || ''} · ${pick.category || ''} · ${isCrypto ? 'CRYPTO' : 'ETF'}`;
+
+    // Big sparkline with area fill
+    const sparkWrap = document.getElementById('pm-big-spark');
+    const values = Array.isArray(pick.sparkline) && pick.sparkline.length >= 5
+        ? pick.sparkline
+        : _miniSparkData(pick.ticker || pick.name, 30, 0.02);
+    const sparkDir = values[values.length-1] >= values[0] ? 'up' : 'down';
+    sparkWrap.className = 'pm-big-spark ' + sparkDir;
+    sparkWrap.innerHTML = _buildBigSparkSvg(values, 500, 120);
+
+    // Score
+    const score = pick.score || 0;
+    document.getElementById('pm-score-val').textContent = score.toFixed(0) + ' / 100';
+    setTimeout(() => {
+        document.getElementById('pm-score-fill').style.width = Math.max(2, Math.min(100, score)) + '%';
+    }, 60);
+
+    // Metrics
+    const m = document.getElementById('pm-metrics');
+    const chg1 = Number(pick.change_1d || 0);
+    const chg7 = Number(pick.change_7d || 0);
+    const chg30 = Number(pick.change_30d || 0);
+    const priceStr = isCrypto
+        ? `$${Number(pick.price).toFixed(pick.price < 1 ? 4 : 2)}`
+        : `${Number(pick.price || 0).toFixed(2)}`;
+    const metrics = [
+        { lbl: 'Prix', val: priceStr },
+        { lbl: 'Variation 1j',  val: `${chg1>=0?'+':''}${chg1.toFixed(2)}%`,  cls: chg1>=0?'up':'down' },
+        { lbl: 'Variation 7j',  val: `${chg7>=0?'+':''}${chg7.toFixed(2)}%`,  cls: chg7>=0?'up':'down' },
+        { lbl: 'Variation 30j', val: `${chg30>=0?'+':''}${chg30.toFixed(2)}%`, cls: chg30>=0?'up':'down' },
+    ];
+    if(typeof pick.volatility_30d === 'number') metrics.push({ lbl: 'Volatilité 30j', val: `${pick.volatility_30d.toFixed(1)}%` });
+    if(typeof pick.sharpe_30d === 'number') metrics.push({ lbl: 'Sharpe 30j', val: pick.sharpe_30d.toFixed(2), cls: pick.sharpe_30d>=0?'up':'down' });
+    if(typeof pick.trend_strength === 'number') metrics.push({ lbl: 'Force tendance', val: `${pick.trend_strength>=0?'+':''}${pick.trend_strength.toFixed(1)}%`, cls: pick.trend_strength>=0?'up':'down' });
+    if(typeof pick.volume_surge === 'number') metrics.push({ lbl: 'Volume (ratio)', val: `×${pick.volume_surge.toFixed(2)}`, cls: pick.volume_surge>1?'up':'down' });
+    m.innerHTML = metrics.map(x => `<div class="pm-metric">
+        <div class="pm-metric-label">${x.lbl}</div>
+        <div class="pm-metric-val ${x.cls||''}">${x.val}</div>
+    </div>`).join('');
+
+    // Reasons
+    const reasons = pick.reasons && pick.reasons.length ? pick.reasons : ['Activité normale détectée par le scanner'];
+    document.getElementById('pm-reasons').innerHTML = reasons.map(r => `<div class="pm-reason">${r}</div>`).join('');
+
+    // Open
+    backdrop.classList.add('open');
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closePickModal(){
+    const modal = document.getElementById('pick-modal');
+    const backdrop = document.getElementById('pick-modal-backdrop');
+    if(modal) modal.classList.remove('open');
+    if(backdrop) backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+    _currentPick = null;
+}
+
+// ESC ferme la modale
+document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape'){
+        const m = document.getElementById('pick-modal');
+        if(m && m.classList.contains('open')) closePickModal();
+    }
+});
+
+function _buildBigSparkSvg(values, w, h){
+    if(!values || values.length < 2) return '';
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = max - min || 1;
+    const dx = w / (values.length - 1);
+    const pad = 6;
+    const innerH = h - pad * 2;
+    const pts = values.map((v, i) => {
+        const x = i * dx;
+        const y = pad + innerH - ((v - min) / range) * innerH;
+        return [x, y];
+    });
+    const linePath = 'M' + pts.map(p => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' L');
+    const fillPath = linePath + ` L${w.toFixed(1)},${h.toFixed(1)} L0,${h.toFixed(1)} Z`;
+    return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+        <path class="fill" d="${fillPath}"/>
+        <path class="line" d="${linePath}"/>
+    </svg>`;
+}
+
+function investInCurrentPick(){
+    if(!_currentPick) return;
+    const p = _currentPick;
+    const isCrypto = p.asset_class === 'crypto';
+    closePickModal();
+
+    if(isCrypto){
+        // Redirige vers l'onglet Crypto avec un toast guide
+        if(typeof showView === 'function') showView('crypto');
+        if(typeof toast === 'function') toast(`${p.ticker} : configure ton allocation dans l'onglet Crypto.`);
+        return;
+    }
+
+    // ETF : redirige vers l'onglet DCA (pré-remplissage best-effort du ticker)
+    try {
+        sessionStorage.setItem('dca_focus_ticker', p.ticker);
+    } catch(e){}
+    if(typeof showView === 'function') showView('dca');
+    if(typeof toast === 'function') toast(`${p.ticker} ajouté à ton prochain DCA ETF.`);
+}
+</script>
+
 </body>
 </html>
