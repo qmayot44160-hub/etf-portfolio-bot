@@ -789,6 +789,59 @@ def api_smart_picks_history():
     return jsonify(scanner.get_history_with_perf(limit=limit))
 
 
+@app.route("/api/smart-picks/heatmap")
+def api_smart_picks_heatmap():
+    """
+    Renvoie la liste complète (~40) des ETF scannés, classés par catégorie,
+    pour une visualisation heatmap à la Finviz.
+    """
+    from etf_scanner import get_etf_scanner, ETF_UNIVERSE
+    scanner = get_etf_scanner()
+    cache = scanner.get_cached_results(limit=200)
+    results = cache.get("results", [])
+
+    # Si pas de cache : envoie la liste (sans scores) pour afficher des tuiles grises
+    if not results:
+        return jsonify({
+            "tiles": [
+                {
+                    "ticker": e["ticker"], "name": e["name"], "category": e["category"],
+                    "score": None, "direction": "NEUTRAL",
+                    "change_1d": None, "change_7d": None, "change_30d": None,
+                    "price": None, "sparkline": [],
+                } for e in ETF_UNIVERSE
+            ],
+            "last_scan": None,
+            "is_scanning": cache.get("is_scanning", False),
+        })
+
+    # Tri par catégorie puis par score décroissant
+    tiles = sorted(results, key=lambda r: (r.get("category", ""), -(r.get("score") or 0)))
+    slim = [{
+        "ticker": r.get("ticker"),
+        "name": r.get("name"),
+        "category": r.get("category"),
+        "score": r.get("score"),
+        "direction": r.get("direction", "NEUTRAL"),
+        "change_1d": r.get("change_1d"),
+        "change_7d": r.get("change_7d"),
+        "change_30d": r.get("change_30d"),
+        "price": r.get("price"),
+        "sparkline": r.get("sparkline", []),
+        "volatility_30d": r.get("volatility_30d"),
+        "sharpe_30d": r.get("sharpe_30d"),
+        "trend_strength": r.get("trend_strength"),
+        "volume_surge": r.get("volume_surge"),
+        "reasons": r.get("reasons", []),
+        "asset_class": "etf",
+    } for r in tiles]
+    return jsonify({
+        "tiles": slim,
+        "last_scan": cache.get("last_scan"),
+        "is_scanning": cache.get("is_scanning", False),
+    })
+
+
 # ── API: Reset ─────────────────────────────────────────
 
 @app.route("/api/reset", methods=["POST"])
