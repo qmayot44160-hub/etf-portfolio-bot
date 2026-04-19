@@ -2,6 +2,7 @@
 Dashboard web Flask pour le bot ETF.
 """
 
+from datetime import datetime
 from flask import Flask, render_template, jsonify, request, session, redirect, url_for
 from bot_engine import BotEngine
 from portfolio import (
@@ -698,6 +699,87 @@ def api_trading_symbols():
     return jsonify({"symbols": config.get("symbols", [])})
 
 
+# ── API: Smart Picks ────────────────────────────────────
+#   Picks du jour — le bot choisit lui-même les meilleurs actifs
+#   en combinant son scanner ETF autonome + le scanner crypto existant.
+
+@app.route("/api/smart-picks")
+def api_smart_picks():
+    """Top picks unifiés (ETF + crypto), triés par score."""
+    from etf_scanner import get_etf_scanner
+
+    limit = int(request.args.get("limit", 5))
+    asset_class = request.args.get("class", "all")  # "all" | "etf" | "crypto"
+
+    etf_picks = []
+    crypto_picks = []
+
+    # ETF
+    if asset_class in ("all", "etf"):
+        scanner = get_etf_scanner()
+        cached = scanner.get_cached_results(limit=limit * 2)
+        # Si cache vide ou > 1h → lance un scan async (ne bloque pas la requête)
+        needs_refresh = False
+        if not cached.get("last_scan"):
+            needs_refresh = True
+        else:
+            try:
+                last = datetime.fromisoformat(cached["last_scan"])
+                if (datetime.now() - last).total_seconds() > 3600:
+                    needs_refresh = True
+            except Exception:
+                needs_refresh = True
+        if needs_refresh and not cached.get("is_scanning"):
+            scanner.scan_async(force=True)
+        etf_picks = cached.get("results", [])[:limit]
+
+    # Crypto (du scanner existant)
+    if asset_class in ("all", "crypto"):
+        try:
+            if trader.scanner.exchange and trader.scanner.exchange.connected:
+                cached = trader.scanner.get_cached_results()
+                raw = cached.get("results", [])[:limit]
+                # Normalize shape to match ETF picks for frontend
+                for r in raw:
+                    crypto_picks.append({
+                        "ticker": r.get("symbol", "").replace("/USDT", ""),
+                        "name": r.get("symbol", "").replace("/USDT", ""),
+                        "category": r.get("category", "CRYPTO"),
+                        "price": r.get("price", 0),
+                        "score": r.get("score", 0),
+                        "direction": "BULL" if r.get("direction") == "LONG" else "BEAR",
+                        "change_1d": r.get("price_change_24h", 0),
+                        "change_7d": r.get("price_change_7d", 0),
+                        "change_30d": r.get("price_change_7d", 0),
+                        "volume_surge": 1 + (r.get("volume_change_pct", 0) / 100),
+                        "reasons": r.get("reasons", []),
+                        "sparkline": [],  # crypto scanner n'en fournit pas
+                        "asset_class": "crypto",
+                    })
+        except Exception as e:
+            print(f"[smart-picks] crypto fetch error: {e}")
+
+    # Ajoute asset_class à l'ETF
+    for p in etf_picks:
+        p["asset_class"] = "etf"
+
+    # Retour unifié
+    return jsonify({
+        "etf": etf_picks,
+        "crypto": crypto_picks,
+        "last_updated": datetime.now().isoformat(timespec="seconds"),
+    })
+
+
+@app.route("/api/smart-picks/refresh", methods=["POST"])
+def api_smart_picks_refresh():
+    """Force un re-scan en arrière-plan."""
+    from etf_scanner import get_etf_scanner
+    scanner = get_etf_scanner()
+    r = scanner.scan_async(force=True)
+    return jsonify(r)
+
+
 # ── API: Reset ─────────────────────────────────────────
 
 @app.route("/api/reset", methods=["POST"])
@@ -734,6 +816,15 @@ def init_app():
         if trader_config.get("enabled") and not trader.running:
             trader.start()
             print("[Startup] Trading loop auto-started (LIVE mode)")
+
+    # Kick off an initial ETF scan in the background (non-blocking).
+    # Si un cache existe déjà et est récent (<1h), scan_async court-circuitera.
+    try:
+        from etf_scanner import get_etf_scanner
+        get_etf_scanner().scan_async(force=False)
+        print("[Startup] ETF smart-picks scanner triggered")
+    except Exception as e:
+        print(f"[Startup] ETF scanner init error: {e}")
 
 
 init_app()
