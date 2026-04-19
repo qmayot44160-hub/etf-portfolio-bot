@@ -28,6 +28,7 @@ from typing import Optional, List
 from data_paths import data_path
 
 ETF_SCANNER_CACHE = data_path("etf_scanner_cache.json")
+ETF_PICKS_HISTORY = data_path("etf_picks_history.json")
 
 # Univers curaté — tickers yfinance (US + EU). Mélange délibéré pour la découverte.
 ETF_UNIVERSE = [
@@ -283,6 +284,12 @@ class ETFScanner:
             except Exception as e:
                 print(f"[ETFScanner] alert error: {e}")
 
+            # ── Snapshot dans l'historique (un seul par jour par ticker) ──
+            try:
+                self._snapshot_to_history(results)
+            except Exception as e:
+                print(f"[ETFScanner] history snapshot error: {e}")
+
             elapsed = round(time.time() - start, 1)
             self.cache = {
                 "results": [asdict(r) for r in results],
@@ -363,6 +370,147 @@ class ETFScanner:
             "stats": self.cache.get("stats", {}),
             "is_scanning": self._scanning,
         }
+
+    # ─────────────────────────────────────────
+    #  Historique des picks (pour mesurer la perf réalisée)
+    # ─────────────────────────────────────────
+    HISTORY_MAX = 500        # total entries cap
+    HISTORY_TOP_N = 10       # combien de picks on snapshot à chaque scan
+    HISTORY_MIN_SCORE = 60   # seuil minimum pour être snapshot
+
+    def _load_history(self) -> list:
+        if os.path.exists(ETF_PICKS_HISTORY):
+            try:
+                with open(ETF_PICKS_HISTORY, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception:
+                pass
+        return []
+
+    def _save_history(self, hist: list):
+        try:
+            with open(ETF_PICKS_HISTORY, "w", encoding="utf-8") as f:
+                json.dump(hist[-self.HISTORY_MAX:], f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"[ETFScanner] history save error: {e}")
+
+    def _snapshot_to_history(self, results: List[ETFScanResult]):
+        """Snapshot des top picks. Un seul enregistrement par (ticker, jour)."""
+        hist = self._load_history()
+        today = datetime.now().date().isoformat()
+        # Existing (ticker, day) pairs for dedup
+        existing = {(e.get("ticker"), e.get("date")) for e in hist}
+
+        for r in results[:self.HISTORY_TOP_N]:
+            if r.score < self.HISTORY_MIN_SCORE:
+                continue
+            if (r.ticker, today) in existing:
+                continue
+            hist.append({
+                "ticker": r.ticker,
+                "name": r.name,
+                "category": r.category,
+                "date": today,
+                "timestamp": datetime.now().isoformat(timespec="seconds"),
+                "price_at_pick": r.price,
+                "score": r.score,
+                "direction": r.direction,
+                "change_30d_at_pick": r.change_30d,
+                "reasons": r.reasons[:2],
+            })
+        self._save_history(hist)
+
+    def get_history_with_perf(self, limit: int = 20) -> dict:
+        """
+        Retourne les picks passés avec la performance réalisée depuis le pick.
+        Utilise les derniers prix disponibles (sparkline du scan courant si dispo,
+        sinon yfinance quote).
+        """
+        hist = self._load_history()
+        if not hist:
+            return {"picks": [], "stats": {"total": 0, "winrate": 0, "avg_return": 0}}
+
+        # Tri chrono décroissant (plus récent en premier)
+        hist_sorted = sorted(hist, key=lambda x: x.get("timestamp", ""), reverse=True)
+        recent = hist_sorted[:limit]
+
+        # Map ticker → prix courant (depuis le cache si dispo, sinon fetch léger)
+        current_prices = {}
+        cached_results = self.cache.get("results", [])
+        cached_map = {r.get("ticker"): r for r in cached_results}
+
+        # Tickers pour lesquels on n'a pas de prix cache → fetch yfinance
+        missing_tickers = [p["ticker"] for p in recent if p["ticker"] not in cached_map]
+        if missing_tickers:
+            try:
+                import yfinance as yf
+                import pandas as pd
+                data = yf.download(
+                    list(set(missing_tickers)), period="5d",
+                    progress=False, group_by="ticker", threads=True, auto_adjust=True,
+                )
+                for t in set(missing_tickers):
+                    try:
+                        if isinstance(data.columns, pd.MultiIndex):
+                            if t in data.columns.levels[0]:
+                                s = data[t]["Close"].dropna()
+                                if len(s):
+                                    current_prices[t] = float(s.iloc[-1])
+                        else:
+                            s = data["Close"].dropna() if "Close" in data.columns else data.dropna()
+                            if len(s):
+                                current_prices[t] = float(s.iloc[-1])
+                    except Exception:
+                        pass
+            except Exception as e:
+                print(f"[ETFScanner] history price fetch error: {e}")
+
+        out_picks = []
+        wins = 0
+        total_returns = []
+        for p in recent:
+            t = p["ticker"]
+            price_now = None
+            if t in cached_map:
+                price_now = cached_map[t].get("price")
+            elif t in current_prices:
+                price_now = current_prices[t]
+
+            price_at = p.get("price_at_pick") or 0
+            if price_now and price_at:
+                ret_pct = (price_now / price_at - 1) * 100
+            else:
+                ret_pct = None
+
+            # Days elapsed
+            try:
+                pick_dt = datetime.fromisoformat(p["timestamp"].split("T")[0])
+                days = (datetime.now() - pick_dt).days
+            except Exception:
+                days = 0
+
+            entry = {
+                **p,
+                "price_now": round(price_now, 2) if price_now else None,
+                "return_pct": round(ret_pct, 2) if ret_pct is not None else None,
+                "days_elapsed": days,
+            }
+            out_picks.append(entry)
+            if ret_pct is not None:
+                total_returns.append(ret_pct)
+                if ret_pct > 0:
+                    wins += 1
+
+        n_measurable = len(total_returns)
+        stats = {
+            "total": len(out_picks),
+            "measurable": n_measurable,
+            "winrate": round((wins / n_measurable * 100), 1) if n_measurable else 0,
+            "avg_return": round(sum(total_returns) / n_measurable, 2) if n_measurable else 0,
+            "best_return": round(max(total_returns), 2) if total_returns else 0,
+            "worst_return": round(min(total_returns), 2) if total_returns else 0,
+        }
+        return {"picks": out_picks, "stats": stats}
 
     # ─────────────────────────────────────────
     #  Background auto-scan (non-bloquant)

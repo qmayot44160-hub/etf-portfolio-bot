@@ -780,6 +780,15 @@ def api_smart_picks_refresh():
     return jsonify(r)
 
 
+@app.route("/api/smart-picks/history")
+def api_smart_picks_history():
+    """Historique des picks passés + performance réalisée depuis chaque pick."""
+    from etf_scanner import get_etf_scanner
+    limit = int(request.args.get("limit", 20))
+    scanner = get_etf_scanner()
+    return jsonify(scanner.get_history_with_perf(limit=limit))
+
+
 # ── API: Reset ─────────────────────────────────────────
 
 @app.route("/api/reset", methods=["POST"])

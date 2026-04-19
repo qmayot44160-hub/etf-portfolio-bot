@@ -2951,6 +2951,105 @@
             color: var(--sf-text-secondary);
         }
 
+        /* History tab : stats band + picks list */
+        .sp-history-stats {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        @media (max-width: 640px) { .sp-history-stats { grid-template-columns: repeat(2, 1fr); } }
+        .sp-hs-card {
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        .sp-hs-label {
+            font-size: 0.6rem; color: var(--sf-text-muted);
+            letter-spacing: 0.08em; text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+        .sp-hs-val {
+            font-size: 1.02rem; font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.01em;
+        }
+        .sp-hs-val.up { color: var(--sf-green); }
+        .sp-hs-val.down { color: var(--sf-red); }
+        .sp-hs-val .sub { font-size: 0.68rem; color: var(--sf-text-muted); font-weight: 500; margin-left: 4px; }
+
+        .sp-history-list {
+            grid-column: 1 / -1;
+            display: flex; flex-direction: column;
+            gap: 6px;
+        }
+        .sp-hist-row {
+            display: grid;
+            grid-template-columns: 40px 1fr auto auto auto;
+            align-items: center; gap: 12px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .sp-hist-row:hover {
+            background: rgba(255,255,255,0.045);
+            border-color: rgba(10,132,255,0.2);
+            transform: translateX(3px);
+        }
+        .sp-hist-badge {
+            width: 34px; height: 34px; border-radius: 8px;
+            background: rgba(10,132,255,0.12);
+            border: 1px solid rgba(10,132,255,0.2);
+            color: var(--sf-blue);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.66rem; font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+        .sp-hist-info { min-width: 0; }
+        .sp-hist-ticker {
+            font-size: 0.88rem; font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+        .sp-hist-meta {
+            font-size: 0.7rem; color: var(--sf-text-muted);
+            margin-top: 2px;
+        }
+        .sp-hist-score {
+            font-size: 0.72rem; font-weight: 600;
+            color: var(--sf-text-muted);
+            padding: 3px 8px; border-radius: 6px;
+            background: rgba(255,255,255,0.04);
+            font-variant-numeric: tabular-nums;
+        }
+        .sp-hist-age {
+            font-size: 0.7rem; color: var(--sf-text-muted);
+            letter-spacing: 0.02em;
+        }
+        .sp-hist-return {
+            font-size: 0.95rem; font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.01em;
+            padding: 5px 10px; border-radius: 7px;
+            min-width: 72px; text-align: right;
+        }
+        .sp-hist-return.up {
+            background: rgba(48,209,88,0.12);
+            color: var(--sf-green);
+            box-shadow: 0 0 10px rgba(48,209,88,0.1);
+        }
+        .sp-hist-return.down {
+            background: rgba(255,69,58,0.12);
+            color: var(--sf-red);
+        }
+        .sp-hist-return.pending {
+            background: rgba(255,255,255,0.04);
+            color: var(--sf-text-muted);
+            font-weight: 500;
+        }
+
         .sp-empty, .sp-loading {
             grid-column: 1 / -1;
             text-align: center; padding: 34px 20px;
@@ -3336,6 +3435,7 @@
                 <button class="sp-tab active" data-tab="all" onclick="switchSmartPicksTab('all')">Tous <span class="count" id="sp-c-all">—</span></button>
                 <button class="sp-tab" data-tab="etf" onclick="switchSmartPicksTab('etf')">ETF <span class="count" id="sp-c-etf">—</span></button>
                 <button class="sp-tab" data-tab="crypto" onclick="switchSmartPicksTab('crypto')">Crypto <span class="count" id="sp-c-crypto">—</span></button>
+                <button class="sp-tab" data-tab="history" onclick="switchSmartPicksTab('history')"><span class="sfi" data-icon="clock" style="width:12px;height:12px"></span>Historique <span class="count" id="sp-c-hist">—</span></button>
             </div>
             <div class="sp-list" id="sp-list">
                 <div class="sp-loading">
@@ -6290,7 +6390,7 @@ async function loadHomeAllocation(){
    Fetch /api/smart-picks → render dans la carte d'accueil.
    Auto-refresh toutes les 5min. Onglets tous/ETF/crypto.
    ═══════════════════════════════════════════════════════ */
-const SP_STATE = { data: null, tab: 'all', loading: false, refreshTimer: null };
+const SP_STATE = { data: null, history: null, tab: 'all', loading: false, refreshTimer: null };
 
 async function loadSmartPicks(opts){
     const list = document.getElementById('sp-list');
@@ -6302,6 +6402,8 @@ async function loadSmartPicks(opts){
         const d = await (await fetch(url)).json();
         SP_STATE.data = d;
         renderSmartPicks();
+        // Charge l'historique en tâche de fond (pour le badge de count)
+        loadSmartPicksHistory().catch(() => {});
         // Auto-refresh silencieux toutes les 5 min
         if(!SP_STATE.refreshTimer){
             SP_STATE.refreshTimer = setInterval(() => {
@@ -6347,8 +6449,15 @@ function renderSmartPicks(){
         }
     }
 
-    // Picks selon l'onglet
     const tab = SP_STATE.tab;
+
+    // Tab Historique : rendu différent (stats + liste verticale)
+    if(tab === 'history'){
+        renderSmartPicksHistory();
+        return;
+    }
+
+    // Picks courants selon l'onglet
     const picks = tab === 'etf' ? etf : tab === 'crypto' ? crypto : all;
 
     if(!picks.length){
@@ -6364,6 +6473,87 @@ function renderSmartPicks(){
     }
 
     list.innerHTML = picks.slice(0, 6).map(p => _renderSmartPickCard(p)).join('');
+}
+
+async function loadSmartPicksHistory(){
+    try {
+        const d = await (await fetch('/api/smart-picks/history?limit=20')).json();
+        SP_STATE.history = d;
+        const cEl = document.getElementById('sp-c-hist');
+        if(cEl) cEl.textContent = d.stats ? d.stats.total : '—';
+        if(SP_STATE.tab === 'history') renderSmartPicksHistory();
+    } catch(e){
+        console.warn('loadSmartPicksHistory', e);
+    }
+}
+
+function renderSmartPicksHistory(){
+    const list = document.getElementById('sp-list');
+    if(!list) return;
+    const h = SP_STATE.history;
+
+    if(!h){
+        list.innerHTML = `<div class="sp-loading">
+            <div class="skel-row"></div><div class="skel-row"></div><div class="skel-row"></div>
+        </div>`;
+        return;
+    }
+    if(!h.picks || !h.picks.length){
+        list.innerHTML = `<div class="sp-empty">
+            Pas encore d'historique.<br>
+            <span style="opacity:0.6;font-size:0.78rem">Les picks avec un score ≥ 60 seront enregistrés à chaque scan (1 par jour max).</span>
+        </div>`;
+        return;
+    }
+
+    const s = h.stats || {};
+    const avgCls = (s.avg_return || 0) >= 0 ? 'up' : 'down';
+    const bestCls = (s.best_return || 0) >= 0 ? 'up' : 'down';
+    const wrCls = (s.winrate || 0) >= 50 ? 'up' : 'down';
+
+    const statsHtml = `<div class="sp-history-stats">
+        <div class="sp-hs-card">
+            <div class="sp-hs-label">Picks totaux</div>
+            <div class="sp-hs-val">${s.total || 0}<span class="sub">${s.measurable || 0} mesurables</span></div>
+        </div>
+        <div class="sp-hs-card">
+            <div class="sp-hs-label">Taux de réussite</div>
+            <div class="sp-hs-val ${wrCls}">${(s.winrate || 0).toFixed(0)}%</div>
+        </div>
+        <div class="sp-hs-card">
+            <div class="sp-hs-label">Retour moyen</div>
+            <div class="sp-hs-val ${avgCls}">${(s.avg_return >= 0 ? '+' : '')}${(s.avg_return || 0).toFixed(2)}%</div>
+        </div>
+        <div class="sp-hs-card">
+            <div class="sp-hs-label">Meilleur pick</div>
+            <div class="sp-hs-val ${bestCls}">${(s.best_return >= 0 ? '+' : '')}${(s.best_return || 0).toFixed(2)}%</div>
+        </div>
+    </div>`;
+
+    const rowsHtml = `<div class="sp-history-list">${h.picks.map(p => {
+        const tick = (p.ticker || '').split('.')[0].slice(0,5).toUpperCase();
+        const age = p.days_elapsed === 0 ? "aujourd'hui" : p.days_elapsed === 1 ? "hier" : `il y a ${p.days_elapsed}j`;
+        let retHtml;
+        if(p.return_pct === null || p.return_pct === undefined){
+            retHtml = `<div class="sp-hist-return pending">—</div>`;
+        } else {
+            const cls = p.return_pct >= 0 ? 'up' : 'down';
+            const sign = p.return_pct >= 0 ? '+' : '';
+            retHtml = `<div class="sp-hist-return ${cls}">${sign}${p.return_pct.toFixed(2)}%</div>`;
+        }
+        return `<div class="sp-hist-row" onclick="showView('scanner')">
+            <div class="sp-hist-badge">${tick}</div>
+            <div class="sp-hist-info">
+                <div class="sp-hist-ticker">${p.ticker} · <span style="color:var(--sf-text-muted);font-weight:500">${p.name || ''}</span></div>
+                <div class="sp-hist-meta">${p.category || ''} · Pické ${age} ${p.price_at_pick ? '@ ' + p.price_at_pick.toFixed(2) : ''}</div>
+            </div>
+            <div class="sp-hist-score">Score ${Number(p.score||0).toFixed(0)}</div>
+            <div class="sp-hist-age">${p.days_elapsed}j</div>
+            ${retHtml}
+        </div>`;
+    }).join('')}</div>`;
+
+    list.innerHTML = statsHtml + rowsHtml;
 }
 
 function _renderSmartPickCard(p){
@@ -6463,7 +6653,17 @@ function switchSmartPicksTab(tab){
     document.querySelectorAll('#sp-tabs .sp-tab').forEach(b => {
         b.classList.toggle('active', b.dataset.tab === tab);
     });
-    renderSmartPicks();
+    if(tab === 'history'){
+        // Lazy load si pas encore chargé
+        if(!SP_STATE.history){
+            renderSmartPicksHistory(); // affiche skeleton
+            loadSmartPicksHistory();
+        } else {
+            renderSmartPicksHistory();
+        }
+    } else {
+        renderSmartPicks();
+    }
 }
 
 async function refreshSmartPicks(){
