@@ -1815,7 +1815,7 @@
         .wd-stats {
             display: grid; grid-template-columns: repeat(2, 1fr);
             gap: 8px;
-            margin-bottom: 18px;
+            margin-bottom: 14px;
         }
         .wd-stat {
             padding: 12px 14px;
@@ -1836,6 +1836,79 @@
         .wd-stat-sub {
             font-size: 0.7rem; color: var(--sf-text-muted);
             margin-top: 2px;
+        }
+
+        /* Breakdown par classe d'actif (crypto / actions / ETF / matières premières) */
+        .wd-breakdown {
+            margin-bottom: 18px;
+            padding: 14px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .wd-breakdown-title {
+            font-size: 0.62rem; font-weight: 650;
+            color: var(--sf-text-muted);
+            letter-spacing: 0.1em; text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .wd-breakdown-total {
+            font-size: 0.72rem; font-weight: 600;
+            color: var(--sf-text);
+            letter-spacing: 0;
+            text-transform: none;
+            font-variant-numeric: tabular-nums;
+        }
+        .wd-bar {
+            display: flex; height: 8px; border-radius: 4px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.04);
+            margin-bottom: 12px;
+        }
+        .wd-bar-seg {
+            height: 100%;
+            transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .wd-bar-seg.actions    { background: linear-gradient(90deg, #0a84ff 0%, #30d0ff 100%); }
+        .wd-bar-seg.etf        { background: linear-gradient(90deg, #bf5af2 0%, #8e6aff 100%); }
+        .wd-bar-seg.crypto     { background: linear-gradient(90deg, #ff9f0a 0%, #ffd60a 100%); }
+        .wd-bar-seg.commodity  { background: linear-gradient(90deg, #30d158 0%, #66e896 100%); }
+        .wd-class-list {
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .wd-class-row {
+            display: grid;
+            grid-template-columns: 14px 1fr auto auto;
+            gap: 10px; align-items: center;
+            padding: 6px 2px;
+        }
+        .wd-class-dot {
+            width: 10px; height: 10px; border-radius: 3px;
+        }
+        .wd-class-dot.actions   { background: linear-gradient(135deg, #0a84ff, #30d0ff); }
+        .wd-class-dot.etf       { background: linear-gradient(135deg, #bf5af2, #8e6aff); }
+        .wd-class-dot.crypto    { background: linear-gradient(135deg, #ff9f0a, #ffd60a); }
+        .wd-class-dot.commodity { background: linear-gradient(135deg, #30d158, #66e896); }
+        .wd-class-name {
+            font-size: 0.82rem; font-weight: 500;
+            letter-spacing: -0.005em;
+        }
+        .wd-class-pct {
+            font-size: 0.72rem; color: var(--sf-text-muted);
+            font-variant-numeric: tabular-nums;
+            min-width: 38px; text-align: right;
+        }
+        .wd-class-val {
+            font-size: 0.86rem; font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.01em;
+            min-width: 72px; text-align: right;
+        }
+        .wd-class-row.empty .wd-class-name,
+        .wd-class-row.empty .wd-class-pct,
+        .wd-class-row.empty .wd-class-val {
+            opacity: 0.38;
         }
 
         /* Section titles */
@@ -8046,23 +8119,55 @@ setTimeout(() => {
             <div class="wd-balance-chg" id="wd-balance-chg">—</div>
         </div>
 
-        <!-- Stats grid -->
+        <!-- Répartition par classe d'actif -->
+        <div class="wd-breakdown" id="wd-breakdown">
+            <div class="wd-breakdown-title">
+                <span>Répartition par classe</span>
+                <span class="wd-breakdown-total" id="wd-breakdown-total">—</span>
+            </div>
+            <div class="wd-bar" id="wd-bar">
+                <div class="wd-bar-seg actions" style="width:0%"></div>
+                <div class="wd-bar-seg etf" style="width:0%"></div>
+                <div class="wd-bar-seg crypto" style="width:0%"></div>
+                <div class="wd-bar-seg commodity" style="width:0%"></div>
+            </div>
+            <div class="wd-class-list" id="wd-class-list">
+                <div class="wd-class-row empty" data-class="actions">
+                    <div class="wd-class-dot actions"></div>
+                    <div class="wd-class-name">Actions</div>
+                    <div class="wd-class-pct">0%</div>
+                    <div class="wd-class-val">$0</div>
+                </div>
+                <div class="wd-class-row empty" data-class="etf">
+                    <div class="wd-class-dot etf"></div>
+                    <div class="wd-class-name">ETF</div>
+                    <div class="wd-class-pct">0%</div>
+                    <div class="wd-class-val">$0</div>
+                </div>
+                <div class="wd-class-row empty" data-class="crypto">
+                    <div class="wd-class-dot crypto"></div>
+                    <div class="wd-class-name">Crypto</div>
+                    <div class="wd-class-pct">0%</div>
+                    <div class="wd-class-val">$0</div>
+                </div>
+                <div class="wd-class-row empty" data-class="commodity">
+                    <div class="wd-class-dot commodity"></div>
+                    <div class="wd-class-name">Matières premières</div>
+                    <div class="wd-class-pct">0%</div>
+                    <div class="wd-class-val">$0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cash + nb positions -->
         <div class="wd-stats">
             <div class="wd-stat">
-                <div class="wd-stat-label">Cash</div>
+                <div class="wd-stat-label">Cash disponible</div>
                 <div class="wd-stat-val" id="wd-stat-cash">—</div>
             </div>
             <div class="wd-stat">
-                <div class="wd-stat-label">Positions</div>
+                <div class="wd-stat-label">Positions ouvertes</div>
                 <div class="wd-stat-val" id="wd-stat-positions">—</div>
-            </div>
-            <div class="wd-stat">
-                <div class="wd-stat-label">ETF</div>
-                <div class="wd-stat-val" id="wd-stat-etf">—</div>
-            </div>
-            <div class="wd-stat">
-                <div class="wd-stat-label">Crypto</div>
-                <div class="wd-stat-val" id="wd-stat-crypto">—</div>
             </div>
         </div>
 
@@ -8175,6 +8280,34 @@ function _fmtPct(v){
     return (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
 }
 
+/**
+ * Classe une position dans : actions | etf | crypto | commodity
+ * Règles : crypto → crypto ; catégorie/nom/ticker contient mots-clés
+ * matières premières → commodity ; "Actions" explicite → actions ;
+ * défaut → etf.
+ */
+function _classifyPosition(p, defaultType){
+    if(defaultType === 'crypto') return 'crypto';
+    const cat = (p.category || p.asset_class || '').toString().toLowerCase();
+    const name = (p.name || '').toString().toLowerCase();
+    const ticker = (p.ticker || p.symbol || '').toString().toUpperCase();
+    const blob = cat + ' ' + name;
+
+    // Matières premières : or, argent, pétrole, gaz, commodités, énergie ETF
+    const commodityTickers = ['GLD','SLV','USO','DBC','PDBC','IAU','SGOL','UNG','BNO','WEAT','CORN','DBO','PALL','PPLT'];
+    const commodityKws = ['or ', 'gold', 'silver', 'argent', 'pétrole', 'petrole', 'oil', 'brent', 'wti',
+                          'gaz', 'natural gas', 'commodit', 'matière', 'matiere', 'énergie', 'energie',
+                          'métaux', 'metaux', 'metal', 'agricultur'];
+    if(commodityTickers.includes(ticker)) return 'commodity';
+    if(commodityKws.some(k => blob.includes(k))) return 'commodity';
+
+    // Actions directes : champ action explicit OU action_directe OU stock
+    if(p.asset_class === 'stock' || p.asset_class === 'action' || p.type === 'stock') return 'actions';
+
+    // Défaut : ETF (incluant ETF d'actions, obligations, immobilier...)
+    return 'etf';
+}
+
 function renderWalletBalance(pf, crypto){
     const pfVal = pf?.total_value ?? pf?.equity ?? 0;
     const cryptoVal = crypto?.total_value ?? 0;
@@ -8194,10 +8327,48 @@ function renderWalletBalance(pf, crypto){
     modePill.style.background = mode === 'LIVE' ? 'rgba(48,209,88,0.18)' : 'rgba(255,159,10,0.16)';
     modePill.style.color = mode === 'LIVE' ? 'var(--sf-green)' : 'var(--sf-orange)';
 
+    // === Breakdown par classe d'actif ===
+    const classVals = { actions: 0, etf: 0, crypto: 0, commodity: 0 };
+    (pf?.positions || []).forEach(p => {
+        const cls = _classifyPosition(p, 'etf');
+        const v = p.market_value ?? p.value ?? 0;
+        classVals[cls] += v;
+    });
+    (crypto?.positions || []).forEach(p => {
+        classVals.crypto += (p.market_value ?? p.value ?? 0);
+    });
+
+    const invested = classVals.actions + classVals.etf + classVals.crypto + classVals.commodity;
+    document.getElementById('wd-breakdown-total').textContent =
+        invested > 0 ? 'Investi ' + _fmtMoney(invested) : 'Aucun actif';
+
+    // Barre segmentée
+    const bar = document.getElementById('wd-bar');
+    if(bar){
+        const safe = invested > 0 ? invested : 1;
+        const segs = bar.querySelectorAll('.wd-bar-seg');
+        const order = ['actions','etf','crypto','commodity'];
+        segs.forEach((seg, i) => {
+            const k = order[i];
+            const pct = invested > 0 ? (classVals[k] / safe * 100) : 0;
+            seg.style.width = pct + '%';
+        });
+    }
+
+    // Liste détaillée
+    const labels = { actions:'Actions', etf:'ETF', crypto:'Crypto', commodity:'Matières premières' };
+    document.querySelectorAll('#wd-class-list .wd-class-row').forEach(row => {
+        const k = row.dataset.class;
+        const val = classVals[k] || 0;
+        const pct = invested > 0 ? (val / invested * 100) : 0;
+        row.classList.toggle('empty', val <= 0.01);
+        row.querySelector('.wd-class-name').textContent = labels[k];
+        row.querySelector('.wd-class-pct').textContent = pct.toFixed(1) + '%';
+        row.querySelector('.wd-class-val').textContent = _fmtMoney(val);
+    });
+
     document.getElementById('wd-stat-cash').textContent = _fmtMoney(cash);
     document.getElementById('wd-stat-positions').textContent = ((pf?.positions?.length || 0) + (crypto?.positions?.length || 0));
-    document.getElementById('wd-stat-etf').textContent = _fmtMoney(pfVal);
-    document.getElementById('wd-stat-crypto').textContent = _fmtMoney(cryptoVal);
 }
 
 function renderWalletPositions(pf, crypto){
