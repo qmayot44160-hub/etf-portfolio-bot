@@ -368,6 +368,65 @@ def api_portfolio():
     return jsonify(result)
 
 
+@app.route("/api/portfolio/history")
+def api_portfolio_history():
+    """
+    Historique de la valeur totale du portefeuille (toutes classes d'actifs).
+    Query params : range=1d|1w|1m|3m|1y|all, benchmark=SPY|URTH|...
+    Retourne {series, source, benchmark, class_breakdown_now, perf_pct}.
+    """
+    import portfolio_history as ph
+
+    range_key = request.args.get("range", "1m").lower()
+    benchmark_sym = request.args.get("benchmark", "").strip().upper()
+
+    pf = engine.get_portfolio()
+    try:
+        crypto_pf = crypto.get_portfolio()
+    except Exception:
+        crypto_pf = None
+
+    series, source = ph.get_history_or_reconstruct(pf, crypto_pf, range_key)
+
+    benchmark_series = []
+    if benchmark_sym:
+        benchmark_series = ph.get_benchmark_series(benchmark_sym, range_key)
+
+    # Perf % sur la période
+    perf_pct = None
+    if series and len(series) >= 2:
+        try:
+            v0 = float(series[0].get("total") or 0)
+            v1 = float(series[-1].get("total") or 0)
+            if v0 > 0:
+                perf_pct = round((v1 - v0) / v0 * 100, 2)
+        except Exception:
+            pass
+
+    return jsonify({
+        "range": range_key,
+        "source": source,
+        "series": series,
+        "benchmark_symbol": benchmark_sym or None,
+        "benchmark_series": benchmark_series,
+        "perf_pct": perf_pct,
+        "current": ph.classify_portfolio(pf, crypto_pf),
+    })
+
+
+@app.route("/api/portfolio/snapshot", methods=["POST"])
+def api_portfolio_snapshot():
+    """Force l'enregistrement d'un snapshot maintenant."""
+    import portfolio_history as ph
+    pf = engine.get_portfolio()
+    try:
+        crypto_pf = crypto.get_portfolio()
+    except Exception:
+        crypto_pf = None
+    snap = ph.snapshot(pf, crypto_pf)
+    return jsonify({"ok": True, "snapshot": snap})
+
+
 @app.route("/api/prices")
 def api_prices():
     """Retourne les prix actuels."""
@@ -887,6 +946,25 @@ def init_app():
         print("[Startup] ETF smart-picks scanner triggered")
     except Exception as e:
         print(f"[Startup] ETF scanner init error: {e}")
+
+    # Snapshot quotidien de la valeur portefeuille (toutes classes)
+    try:
+        import portfolio_history as _ph
+        import threading as _threading
+        def _initial_snapshot():
+            try:
+                pf = engine.get_portfolio()
+                try:
+                    crypto_pf = crypto.get_portfolio()
+                except Exception:
+                    crypto_pf = None
+                _ph.snapshot(pf, crypto_pf)
+                print("[Startup] Portfolio snapshot recorded")
+            except Exception as e:
+                print(f"[Startup] snapshot error: {e}")
+        _threading.Thread(target=_initial_snapshot, daemon=True).start()
+    except Exception as e:
+        print(f"[Startup] portfolio_history init error: {e}")
 
 
 init_app()

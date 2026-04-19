@@ -1811,6 +1811,157 @@
         .wd-balance-chg.down { background: rgba(255,69,58,0.12); color: var(--sf-red); }
         .wd-balance-chg.flat { background: rgba(255,255,255,0.05); color: var(--sf-text-muted); }
 
+        /* ═══════════════════════════════════════════════════════
+           PORTFOLIO CHART — hero line chart (Robinhood-style)
+           ═══════════════════════════════════════════════════════ */
+        .pf-chart {
+            position: relative;
+            margin-bottom: 14px;
+            padding: 14px 14px 10px;
+            border-radius: 14px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .pf-chart-head {
+            display: flex; align-items: baseline; justify-content: space-between;
+            gap: 10px; margin-bottom: 10px;
+        }
+        .pf-chart-title {
+            font-size: 0.62rem; font-weight: 650;
+            color: var(--sf-text-muted);
+            letter-spacing: 0.1em; text-transform: uppercase;
+        }
+        .pf-chart-perf {
+            font-size: 0.82rem; font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.01em;
+            padding: 3px 9px; border-radius: 6px;
+        }
+        .pf-chart-perf.up { background: rgba(48,209,88,0.14); color: var(--sf-green); }
+        .pf-chart-perf.down { background: rgba(255,69,58,0.14); color: var(--sf-red); }
+        .pf-chart-perf.flat { background: rgba(255,255,255,0.05); color: var(--sf-text-muted); }
+        .pf-chart-svg {
+            width: 100%; height: 110px; display: block;
+            overflow: visible;
+        }
+        .pf-chart-line {
+            fill: none;
+            stroke-width: 2;
+            stroke-linejoin: round; stroke-linecap: round;
+            filter: drop-shadow(0 0 8px currentColor);
+            transition: d 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .pf-chart-line.up { stroke: var(--sf-green); color: rgba(48,209,88,0.6); }
+        .pf-chart-line.down { stroke: var(--sf-red); color: rgba(255,69,58,0.6); }
+        .pf-chart-line.flat { stroke: var(--sf-text-muted); color: transparent; }
+        .pf-chart-area.up { fill: url(#pf-grad-up); }
+        .pf-chart-area.down { fill: url(#pf-grad-down); }
+        .pf-chart-area.flat { fill: url(#pf-grad-flat); }
+        .pf-chart-bench {
+            fill: none;
+            stroke: #bf5af2;
+            stroke-width: 1.3;
+            stroke-dasharray: 4 4;
+            opacity: 0.6;
+        }
+        .pf-chart-crosshair {
+            stroke: rgba(255,255,255,0.2);
+            stroke-width: 1; stroke-dasharray: 2 3;
+            pointer-events: none;
+        }
+        .pf-chart-dot {
+            fill: currentColor; stroke: #fff; stroke-width: 1.5;
+            pointer-events: none;
+            filter: drop-shadow(0 0 6px currentColor);
+        }
+        .pf-chart-tip {
+            position: absolute; top: 8px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20,20,22,0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 0.72rem;
+            font-variant-numeric: tabular-nums;
+            pointer-events: none;
+            opacity: 0; transition: opacity 0.15s;
+            white-space: nowrap;
+            z-index: 2;
+        }
+        .pf-chart-tip.visible { opacity: 1; }
+        .pf-chart-tip-date {
+            color: var(--sf-text-muted); font-size: 0.64rem;
+            letter-spacing: 0.03em;
+            margin-top: 2px;
+        }
+        .pf-range-pills {
+            display: flex; gap: 4px;
+            padding: 3px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 9px;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-top: 10px;
+        }
+        .pf-range-pill {
+            flex: 1;
+            padding: 5px 0;
+            font-size: 0.7rem; font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent; border: none;
+            color: var(--sf-text-muted);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            font-variant-numeric: tabular-nums;
+        }
+        .pf-range-pill:hover {
+            color: var(--sf-text);
+            background: rgba(255,255,255,0.04);
+        }
+        .pf-range-pill.active {
+            color: var(--sf-text);
+            background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+            box-shadow: 0 1px 3px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        .pf-bench-toggle {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.66rem; color: var(--sf-text-muted);
+            margin-top: 8px; cursor: pointer;
+            user-select: none;
+            padding: 3px 8px; border-radius: 6px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.04);
+            transition: all 0.2s;
+        }
+        .pf-bench-toggle:hover { background: rgba(255,255,255,0.05); color: var(--sf-text); }
+        .pf-bench-toggle.active {
+            background: rgba(191,90,242,0.12);
+            border-color: rgba(191,90,242,0.3);
+            color: #d9b5ff;
+        }
+        .pf-bench-dot {
+            width: 14px; height: 2px; border-radius: 1px;
+            background: repeating-linear-gradient(90deg, #bf5af2 0 3px, transparent 3px 6px);
+        }
+        .pf-chart-empty {
+            height: 110px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--sf-text-muted); font-size: 0.78rem;
+        }
+        .pf-chart-loading {
+            height: 110px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+            background-size: 200% 100%;
+            animation: pfChartShimmer 1.4s ease-in-out infinite;
+            border-radius: 10px;
+        }
+        @keyframes pfChartShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
         /* Split stats (cash / positions / ETF / crypto) */
         .wd-stats {
             display: grid; grid-template-columns: repeat(2, 1fr);
@@ -6694,14 +6845,17 @@ function _formatSignedCurrency(v, ccy='€'){
     return sign + _formatCurrency(v, ccy);
 }
 
-function updateHeroPortfolio(totalValue, range){
+function updateHeroPortfolio(totalValue, range, realValues){
     const wrap = document.getElementById('hero-portfolio');
     if(!wrap || totalValue == null || !isFinite(totalValue)) return;
     HERO_STATE.lastTotal = totalValue;
     range = range || HERO_STATE.range;
     HERO_STATE.range = range;
 
-    const values = _heroGenerateData(totalValue, range);
+    // Privilégie les vraies données si fournies
+    const values = (Array.isArray(realValues) && realValues.length >= 2)
+        ? realValues
+        : _heroGenerateData(totalValue, range);
     const start = values[0];
     const end = values[values.length - 1];
     const changeAmount = end - start;
@@ -6755,17 +6909,40 @@ function updateHeroPortfolio(totalValue, range){
     }
 }
 
+/* Fetches real portfolio history (multi-classes) from the backend.
+   range UI format: 1D|1W|1M|3M|1Y|ALL → API: 1d|1w|1m|3m|1y|all */
+async function _heroLoadRealSeries(range){
+    const apiRange = String(range || '1M').toLowerCase();
+    try {
+        const r = await fetch('/api/portfolio/history?range=' + apiRange);
+        if(!r.ok) return null;
+        const data = await r.json();
+        if(!Array.isArray(data?.series) || data.series.length < 2) return null;
+        return {
+            values: data.series.map(s => s.total || 0),
+            source: data.source,
+            perfPct: data.perf_pct,
+        };
+    } catch(e){
+        return null;
+    }
+}
+
 /* Wire hero time-range buttons */
 function _initHeroTimeRange(){
     const wrap = document.getElementById('hero-timerange');
     if(!wrap || wrap.__wired) return;
     wrap.__wired = true;
     wrap.querySelectorAll('button[data-range]').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
             wrap.querySelectorAll('button').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             const range = btn.dataset.range;
-            if(HERO_STATE.lastTotal != null){
+            const real = await _heroLoadRealSeries(range);
+            if(real && real.values.length >= 2){
+                const total = real.values[real.values.length - 1];
+                updateHeroPortfolio(total, range, real.values);
+            } else if(HERO_STATE.lastTotal != null){
                 updateHeroPortfolio(HERO_STATE.lastTotal, range);
             }
         });
@@ -6829,8 +7006,14 @@ async function loadHome(){
         if(s.totalValue !== null){
             totalEl.innerHTML = ''; animateVal(totalEl, s.totalValue, '', '€', 0);
             document.getElementById('home-total-sub').textContent = s.brokerName || '—';
-            // Trading-app hero : big portfolio value + sparkline
+            // Trading-app hero : big portfolio value + sparkline (vraies données via /api/portfolio/history)
             updateHeroPortfolio(s.totalValue, HERO_STATE.range);
+            _heroLoadRealSeries(HERO_STATE.range).then(real => {
+                if(real && real.values.length >= 2){
+                    const total = real.values[real.values.length - 1] || s.totalValue;
+                    updateHeroPortfolio(total, HERO_STATE.range, real.values);
+                }
+            }).catch(() => {});
         }else{
             totalEl.textContent = '—';
             document.getElementById('home-total-sub').textContent = 'Aucun broker connecté';
@@ -8119,6 +8302,45 @@ setTimeout(() => {
             <div class="wd-balance-chg" id="wd-balance-chg">—</div>
         </div>
 
+        <!-- Hero Portfolio Chart (Robinhood-style) -->
+        <div class="pf-chart" data-scope="wallet">
+            <div class="pf-chart-head">
+                <div class="pf-chart-title">Évolution du patrimoine</div>
+                <div class="pf-chart-perf flat" id="pf-chart-perf-wallet">—</div>
+            </div>
+            <div style="position:relative;" id="pf-chart-wrap-wallet">
+                <div class="pf-chart-tip" id="pf-chart-tip-wallet">—</div>
+                <svg class="pf-chart-svg" id="pf-chart-svg-wallet" viewBox="0 0 400 110" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="pf-grad-up" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#30d158" stop-opacity="0.32"/>
+                            <stop offset="100%" stop-color="#30d158" stop-opacity="0"/>
+                        </linearGradient>
+                        <linearGradient id="pf-grad-down" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#ff453a" stop-opacity="0.32"/>
+                            <stop offset="100%" stop-color="#ff453a" stop-opacity="0"/>
+                        </linearGradient>
+                        <linearGradient id="pf-grad-flat" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#8e8e93" stop-opacity="0.18"/>
+                            <stop offset="100%" stop-color="#8e8e93" stop-opacity="0"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <div class="pf-range-pills" data-scope="wallet">
+                <button class="pf-range-pill" data-range="1d">1J</button>
+                <button class="pf-range-pill" data-range="1w">1S</button>
+                <button class="pf-range-pill active" data-range="1m">1M</button>
+                <button class="pf-range-pill" data-range="3m">3M</button>
+                <button class="pf-range-pill" data-range="1y">1A</button>
+                <button class="pf-range-pill" data-range="all">Tout</button>
+            </div>
+            <button class="pf-bench-toggle" onclick="togglePortfolioBenchmark('wallet')" id="pf-bench-toggle-wallet">
+                <span class="pf-bench-dot"></span>
+                <span>Comparer au S&amp;P 500</span>
+            </button>
+        </div>
+
         <!-- Répartition par classe d'actif -->
         <div class="wd-breakdown" id="wd-breakdown">
             <div class="wd-breakdown-title">
@@ -8223,6 +8445,8 @@ function openWalletDrawer(){
     WALLET_STATE.open = true;
     document.body.style.overflow = 'hidden';
     loadWalletData();
+    // Charge le chart portefeuille
+    try { _bindPfRangePills('wallet'); loadPortfolioChart('wallet'); } catch(e){}
 }
 
 function closeWalletDrawer(){
@@ -8278,6 +8502,200 @@ function _fmtMoney(v){
 function _fmtPct(v){
     if(v == null || isNaN(v)) return '—';
     return (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+}
+
+/* ═══════════════════════════════════════════════════════
+   PORTFOLIO CHART — Robinhood-style line chart, multi-scope
+   ═══════════════════════════════════════════════════════ */
+const PF_CHART_STATE = {
+    wallet: { range: '1m', benchmark: null, data: null, loading: false },
+    home:   { range: '1m', benchmark: null, data: null, loading: false },
+};
+
+function togglePortfolioBenchmark(scope){
+    const st = PF_CHART_STATE[scope];
+    if(!st) return;
+    st.benchmark = st.benchmark ? null : 'SPY';
+    const btn = document.getElementById('pf-bench-toggle-' + scope);
+    if(btn) btn.classList.toggle('active', !!st.benchmark);
+    loadPortfolioChart(scope);
+}
+
+function _bindPfRangePills(scope){
+    document.querySelectorAll(`.pf-range-pills[data-scope="${scope}"] .pf-range-pill`).forEach(btn => {
+        if(btn._bound) return;
+        btn._bound = true;
+        btn.addEventListener('click', () => {
+            const range = btn.dataset.range;
+            PF_CHART_STATE[scope].range = range;
+            document.querySelectorAll(`.pf-range-pills[data-scope="${scope}"] .pf-range-pill`)
+                .forEach(b => b.classList.toggle('active', b === btn));
+            loadPortfolioChart(scope);
+        });
+    });
+}
+
+async function loadPortfolioChart(scope){
+    const st = PF_CHART_STATE[scope];
+    if(!st || st.loading) return;
+    st.loading = true;
+
+    const svg = document.getElementById('pf-chart-svg-' + scope);
+    if(!svg) { st.loading = false; return; }
+
+    try {
+        const params = new URLSearchParams({ range: st.range });
+        if(st.benchmark) params.set('benchmark', st.benchmark);
+        const res = await fetch('/api/portfolio/history?' + params.toString());
+        if(!res.ok) throw new Error('http');
+        const data = await res.json();
+        st.data = data;
+        _renderPortfolioChart(scope, data);
+    } catch(e){
+        console.warn('[pf-chart] load error', e);
+        _renderPortfolioChart(scope, null);
+    } finally {
+        st.loading = false;
+    }
+}
+
+function _renderPortfolioChart(scope, data){
+    const svg = document.getElementById('pf-chart-svg-' + scope);
+    const perfEl = document.getElementById('pf-chart-perf-' + scope);
+    if(!svg) return;
+
+    // Conserve defs, vide le reste
+    const defs = svg.querySelector('defs');
+    svg.innerHTML = '';
+    if(defs) svg.appendChild(defs);
+
+    const series = data?.series || [];
+    if(series.length < 2){
+        const empty = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        empty.setAttribute('x', '200'); empty.setAttribute('y', '58');
+        empty.setAttribute('text-anchor', 'middle');
+        empty.setAttribute('fill', 'rgba(255,255,255,0.35)');
+        empty.setAttribute('font-size', '11');
+        empty.textContent = 'Données insuffisantes';
+        svg.appendChild(empty);
+        if(perfEl){ perfEl.textContent = '—'; perfEl.className = 'pf-chart-perf flat'; }
+        return;
+    }
+
+    // Normalisation valeurs
+    const values = series.map(s => s.total || 0);
+    const minV = Math.min(...values);
+    const maxV = Math.max(...values);
+    const span = Math.max(maxV - minV, Math.abs(maxV) * 0.001, 1);
+    const padY = 8;
+    const H = 110, W = 400;
+    const stepX = series.length > 1 ? (W / (series.length - 1)) : W;
+    const yOf = v => H - padY - ((v - minV) / span) * (H - 2 * padY);
+
+    // Direction (up/down/flat)
+    const perfPct = data?.perf_pct;
+    const dir = perfPct == null ? 'flat' : (perfPct > 0.05 ? 'up' : perfPct < -0.05 ? 'down' : 'flat');
+
+    // Path ligne
+    let d = '';
+    series.forEach((s, i) => {
+        const x = i * stepX;
+        const y = yOf(s.total || 0);
+        d += (i === 0 ? 'M' : 'L') + x.toFixed(2) + ',' + y.toFixed(2);
+    });
+    // Path zone
+    let area = d + ` L${W},${H} L0,${H} Z`;
+
+    const areaEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    areaEl.setAttribute('class', 'pf-chart-area ' + dir);
+    areaEl.setAttribute('d', area);
+    svg.appendChild(areaEl);
+
+    const lineEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    lineEl.setAttribute('class', 'pf-chart-line ' + dir);
+    lineEl.setAttribute('d', d);
+    svg.appendChild(lineEl);
+
+    // Benchmark overlay (échelle normalisée sur MIN..MAX de la série portfolio)
+    const bench = data?.benchmark_series || [];
+    if(bench.length >= 2){
+        // Convertit les 100=base en $ fictifs puis projette dans le même espace que le portefeuille
+        const benchStepX = W / (bench.length - 1);
+        const bMin = Math.min(...bench.map(b => b.value));
+        const bMax = Math.max(...bench.map(b => b.value));
+        const bSpan = Math.max(bMax - bMin, 0.01);
+        let bd = '';
+        bench.forEach((b, i) => {
+            const x = i * benchStepX;
+            const y = H - padY - ((b.value - bMin) / bSpan) * (H - 2 * padY);
+            bd += (i === 0 ? 'M' : 'L') + x.toFixed(2) + ',' + y.toFixed(2);
+        });
+        const benchEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        benchEl.setAttribute('class', 'pf-chart-bench');
+        benchEl.setAttribute('d', bd);
+        svg.appendChild(benchEl);
+    }
+
+    // Hover crosshair
+    const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    overlay.setAttribute('x', '0'); overlay.setAttribute('y', '0');
+    overlay.setAttribute('width', W); overlay.setAttribute('height', H);
+    overlay.setAttribute('fill', 'transparent');
+    overlay.style.cursor = 'crosshair';
+
+    const crosshair = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    crosshair.setAttribute('class', 'pf-chart-crosshair');
+    crosshair.setAttribute('y1', 0); crosshair.setAttribute('y2', H);
+    crosshair.style.display = 'none';
+    svg.appendChild(crosshair);
+
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('class', 'pf-chart-dot ' + dir);
+    dot.setAttribute('r', '3.5');
+    dot.style.color = dir === 'up' ? '#30d158' : dir === 'down' ? '#ff453a' : '#8e8e93';
+    dot.style.display = 'none';
+    svg.appendChild(dot);
+
+    const tip = document.getElementById('pf-chart-tip-' + scope);
+
+    overlay.addEventListener('mousemove', (e) => {
+        const rect = svg.getBoundingClientRect();
+        const xPx = e.clientX - rect.left;
+        const xSvg = (xPx / rect.width) * W;
+        const idx = Math.min(series.length - 1, Math.max(0, Math.round(xSvg / stepX)));
+        const s = series[idx];
+        const x = idx * stepX;
+        const y = yOf(s.total || 0);
+        crosshair.setAttribute('x1', x); crosshair.setAttribute('x2', x);
+        crosshair.style.display = '';
+        dot.setAttribute('cx', x); dot.setAttribute('cy', y);
+        dot.style.display = '';
+        if(tip){
+            const date = new Date(s.ts);
+            const dateStr = date.toLocaleString('fr-FR', {day:'2-digit', month:'short', year:'2-digit', hour:'2-digit', minute:'2-digit'});
+            const v = _fmtMoney(s.total || 0);
+            tip.innerHTML = `<div><b>${v}</b></div><div class="pf-chart-tip-date">${dateStr}</div>`;
+            tip.classList.add('visible');
+        }
+    });
+    overlay.addEventListener('mouseleave', () => {
+        crosshair.style.display = 'none';
+        dot.style.display = 'none';
+        if(tip) tip.classList.remove('visible');
+    });
+    svg.appendChild(overlay);
+
+    // Perf pill
+    if(perfEl){
+        if(perfPct == null){
+            perfEl.textContent = '—';
+            perfEl.className = 'pf-chart-perf flat';
+        } else {
+            const sign = perfPct >= 0 ? '+' : '';
+            perfEl.textContent = sign + perfPct.toFixed(2) + '%';
+            perfEl.className = 'pf-chart-perf ' + dir;
+        }
+    }
 }
 
 /**
