@@ -1962,6 +1962,154 @@
             100% { background-position: -200% 0; }
         }
 
+        /* ═══════════════════════════════════════════════════════
+           TOP MOVERS — horizontal scrollable strip (Coinbase-style)
+           ═══════════════════════════════════════════════════════ */
+        .movers-section {
+            margin-bottom: 18px;
+        }
+        .movers-head {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .movers-title {
+            font-size: 0.62rem; font-weight: 650;
+            color: var(--sf-text-muted);
+            letter-spacing: 0.1em; text-transform: uppercase;
+        }
+        .movers-tabs {
+            display: inline-flex; gap: 2px;
+            padding: 2px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 7px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .movers-tab {
+            padding: 3px 9px;
+            font-size: 0.64rem; font-weight: 600;
+            letter-spacing: 0.04em;
+            background: transparent; border: none;
+            color: var(--sf-text-muted);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .movers-tab:hover { color: var(--sf-text); }
+        .movers-tab.active {
+            color: var(--sf-text);
+            background: rgba(255,255,255,0.08);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+        .movers-strip {
+            display: flex; gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .movers-strip::-webkit-scrollbar { display: none; }
+        .mover-tile {
+            flex: 0 0 128px;
+            min-width: 128px;
+            scroll-snap-align: start;
+            padding: 10px 11px;
+            border-radius: 11px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .mover-tile:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255,255,255,0.12);
+        }
+        .mover-tile.up {
+            background: linear-gradient(135deg, rgba(48,209,88,0.12), rgba(48,209,88,0.04));
+            border-color: rgba(48,209,88,0.22);
+        }
+        .mover-tile.up:hover {
+            box-shadow: 0 4px 16px rgba(48,209,88,0.18);
+            border-color: rgba(48,209,88,0.4);
+        }
+        .mover-tile.down {
+            background: linear-gradient(135deg, rgba(255,69,58,0.12), rgba(255,69,58,0.04));
+            border-color: rgba(255,69,58,0.22);
+        }
+        .mover-tile.down:hover {
+            box-shadow: 0 4px 16px rgba(255,69,58,0.18);
+            border-color: rgba(255,69,58,0.4);
+        }
+        .mover-tile-head {
+            display: flex; align-items: center; gap: 6px;
+            margin-bottom: 4px;
+        }
+        .mover-tile-badge {
+            width: 22px; height: 22px; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.58rem; font-weight: 700;
+            letter-spacing: 0.02em;
+            background: rgba(255,255,255,0.08);
+            color: var(--sf-text);
+            flex-shrink: 0;
+        }
+        .mover-tile.up .mover-tile-badge {
+            background: rgba(48,209,88,0.2);
+            color: var(--sf-green);
+        }
+        .mover-tile.down .mover-tile-badge {
+            background: rgba(255,69,58,0.2);
+            color: var(--sf-red);
+        }
+        .mover-tile-sym {
+            font-size: 0.78rem; font-weight: 650;
+            letter-spacing: -0.01em;
+            flex: 1; min-width: 0;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .mover-tile-class {
+            position: absolute; top: 8px; right: 8px;
+            font-size: 0.52rem; font-weight: 600;
+            letter-spacing: 0.04em;
+            color: var(--sf-text-muted);
+            text-transform: uppercase;
+            opacity: 0.55;
+        }
+        .mover-tile-pct {
+            font-size: 1rem; font-weight: 700;
+            letter-spacing: -0.015em;
+            font-variant-numeric: tabular-nums;
+            margin-top: 2px;
+        }
+        .mover-tile.up .mover-tile-pct { color: var(--sf-green); }
+        .mover-tile.down .mover-tile-pct { color: var(--sf-red); }
+        .mover-tile-val {
+            font-size: 0.66rem; color: var(--sf-text-muted);
+            font-variant-numeric: tabular-nums;
+            margin-top: 1px;
+        }
+        .mover-tile-spark {
+            height: 22px; width: 100%;
+            margin-top: 4px;
+        }
+        .mover-tile-spark path {
+            fill: none; stroke-width: 1.5;
+            stroke-linejoin: round; stroke-linecap: round;
+        }
+        .mover-tile.up .mover-tile-spark path { stroke: var(--sf-green); }
+        .mover-tile.down .mover-tile-spark path { stroke: var(--sf-red); }
+        .movers-empty {
+            text-align: center;
+            padding: 18px 12px;
+            color: var(--sf-text-muted);
+            font-size: 0.78rem;
+            background: rgba(255,255,255,0.02);
+            border-radius: 10px;
+            border: 1px dashed rgba(255,255,255,0.08);
+        }
+
         /* Split stats (cash / positions / ETF / crypto) */
         .wd-stats {
             display: grid; grid-template-columns: repeat(2, 1fr);
@@ -8341,6 +8489,20 @@ setTimeout(() => {
             </button>
         </div>
 
+        <!-- Top Movers (Coinbase-style) -->
+        <div class="movers-section">
+            <div class="movers-head">
+                <div class="movers-title">Top movers du jour</div>
+                <div class="movers-tabs" id="wd-movers-tabs">
+                    <button class="movers-tab active" data-movers="up">🔥 Hausse</button>
+                    <button class="movers-tab" data-movers="down">❄️ Baisse</button>
+                </div>
+            </div>
+            <div class="movers-strip" id="wd-movers-strip">
+                <div class="movers-empty">Aucune donnée disponible</div>
+            </div>
+        </div>
+
         <!-- Répartition par classe d'actif -->
         <div class="wd-breakdown" id="wd-breakdown">
             <div class="wd-breakdown-title">
@@ -8478,6 +8640,8 @@ async function loadWalletData(){
 
         WALLET_STATE.data = { pf, crypto, trades };
         renderWalletBalance(pf, crypto);
+        renderTopMovers(pf, crypto);
+        _bindMoversTabs();
         renderWalletPositions(pf, crypto);
         renderWalletActivity(trades);
 
@@ -8696,6 +8860,154 @@ function _renderPortfolioChart(scope, data){
             perfEl.className = 'pf-chart-perf ' + dir;
         }
     }
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOP MOVERS — tri automatique des gagnants/perdants du jour
+   ═══════════════════════════════════════════════════════ */
+const MOVERS_STATE = { direction: 'up', items: [] };
+
+function _moversBuildFromPortfolio(pf, cryptoPf){
+    const items = [];
+    (pf?.positions || []).forEach(p => {
+        const chg = p.pnl_pct ?? p.change_pct ?? p.day_change_pct ?? p.pct ?? null;
+        if(chg == null || !isFinite(chg)) return;
+        items.push({
+            ticker: p.ticker || p.symbol,
+            name: p.name || p.ticker,
+            pct: Number(chg),
+            value: p.market_value ?? p.value ?? 0,
+            class: _classifyPosition(p, 'etf'),
+            category: p.category,
+            asset_class: p.asset_class || 'etf',
+        });
+    });
+    (cryptoPf?.positions || []).forEach(p => {
+        const chg = p.pnl_pct ?? p.change_pct ?? p.day_change_pct ?? p.pct ?? null;
+        if(chg == null || !isFinite(chg)) return;
+        items.push({
+            ticker: p.ticker || p.symbol,
+            name: p.name || p.ticker,
+            pct: Number(chg),
+            value: p.market_value ?? p.value ?? 0,
+            class: 'crypto',
+            category: p.category || 'Crypto',
+            asset_class: 'crypto',
+        });
+    });
+    return items;
+}
+
+function _moversSparkPath(pct, width, height){
+    // Sparkline pseudo-réaliste déterministe basée sur le ticker+pct
+    // (pour éviter le flat ennuyeux ; ok en attendant les vrais intradays)
+    const points = 16;
+    const seed = Math.abs(Math.round(pct * 1000));
+    let s = seed || 1;
+    const rand = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+    const trend = pct / 100;
+    const vals = [];
+    let v = 0;
+    for(let i = 0; i < points; i++){
+        v = v + (trend / points) + (rand() - 0.5) * 0.01;
+        vals.push(v);
+    }
+    const min = Math.min(...vals);
+    const max = Math.max(...vals);
+    const span = Math.max(max - min, 0.001);
+    const step = width / (points - 1);
+    let d = '';
+    vals.forEach((val, i) => {
+        const x = i * step;
+        const y = height - ((val - min) / span) * height;
+        d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+    });
+    return d;
+}
+
+function renderTopMovers(pf, cryptoPf){
+    const strip = document.getElementById('wd-movers-strip');
+    if(!strip) return;
+
+    MOVERS_STATE.items = _moversBuildFromPortfolio(pf, cryptoPf);
+
+    if(MOVERS_STATE.items.length === 0){
+        strip.innerHTML = '<div class="movers-empty">Aucune position ne bouge aujourd\'hui</div>';
+        return;
+    }
+
+    const direction = MOVERS_STATE.direction;
+    let sorted;
+    if(direction === 'up'){
+        sorted = MOVERS_STATE.items.filter(x => x.pct > 0).sort((a, b) => b.pct - a.pct);
+    } else {
+        sorted = MOVERS_STATE.items.filter(x => x.pct < 0).sort((a, b) => a.pct - b.pct);
+    }
+
+    const top = sorted.slice(0, 6);
+    if(top.length === 0){
+        strip.innerHTML = `<div class="movers-empty">Aucun actif en ${direction === 'up' ? 'hausse' : 'baisse'} aujourd'hui</div>`;
+        return;
+    }
+
+    const classLabels = { actions: 'ACT', etf: 'ETF', crypto: 'CRY', commodity: 'MAT' };
+    strip.innerHTML = top.map(it => {
+        const sym = (it.ticker || '?').split('.')[0].slice(0, 5).toUpperCase();
+        const cls = it.pct >= 0 ? 'up' : 'down';
+        const sign = it.pct >= 0 ? '+' : '';
+        const sparkD = _moversSparkPath(it.pct, 106, 22);
+        const classTag = classLabels[it.class] || 'ETF';
+        return `
+            <div class="mover-tile ${cls}" onclick='openMoverTile(${JSON.stringify({
+                ticker: it.ticker, name: it.name, pct: it.pct,
+                asset_class: it.asset_class, category: it.category,
+            }).replace(/'/g, "&#39;")})' title="${it.name || sym}">
+                <div class="mover-tile-class">${classTag}</div>
+                <div class="mover-tile-head">
+                    <div class="mover-tile-badge">${sym.slice(0, 3)}</div>
+                    <div class="mover-tile-sym">${sym}</div>
+                </div>
+                <div class="mover-tile-pct">${sign}${it.pct.toFixed(2)}%</div>
+                <div class="mover-tile-val">${_fmtMoney(it.value)}</div>
+                <svg class="mover-tile-spark" viewBox="0 0 106 22" preserveAspectRatio="none">
+                    <path d="${sparkD}"/>
+                </svg>
+            </div>
+        `;
+    }).join('');
+}
+
+function _bindMoversTabs(){
+    const tabs = document.getElementById('wd-movers-tabs');
+    if(!tabs || tabs._bound) return;
+    tabs._bound = true;
+    tabs.querySelectorAll('.movers-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+            MOVERS_STATE.direction = btn.dataset.movers;
+            tabs.querySelectorAll('.movers-tab').forEach(b => b.classList.toggle('active', b === btn));
+            renderTopMovers(WALLET_STATE.data?.pf, WALLET_STATE.data?.crypto);
+        });
+    });
+}
+
+function openMoverTile(m){
+    // Ouvre le pick modal avec les données disponibles
+    try {
+        const pickLike = {
+            ticker: m.ticker, name: m.name || m.ticker,
+            asset_class: m.asset_class || 'etf',
+            category: m.category || '',
+            direction: m.pct >= 0 ? 'BULL' : 'BEAR',
+            score: 0,
+            change_1d: m.pct,
+            change_30d: 0,
+            reasons: [`Mouvement du jour : ${m.pct >= 0 ? '+' : ''}${m.pct.toFixed(2)}%`],
+        };
+        closeWalletDrawer();
+        setTimeout(() => {
+            if(typeof openPickModal === 'function') openPickModal(pickLike);
+        }, 300);
+    } catch(e){ console.warn('openMoverTile', e); }
 }
 
 /**
