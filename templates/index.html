@@ -2389,6 +2389,286 @@
             background: rgba(255,69,58,0.25);
         }
 
+        /* ═══════════════════════════════════════════════════════
+           DISCOVER — thèmes d'investissement (Coinbase/eToro-style)
+           ═══════════════════════════════════════════════════════ */
+        .dc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 14px;
+        }
+        .dc-card {
+            position: relative;
+            padding: 20px;
+            border-radius: 16px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.07);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            overflow: hidden;
+        }
+        .dc-card::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(circle at top right, var(--dc-glow, transparent), transparent 60%);
+            opacity: 0.22;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .dc-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255,255,255,0.15);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+        }
+        .dc-card:hover::before { opacity: 0.4; }
+        .dc-card-header {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 14px;
+            position: relative; z-index: 1;
+        }
+        .dc-icon {
+            width: 52px; height: 52px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem;
+            background: var(--dc-grad, linear-gradient(135deg, rgba(10,132,255,0.28), rgba(10,132,255,0.1)));
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.12);
+        }
+        .dc-title-block { flex: 1; min-width: 0; }
+        .dc-name {
+            font-size: 1.02rem; font-weight: 650;
+            letter-spacing: -0.01em;
+        }
+        .dc-short {
+            font-size: 0.72rem; color: var(--sf-text-muted);
+            letter-spacing: 0.04em;
+            margin-top: 2px;
+        }
+        .dc-desc {
+            font-size: 0.8rem; color: var(--sf-text-muted);
+            line-height: 1.45;
+            margin-bottom: 14px;
+            position: relative; z-index: 1;
+        }
+        .dc-counts {
+            display: flex; flex-wrap: wrap; gap: 5px;
+            margin-bottom: 14px;
+            position: relative; z-index: 1;
+        }
+        .dc-count-pill {
+            display: inline-flex; align-items: center;
+            font-size: 0.62rem; font-weight: 600;
+            padding: 3px 8px; border-radius: 5px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: var(--sf-text-muted);
+            letter-spacing: 0.04em;
+        }
+        .dc-count-pill.etf { background: rgba(10,132,255,0.1); color: #7dbcff; border-color: rgba(10,132,255,0.22); }
+        .dc-count-pill.actions { background: rgba(191,90,242,0.1); color: #d9b5ff; border-color: rgba(191,90,242,0.22); }
+        .dc-count-pill.crypto { background: rgba(255,159,10,0.1); color: #ffd089; border-color: rgba(255,159,10,0.22); }
+        .dc-count-pill.commodity { background: rgba(48,209,88,0.1); color: #8be0a2; border-color: rgba(48,209,88,0.22); }
+        .dc-perf-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+            position: relative; z-index: 1;
+        }
+        .dc-perf-cell {
+            padding: 8px 10px;
+            border-radius: 9px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.04);
+            text-align: center;
+        }
+        .dc-perf-label {
+            font-size: 0.58rem; color: var(--sf-text-muted);
+            letter-spacing: 0.08em; text-transform: uppercase;
+        }
+        .dc-perf-val {
+            font-size: 0.92rem; font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.01em;
+            margin-top: 2px;
+        }
+        .dc-perf-val.up { color: var(--sf-green); }
+        .dc-perf-val.down { color: var(--sf-red); }
+        .dc-perf-val.flat { color: var(--sf-text-muted); }
+        .dc-tickers-preview {
+            display: flex; flex-wrap: wrap; gap: 4px;
+            margin-bottom: 14px;
+            position: relative; z-index: 1;
+        }
+        .dc-ticker-chip {
+            font-size: 0.66rem; font-weight: 600;
+            padding: 3px 7px; border-radius: 5px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.06);
+            letter-spacing: 0.02em;
+            font-variant-numeric: tabular-nums;
+        }
+        .dc-cta {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.78rem; font-weight: 600;
+            color: var(--sf-text);
+            padding: 8px 14px; border-radius: 9px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative; z-index: 1;
+            transition: all 0.2s;
+        }
+        .dc-card:hover .dc-cta {
+            background: var(--dc-grad, rgba(10,132,255,0.2));
+            border-color: transparent;
+        }
+
+        /* Detail view */
+        .dc-detail-header {
+            display: flex; align-items: center; gap: 16px;
+            padding: 22px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: 18px;
+            position: relative; overflow: hidden;
+        }
+        .dc-detail-header::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: var(--dc-glow-big, transparent);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        .dc-detail-icon {
+            width: 72px; height: 72px; border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.4rem;
+            background: var(--dc-grad, linear-gradient(135deg, rgba(10,132,255,0.32), rgba(10,132,255,0.12)));
+            border: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
+            position: relative; z-index: 1;
+        }
+        .dc-detail-titles {
+            flex: 1; min-width: 0;
+            position: relative; z-index: 1;
+        }
+        .dc-detail-name {
+            font-size: 1.5rem; font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .dc-detail-desc {
+            font-size: 0.88rem; color: var(--sf-text-muted);
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+        .dc-detail-back {
+            background: transparent; border: 1px solid rgba(255,255,255,0.1);
+            color: var(--sf-text-muted);
+            padding: 8px 14px; border-radius: 9px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            transition: all 0.2s;
+            position: relative; z-index: 1;
+        }
+        .dc-detail-back:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--sf-text);
+        }
+        .dc-detail-perf {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 10px; margin-bottom: 18px;
+        }
+        .dc-detail-perf-cell {
+            padding: 14px 18px;
+            border-radius: 13px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .dc-detail-perf-label {
+            font-size: 0.66rem; color: var(--sf-text-muted);
+            letter-spacing: 0.1em; text-transform: uppercase;
+        }
+        .dc-detail-perf-val {
+            font-size: 1.5rem; font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.02em;
+            margin-top: 4px;
+        }
+        .dc-detail-perf-val.up { color: var(--sf-green); }
+        .dc-detail-perf-val.down { color: var(--sf-red); }
+        .dc-detail-perf-val.flat { color: var(--sf-text-muted); }
+        .dc-tickers-table {
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.06);
+            overflow: hidden;
+        }
+        .dc-ticker-row {
+            display: grid;
+            grid-template-columns: 38px 1fr auto auto 100px;
+            gap: 14px;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .dc-ticker-row:last-child { border-bottom: none; }
+        .dc-ticker-row:hover { background: rgba(255,255,255,0.03); }
+        .dc-ticker-rank {
+            font-size: 0.78rem; font-weight: 700;
+            color: var(--sf-text-muted);
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+        .dc-ticker-rank.gold { color: #ffd60a; }
+        .dc-ticker-rank.silver { color: #c5c5c7; }
+        .dc-ticker-rank.bronze { color: #cd7f32; }
+        .dc-ticker-info { min-width: 0; }
+        .dc-ticker-sym {
+            font-size: 0.92rem; font-weight: 650;
+            letter-spacing: -0.01em;
+        }
+        .dc-ticker-name {
+            font-size: 0.7rem; color: var(--sf-text-muted);
+            margin-top: 1px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .dc-ticker-class-tag {
+            display: inline-block;
+            font-size: 0.54rem; font-weight: 700;
+            padding: 2px 5px; border-radius: 4px;
+            letter-spacing: 0.04em;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        .dc-ticker-class-tag.etf { background: rgba(10,132,255,0.18); color: #7dbcff; }
+        .dc-ticker-class-tag.actions { background: rgba(191,90,242,0.18); color: #d9b5ff; }
+        .dc-ticker-class-tag.crypto { background: rgba(255,159,10,0.18); color: #ffd089; }
+        .dc-ticker-class-tag.commodity { background: rgba(48,209,88,0.18); color: #8be0a2; }
+        .dc-ticker-price {
+            font-size: 0.86rem; font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            text-align: right;
+        }
+        .dc-ticker-chg {
+            font-size: 0.74rem; font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            padding: 2px 7px; border-radius: 6px;
+            min-width: 64px; text-align: center;
+        }
+        .dc-ticker-chg.up { background: rgba(48,209,88,0.12); color: var(--sf-green); }
+        .dc-ticker-chg.down { background: rgba(255,69,58,0.12); color: var(--sf-red); }
+        .dc-ticker-chg.flat { background: rgba(255,255,255,0.04); color: var(--sf-text-muted); }
+        .dc-ticker-score {
+            font-size: 0.88rem; font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            text-align: right;
+        }
+        .dc-ticker-score.high { color: var(--sf-green); }
+        .dc-ticker-score.mid { color: var(--sf-text); }
+        .dc-ticker-score.low { color: var(--sf-text-muted); }
+
         /* Split stats (cash / positions / ETF / crypto) */
         .wd-stats {
             display: grid; grid-template-columns: repeat(2, 1fr);
@@ -4389,6 +4669,7 @@
                     <button class="nav-dropdown-item" data-view="projection"><span class="nav-icon" data-icon="trending"></span>Projection</button>
                     <button class="nav-dropdown-item" data-view="scanner"><span class="nav-icon" data-icon="search"></span>Scanner</button>
                     <button class="nav-dropdown-item" data-view="watchlist"><span class="nav-icon" style="font-size:1rem;line-height:1">★</span>Watchlist</button>
+                    <button class="nav-dropdown-item" data-view="discover"><span class="nav-icon" style="font-size:1rem;line-height:1">🎯</span>Discover</button>
                 </div>
             </div>
 
@@ -5227,6 +5508,39 @@
     </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════
+     DISCOVER — thèmes d'investissement multi-classes
+     ═══════════════════════════════════════════════════════ -->
+<div id="view-discover">
+    <div class="hero">
+        <div class="hero-eyebrow"><span class="dot" style="background:#bf5af2"></span>Discover · Thèmes d'investissement</div>
+        <div class="hero-badge" style="background:linear-gradient(135deg,rgba(191,90,242,0.22),rgba(10,132,255,0.12));border-color:rgba(191,90,242,0.3);color:#d9b5ff;font-size:1.4rem">🎯</div>
+        <h1 class="hero-title">Discover</h1>
+        <p class="hero-subtitle">Explore 6 thèmes d'investissement multi-classes (ETF + Actions + Crypto + Matières). Clique sur un thème pour voir les tickers classés par score et ouvrir le détail de chacun.</p>
+    </div>
+    <div class="section-wide">
+        <div id="dc-list-view">
+            <div class="dc-grid" id="dc-grid">
+                <div style="grid-column:1/-1;color:var(--sf-text-muted);text-align:center;padding:40px">Chargement des thèmes…</div>
+            </div>
+        </div>
+        <div id="dc-detail-view" style="display:none">
+            <div class="dc-detail-header" id="dc-detail-header">
+                <div class="dc-detail-icon" id="dc-detail-icon">🎯</div>
+                <div class="dc-detail-titles">
+                    <div class="dc-detail-name" id="dc-detail-name">—</div>
+                    <div class="dc-detail-desc" id="dc-detail-desc">—</div>
+                </div>
+                <button class="dc-detail-back" onclick="discoverBackToList()">← Retour</button>
+            </div>
+            <div class="dc-detail-perf" id="dc-detail-perf"></div>
+            <div class="dc-tickers-table" id="dc-tickers-table">
+                <div style="text-align:center;padding:30px;color:var(--sf-text-muted)">Analyse du thème…</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="view-scanner">
     <div class="hero">
         <div class="hero-eyebrow"><span class="dot"></span>Opportunités · Temps réel</div>
@@ -6009,7 +6323,7 @@ function showView(v){
             next.style.transform='translateY(0)';
         });
         window.scrollTo({top:0,behavior:'smooth'});
-        const loaders={home:loadHome,portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire,securite:loadSecurite,watchlist:loadWatchlist};
+        const loaders={home:loadHome,portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire,securite:loadSecurite,watchlist:loadWatchlist,discover:loadDiscover};
         if(loaders[v])loaders[v]();
     };
     if(current&&current!==next){
@@ -9575,6 +9889,207 @@ async function clearWatchlistAlert(){
 (function initWL(){
     setTimeout(_wlSyncWatched, 500);
 })();
+
+/* ═══════════════════════════════════════════════════════
+   DISCOVER — thèmes d'investissement multi-classes
+   ═══════════════════════════════════════════════════════ */
+const DC_STATE = { themes: [], current: null, loaded: false };
+
+function _dcPerfCls(v){
+    if(v == null) return 'flat';
+    if(v > 0.05) return 'up';
+    if(v < -0.05) return 'down';
+    return 'flat';
+}
+function _dcPerfTxt(v){
+    if(v == null) return '—';
+    return (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+}
+
+async function loadDiscover(){
+    const grid = document.getElementById('dc-grid');
+    if(!grid) return;
+    // Assure que la vue liste est affichée
+    document.getElementById('dc-list-view').style.display = 'block';
+    document.getElementById('dc-detail-view').style.display = 'none';
+
+    if(!DC_STATE.loaded){
+        grid.innerHTML = '<div style="grid-column:1/-1;color:var(--sf-text-muted);text-align:center;padding:40px">Chargement des thèmes…</div>';
+    }
+
+    try {
+        const r = await fetch('/api/themes');
+        if(!r.ok) throw new Error('http');
+        const d = await r.json();
+        DC_STATE.themes = d.themes || [];
+        DC_STATE.loaded = true;
+        _dcRenderGrid();
+    } catch(e){
+        console.warn('loadDiscover', e);
+        grid.innerHTML = '<div style="grid-column:1/-1;color:var(--sf-red);text-align:center;padding:40px">Erreur de chargement</div>';
+    }
+}
+
+function _dcRenderGrid(){
+    const grid = document.getElementById('dc-grid');
+    if(!grid) return;
+    if(DC_STATE.themes.length === 0){
+        grid.innerHTML = '<div style="grid-column:1/-1;color:var(--sf-text-muted);text-align:center;padding:40px">Aucun thème disponible</div>';
+        return;
+    }
+    grid.innerHTML = DC_STATE.themes.map(t => {
+        const g = t.gradient || ['#0a84ff', '#5ac8fa'];
+        const styleVars = `--dc-grad:linear-gradient(135deg, ${g[0]}44, ${g[1]}22);--dc-glow:${g[0]}66;`;
+        const classesPills = Object.entries(t.counts || {})
+            .filter(([k, v]) => v > 0)
+            .map(([k, v]) => {
+                const labels = { etf: 'ETF', actions: 'Actions', crypto: 'Crypto', commodity: 'Matières' };
+                return `<span class="dc-count-pill ${k}">${v} ${labels[k]||k}</span>`;
+            }).join('');
+        const preview = (t.tickers_preview || []).map(tk => `<span class="dc-ticker-chip">${tk}</span>`).join('');
+        return `
+            <div class="dc-card" style="${styleVars}" onclick="openTheme('${t.id}')">
+                <div class="dc-card-header">
+                    <div class="dc-icon">${t.emoji || '🎯'}</div>
+                    <div class="dc-title-block">
+                        <div class="dc-name">${t.name}</div>
+                        <div class="dc-short">${t.short_name || ''}</div>
+                    </div>
+                </div>
+                <div class="dc-desc">${t.description || ''}</div>
+                <div class="dc-counts">${classesPills}</div>
+                <div class="dc-perf-grid">
+                    <div class="dc-perf-cell">
+                        <div class="dc-perf-label">1 mois</div>
+                        <div class="dc-perf-val ${_dcPerfCls(t.perf_1m)}">${_dcPerfTxt(t.perf_1m)}</div>
+                    </div>
+                    <div class="dc-perf-cell">
+                        <div class="dc-perf-label">3 mois</div>
+                        <div class="dc-perf-val ${_dcPerfCls(t.perf_3m)}">${_dcPerfTxt(t.perf_3m)}</div>
+                    </div>
+                    <div class="dc-perf-cell">
+                        <div class="dc-perf-label">1 an</div>
+                        <div class="dc-perf-val ${_dcPerfCls(t.perf_1y)}">${_dcPerfTxt(t.perf_1y)}</div>
+                    </div>
+                </div>
+                <div class="dc-tickers-preview">${preview}</div>
+                <div class="dc-cta">Explorer ce thème →</div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function openTheme(themeId){
+    document.getElementById('dc-list-view').style.display = 'none';
+    document.getElementById('dc-detail-view').style.display = 'block';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+
+    const summary = DC_STATE.themes.find(t => t.id === themeId);
+    if(summary){
+        _dcRenderDetailHeader(summary);
+    }
+
+    const table = document.getElementById('dc-tickers-table');
+    table.innerHTML = '<div style="text-align:center;padding:30px;color:var(--sf-text-muted)">Analyse du thème…</div>';
+
+    try {
+        const r = await fetch('/api/themes/' + encodeURIComponent(themeId));
+        if(!r.ok) throw new Error('http');
+        const detail = await r.json();
+        DC_STATE.current = detail;
+        _dcRenderDetailHeader(detail);
+        _dcRenderPerfGrid(detail);
+        _dcRenderTickersTable(detail);
+    } catch(e){
+        console.warn('openTheme', e);
+        table.innerHTML = '<div style="text-align:center;padding:30px;color:var(--sf-red)">Erreur de chargement du thème</div>';
+    }
+}
+
+function _dcRenderDetailHeader(t){
+    const header = document.getElementById('dc-detail-header');
+    const g = t.gradient || ['#0a84ff', '#5ac8fa'];
+    header.style.setProperty('--dc-grad', `linear-gradient(135deg, ${g[0]}44, ${g[1]}22)`);
+    header.style.setProperty('--dc-glow-big', `radial-gradient(circle at top right, ${g[0]}33, transparent 60%)`);
+    document.getElementById('dc-detail-icon').textContent = t.emoji || '🎯';
+    document.getElementById('dc-detail-name').textContent = t.name;
+    document.getElementById('dc-detail-desc').textContent = t.description || '';
+}
+
+function _dcRenderPerfGrid(t){
+    const grid = document.getElementById('dc-detail-perf');
+    grid.innerHTML = `
+        <div class="dc-detail-perf-cell">
+            <div class="dc-detail-perf-label">Perf. 1 mois</div>
+            <div class="dc-detail-perf-val ${_dcPerfCls(t.perf_1m)}">${_dcPerfTxt(t.perf_1m)}</div>
+        </div>
+        <div class="dc-detail-perf-cell">
+            <div class="dc-detail-perf-label">Perf. 3 mois</div>
+            <div class="dc-detail-perf-val ${_dcPerfCls(t.perf_3m)}">${_dcPerfTxt(t.perf_3m)}</div>
+        </div>
+        <div class="dc-detail-perf-cell">
+            <div class="dc-detail-perf-label">Perf. 1 an</div>
+            <div class="dc-detail-perf-val ${_dcPerfCls(t.perf_1y)}">${_dcPerfTxt(t.perf_1y)}</div>
+        </div>
+    `;
+}
+
+function _dcRenderTickersTable(t){
+    const table = document.getElementById('dc-tickers-table');
+    const tickers = t.tickers || [];
+    if(tickers.length === 0){
+        table.innerHTML = '<div style="text-align:center;padding:30px;color:var(--sf-text-muted)">Aucune donnée disponible</div>';
+        return;
+    }
+    const classLbl = { etf: 'ETF', actions: 'ACT', crypto: 'CRY', commodity: 'MAT' };
+    table.innerHTML = tickers.map((tk, i) => {
+        const rank = i + 1;
+        const rankCls = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+        const cls = tk.asset_class || 'etf';
+        const chg = tk.change_1m;
+        const chgCls = chg == null ? 'flat' : chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat';
+        const chgTxt = chg == null ? '—' : (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
+        const priceTxt = tk.price == null ? '—' :
+            (tk.price >= 1000 ? '$' + tk.price.toLocaleString('fr-FR', {maximumFractionDigits:2}) :
+             tk.price < 1 ? '$' + tk.price.toFixed(4) : '$' + tk.price.toFixed(2));
+        const score = tk.score;
+        const scoreCls = score == null ? 'low' : score >= 65 ? 'high' : score >= 45 ? 'mid' : 'low';
+        const scoreTxt = score == null ? '—' : score.toFixed(0);
+        const tickerEsc = (tk.ticker || '').replace(/'/g, '');
+        const nameEsc = (tk.name || '').replace(/'/g, '').slice(0, 40);
+        const catEsc = (tk.category || '').replace(/'/g, '').slice(0, 30);
+        return `
+            <div class="dc-ticker-row" onclick='openPickModal(${JSON.stringify({
+                ticker: tk.ticker, name: tk.name, asset_class: cls,
+                category: tk.category || '',
+                price: tk.price, change_1d: tk.change_1d,
+                change_30d: tk.change_1m || 0,
+                score: tk.score || 0,
+                direction: (tk.change_1m || 0) >= 0 ? "BULL" : "BEAR",
+                sparkline: tk.sparkline || [],
+                reasons: ["Thème : ${t.name}"],
+            }).replace(/'/g, "&#39;")})'>
+                <div class="dc-ticker-rank ${rankCls}">${rankCls ? ['🥇','🥈','🥉'][rank-1] : rank}</div>
+                <div class="dc-ticker-info">
+                    <div class="dc-ticker-sym">
+                        <span class="dc-ticker-class-tag ${cls}">${classLbl[cls]||'ETF'}</span>
+                        ${tk.ticker}
+                    </div>
+                    <div class="dc-ticker-name">${nameEsc} ${catEsc ? '· ' + catEsc : ''}</div>
+                </div>
+                <div class="dc-ticker-price">${priceTxt}</div>
+                <div class="dc-ticker-chg ${chgCls}">${chgTxt}</div>
+                <div class="dc-ticker-score ${scoreCls}">${scoreTxt}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function discoverBackToList(){
+    document.getElementById('dc-list-view').style.display = 'block';
+    document.getElementById('dc-detail-view').style.display = 'none';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
 
 /**
  * Classe une position dans : actions | etf | crypto | commodity

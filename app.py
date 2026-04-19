@@ -414,6 +414,23 @@ def api_portfolio_history():
     })
 
 
+@app.route("/api/themes")
+def api_themes_list():
+    """Liste des thèmes Discover avec perf moyenne. Cache 1h."""
+    import themes as th
+    force = request.args.get("force", "").lower() in ("1", "true")
+    return jsonify({"themes": th.get_themes_with_perf(force_refresh=force)})
+
+
+@app.route("/api/themes/<theme_id>")
+def api_theme_detail(theme_id):
+    import themes as th
+    detail = th.get_theme_detail(theme_id)
+    if not detail:
+        return jsonify({"error": "theme_not_found"}), 404
+    return jsonify(detail)
+
+
 @app.route("/api/watchlist", methods=["GET"])
 def api_watchlist_list():
     import watchlist as wl
