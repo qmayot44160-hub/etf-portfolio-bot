@@ -414,6 +414,55 @@ def api_portfolio_history():
     })
 
 
+@app.route("/api/watchlist", methods=["GET"])
+def api_watchlist_list():
+    import watchlist as wl
+    return jsonify({"items": wl.list_items()})
+
+
+@app.route("/api/watchlist/add", methods=["POST"])
+def api_watchlist_add():
+    import watchlist as wl
+    data = request.get_json() or {}
+    return jsonify(wl.add(
+        data.get("ticker", ""),
+        name=data.get("name", ""),
+        asset_class=data.get("asset_class", "etf"),
+        category=data.get("category", ""),
+    ))
+
+
+@app.route("/api/watchlist/<ticker>", methods=["DELETE"])
+def api_watchlist_remove(ticker):
+    import watchlist as wl
+    return jsonify(wl.remove(ticker))
+
+
+@app.route("/api/watchlist/<ticker>/alert", methods=["POST"])
+def api_watchlist_set_alert(ticker):
+    import watchlist as wl
+    data = request.get_json() or {}
+    above = data.get("above")
+    below = data.get("below")
+    # Permet null/0 pour effacer explicitement
+    return jsonify(wl.set_alert(ticker,
+        above=above if above is not None else None,
+        below=below if below is not None else None,
+    ))
+
+
+@app.route("/api/watchlist/<ticker>/alert", methods=["DELETE"])
+def api_watchlist_clear_alert(ticker):
+    import watchlist as wl
+    return jsonify(wl.clear_alert(ticker))
+
+
+@app.route("/api/watchlist/check/<ticker>")
+def api_watchlist_check(ticker):
+    import watchlist as wl
+    return jsonify({"watched": wl.is_watched(ticker)})
+
+
 @app.route("/api/portfolio/snapshot", methods=["POST"])
 def api_portfolio_snapshot():
     """Force l'enregistrement d'un snapshot maintenant."""
@@ -946,6 +995,13 @@ def init_app():
         print("[Startup] ETF smart-picks scanner triggered")
     except Exception as e:
         print(f"[Startup] ETF scanner init error: {e}")
+
+    # Watchlist : démarre le checker d'alertes en arrière-plan
+    try:
+        import watchlist as _wl
+        _wl.start_background_checker(interval_sec=300)
+    except Exception as e:
+        print(f"[Startup] watchlist checker error: {e}")
 
     # Snapshot quotidien de la valeur portefeuille (toutes classes)
     try:

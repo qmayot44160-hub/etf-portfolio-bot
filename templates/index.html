@@ -2110,6 +2110,285 @@
             border: 1px dashed rgba(255,255,255,0.08);
         }
 
+        /* ═══════════════════════════════════════════════════════
+           WATCHLIST — étoile sur cards + onglet dédié
+           ═══════════════════════════════════════════════════════ */
+        .wl-star-btn {
+            position: absolute; top: 10px; right: 10px;
+            width: 28px; height: 28px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            color: var(--sf-text-muted);
+            cursor: pointer;
+            z-index: 3;
+            transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+            font-size: 0.95rem;
+            line-height: 1;
+        }
+        .wl-star-btn:hover {
+            background: rgba(255,204,0,0.14);
+            border-color: rgba(255,204,0,0.3);
+            color: #ffcc00;
+            transform: scale(1.08);
+        }
+        .wl-star-btn.active {
+            background: linear-gradient(135deg, rgba(255,204,0,0.25), rgba(255,159,10,0.18));
+            border-color: rgba(255,204,0,0.5);
+            color: #ffcc00;
+            box-shadow: 0 0 12px rgba(255,204,0,0.25);
+        }
+        .sp-card { position: relative; }
+
+        .wl-page {
+            padding: 0;
+        }
+        .wl-empty {
+            text-align: center;
+            padding: 56px 24px;
+            color: var(--sf-text-muted);
+        }
+        .wl-empty-icon {
+            font-size: 3rem; margin-bottom: 12px;
+            opacity: 0.4;
+        }
+        .wl-empty-title {
+            font-size: 1.1rem; font-weight: 600;
+            color: var(--sf-text);
+            margin-bottom: 6px;
+        }
+        .wl-empty-sub {
+            font-size: 0.88rem;
+        }
+        .wl-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        .wl-card {
+            position: relative;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .wl-card:hover {
+            border-color: rgba(255,255,255,0.12);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        }
+        .wl-card-head {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 10px;
+        }
+        .wl-card-badge {
+            width: 34px; height: 34px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 700;
+            letter-spacing: 0.02em;
+            background: rgba(10,132,255,0.15);
+            color: var(--sf-blue);
+            flex-shrink: 0;
+        }
+        .wl-card[data-class="crypto"] .wl-card-badge {
+            background: rgba(255,159,10,0.18); color: var(--sf-orange);
+        }
+        .wl-card[data-class="commodity"] .wl-card-badge {
+            background: rgba(48,209,88,0.18); color: var(--sf-green);
+        }
+        .wl-card[data-class="actions"] .wl-card-badge {
+            background: rgba(191,90,242,0.18); color: #bf5af2;
+        }
+        .wl-card-info { flex: 1; min-width: 0; }
+        .wl-card-ticker {
+            font-size: 0.95rem; font-weight: 650;
+            letter-spacing: -0.01em;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .wl-card-name {
+            font-size: 0.72rem; color: var(--sf-text-muted);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            margin-top: 2px;
+        }
+        .wl-card-remove {
+            background: transparent; border: none;
+            color: var(--sf-text-muted);
+            cursor: pointer;
+            padding: 4px 8px; border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .wl-card-remove:hover {
+            background: rgba(255,69,58,0.12);
+            color: var(--sf-red);
+        }
+        .wl-card-price-row {
+            display: flex; align-items: baseline; justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .wl-card-price {
+            font-size: 1.35rem; font-weight: 700;
+            letter-spacing: -0.02em;
+            font-variant-numeric: tabular-nums;
+        }
+        .wl-card-chg {
+            font-size: 0.78rem; font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            padding: 2px 8px; border-radius: 6px;
+        }
+        .wl-card-chg.up { background: rgba(48,209,88,0.12); color: var(--sf-green); }
+        .wl-card-chg.down { background: rgba(255,69,58,0.12); color: var(--sf-red); }
+        .wl-card-chg.flat { background: rgba(255,255,255,0.05); color: var(--sf-text-muted); }
+        .wl-card-spark {
+            height: 36px; width: 100%; display: block;
+            margin-bottom: 10px;
+        }
+        .wl-card-spark path {
+            fill: none; stroke-width: 1.6;
+            stroke-linejoin: round; stroke-linecap: round;
+        }
+        .wl-card-spark.up path { stroke: var(--sf-green); }
+        .wl-card-spark.down path { stroke: var(--sf-red); }
+        .wl-card-spark.flat path { stroke: var(--sf-text-muted); }
+        .wl-card-alerts {
+            display: flex; gap: 6px;
+            font-size: 0.68rem;
+            color: var(--sf-text-muted);
+        }
+        .wl-alert-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 8px; border-radius: 6px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-variant-numeric: tabular-nums;
+        }
+        .wl-alert-pill:hover {
+            background: rgba(10,132,255,0.12);
+            border-color: rgba(10,132,255,0.3);
+            color: var(--sf-blue);
+        }
+        .wl-alert-pill.active {
+            background: rgba(10,132,255,0.18);
+            border-color: rgba(10,132,255,0.4);
+            color: #8abfff;
+        }
+        .wl-alert-pill .wl-alert-val {
+            font-weight: 600;
+            color: var(--sf-text);
+        }
+        .wl-toolbar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 14px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .wl-toolbar-left {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.82rem; color: var(--sf-text-muted);
+        }
+        .wl-count-pill {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 10px; border-radius: 7px;
+            background: rgba(255,204,0,0.12);
+            border: 1px solid rgba(255,204,0,0.25);
+            color: #ffcc00;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        /* Modal d'édition des alertes */
+        .wl-alert-modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(6px);
+            z-index: 1050;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.25s;
+        }
+        .wl-alert-modal-backdrop.open { opacity: 1; pointer-events: auto; }
+        .wl-alert-modal {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.92);
+            width: min(420px, 92vw);
+            background: rgba(24,24,28,0.96);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 18px;
+            padding: 22px;
+            z-index: 1051;
+            opacity: 0; pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .wl-alert-modal.open {
+            opacity: 1; pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .wl-alert-modal h3 {
+            margin: 0 0 6px; font-size: 1.05rem;
+        }
+        .wl-alert-modal p.sub {
+            font-size: 0.78rem; color: var(--sf-text-muted);
+            margin: 0 0 18px;
+        }
+        .wl-alert-modal label {
+            display: block; margin-bottom: 4px;
+            font-size: 0.7rem; color: var(--sf-text-muted);
+            letter-spacing: 0.06em; text-transform: uppercase;
+        }
+        .wl-alert-modal input {
+            width: 100%; padding: 10px 12px;
+            margin-bottom: 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            color: var(--sf-text);
+            font-size: 0.92rem;
+            font-variant-numeric: tabular-nums;
+        }
+        .wl-alert-modal input:focus {
+            outline: none;
+            border-color: rgba(10,132,255,0.5);
+            background: rgba(10,132,255,0.05);
+        }
+        .wl-alert-modal-footer {
+            display: flex; gap: 8px; justify-content: flex-end;
+            margin-top: 6px;
+        }
+        .wl-alert-modal-footer button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.82rem; font-weight: 600;
+            cursor: pointer; border: none;
+            transition: all 0.2s;
+        }
+        .wl-alert-modal-footer .secondary {
+            background: rgba(255,255,255,0.06);
+            color: var(--sf-text);
+        }
+        .wl-alert-modal-footer .secondary:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .wl-alert-modal-footer .primary {
+            background: linear-gradient(135deg, var(--sf-blue), #5ab0ff);
+            color: white;
+        }
+        .wl-alert-modal-footer .primary:hover {
+            box-shadow: 0 4px 14px rgba(10,132,255,0.4);
+        }
+        .wl-alert-modal-footer .danger {
+            background: rgba(255,69,58,0.15);
+            color: var(--sf-red);
+            border: 1px solid rgba(255,69,58,0.25);
+        }
+        .wl-alert-modal-footer .danger:hover {
+            background: rgba(255,69,58,0.25);
+        }
+
         /* Split stats (cash / positions / ETF / crypto) */
         .wd-stats {
             display: grid; grid-template-columns: repeat(2, 1fr);
@@ -4109,6 +4388,7 @@
                     <button class="nav-dropdown-item" data-view="analytics"><span class="nav-icon" data-icon="chartUp"></span>Performance</button>
                     <button class="nav-dropdown-item" data-view="projection"><span class="nav-icon" data-icon="trending"></span>Projection</button>
                     <button class="nav-dropdown-item" data-view="scanner"><span class="nav-icon" data-icon="search"></span>Scanner</button>
+                    <button class="nav-dropdown-item" data-view="watchlist"><span class="nav-icon" style="font-size:1rem;line-height:1">★</span>Watchlist</button>
                 </div>
             </div>
 
@@ -4897,6 +5177,56 @@
 <!-- ═══════════════════════════════════════════════════════
      SCANNER
      ═══════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════
+     WATCHLIST — suivi d'actifs sans les détenir
+     ═══════════════════════════════════════════════════════ -->
+<div id="view-watchlist">
+    <div class="hero">
+        <div class="hero-eyebrow"><span class="dot" style="background:#ffcc00"></span>Watchlist · Suivi personnalisé</div>
+        <div class="hero-badge" style="background:linear-gradient(135deg,rgba(255,204,0,0.18),rgba(255,159,10,0.12));border-color:rgba(255,204,0,0.3);color:#ffcc00;font-size:1.4rem">★</div>
+        <h1 class="hero-title">Ma Watchlist</h1>
+        <p class="hero-subtitle">Suis les actifs qui t'intéressent sans les détenir. Configure des alertes de prix pour recevoir une notification Telegram dès qu'un seuil est franchi.</p>
+    </div>
+    <div class="section-wide">
+        <div class="wl-page">
+            <div class="wl-toolbar">
+                <div class="wl-toolbar-left">
+                    <div class="wl-count-pill">★ <span id="wl-count">0</span></div>
+                    <span>actif(s) surveillé(s)</span>
+                </div>
+                <button class="link-more" onclick="loadWatchlist(true)">↻ Rafraîchir</button>
+            </div>
+            <div id="wl-grid-wrap">
+                <div class="wl-empty" id="wl-empty" style="display:none">
+                    <div class="wl-empty-icon">★</div>
+                    <div class="wl-empty-title">Ta watchlist est vide</div>
+                    <div class="wl-empty-sub">
+                        Ajoute des actifs en cliquant sur l'étoile des Smart Picks<br>
+                        ou depuis n'importe quelle carte d'actif.
+                    </div>
+                </div>
+                <div class="wl-grid" id="wl-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal alertes watchlist -->
+<div class="wl-alert-modal-backdrop" id="wl-alert-modal-backdrop" onclick="closeWatchlistAlertModal()"></div>
+<div class="wl-alert-modal" id="wl-alert-modal">
+    <h3 id="wl-alert-title">Configurer une alerte</h3>
+    <p class="sub" id="wl-alert-sub">Reçois une notification Telegram quand le prix franchit un seuil.</p>
+    <label for="wl-alert-above">Alerte si prix ≥</label>
+    <input type="number" step="0.0001" id="wl-alert-above" placeholder="ex: 150.00">
+    <label for="wl-alert-below">Alerte si prix ≤</label>
+    <input type="number" step="0.0001" id="wl-alert-below" placeholder="ex: 120.00">
+    <div class="wl-alert-modal-footer">
+        <button class="danger" onclick="clearWatchlistAlert()">Tout effacer</button>
+        <button class="secondary" onclick="closeWatchlistAlertModal()">Annuler</button>
+        <button class="primary" onclick="saveWatchlistAlert()">Enregistrer</button>
+    </div>
+</div>
+
 <div id="view-scanner">
     <div class="hero">
         <div class="hero-eyebrow"><span class="dot"></span>Opportunités · Temps réel</div>
@@ -5679,7 +6009,7 @@ function showView(v){
             next.style.transform='translateY(0)';
         });
         window.scrollTo({top:0,behavior:'smooth'});
-        const loaders={home:loadHome,portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire,securite:loadSecurite};
+        const loaders={home:loadHome,portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire,securite:loadSecurite,watchlist:loadWatchlist};
         if(loaders[v])loaders[v]();
     };
     if(current&&current!==next){
@@ -7557,7 +7887,9 @@ function _renderSmartPickCard(p){
     const priceTxt = p.asset_class === 'crypto' ? `$${Number(p.price).toFixed(p.price < 1 ? 4 : 2)}` : `${Number(p.price).toFixed(2)}`;
 
     // Store pick on the DOM node for the click handler via data-idx (no JSON in attr)
+    const isWatched = window.WL_STATE && window.WL_STATE.watched.has((p.ticker||'').toUpperCase());
     return `<div class="sp-card ${dir}" data-class="${p.asset_class||'etf'}" data-ticker="${p.ticker||''}" onclick="openPickFromCard(this, event)">
+        <button class="wl-star-btn ${isWatched ? 'active' : ''}" onclick="event.stopPropagation();toggleWatchlistFromPick('${(p.ticker||'').replace(/'/g,'')}', '${(p.name||'').replace(/'/g,'').slice(0,40)}', '${p.asset_class||'etf'}', '${(p.category||'').replace(/'/g,'').slice(0,40)}', this)" title="Ajouter à la watchlist">★</button>
         <div class="sp-row1">
             <div class="sp-badge">${tick}</div>
             <div class="sp-titles">
@@ -9009,6 +9341,240 @@ function openMoverTile(m){
         }, 300);
     } catch(e){ console.warn('openMoverTile', e); }
 }
+
+/* ═══════════════════════════════════════════════════════
+   WATCHLIST — état global + toggle star + rendu onglet
+   ═══════════════════════════════════════════════════════ */
+window.WL_STATE = { watched: new Set(), items: [], loaded: false, currentEditing: null };
+
+async function _wlSyncWatched(){
+    try {
+        const r = await fetch('/api/watchlist');
+        if(!r.ok) return;
+        const d = await r.json();
+        WL_STATE.items = d.items || [];
+        WL_STATE.watched = new Set(WL_STATE.items.map(it => (it.ticker || '').toUpperCase()));
+        WL_STATE.loaded = true;
+        _wlRefreshAllStars();
+    } catch(e){ console.warn('wl sync', e); }
+}
+
+function _wlRefreshAllStars(){
+    document.querySelectorAll('.sp-card .wl-star-btn').forEach(btn => {
+        const card = btn.closest('.sp-card');
+        const tk = (card?.dataset.ticker || '').toUpperCase();
+        btn.classList.toggle('active', WL_STATE.watched.has(tk));
+    });
+}
+
+async function toggleWatchlistFromPick(ticker, name, assetClass, category, btn){
+    if(!ticker) return;
+    const k = ticker.toUpperCase();
+    const isWatched = WL_STATE.watched.has(k);
+    try {
+        if(isWatched){
+            await fetch('/api/watchlist/' + encodeURIComponent(k), { method: 'DELETE' });
+            WL_STATE.watched.delete(k);
+            btn?.classList.remove('active');
+            _wlToast(`${k} retiré de la watchlist`);
+        } else {
+            await fetch('/api/watchlist/add', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ ticker: k, name, asset_class: assetClass, category })
+            });
+            WL_STATE.watched.add(k);
+            btn?.classList.add('active');
+            _wlToast(`★ ${k} ajouté à la watchlist`);
+        }
+        // rafraîchir le count dans l'onglet si déjà chargé
+        const countEl = document.getElementById('wl-count');
+        if(countEl) countEl.textContent = WL_STATE.watched.size;
+    } catch(e){ console.warn('toggle watchlist', e); }
+}
+
+function _wlToast(msg){
+    let t = document.getElementById('wl-toast');
+    if(!t){
+        t = document.createElement('div');
+        t.id = 'wl-toast';
+        t.style.cssText = `
+            position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
+            background:rgba(20,20,24,0.96); backdrop-filter:blur(14px);
+            border:1px solid rgba(255,204,0,0.3);
+            border-radius:10px; padding:10px 18px;
+            font-size:0.86rem; color:#ffe8a3;
+            z-index:9999; opacity:0; transition:opacity 0.3s;
+            pointer-events:none; box-shadow:0 8px 30px rgba(0,0,0,0.4);
+        `;
+        document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2200);
+}
+
+async function loadWatchlist(force){
+    const grid = document.getElementById('wl-grid');
+    const empty = document.getElementById('wl-empty');
+    const countEl = document.getElementById('wl-count');
+    if(!grid) return;
+
+    if(force || !WL_STATE.loaded){
+        grid.innerHTML = '<div style="grid-column:1/-1;color:var(--sf-text-muted);text-align:center;padding:30px">Chargement…</div>';
+    }
+
+    try {
+        const r = await fetch('/api/watchlist');
+        if(!r.ok) throw new Error('http');
+        const d = await r.json();
+        WL_STATE.items = d.items || [];
+        WL_STATE.watched = new Set(WL_STATE.items.map(it => (it.ticker || '').toUpperCase()));
+        WL_STATE.loaded = true;
+
+        if(countEl) countEl.textContent = WL_STATE.watched.size;
+
+        if(WL_STATE.items.length === 0){
+            if(empty) empty.style.display = 'block';
+            grid.innerHTML = '';
+            return;
+        }
+        if(empty) empty.style.display = 'none';
+
+        grid.innerHTML = WL_STATE.items.map(_wlCardHtml).join('');
+        _wlRefreshAllStars();
+    } catch(e){
+        console.warn('loadWatchlist', e);
+        grid.innerHTML = '<div style="grid-column:1/-1;color:var(--sf-red);text-align:center;padding:30px">Erreur de chargement</div>';
+    }
+}
+
+function _wlCardHtml(it){
+    const tk = (it.ticker || '').toUpperCase();
+    const sym = tk.split('.')[0].slice(0, 4);
+    const chg = it.change_1d;
+    const chgCls = chg == null ? 'flat' : chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat';
+    const chgTxt = chg == null ? '—' : (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
+    const price = it.price;
+    const priceTxt = price == null ? '—' :
+        (price >= 1000 ? '$' + price.toLocaleString('fr-FR', {maximumFractionDigits:2}) :
+         price < 1 ? '$' + price.toFixed(4) : '$' + price.toFixed(2));
+
+    // Sparkline
+    let sparkHtml = '';
+    const spark = it.sparkline || [];
+    if(spark.length >= 2){
+        const min = Math.min(...spark);
+        const max = Math.max(...spark);
+        const span = Math.max(max - min, 0.0001);
+        const step = 100 / (spark.length - 1);
+        let d = '';
+        spark.forEach((v, i) => {
+            const x = i * step;
+            const y = 36 - ((v - min) / span) * 32 - 2;
+            d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+        });
+        sparkHtml = `<svg class="wl-card-spark ${chgCls}" viewBox="0 0 100 36" preserveAspectRatio="none"><path d="${d}"/></svg>`;
+    }
+
+    const alerts = it.alerts || {};
+    const above = alerts.above;
+    const below = alerts.below;
+    const hasAlert = above != null || below != null;
+
+    const aboveTxt = above != null
+        ? `<span class="wl-alert-pill active" onclick="openWatchlistAlertModal('${tk}')">≥ <span class="wl-alert-val">${above}</span></span>`
+        : '';
+    const belowTxt = below != null
+        ? `<span class="wl-alert-pill active" onclick="openWatchlistAlertModal('${tk}')">≤ <span class="wl-alert-val">${below}</span></span>`
+        : '';
+    const addAlertBtn = !hasAlert
+        ? `<span class="wl-alert-pill" onclick="openWatchlistAlertModal('${tk}')">+ Alerte</span>`
+        : '';
+
+    return `
+        <div class="wl-card" data-class="${it.asset_class||'etf'}" data-ticker="${tk}">
+            <div class="wl-card-head">
+                <div class="wl-card-badge">${sym}</div>
+                <div class="wl-card-info">
+                    <div class="wl-card-ticker">${tk}</div>
+                    <div class="wl-card-name">${(it.name||'').slice(0,40)} ${it.category ? '· ' + it.category : ''}</div>
+                </div>
+                <button class="wl-card-remove" onclick="removeFromWatchlist('${tk}')" title="Retirer">✕</button>
+            </div>
+            <div class="wl-card-price-row">
+                <div class="wl-card-price">${priceTxt}</div>
+                <div class="wl-card-chg ${chgCls}">${chgTxt}</div>
+            </div>
+            ${sparkHtml}
+            <div class="wl-card-alerts">${aboveTxt}${belowTxt}${addAlertBtn}</div>
+        </div>
+    `;
+}
+
+async function removeFromWatchlist(ticker){
+    if(!confirm(`Retirer ${ticker} de la watchlist ?`)) return;
+    try {
+        await fetch('/api/watchlist/' + encodeURIComponent(ticker), { method: 'DELETE' });
+        WL_STATE.watched.delete(ticker.toUpperCase());
+        loadWatchlist(true);
+        _wlRefreshAllStars();
+    } catch(e){ console.warn('remove', e); }
+}
+
+/* Modal alerts */
+function openWatchlistAlertModal(ticker){
+    const item = WL_STATE.items.find(x => (x.ticker||'').toUpperCase() === ticker.toUpperCase());
+    if(!item) return;
+    WL_STATE.currentEditing = ticker;
+    document.getElementById('wl-alert-title').textContent = `Alerte sur ${ticker}`;
+    document.getElementById('wl-alert-sub').textContent =
+        `Prix actuel : ${item.price != null ? '$' + item.price : '—'} · Notification Telegram dès franchissement.`;
+    document.getElementById('wl-alert-above').value = item.alerts?.above ?? '';
+    document.getElementById('wl-alert-below').value = item.alerts?.below ?? '';
+    document.getElementById('wl-alert-modal-backdrop').classList.add('open');
+    document.getElementById('wl-alert-modal').classList.add('open');
+}
+function closeWatchlistAlertModal(){
+    WL_STATE.currentEditing = null;
+    document.getElementById('wl-alert-modal-backdrop').classList.remove('open');
+    document.getElementById('wl-alert-modal').classList.remove('open');
+}
+async function saveWatchlistAlert(){
+    const ticker = WL_STATE.currentEditing;
+    if(!ticker) return;
+    const above = document.getElementById('wl-alert-above').value;
+    const below = document.getElementById('wl-alert-below').value;
+    try {
+        await fetch('/api/watchlist/' + encodeURIComponent(ticker) + '/alert', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+                above: above ? parseFloat(above) : null,
+                below: below ? parseFloat(below) : null,
+            })
+        });
+        closeWatchlistAlertModal();
+        loadWatchlist(true);
+        _wlToast(`Alerte enregistrée pour ${ticker}`);
+    } catch(e){ console.warn('save alert', e); }
+}
+async function clearWatchlistAlert(){
+    const ticker = WL_STATE.currentEditing;
+    if(!ticker) return;
+    try {
+        await fetch('/api/watchlist/' + encodeURIComponent(ticker) + '/alert', { method: 'DELETE' });
+        closeWatchlistAlertModal();
+        loadWatchlist(true);
+        _wlToast(`Alertes effacées pour ${ticker}`);
+    } catch(e){ console.warn('clear alert', e); }
+}
+
+// Sync initiale au load
+(function initWL(){
+    setTimeout(_wlSyncWatched, 500);
+})();
 
 /**
  * Classe une position dans : actions | etf | crypto | commodity
