@@ -1617,6 +1617,377 @@
             opacity: 0.85;
         }
 
+        /* Wallet button — logo + pastille verte si positions */
+        .wallet-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 30px; height: 30px; border-radius: 9px;
+            background: linear-gradient(135deg, rgba(48,209,88,0.14), rgba(10,132,255,0.1));
+            border: 1px solid rgba(48,209,88,0.22);
+            color: #f5f5f7;
+            cursor: pointer; font-family: inherit;
+            backdrop-filter: blur(12px) saturate(160%);
+            -webkit-backdrop-filter: blur(12px) saturate(160%);
+            box-shadow:
+                0 0 0 0 rgba(48,209,88,0),
+                0 4px 14px -3px rgba(48,209,88,0.25);
+            transition: all 0.22s cubic-bezier(0.2,0.9,0.2,1);
+            position: relative;
+            flex-shrink: 0;
+        }
+        .wallet-btn svg {
+            width: 15px; height: 15px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .wallet-btn:hover {
+            transform: translateY(-1px);
+            background: linear-gradient(135deg, rgba(48,209,88,0.22), rgba(10,132,255,0.16));
+            border-color: rgba(48,209,88,0.38);
+            box-shadow:
+                0 0 0 3px rgba(48,209,88,0.08),
+                0 6px 18px -3px rgba(48,209,88,0.4);
+        }
+        .wallet-btn:active { transform: scale(0.94); }
+        .wallet-btn.has-positions::after {
+            content: ''; position: absolute;
+            top: -2px; right: -2px;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--sf-green);
+            border: 1.5px solid #0a0a0a;
+            box-shadow: 0 0 6px rgba(48,209,88,0.6);
+            animation: walletDotPulse 2.4s ease-in-out infinite;
+        }
+        @keyframes walletDotPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%      { opacity: 0.55; transform: scale(0.75); }
+        }
+
+        /* ════════════════════════════════════════════════
+           WALLET DRAWER — panneau latéral right-side
+           Plus compact que le settings-drawer (420-480px),
+           focus "banque" : balance, positions, activité, actions.
+           ════════════════════════════════════════════════ */
+        .wallet-drawer-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.42);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 950;
+        }
+        .wallet-drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+
+        .wallet-drawer {
+            position: fixed;
+            top: 0; right: 0; bottom: 0;
+            width: min(440px, 100vw);
+            background:
+                radial-gradient(ellipse at top left, rgba(48,209,88,0.09), transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(10,132,255,0.06), transparent 55%),
+                linear-gradient(180deg, rgba(14,14,18,0.97), rgba(10,10,14,0.96));
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border-left: 1px solid rgba(255,255,255,0.08);
+            box-shadow: -24px 0 70px -12px rgba(0,0,0,0.7), inset 1px 0 0 rgba(255,255,255,0.03);
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.2,0.9,0.2,1);
+            z-index: 1000;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+        .wallet-drawer.open { transform: translateX(0); }
+        .wallet-drawer::before {
+            content: ''; position: absolute;
+            left: 0; top: 0; bottom: 0; width: 1px;
+            background: linear-gradient(180deg,
+                transparent, rgba(48,209,88,0.4) 20%,
+                rgba(10,132,255,0.3) 60%, transparent);
+            pointer-events: none;
+        }
+
+        .wd-header {
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 22px;
+            background: rgba(10,10,14,0.85);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            backdrop-filter: blur(20px);
+            z-index: 5;
+        }
+        .wd-title {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.98rem; font-weight: 650;
+            letter-spacing: -0.01em;
+        }
+        .wd-title-icon {
+            width: 30px; height: 30px; border-radius: 9px;
+            background: linear-gradient(135deg, var(--sf-green), var(--sf-blue));
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(48,209,88,0.3);
+        }
+        .wd-title-icon svg {
+            width: 15px; height: 15px;
+            fill: none; stroke: white;
+            stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .wd-close {
+            width: 30px; height: 30px; border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04);
+            color: var(--sf-text-secondary);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.2,0.9,0.2,1);
+            font-size: 0.9rem;
+        }
+        .wd-close:hover {
+            background: rgba(255,255,255,0.08); color: var(--sf-text);
+            transform: rotate(90deg);
+        }
+
+        .wd-body {
+            flex: 1; overflow-y: auto;
+            padding: 20px 22px 28px;
+            scrollbar-gutter: stable;
+        }
+        .wd-body::-webkit-scrollbar { width: 8px; }
+        .wd-body::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.08); border-radius: 4px;
+        }
+
+        /* Hero balance card */
+        .wd-balance {
+            position: relative;
+            padding: 22px 22px 20px;
+            border-radius: 16px;
+            background:
+                radial-gradient(ellipse at top left, rgba(48,209,88,0.12), transparent 60%),
+                linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.07);
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+        .wd-balance-label {
+            font-size: 0.64rem; color: var(--sf-text-muted);
+            letter-spacing: 0.1em; text-transform: uppercase;
+            margin-bottom: 4px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .wd-mode-pill {
+            font-size: 0.58rem; font-weight: 700;
+            letter-spacing: 0.08em;
+            padding: 2px 7px; border-radius: 5px;
+            background: rgba(255,159,10,0.15);
+            color: var(--sf-orange);
+            border: 1px solid rgba(255,159,10,0.25);
+        }
+        .wd-mode-pill.live {
+            background: rgba(48,209,88,0.15);
+            color: var(--sf-green);
+            border-color: rgba(48,209,88,0.3);
+        }
+        .wd-balance-value {
+            font-size: 2.1rem; font-weight: 700;
+            letter-spacing: -0.03em;
+            font-variant-numeric: tabular-nums;
+            line-height: 1.1;
+        }
+        .wd-balance-sub {
+            margin-top: 8px;
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.78rem; color: var(--sf-text-muted);
+        }
+        .wd-balance-chg {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 2px 8px; border-radius: 6px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+        .wd-balance-chg.up { background: rgba(48,209,88,0.12); color: var(--sf-green); }
+        .wd-balance-chg.down { background: rgba(255,69,58,0.12); color: var(--sf-red); }
+        .wd-balance-chg.flat { background: rgba(255,255,255,0.05); color: var(--sf-text-muted); }
+
+        /* Split stats (cash / positions / ETF / crypto) */
+        .wd-stats {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        .wd-stat {
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .wd-stat-label {
+            font-size: 0.6rem; color: var(--sf-text-muted);
+            letter-spacing: 0.08em; text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .wd-stat-val {
+            font-size: 1.02rem; font-weight: 650;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.01em;
+        }
+        .wd-stat-sub {
+            font-size: 0.7rem; color: var(--sf-text-muted);
+            margin-top: 2px;
+        }
+
+        /* Section titles */
+        .wd-section-title {
+            font-size: 0.68rem; font-weight: 650;
+            color: var(--sf-text-muted);
+            letter-spacing: 0.1em; text-transform: uppercase;
+            margin: 18px 0 10px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .wd-section-title .link {
+            text-transform: none; letter-spacing: 0.01em;
+            font-weight: 500;
+            font-size: 0.74rem;
+            color: var(--sf-blue); cursor: pointer;
+            text-decoration: none;
+        }
+        .wd-section-title .link:hover { text-decoration: underline; }
+
+        /* Positions list */
+        .wd-pos-list { display: flex; flex-direction: column; gap: 4px; }
+        .wd-pos-row {
+            display: grid; grid-template-columns: 30px 1fr auto; gap: 10px;
+            align-items: center;
+            padding: 8px 10px;
+            border-radius: 9px;
+            transition: background 0.2s, transform 0.2s;
+            cursor: pointer;
+        }
+        .wd-pos-row:hover {
+            background: rgba(255,255,255,0.035);
+            transform: translateX(3px);
+        }
+        .wd-pos-sym {
+            width: 28px; height: 28px; border-radius: 7px;
+            background: rgba(10,132,255,0.12);
+            border: 1px solid rgba(10,132,255,0.2);
+            color: var(--sf-blue);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.6rem; font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+        .wd-pos-row.crypto .wd-pos-sym {
+            background: rgba(255,159,10,0.12);
+            border-color: rgba(255,159,10,0.2);
+            color: var(--sf-orange);
+        }
+        .wd-pos-info { min-width: 0; }
+        .wd-pos-name {
+            font-size: 0.82rem; font-weight: 600;
+            letter-spacing: -0.01em;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .wd-pos-sub {
+            font-size: 0.68rem; color: var(--sf-text-muted);
+            margin-top: 1px;
+        }
+        .wd-pos-val {
+            text-align: right;
+            font-size: 0.86rem; font-weight: 650;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.01em;
+        }
+        .wd-pos-chg {
+            font-size: 0.66rem;
+            font-variant-numeric: tabular-nums;
+        }
+        .wd-pos-chg.up { color: var(--sf-green); }
+        .wd-pos-chg.down { color: var(--sf-red); }
+
+        /* Activity / events */
+        .wd-activity-list { display: flex; flex-direction: column; gap: 6px; }
+        .wd-act-row {
+            display: grid; grid-template-columns: auto 1fr auto; gap: 10px;
+            align-items: center;
+            padding: 8px 10px;
+            border-radius: 9px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.78rem;
+        }
+        .wd-act-ico {
+            width: 22px; height: 22px; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(10,132,255,0.12);
+            color: var(--sf-blue);
+        }
+        .wd-act-ico.green { background: rgba(48,209,88,0.14); color: var(--sf-green); }
+        .wd-act-ico.red { background: rgba(255,69,58,0.12); color: var(--sf-red); }
+        .wd-act-ico.orange { background: rgba(255,159,10,0.12); color: var(--sf-orange); }
+        .wd-act-ico svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 2; }
+        .wd-act-text { color: var(--sf-text-secondary); }
+        .wd-act-text b { color: var(--sf-text); }
+        .wd-act-time {
+            color: var(--sf-text-muted);
+            font-size: 0.7rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Quick actions */
+        .wd-actions {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+            margin-top: 6px;
+        }
+        .wd-action {
+            padding: 10px 12px;
+            border-radius: 11px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: var(--sf-text);
+            font-size: 0.82rem; font-weight: 550;
+            cursor: pointer;
+            display: flex; align-items: center; gap: 10px;
+            transition: all 0.2s;
+        }
+        .wd-action:hover {
+            background: rgba(10,132,255,0.12);
+            border-color: rgba(10,132,255,0.28);
+            color: var(--sf-blue);
+            transform: translateY(-1px);
+        }
+        .wd-action .sfi {
+            width: 14px; height: 14px;
+            color: var(--sf-blue);
+            flex-shrink: 0;
+        }
+        .wd-action.primary {
+            background: linear-gradient(135deg, rgba(48,209,88,0.18), rgba(10,132,255,0.14));
+            border-color: rgba(48,209,88,0.3);
+            color: #f5f5f7;
+        }
+        .wd-action.primary .sfi { color: var(--sf-green); }
+        .wd-action.primary:hover {
+            background: linear-gradient(135deg, rgba(48,209,88,0.28), rgba(10,132,255,0.2));
+            border-color: rgba(48,209,88,0.5);
+        }
+
+        .wd-empty {
+            text-align: center;
+            padding: 20px 10px;
+            font-size: 0.8rem;
+            color: var(--sf-text-muted);
+        }
+        .wd-skel {
+            height: 54px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+            background-size: 200% 100%;
+            animation: skelShimmer 1.4s ease-in-out infinite;
+            margin-bottom: 6px;
+        }
+
         .user-menu {
             position: fixed; top: 48px; right: 22px; z-index: 9998;
             width: 280px;
@@ -3384,6 +3755,7 @@
             <div id="mode-badge" class="hdr-chip mode-chip"><span class="chip-dot"></span>PAPER</div>
             <button id="kill-switch-btn" class="hdr-chip kill-chip" onclick="triggerKillSwitch()" title="Arrêt d'urgence du bot"><span class="sfi" data-icon="power"></span>KILL</button>
             <div id="bot-status" class="globalheader-status"><span class="dot" style="background:var(--sf-orange)"></span> Simulation</div>
+            <button id="wallet-btn" class="wallet-btn" onclick="toggleWalletDrawer()" title="Wallet — patrimoine & activité" aria-haspopup="dialog"><span class="sfi" data-icon="wallet"></span></button>
             <span class="hdr-divider" aria-hidden="true"></span>
             <button id="avatar-btn" class="avatar-btn" onclick="toggleSettingsFromAvatar()" oncontextmenu="event.preventDefault(); toggleUserMenu(event);" title="Profil & Paramètres (clic droit pour menu rapide)" aria-haspopup="dialog">QM</button>
         </div>
@@ -4882,6 +5254,7 @@ const ICN = {
     phone: '<svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>',
     refresh: '<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0115-6.7L21 8M21 3v5h-5M21 12a9 9 0 01-15 6.7L3 16M3 21v-5h5"/></svg>',
     briefcase: '<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2M3 13h18"/></svg>',
+    wallet: '<svg viewBox="0 0 24 24"><path d="M3 8v10a2 2 0 002 2h14a2 2 0 002-2v-8a2 2 0 00-2-2H5a2 2 0 010-4h13v4"/><circle cx="17" cy="14" r="1.2" fill="currentColor" stroke="none"/></svg>',
     inbox: '<svg viewBox="0 0 24 24"><path d="M3 13l3-8h12l3 8v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6z"/><path d="M3 13h5l1 3h6l1-3h5"/></svg>',
     bank: '<svg viewBox="0 0 24 24"><path d="M3 21h18M3 10h18M12 3L3 8v2h18V8l-9-5zM6 10v11M10 10v11M14 10v11M18 10v11"/></svg>',
     scale: '<svg viewBox="0 0 24 24"><path d="M12 3v18M3 7l9-2 9 2M6 7l-3 8a4 4 0 008 0L8 7M18 7l-3 8a4 4 0 008 0l-3-8"/></svg>',
@@ -7648,6 +8021,270 @@ setTimeout(() => {
         </button>
     </div>
 </div>
+
+<!-- ═══════════════════════════════════════════════════════
+     WALLET DRAWER — patrimoine, positions, activité, actions
+     ═══════════════════════════════════════════════════════ -->
+<div class="wallet-drawer-backdrop" id="wallet-drawer-backdrop" onclick="closeWalletDrawer()"></div>
+<aside class="wallet-drawer" id="wallet-drawer" role="dialog" aria-modal="true" aria-labelledby="wd-title">
+    <div class="wd-header">
+        <div class="wd-title-icon"><span class="sfi" data-icon="wallet"></span></div>
+        <div style="flex:1; min-width:0;">
+            <div id="wd-title" style="font-size:1.05rem; font-weight:700; letter-spacing:-0.01em;">Wallet</div>
+            <div style="font-size:0.72rem; color:var(--sf-text-muted); margin-top:2px;" id="wd-subtitle">Patrimoine & activité</div>
+        </div>
+        <button class="wd-close" onclick="closeWalletDrawer()" aria-label="Fermer">✕</button>
+    </div>
+    <div class="wd-body" id="wd-body">
+        <!-- Hero balance -->
+        <div class="wd-balance">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <span style="font-size:0.72rem; color:var(--sf-text-muted); text-transform:uppercase; letter-spacing:0.06em;">Valeur totale</span>
+                <span class="wd-mode-pill" id="wd-mode-pill">PAPER</span>
+            </div>
+            <div class="wd-balance-value" id="wd-balance-value">—</div>
+            <div class="wd-balance-chg" id="wd-balance-chg">—</div>
+        </div>
+
+        <!-- Stats grid -->
+        <div class="wd-stats">
+            <div class="wd-stat">
+                <div class="wd-stat-label">Cash</div>
+                <div class="wd-stat-val" id="wd-stat-cash">—</div>
+            </div>
+            <div class="wd-stat">
+                <div class="wd-stat-label">Positions</div>
+                <div class="wd-stat-val" id="wd-stat-positions">—</div>
+            </div>
+            <div class="wd-stat">
+                <div class="wd-stat-label">ETF</div>
+                <div class="wd-stat-val" id="wd-stat-etf">—</div>
+            </div>
+            <div class="wd-stat">
+                <div class="wd-stat-label">Crypto</div>
+                <div class="wd-stat-val" id="wd-stat-crypto">—</div>
+            </div>
+        </div>
+
+        <!-- Positions -->
+        <div class="wd-section-title">
+            <span>Positions actives</span>
+            <a href="#" onclick="event.preventDefault(); closeWalletDrawer(); document.querySelector('[data-view=\'positions\']')?.click();">Voir tout</a>
+        </div>
+        <div class="wd-pos-list" id="wd-pos-list">
+            <div class="wd-skel"></div>
+            <div class="wd-skel"></div>
+        </div>
+
+        <!-- Activity -->
+        <div class="wd-section-title" style="margin-top:18px;">
+            <span>Activité récente</span>
+            <a href="#" onclick="event.preventDefault(); closeWalletDrawer(); document.querySelector('[data-view=\'historique\']')?.click();">Historique</a>
+        </div>
+        <div class="wd-activity-list" id="wd-activity-list">
+            <div class="wd-skel"></div>
+            <div class="wd-skel"></div>
+        </div>
+
+        <!-- Actions -->
+        <div class="wd-actions">
+            <button class="wd-action primary" onclick="closeWalletDrawer(); document.querySelector('[data-view=\'smart-picks\']')?.click();">
+                <span class="sfi" data-icon="sparkles"></span> Smart Picks
+            </button>
+            <button class="wd-action" onclick="closeWalletDrawer(); document.querySelector('[data-view=\'positions\']')?.click();">
+                <span class="sfi" data-icon="chart"></span> Portefeuille
+            </button>
+        </div>
+    </div>
+</aside>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   WALLET DRAWER — ouverture, chargement, rendu
+   ═══════════════════════════════════════════════════════ */
+const WALLET_STATE = { open: false, loading: false, data: null };
+
+function toggleWalletDrawer(){
+    if(WALLET_STATE.open) closeWalletDrawer();
+    else openWalletDrawer();
+}
+
+function openWalletDrawer(){
+    const drawer = document.getElementById('wallet-drawer');
+    const backdrop = document.getElementById('wallet-drawer-backdrop');
+    if(!drawer || !backdrop) return;
+    drawer.classList.add('open');
+    backdrop.classList.add('open');
+    WALLET_STATE.open = true;
+    document.body.style.overflow = 'hidden';
+    loadWalletData();
+}
+
+function closeWalletDrawer(){
+    const drawer = document.getElementById('wallet-drawer');
+    const backdrop = document.getElementById('wallet-drawer-backdrop');
+    if(!drawer || !backdrop) return;
+    drawer.classList.remove('open');
+    backdrop.classList.remove('open');
+    WALLET_STATE.open = false;
+    document.body.style.overflow = '';
+}
+
+// ESC to close
+document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && WALLET_STATE.open){ closeWalletDrawer(); }
+});
+
+async function loadWalletData(){
+    if(WALLET_STATE.loading) return;
+    WALLET_STATE.loading = true;
+
+    try {
+        const fetchJSON = (u) => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null);
+        const [pf, crypto, trades] = await Promise.all([
+            fetchJSON('/api/portfolio'),
+            fetchJSON('/api/crypto/portfolio'),
+            fetchJSON('/api/paper/trades?limit=6')
+        ]);
+
+        WALLET_STATE.data = { pf, crypto, trades };
+        renderWalletBalance(pf, crypto);
+        renderWalletPositions(pf, crypto);
+        renderWalletActivity(trades);
+
+        // Badge si positions
+        const hasPos = (pf?.positions?.length || 0) + (crypto?.positions?.length || 0) > 0;
+        const btn = document.getElementById('wallet-btn');
+        if(btn) btn.classList.toggle('has-positions', hasPos);
+    } catch(e){
+        console.warn('[wallet] load error', e);
+    } finally {
+        WALLET_STATE.loading = false;
+    }
+}
+
+function _fmtMoney(v){
+    if(v == null || isNaN(v)) return '—';
+    const sign = v < 0 ? '-' : '';
+    const abs = Math.abs(v);
+    if(abs >= 1000) return sign + '$' + abs.toLocaleString('fr-FR', {maximumFractionDigits: 0});
+    return sign + '$' + abs.toFixed(2);
+}
+function _fmtPct(v){
+    if(v == null || isNaN(v)) return '—';
+    return (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+}
+
+function renderWalletBalance(pf, crypto){
+    const pfVal = pf?.total_value ?? pf?.equity ?? 0;
+    const cryptoVal = crypto?.total_value ?? 0;
+    const totalVal = pfVal + cryptoVal;
+    const cash = (pf?.cash ?? 0) + (crypto?.cash ?? 0);
+    const dayChg = pf?.day_change_pct ?? pf?.change_pct ?? 0;
+
+    document.getElementById('wd-balance-value').textContent = _fmtMoney(totalVal);
+    const chgEl = document.getElementById('wd-balance-chg');
+    chgEl.textContent = _fmtPct(dayChg) + ' aujourd\'hui';
+    chgEl.style.color = dayChg >= 0 ? 'var(--sf-green)' : 'var(--sf-red)';
+    chgEl.style.background = dayChg >= 0 ? 'rgba(48,209,88,0.12)' : 'rgba(255,69,58,0.12)';
+
+    const mode = pf?.mode || (pf?.paper ? 'PAPER' : 'LIVE');
+    const modePill = document.getElementById('wd-mode-pill');
+    modePill.textContent = String(mode).toUpperCase();
+    modePill.style.background = mode === 'LIVE' ? 'rgba(48,209,88,0.18)' : 'rgba(255,159,10,0.16)';
+    modePill.style.color = mode === 'LIVE' ? 'var(--sf-green)' : 'var(--sf-orange)';
+
+    document.getElementById('wd-stat-cash').textContent = _fmtMoney(cash);
+    document.getElementById('wd-stat-positions').textContent = ((pf?.positions?.length || 0) + (crypto?.positions?.length || 0));
+    document.getElementById('wd-stat-etf').textContent = _fmtMoney(pfVal);
+    document.getElementById('wd-stat-crypto').textContent = _fmtMoney(cryptoVal);
+}
+
+function renderWalletPositions(pf, crypto){
+    const list = document.getElementById('wd-pos-list');
+    if(!list) return;
+    const items = [];
+    (pf?.positions || []).slice(0, 4).forEach(p => items.push({
+        symbol: p.symbol || p.ticker, name: p.name || p.symbol,
+        value: p.market_value ?? p.value ?? 0, chg: p.pnl_pct ?? p.change_pct ?? 0,
+        type: 'etf'
+    }));
+    (crypto?.positions || []).slice(0, 3).forEach(p => items.push({
+        symbol: p.symbol || p.ticker, name: p.name || p.symbol,
+        value: p.market_value ?? p.value ?? 0, chg: p.pnl_pct ?? p.change_pct ?? 0,
+        type: 'crypto'
+    }));
+
+    if(items.length === 0){
+        list.innerHTML = '<div class="wd-empty">Aucune position ouverte</div>';
+        return;
+    }
+
+    list.innerHTML = items.map(it => {
+        const sym = (it.symbol || '?').slice(0, 4).toUpperCase();
+        const chgCls = it.chg >= 0 ? 'up' : 'down';
+        return `
+            <div class="wd-pos-row ${it.type === 'crypto' ? 'crypto' : ''}">
+                <div class="wd-pos-sym">${sym}</div>
+                <div class="wd-pos-info">
+                    <div class="wd-pos-name">${it.name || it.symbol}</div>
+                    <div class="wd-pos-sub">${it.type === 'crypto' ? 'Crypto' : 'ETF'}</div>
+                </div>
+                <div class="wd-pos-val-block">
+                    <div class="wd-pos-val">${_fmtMoney(it.value)}</div>
+                    <div class="wd-pos-chg ${chgCls}">${_fmtPct(it.chg)}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderWalletActivity(trades){
+    const list = document.getElementById('wd-activity-list');
+    if(!list) return;
+    const items = (trades?.trades || trades || []).slice(0, 5);
+    if(!Array.isArray(items) || items.length === 0){
+        list.innerHTML = '<div class="wd-empty">Aucune activité récente</div>';
+        return;
+    }
+
+    list.innerHTML = items.map(t => {
+        const side = (t.side || t.action || '').toUpperCase();
+        const isBuy = side === 'BUY' || side === 'LONG';
+        const isClose = side === 'SELL' || side === 'CLOSE' || side === 'SHORT';
+        const icon = isBuy ? 'plus' : isClose ? 'minus' : 'check';
+        const variant = isBuy ? 'buy' : isClose ? 'sell' : 'neutral';
+        const pnl = t.pnl ?? t.profit;
+        const pnlTxt = (pnl != null) ? _fmtMoney(pnl) : '';
+        const pnlCls = (pnl != null && pnl >= 0) ? 'up' : 'down';
+        const ts = t.timestamp || t.date || t.time || '';
+        const when = ts ? new Date(ts).toLocaleString('fr-FR', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : '';
+        return `
+            <div class="wd-act-row">
+                <div class="wd-act-icon ${variant}"><span class="sfi" data-icon="${icon}"></span></div>
+                <div class="wd-act-info">
+                    <div class="wd-act-title">${side || 'TRADE'} · ${t.symbol || t.ticker || '?'}</div>
+                    <div class="wd-act-sub">${when}</div>
+                </div>
+                ${pnlTxt ? `<div class="wd-act-pnl ${pnlCls}">${pnlTxt}</div>` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+// Indicateur initial : charge (silencieux) pour positionner le point "has-positions"
+(function initWalletBadge(){
+    setTimeout(async () => {
+        try {
+            const pf = await fetch('/api/portfolio').then(r => r.ok ? r.json() : null).catch(() => null);
+            const crypto = await fetch('/api/crypto/portfolio').then(r => r.ok ? r.json() : null).catch(() => null);
+            const hasPos = (pf?.positions?.length || 0) + (crypto?.positions?.length || 0) > 0;
+            const btn = document.getElementById('wallet-btn');
+            if(btn) btn.classList.toggle('has-positions', hasPos);
+        } catch(e){}
+    }, 1800);
+})();
+</script>
 
 <script>
 /* ═══════════════════════════════════════════════════════
