@@ -9280,13 +9280,29 @@ function loadSettingsView(){
    ═══════════════════════════════════════════════════════ */
 const CUSTOM_PREFS_KEY = 'pq_custom_prefs_v1';
 
+const DEFAULT_CUSTOM_PREFS = {
+    uiScale: 125,
+    maxWidth: 'wide',
+    radius: 'round',
+    homeModules: [
+        { id: 'market-ticker',   visible: true },
+        { id: 'home-stats',      visible: true },
+        { id: 'hero-portfolio',  visible: true },
+        { id: 'home-dual',       visible: true },
+        { id: 'heatmap-market',  visible: true },
+        { id: 'smart-picks',     visible: true },
+        { id: 'home-actions',    visible: true },
+        { id: 'home-shortcuts',  visible: true },
+    ]
+};
+
 function loadCustomPrefs(){
     try {
         const raw = localStorage.getItem(CUSTOM_PREFS_KEY);
-        if(!raw) return { uiScale: 100, maxWidth: 'normal', radius: 'normal', homeModules: null };
+        if(!raw) return JSON.parse(JSON.stringify(DEFAULT_CUSTOM_PREFS));
         const p = JSON.parse(raw);
-        return Object.assign({ uiScale: 100, maxWidth: 'normal', radius: 'normal', homeModules: null }, p);
-    } catch(e){ return { uiScale: 100, maxWidth: 'normal', radius: 'normal', homeModules: null }; }
+        return Object.assign(JSON.parse(JSON.stringify(DEFAULT_CUSTOM_PREFS)), p);
+    } catch(e){ return JSON.parse(JSON.stringify(DEFAULT_CUSTOM_PREFS)); }
 }
 function saveCustomPrefs(patch){
     const cur = loadCustomPrefs();
@@ -9464,7 +9480,7 @@ function applyHomeModulesFromPrefs(prefs){
 }
 
 function resetUiScale(){
-    saveCustomPrefs({ uiScale: 100, maxWidth: 'normal', radius: 'normal' });
+    saveCustomPrefs({ uiScale: DEFAULT_CUSTOM_PREFS.uiScale, maxWidth: DEFAULT_CUSTOM_PREFS.maxWidth, radius: DEFAULT_CUSTOM_PREFS.radius, homeModules: JSON.parse(JSON.stringify(DEFAULT_CUSTOM_PREFS.homeModules)) });
     applyCustomPrefs();
     wirePersonnalisationPanel();
     if(typeof toast === 'function') toast('Échelle réinitialisée');
