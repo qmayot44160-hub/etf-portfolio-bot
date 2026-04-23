@@ -8,6 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* User-customizable via Settings > Personnalisation */
+            --ui-scale: 1;
+            --ui-radius: 22px;
+            --ui-maxwidth: 1120px;
+            --ui-maxwidth-wide: 1240px;
+
             --sf-bg: #000000;
             --sf-bg-alt: #101010;
             --sf-bg-card: #1d1d1f;
@@ -26,6 +32,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: calc(16px * var(--ui-scale)); }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
@@ -102,33 +109,34 @@
            ════════════════════════════════════════════════ */
         .globalheader {
             position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
-            height: 54px;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: saturate(180%) blur(20px);
-            -webkit-backdrop-filter: saturate(180%) blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.04);
+            height: 68px;
+            background: rgba(0,0,0,0.82);
+            backdrop-filter: saturate(180%) blur(22px);
+            -webkit-backdrop-filter: saturate(180%) blur(22px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
             display: flex; align-items: center; justify-content: center;
         }
         .globalheader-inner {
             display: flex; align-items: center; justify-content: space-between;
-            max-width: 1200px; width: 100%; padding: 0 28px;
+            max-width: 1260px; width: 100%; padding: 0 32px;
         }
         .globalheader-logo {
-            font-size: 1.05rem; font-weight: 600; color: var(--sf-text);
+            font-size: 1.2rem; font-weight: 700; color: var(--sf-text);
             letter-spacing: -0.02em; cursor: default;
         }
-        .globalheader-links { display: flex; gap: 2px; }
+        .globalheader-links { display: flex; gap: 4px; }
         .globalheader-link {
-            font-size: 0.86rem; color: var(--sf-text-secondary);
-            text-decoration: none; padding: 0 18px; line-height: 54px;
-            transition: color 0.3s; cursor: pointer; letter-spacing: 0;
+            font-size: 1rem; color: var(--sf-text-secondary);
+            text-decoration: none; padding: 0 22px; line-height: 68px;
+            transition: color 0.3s; cursor: pointer; letter-spacing: -0.005em;
             background: none; border: none; font-family: inherit;
+            font-weight: 500;
         }
         .globalheader-link:hover { color: var(--sf-text); }
         .globalheader-link.active { color: var(--sf-text); position: relative; }
         .globalheader-link.active::after {
             content: '';
-            position: absolute; bottom: 0; left: 18px; right: 18px; height: 2px;
+            position: absolute; bottom: 0; left: 22px; right: 22px; height: 2px;
             background: var(--sf-text); border-radius: 1px;
             animation: navSlide 0.3s ease;
         }
@@ -255,7 +263,7 @@
         /* ════════════════════════════════════════════════
            PAGE VIEWS — Apple full-viewport sections
            ════════════════════════════════════════════════ */
-        .page { padding-top: 54px; min-height: 100vh; }
+        .page { padding-top: 68px; min-height: 100vh; }
 
         [id^="view-"] {
             display: none;
@@ -331,12 +339,12 @@
            CONTENT SECTIONS
            ════════════════════════════════════════════════ */
         .section {
-            max-width: 1120px;
+            max-width: var(--ui-maxwidth);
             margin: 0 auto;
             padding: 24px 32px 120px;
         }
         .section-wide {
-            max-width: 1240px;
+            max-width: var(--ui-maxwidth-wide);
             margin: 0 auto;
             padding: 24px 32px 120px;
         }
@@ -357,7 +365,7 @@
 
         .stat-card {
             background: transparent;
-            border-radius: 22px;
+            border-radius: var(--ui-radius);
             padding: 32px 26px;
             text-align: center;
             transition: transform 0.3s, background 0.3s, border-color 0.3s;
@@ -388,7 +396,7 @@
                 radial-gradient(ellipse 80% 60% at 0% 0%, rgba(41,151,255,0.08), transparent 60%),
                 linear-gradient(180deg, rgba(14,14,18,0.85), rgba(8,8,12,0.92));
             border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 22px;
+            border-radius: var(--ui-radius);
             padding: 38px 34px;
             margin-bottom: 28px;
             box-shadow:
@@ -542,6 +550,46 @@
             .steps-row { grid-template-columns: 1fr; gap: 24px; padding: 32px 20px; }
             .step-col + .step-col::before { display: none; }
         }
+
+        /* ════════════════════════════════════════════════
+           DA+ : MODULE LIST (Personnalisation settings)
+           ════════════════════════════════════════════════ */
+        .module-list {
+            display: flex; flex-direction: column; gap: 8px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            padding: 10px;
+        }
+        .module-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .module-item.hidden-module { opacity: 0.5; }
+        .module-item:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); }
+        .module-item-handle {
+            color: var(--sf-text-muted);
+            cursor: grab; font-size: 1.2rem; line-height: 1;
+            user-select: none;
+        }
+        .module-item-label { flex: 1; font-size: 0.85rem; font-weight: 500; color: var(--sf-text); }
+        .module-item-id { font-size: 0.7rem; color: var(--sf-text-muted); font-family: monospace; }
+        .module-item-controls { display: flex; gap: 4px; align-items: center; }
+        .module-btn {
+            width: 28px; height: 28px; border-radius: 7px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: transparent; color: var(--sf-text-secondary);
+            cursor: pointer; font-size: 0.9rem; line-height: 1;
+            display: inline-flex; align-items: center; justify-content: center;
+            transition: all 0.15s;
+        }
+        .module-btn:hover:not(:disabled) { background: rgba(255,255,255,0.06); color: var(--sf-text); border-color: rgba(255,255,255,0.15); }
+        .module-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .module-btn.active { background: rgba(41,151,255,0.15); color: var(--sf-blue); border-color: rgba(41,151,255,0.3); }
 
         /* ════════════════════════════════════════════════
            DA+ : GLOBAL FOOTER (inspiré MEXC)
@@ -1211,11 +1259,12 @@
            ════════════════════════════════════════════════ */
         .nav-group { position: relative; }
         .nav-group-trigger {
-            font-size: 0.86rem; color: var(--sf-text-secondary);
+            font-size: 1rem; color: var(--sf-text-secondary);
             background: none; border: none; font-family: inherit;
-            padding: 0 18px; line-height: 54px; cursor: pointer;
-            transition: color 0.3s; letter-spacing: 0;
-            display: inline-flex; align-items: center; gap: 6px;
+            padding: 0 22px; line-height: 68px; cursor: pointer;
+            transition: color 0.3s; letter-spacing: -0.005em;
+            display: inline-flex; align-items: center; gap: 7px;
+            font-weight: 500;
         }
         .nav-group-trigger::after {
             content: '▾'; font-size: 0.6rem; opacity: 0.6;
@@ -1282,7 +1331,7 @@
            CONTEXT BANNER (persistent status bar)
            ════════════════════════════════════════════════ */
         .ctx-banner {
-            position: fixed; top: 54px; left: 0; right: 0; z-index: 9998;
+            position: fixed; top: 68px; left: 0; right: 0; z-index: 9998;
             background: rgba(16,16,16,0.92);
             backdrop-filter: blur(16px);
             border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -1309,7 +1358,7 @@
         }
         .ctx-link:hover { text-decoration: underline; }
 
-        .page { padding-top: 88px; } /* nav 54 + banner ~34 */
+        .page { padding-top: 102px; } /* nav 68 + banner ~34 */
 
         /* ════════════════════════════════════════════════
            HOME DASHBOARD
@@ -5091,8 +5140,8 @@
     </div>
 
     <!-- ═══ TRADING-APP HERO : big portfolio value + sparkline + time range ═══ -->
-    <div class="section">
-        <div class="hero-portfolio" id="hero-portfolio">
+    <div class="section" id="home-modules-root">
+        <div class="hero-portfolio home-module" id="hero-portfolio" data-module-id="hero-portfolio" data-module-label="Hero portefeuille + sparkline">
             <div class="hp-label">
                 <span class="sfi" data-icon="briefcase"></span>
                 <span>Portefeuille total</span>
@@ -5137,14 +5186,14 @@
         </div>
 
         <!-- Market ticker (scrolling horizontal strip) -->
-        <div class="market-ticker" id="market-ticker" aria-hidden="true">
+        <div class="market-ticker home-module" id="market-ticker" data-module-id="market-ticker" data-module-label="Ticker marchés" aria-hidden="true">
             <div class="market-ticker-track" id="market-ticker-track">
                 <!-- rempli dynamiquement par updateMarketTicker() -->
             </div>
         </div>
 
         <!-- KPIs rapides -->
-        <div class="stat-grid stat-grid-4" id="home-stats">
+        <div class="stat-grid stat-grid-4 home-module" id="home-stats" data-module-id="home-stats" data-module-label="KPIs rapides (Valeur, Mode, Santé, Positions)">
             <div class="stat-card accent-blue">
                 <div class="stat-label">Valeur totale</div>
                 <div class="stat-value" id="home-total"><span class="skel skel-val"></span></div>
@@ -5168,7 +5217,7 @@
         </div>
 
         <!-- ═══ TRADING-APP DUAL BLOCK : Répartition + Top holdings ═══ -->
-        <div class="home-dual">
+        <div class="home-dual home-module" data-module-id="home-dual" data-module-label="Répartition + Top positions">
             <!-- Répartition : donut + legend -->
             <div class="home-dual-card">
                 <div class="home-dual-card-header">
@@ -5204,7 +5253,7 @@
         </div>
 
         <!-- ═══ SMART PICKS — le bot choisit lui-même ═══ -->
-        <div class="smart-picks">
+        <div class="smart-picks home-module" data-module-id="smart-picks" data-module-label="Picks du jour (smart picks IA)">
             <div class="sp-header">
                 <div class="sp-title-wrap">
                     <div class="sp-title-icon"><span class="sfi" data-icon="sparkles"></span></div>
@@ -5262,7 +5311,7 @@
         </div>
 
         <!-- Prochaines actions -->
-        <div class="dcard">
+        <div class="dcard home-module" data-module-id="home-actions" data-module-label="Que faire maintenant ? (actions suggérées)">
             <div class="dcard-title" style="display:flex;align-items:center;gap:10px"><span class="sfi sfi-lg c-blue" data-icon="target"></span>Que faire maintenant&nbsp;?</div>
             <div class="action-list" id="home-actions">
                 <div class="action-card suggest">
@@ -5276,7 +5325,7 @@
         </div>
 
         <!-- Raccourcis -->
-        <div class="dcard">
+        <div class="dcard home-module" data-module-id="home-shortcuts" data-module-label="Raccourcis (tuiles navigation)">
             <div class="dcard-title" style="display:flex;align-items:center;gap:10px"><span class="sfi sfi-lg c-blue" data-icon="sparkles"></span>Raccourcis</div>
             <div class="shortcut-grid">
                 <button class="shortcut-tile" onclick="showView('portfolio')">
@@ -6209,6 +6258,7 @@
             <div class="settings-rail-header">Paramètres</div>
             <button class="settings-rail-item active" data-panel="profil"><span class="sfi" data-icon="user"></span>Profil</button>
             <button class="settings-rail-item" data-panel="apparence"><span class="sfi" data-icon="sparkles"></span>Apparence</button>
+            <button class="settings-rail-item" data-panel="personnalisation"><span class="sfi" data-icon="layers"></span>Personnalisation</button>
             <button class="settings-rail-item" data-panel="notifications"><span class="sfi" data-icon="phone"></span>Notifications</button>
             <button class="settings-rail-item" data-panel="confidentialite"><span class="sfi" data-icon="shield"></span>Confidentialité</button>
             <button class="settings-rail-item" data-panel="securite"><span class="sfi" data-icon="power"></span>Sécurité</button>
@@ -6421,6 +6471,73 @@
                                 <button data-val="EUR">EUR</button>
                                 <button data-val="GBP">GBP</button>
                                 <button data-val="CHF">CHF</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── PERSONNALISATION ─── -->
+            <div class="settings-panel" data-panel="personnalisation">
+                <div class="settings-panel-header">
+                    <h1 class="settings-panel-title">Personnalisation</h1>
+                    <p class="settings-panel-sub">Adapte la taille et l'emplacement de chaque module. Tes préférences sont sauvegardées en local.</p>
+                </div>
+
+                <div class="settings-group">
+                    <div class="settings-group-title">Taille globale de l'interface</div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Échelle UI</div>
+                            <div class="settings-row-hint">Agrandit ou réduit TOUT : cartes, texte, padding. Idéal pour adapter à ton écran.</div>
+                        </div>
+                        <div class="settings-row-control" style="display:flex;align-items:center;gap:12px;min-width:260px">
+                            <input type="range" id="ui-scale-slider" min="85" max="125" step="5" value="100" style="flex:1">
+                            <span id="ui-scale-value" style="font-variant-numeric:tabular-nums;font-weight:600;min-width:48px;text-align:right">100%</span>
+                            <button class="abtn abtn-dark abtn-sm" onclick="resetUiScale()">Reset</button>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Largeur maximale du contenu</div>
+                            <div class="settings-row-hint">Contrôle la largeur des sections (utile sur grand écran).</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <div class="segmented" id="ui-maxwidth">
+                                <button data-val="narrow">Étroit</button>
+                                <button data-val="normal" class="active">Normal</button>
+                                <button data-val="wide">Large</button>
+                                <button data-val="full">Plein écran</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Rayon des cartes</div>
+                            <div class="settings-row-hint">Arrondi des coins : plus doux ou plus net.</div>
+                        </div>
+                        <div class="settings-row-control">
+                            <div class="segmented" id="ui-radius">
+                                <button data-val="sharp">Net (8px)</button>
+                                <button data-val="normal" class="active">Normal (22px)</button>
+                                <button data-val="round">Rond (32px)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <div class="settings-group-title">Modules de l'accueil</div>
+                    <div class="settings-row stack">
+                        <div>
+                            <div class="settings-row-label">Visibilité et ordre</div>
+                            <div class="settings-row-hint">Affiche, masque et réorganise chaque bloc de ta page d'accueil.</div>
+                        </div>
+                        <div class="settings-row-control" style="width:100%">
+                            <div class="module-list" id="home-modules-config"></div>
+                            <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+                                <button class="abtn abtn-dark abtn-sm" onclick="resetHomeModules()">Réinitialiser</button>
+                                <button class="abtn abtn-blue abtn-sm" onclick="applyHomeModules();toast('Configuration appliquée')">Appliquer</button>
                             </div>
                         </div>
                     </div>
@@ -9124,10 +9241,210 @@ function loadSettingsView(){
         loadProfile().then(p => { if(p) fillProfilePanel(p); });
     }
     wireAppearanceAutoSave();
+    try { wirePersonnalisationPanel(); } catch(e){ console.error('[personnalisation]', e); }
     // If confidentialité is the active panel, refresh audit log
     const activePanel = document.querySelector('.settings-panel.active');
     if(activePanel && activePanel.dataset.panel === 'confidentialite') loadAuditLog();
 }
+
+/* ═══════════════════════════════════════════════════════
+   PERSONNALISATION : taille UI + ordre/visibilité modules Accueil
+   ═══════════════════════════════════════════════════════ */
+const CUSTOM_PREFS_KEY = 'pq_custom_prefs_v1';
+
+function loadCustomPrefs(){
+    try {
+        const raw = localStorage.getItem(CUSTOM_PREFS_KEY);
+        if(!raw) return { uiScale: 100, maxWidth: 'normal', radius: 'normal', homeModules: null };
+        const p = JSON.parse(raw);
+        return Object.assign({ uiScale: 100, maxWidth: 'normal', radius: 'normal', homeModules: null }, p);
+    } catch(e){ return { uiScale: 100, maxWidth: 'normal', radius: 'normal', homeModules: null }; }
+}
+function saveCustomPrefs(patch){
+    const cur = loadCustomPrefs();
+    const next = Object.assign(cur, patch || {});
+    localStorage.setItem(CUSTOM_PREFS_KEY, JSON.stringify(next));
+    return next;
+}
+
+function applyCustomPrefs(){
+    const p = loadCustomPrefs();
+    // UI scale
+    document.documentElement.style.setProperty('--ui-scale', (p.uiScale/100).toString());
+    // Max width presets
+    const MW = {
+        narrow: { section: '880px', wide: '980px' },
+        normal: { section: '1120px', wide: '1240px' },
+        wide:   { section: '1360px', wide: '1480px' },
+        full:   { section: '100%',   wide: '100%' },
+    }[p.maxWidth] || { section: '1120px', wide: '1240px' };
+    document.documentElement.style.setProperty('--ui-maxwidth', MW.section);
+    document.documentElement.style.setProperty('--ui-maxwidth-wide', MW.wide);
+    // Radius
+    const RA = { sharp: '8px', normal: '22px', round: '32px' }[p.radius] || '22px';
+    document.documentElement.style.setProperty('--ui-radius', RA);
+    // Home modules (order + visibility)
+    applyHomeModulesFromPrefs(p.homeModules);
+}
+
+function wirePersonnalisationPanel(){
+    const p = loadCustomPrefs();
+
+    // ── UI scale slider ──
+    const slider = document.getElementById('ui-scale-slider');
+    const valLabel = document.getElementById('ui-scale-value');
+    if(slider && valLabel && !slider._wired){
+        slider._wired = true;
+        slider.value = p.uiScale;
+        valLabel.textContent = p.uiScale + '%';
+        slider.addEventListener('input', () => {
+            valLabel.textContent = slider.value + '%';
+            saveCustomPrefs({ uiScale: Number(slider.value) });
+            applyCustomPrefs();
+        });
+    } else if(slider){
+        slider.value = p.uiScale;
+        if(valLabel) valLabel.textContent = p.uiScale + '%';
+    }
+
+    // ── Max-width segmented ──
+    const mwSeg = document.getElementById('ui-maxwidth');
+    if(mwSeg){
+        mwSeg.querySelectorAll('button').forEach(b => {
+            b.classList.toggle('active', b.dataset.val === p.maxWidth);
+            if(!b._wired){
+                b._wired = true;
+                b.addEventListener('click', () => {
+                    mwSeg.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+                    b.classList.add('active');
+                    saveCustomPrefs({ maxWidth: b.dataset.val });
+                    applyCustomPrefs();
+                });
+            }
+        });
+    }
+
+    // ── Radius segmented ──
+    const raSeg = document.getElementById('ui-radius');
+    if(raSeg){
+        raSeg.querySelectorAll('button').forEach(b => {
+            b.classList.toggle('active', b.dataset.val === p.radius);
+            if(!b._wired){
+                b._wired = true;
+                b.addEventListener('click', () => {
+                    raSeg.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+                    b.classList.add('active');
+                    saveCustomPrefs({ radius: b.dataset.val });
+                    applyCustomPrefs();
+                });
+            }
+        });
+    }
+
+    // ── Home modules config ──
+    renderHomeModulesConfig();
+}
+
+function getHomeModulesInDOM(){
+    return Array.from(document.querySelectorAll('#home-modules-root .home-module')).map(el => ({
+        id: el.dataset.moduleId,
+        label: el.dataset.moduleLabel || el.dataset.moduleId,
+    }));
+}
+
+function getHomeModulesOrdered(){
+    const inDom = getHomeModulesInDOM();
+    const prefs = loadCustomPrefs().homeModules;
+    if(!prefs || !Array.isArray(prefs)) return inDom.map(m => Object.assign({ visible: true }, m));
+    // Merge : preserve pref order, append any new modules not in prefs
+    const known = new Set(prefs.map(p => p.id));
+    const merged = prefs
+        .filter(p => inDom.find(m => m.id === p.id))
+        .map(p => {
+            const dom = inDom.find(m => m.id === p.id);
+            return { id: p.id, label: dom.label, visible: p.visible !== false };
+        });
+    inDom.forEach(m => { if(!known.has(m.id)) merged.push({ id: m.id, label: m.label, visible: true }); });
+    return merged;
+}
+
+function renderHomeModulesConfig(){
+    const host = document.getElementById('home-modules-config');
+    if(!host) return;
+    const modules = getHomeModulesOrdered();
+    host.innerHTML = modules.map((m, i) => `
+        <div class="module-item ${m.visible ? '' : 'hidden-module'}" data-id="${m.id}">
+            <span class="module-item-handle" title="Glisser (réservé)">⋮⋮</span>
+            <div style="flex:1;min-width:0">
+                <div class="module-item-label">${m.label}</div>
+                <div class="module-item-id">${m.id}</div>
+            </div>
+            <div class="module-item-controls">
+                <button class="module-btn" onclick="moveHomeModule('${m.id}', -1)" title="Monter" ${i===0?'disabled':''}>↑</button>
+                <button class="module-btn" onclick="moveHomeModule('${m.id}', 1)" title="Descendre" ${i===modules.length-1?'disabled':''}>↓</button>
+                <button class="module-btn ${m.visible?'active':''}" onclick="toggleHomeModule('${m.id}')" title="${m.visible?'Masquer':'Afficher'}">${m.visible?'●':'○'}</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function moveHomeModule(id, delta){
+    const modules = getHomeModulesOrdered();
+    const idx = modules.findIndex(m => m.id === id);
+    if(idx < 0) return;
+    const newIdx = idx + delta;
+    if(newIdx < 0 || newIdx >= modules.length) return;
+    [modules[idx], modules[newIdx]] = [modules[newIdx], modules[idx]];
+    saveCustomPrefs({ homeModules: modules.map(m => ({ id: m.id, visible: m.visible })) });
+    applyCustomPrefs();
+    renderHomeModulesConfig();
+}
+
+function toggleHomeModule(id){
+    const modules = getHomeModulesOrdered();
+    const m = modules.find(x => x.id === id);
+    if(!m) return;
+    m.visible = !m.visible;
+    saveCustomPrefs({ homeModules: modules.map(x => ({ id: x.id, visible: x.visible })) });
+    applyCustomPrefs();
+    renderHomeModulesConfig();
+}
+
+function resetHomeModules(){
+    saveCustomPrefs({ homeModules: null });
+    applyCustomPrefs();
+    renderHomeModulesConfig();
+    if(typeof toast === 'function') toast('Modules réinitialisés');
+}
+
+function applyHomeModules(){
+    applyHomeModulesFromPrefs(loadCustomPrefs().homeModules);
+}
+
+function applyHomeModulesFromPrefs(prefs){
+    const root = document.getElementById('home-modules-root');
+    if(!root) return;
+    const modules = getHomeModulesOrdered();
+    // Reorder DOM
+    modules.forEach(m => {
+        const el = root.querySelector(`.home-module[data-module-id="${m.id}"]`);
+        if(el){
+            root.appendChild(el);
+            el.style.display = m.visible ? '' : 'none';
+        }
+    });
+}
+
+function resetUiScale(){
+    saveCustomPrefs({ uiScale: 100, maxWidth: 'normal', radius: 'normal' });
+    applyCustomPrefs();
+    wirePersonnalisationPanel();
+    if(typeof toast === 'function') toast('Échelle réinitialisée');
+}
+
+// Apply on every page load (before content visible to avoid flash)
+try { applyCustomPrefs(); } catch(e){}
+document.addEventListener('DOMContentLoaded', () => { try { applyCustomPrefs(); } catch(e){} });
 
 function openSettingsDrawer(){
     const drawer = document.getElementById('settings-drawer');
