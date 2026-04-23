@@ -5325,39 +5325,40 @@
             </div>
         </div>
 
-        <!-- Raccourcis -->
-        <div class="dcard home-module" data-module-id="home-shortcuts" data-module-label="Raccourcis (tuiles navigation)">
-            <div class="dcard-title" style="display:flex;align-items:center;gap:10px"><span class="sfi sfi-lg c-blue" data-icon="sparkles"></span>Raccourcis</div>
+        <!-- Actions rapides (remplace les anciens raccourcis de navigation déjà présents dans la nav + footer) -->
+        <div class="dcard home-module" data-module-id="home-shortcuts" data-module-label="Actions rapides">
+            <div class="dcard-title" style="display:flex;align-items:center;gap:10px"><span class="sfi sfi-lg c-blue" data-icon="bolt"></span>Actions rapides</div>
+            <div class="dcard-sub" style="margin-bottom:18px;color:var(--sf-text-muted);font-size:.9rem">Les opérations les plus courantes, en un clic — sans naviguer.</div>
             <div class="shortcut-grid">
-                <button class="shortcut-tile" onclick="showView('portfolio')">
-                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="chart"></span></div>
-                    <div class="shortcut-tile-title">Portefeuille ETF</div>
-                    <div class="shortcut-tile-desc">Allocation + positions</div>
-                </button>
-                <button class="shortcut-tile" onclick="showView('crypto')">
-                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="bitcoin"></span></div>
-                    <div class="shortcut-tile-title">Crypto</div>
-                    <div class="shortcut-tile-desc">Portefeuille crypto live</div>
-                </button>
-                <button class="shortcut-tile" onclick="showView('trading')">
-                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="bolt"></span></div>
-                    <div class="shortcut-tile-title">Auto-Trader</div>
-                    <div class="shortcut-tile-desc">Bot de trading auto</div>
-                </button>
-                <button class="shortcut-tile" onclick="showView('scanner')">
+                <button class="shortcut-tile" onclick="quickAction('scan')">
                     <div class="shortcut-tile-icon"><span class="sfi" data-icon="search"></span></div>
-                    <div class="shortcut-tile-title">Scanner</div>
-                    <div class="shortcut-tile-desc">Opportunités du marché</div>
+                    <div class="shortcut-tile-title">Lancer un scan</div>
+                    <div class="shortcut-tile-desc">Opportunités marché live</div>
                 </button>
-                <button class="shortcut-tile" onclick="showView('projection')">
-                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="trending"></span></div>
-                    <div class="shortcut-tile-title">Projection</div>
-                    <div class="shortcut-tile-desc">Monte Carlo, objectifs</div>
+                <button class="shortcut-tile" onclick="quickAction('rebalance')">
+                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="refresh"></span></div>
+                    <div class="shortcut-tile-title">Simuler rebalance</div>
+                    <div class="shortcut-tile-desc">Drift vs. allocation cible</div>
                 </button>
-                <button class="shortcut-tile" onclick="showView('securite')">
-                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="shield"></span></div>
-                    <div class="shortcut-tile-title">Sécurité & Backups</div>
-                    <div class="shortcut-tile-desc">Kill-switch, Telegram</div>
+                <button class="shortcut-tile" onclick="quickAction('dca')">
+                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="plus"></span></div>
+                    <div class="shortcut-tile-title">Nouveau plan DCA</div>
+                    <div class="shortcut-tile-desc">Investissement programmé</div>
+                </button>
+                <button class="shortcut-tile" onclick="quickAction('export')">
+                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="download"></span></div>
+                    <div class="shortcut-tile-title">Exporter CSV</div>
+                    <div class="shortcut-tile-desc">Positions + historique</div>
+                </button>
+                <button class="shortcut-tile" onclick="quickAction('paperlive')">
+                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="bolt"></span></div>
+                    <div class="shortcut-tile-title">Basculer Paper / Live</div>
+                    <div class="shortcut-tile-desc">Mode de trading actif</div>
+                </button>
+                <button class="shortcut-tile" onclick="quickAction('refresh')">
+                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="refresh"></span></div>
+                    <div class="shortcut-tile-title">Rafraîchir les données</div>
+                    <div class="shortcut-tile-desc">Prix et cotations</div>
                 </button>
             </div>
         </div>
@@ -6224,33 +6225,16 @@
             </div>
         </div>
         <div>
-            <div class="gfooter-col-title">Trading</div>
-            <button class="gfooter-link" onclick="showView('portfolio')">Portefeuille ETF</button>
-            <button class="gfooter-link" onclick="showView('dca')">DCA mensuel</button>
-            <button class="gfooter-link" onclick="showView('crypto')">Crypto</button>
-            <button class="gfooter-link" onclick="showView('trading')">Auto-Trader</button>
-        </div>
-        <div>
-            <div class="gfooter-col-title">Analyse</div>
-            <button class="gfooter-link" onclick="showView('analytics')">Performance</button>
-            <button class="gfooter-link" onclick="showView('projection')">Projection</button>
-            <button class="gfooter-link" onclick="showView('scanner')">Scanner</button>
-            <button class="gfooter-link" onclick="showView('watchlist')">Watchlist</button>
-            <button class="gfooter-link" onclick="showView('discover')">Discover</button>
-        </div>
-        <div>
-            <div class="gfooter-col-title">Configuration</div>
-            <button class="gfooter-link" onclick="showView('broker')">Connexions brokers</button>
-            <button class="gfooter-link" onclick="showView('auto')">Automatisation</button>
-            <button class="gfooter-link" onclick="openSettingsPanel('notifications')">Notifications</button>
-            <button class="gfooter-link" onclick="openSettingsPanel('apparence')">Apparence</button>
-        </div>
-        <div>
             <div class="gfooter-col-title">Ressources</div>
             <button class="gfooter-link" onclick="showView('glossaire')">Glossaire</button>
-            <button class="gfooter-link" onclick="showView('securite')">Sécurité &amp; Alertes</button>
-            <button class="gfooter-link" onclick="openSettingsPanel('apropos')">À propos</button>
             <button class="gfooter-link" onclick="openSettingsPanel('raccourcis')">Raccourcis clavier</button>
+            <button class="gfooter-link" onclick="openSettingsPanel('apropos')">À propos</button>
+        </div>
+        <div>
+            <div class="gfooter-col-title">Support</div>
+            <a class="gfooter-link" href="mailto:support@portfolioquant.app">Nous contacter</a>
+            <button class="gfooter-link" onclick="openSettingsPanel('notifications')">Telegram & alertes</button>
+            <a class="gfooter-link" href="https://github.com" target="_blank" rel="noopener">Signaler un bug</a>
         </div>
     </div>
     <div class="gfooter-bottom">
@@ -6828,6 +6812,41 @@ const PL={paper_bgcolor:'transparent',plot_bgcolor:'transparent',colorway:BRAND_
 let selectedBrokerId=null;
 
 /* ═══ Apple-style view transitions ═══ */
+function quickAction(kind){
+    try {
+        switch(kind){
+            case 'scan':
+                showView('scanner');
+                setTimeout(()=>{ const b=document.querySelector('#view-scanner button[onclick*="scan" i], #view-scanner .btn-primary'); if(b) b.click(); }, 350);
+                if(typeof toast==='function') toast('Scanner lancé', 'info');
+                break;
+            case 'rebalance':
+                showView('portfolio');
+                setTimeout(()=>{ const b=document.querySelector('#view-portfolio button[onclick*="rebalance" i], #view-portfolio [data-action="rebalance"]'); if(b) b.click(); }, 350);
+                if(typeof toast==='function') toast('Simulation de rebalance', 'info');
+                break;
+            case 'dca':
+                showView('dca');
+                if(typeof toast==='function') toast('Nouveau plan DCA', 'info');
+                break;
+            case 'export':
+                if(typeof exportPortfolioCSV==='function') exportPortfolioCSV();
+                else if(typeof toast==='function') toast('Export CSV — disponible bientôt', 'info');
+                break;
+            case 'paperlive':
+                showView('trading');
+                setTimeout(()=>{ const t=document.querySelector('#view-trading [data-action="toggle-mode"], #view-trading .paper-live-toggle'); if(t) t.click(); }, 350);
+                if(typeof toast==='function') toast('Bascule Paper / Live', 'info');
+                break;
+            case 'refresh':
+                if(typeof refreshAll==='function') refreshAll();
+                else if(typeof loadPortfolio==='function') loadPortfolio();
+                if(typeof toast==='function') toast('Données actualisées', 'success');
+                break;
+        }
+    } catch(e){ console.warn('quickAction error', e); }
+}
+
 function showView(v){
     const next=document.getElementById('view-'+v);
     if(!next)return;
