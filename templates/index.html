@@ -5656,13 +5656,19 @@
             </div>
 
             <!-- Tail risk -->
-            <div class="metrics">
-                <div class="mbox"><div class="mbox-label">Skewness</div><div class="mbox-val" id="an-skew">--</div></div>
-                <div class="mbox"><div class="mbox-label">Kurtosis</div><div class="mbox-val" id="an-kurt">--</div></div>
-                <div class="mbox"><div class="mbox-label">VaR 99%</div><div class="mbox-val red" id="an-var99">--</div></div>
-                <div class="mbox"><div class="mbox-label">CVaR 99%</div><div class="mbox-val red" id="an-cvar99">--</div></div>
-                <div class="mbox"><div class="mbox-label">Pire jour</div><div class="mbox-val red" id="an-worst">--</div></div>
-                <div class="mbox"><div class="mbox-label">Meilleur jour</div><div class="mbox-val green" id="an-best">--</div></div>
+            <div class="dcard">
+                <div class="dcard-title"><span class="sfi" data-icon="shield"></span>Risque extrême &amp; queues de distribution</div>
+                <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:16px">
+                    Skewness / Kurtosis mesurent l'asymétrie et l'épaisseur des queues. VaR et CVaR quantifient le pire scénario à 99% de confiance.
+                </p>
+                <div class="metrics">
+                    <div class="mbox"><div class="mbox-label">Skewness</div><div class="mbox-val" id="an-skew">--</div></div>
+                    <div class="mbox"><div class="mbox-label">Kurtosis</div><div class="mbox-val" id="an-kurt">--</div></div>
+                    <div class="mbox"><div class="mbox-label">VaR 99%</div><div class="mbox-val red" id="an-var99">--</div></div>
+                    <div class="mbox"><div class="mbox-label">CVaR 99%</div><div class="mbox-val red" id="an-cvar99">--</div></div>
+                    <div class="mbox"><div class="mbox-label">Pire jour</div><div class="mbox-val red" id="an-worst">--</div></div>
+                    <div class="mbox"><div class="mbox-label">Meilleur jour</div><div class="mbox-val green" id="an-best">--</div></div>
+                </div>
             </div>
 
             <!-- ── Frontière efficiente ── -->
@@ -6204,7 +6210,13 @@
         <p class="hero-subtitle">Définitions de tous les termes financiers et techniques utilisés dans l'application.</p>
     </div>
     <div class="section">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px" id="glossary-grid"></div>
+        <div class="dcard">
+            <div class="dcard-title"><span class="sfi" data-icon="beaker"></span>Dictionnaire des termes</div>
+            <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:20px">
+                Chaque terme est défini simplement, avec un exemple concret. Utile quand tu croises un sigle inconnu dans l'app.
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px" id="glossary-grid"></div>
+        </div>
     </div>
 </div>
 
