@@ -1111,18 +1111,20 @@
         }
         .action-card {
             display: flex; align-items: center; gap: 18px;
-            background: var(--sf-bg-card); border-radius: 16px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
             padding: 18px 22px; cursor: pointer;
-            transition: transform 0.25s, background 0.25s;
+            transition: transform 0.25s, background 0.25s, border-color 0.25s;
             border-left: 3px solid transparent;
             text-align: left;
         }
-        .action-card:hover { transform: translateX(4px); background: var(--sf-bg-card-hover); }
+        .action-card:hover { transform: translateX(4px); background: rgba(255,255,255,0.025); }
         .action-card.urgent { border-left-color: var(--sf-red); }
         .action-card.warn { border-left-color: var(--sf-orange); }
         .action-card.suggest { border-left-color: var(--sf-blue); }
         .action-card.ok { border-left-color: var(--sf-green); opacity: 0.85; cursor: default; }
-        .action-card.ok:hover { transform: none; background: var(--sf-bg-card); }
+        .action-card.ok:hover { transform: none; background: transparent; }
         .action-icon {
             width: 44px; height: 44px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
@@ -5048,7 +5050,7 @@
      DCA
      ═══════════════════════════════════════════════════════ -->
 <div id="view-dca">
-    <div class="hero bg-alt">
+    <div class="hero">
         <div class="hero-eyebrow"><span class="dot"></span>Investissement récurrent</div>
         <div class="hero-badge"><span class="sfi" data-icon="euro"></span></div>
         <h1 class="hero-title">Dollar Cost Averaging</h1>
@@ -5330,7 +5332,7 @@
      TRADING
      ═══════════════════════════════════════════════════════ -->
 <div id="view-trading">
-    <div class="hero bg-alt">
+    <div class="hero">
         <div class="hero-eyebrow"><span class="dot"></span>Bot automatique · Crypto</div>
         <div class="hero-badge"><span class="sfi" data-icon="bolt"></span></div>
         <h1 class="hero-title">Trading Institutionnel</h1>
@@ -5578,7 +5580,7 @@
      CRYPTO
      ═══════════════════════════════════════════════════════ -->
 <div id="view-crypto">
-    <div class="hero bg-alt">
+    <div class="hero">
         <div class="hero-eyebrow"><span class="dot"></span>Actifs numériques</div>
         <div class="hero-badge"><span class="sfi" data-icon="bitcoin"></span></div>
         <h1 class="hero-title">Crypto</h1>
@@ -5658,7 +5660,7 @@
      AUTOMATION
      ═══════════════════════════════════════════════════════ -->
 <div id="view-auto">
-    <div class="hero bg-alt">
+    <div class="hero">
         <div class="hero-eyebrow"><span class="dot"></span>Scheduler · Jobs</div>
         <div class="hero-badge"><span class="sfi" data-icon="clock"></span></div>
         <h1 class="hero-title">Automatisation</h1>
@@ -5801,7 +5803,7 @@
      GLOSSAIRE
      ═══════════════════════════════════════════════════════ -->
 <div id="view-glossaire">
-    <div class="hero bg-alt">
+    <div class="hero">
         <div class="hero-eyebrow"><span class="dot"></span>Lexique · Définitions</div>
         <div class="hero-badge"><span class="sfi" data-icon="beaker"></span></div>
         <h1 class="hero-title">Glossaire</h1>
@@ -8746,6 +8748,8 @@ function openSettingsDrawer(){
     const drawer = document.getElementById('settings-drawer');
     const backdrop = document.getElementById('settings-backdrop');
     if(!drawer) return;
+    // Close wallet drawer if open to avoid overlap
+    try { if(typeof WALLET_STATE !== 'undefined' && WALLET_STATE.open) closeWalletDrawer(); } catch(e){}
     drawer.classList.add('open');
     drawer.setAttribute('aria-hidden', 'false');
     if(backdrop) backdrop.classList.add('open');
@@ -9248,6 +9252,11 @@ function openWalletDrawer(){
     const drawer = document.getElementById('wallet-drawer');
     const backdrop = document.getElementById('wallet-drawer-backdrop');
     if(!drawer || !backdrop) return;
+    // Close settings drawer if open to avoid overlap
+    try {
+        const sd = document.getElementById('settings-drawer');
+        if(sd && sd.classList.contains('open')) closeSettingsDrawer();
+    } catch(e){}
     drawer.classList.add('open');
     backdrop.classList.add('open');
     WALLET_STATE.open = true;
