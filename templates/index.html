@@ -4712,6 +4712,32 @@
             color: var(--sf-blue);
         }
 
+        .hm-scroll-wrap {
+            position: relative;
+            max-height: 520px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 10px;
+            margin-right: -6px;
+            scrollbar-gutter: stable;
+            /* Fondu haut/bas pour indiquer que ça scroll */
+            mask-image: linear-gradient(180deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
+            -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
+        }
+        .hm-scroll-wrap::-webkit-scrollbar { width: 8px; }
+        .hm-scroll-wrap::-webkit-scrollbar-track { background: transparent; }
+        .hm-scroll-wrap::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.12);
+            border-radius: 4px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        .hm-scroll-wrap::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); background-clip: padding-box; }
+        .hm-scroll-wrap { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.18) transparent; }
+        @media (max-width: 640px) {
+            .hm-scroll-wrap { max-height: 420px; }
+        }
+
         .hm-categories {
             display: flex; flex-direction: column; gap: 16px;
         }
@@ -5285,31 +5311,6 @@
             </div>
         </div>
 
-        <!-- ═══ HEATMAP — Carte du marché ═══ -->
-        <div class="heatmap-card">
-            <div class="hm-header">
-                <div class="hm-title-wrap">
-                    <div class="hm-title-icon"><span class="sfi" data-icon="chart"></span></div>
-                    <div>
-                        <div class="hm-title">Carte du marché</div>
-                        <div class="hm-subtitle">40 ETF scannés · intensité = amplitude du mouvement</div>
-                    </div>
-                </div>
-                <div class="hm-legend">
-                    <div class="hm-range-toggle" id="hm-range">
-                        <button class="hm-range-btn" data-range="change_1d">1j</button>
-                        <button class="hm-range-btn" data-range="change_7d">7j</button>
-                        <button class="hm-range-btn active" data-range="change_30d">30j</button>
-                    </div>
-                    <div class="hm-legend-item"><span class="hm-legend-swatch" style="background:var(--sf-red);color:var(--sf-red)"></span>Baisse</div>
-                    <div class="hm-legend-item"><span class="hm-legend-swatch" style="background:var(--sf-green);color:var(--sf-green)"></span>Hausse</div>
-                </div>
-            </div>
-            <div class="hm-categories" id="hm-categories">
-                <div class="hm-empty">Le bot scanne le marché…</div>
-            </div>
-        </div>
-
         <!-- Prochaines actions -->
         <div class="dcard home-module" data-module-id="home-actions" data-module-label="Que faire maintenant ? (actions suggérées)">
             <div class="dcard-title" style="display:flex;align-items:center;gap:10px"><span class="sfi sfi-lg c-blue" data-icon="target"></span>Que faire maintenant&nbsp;?</div>
@@ -5358,6 +5359,33 @@
                     <div class="shortcut-tile-title">Sécurité & Backups</div>
                     <div class="shortcut-tile-desc">Kill-switch, Telegram</div>
                 </button>
+            </div>
+        </div>
+
+        <!-- ═══ HEATMAP — Carte du marché (déplacée sous Raccourcis, scroll interne) ═══ -->
+        <div class="heatmap-card home-module" data-module-id="heatmap-market" data-module-label="Carte du marché (heatmap ETF)">
+            <div class="hm-header">
+                <div class="hm-title-wrap">
+                    <div class="hm-title-icon"><span class="sfi" data-icon="chart"></span></div>
+                    <div>
+                        <div class="hm-title">Carte du marché</div>
+                        <div class="hm-subtitle">40 ETF scannés · intensité = amplitude du mouvement</div>
+                    </div>
+                </div>
+                <div class="hm-legend">
+                    <div class="hm-range-toggle" id="hm-range">
+                        <button class="hm-range-btn" data-range="change_1d">1j</button>
+                        <button class="hm-range-btn" data-range="change_7d">7j</button>
+                        <button class="hm-range-btn active" data-range="change_30d">30j</button>
+                    </div>
+                    <div class="hm-legend-item"><span class="hm-legend-swatch" style="background:var(--sf-red);color:var(--sf-red)"></span>Baisse</div>
+                    <div class="hm-legend-item"><span class="hm-legend-swatch" style="background:var(--sf-green);color:var(--sf-green)"></span>Hausse</div>
+                </div>
+            </div>
+            <div class="hm-scroll-wrap">
+                <div class="hm-categories" id="hm-categories">
+                    <div class="hm-empty">Le bot scanne le marché…</div>
+                </div>
             </div>
         </div>
     </div>
