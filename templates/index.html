@@ -6824,36 +6824,123 @@ const PL={paper_bgcolor:'transparent',plot_bgcolor:'transparent',colorway:BRAND_
 let selectedBrokerId=null;
 
 /* ═══ Apple-style view transitions ═══ */
+/* ═══ QUICK ACTIONS — Actions rapides de l'accueil ═══ */
+
+async function qaExportCSV(){
+    try {
+        if(typeof toast==='function') toast('Préparation de l\'export…', 'info');
+        const [pf, set] = await Promise.all([
+            fetch('/api/portfolio').then(r=>r.json()).catch(()=>({})),
+            fetch('/api/settings').then(r=>r.json()).catch(()=>({})),
+        ]);
+        const positions = (pf && (pf.positions || pf.holdings || [])) || [];
+        const rows = [['Symbole','Nom','Quantité','Prix','Valeur','Poids %','P&L','P&L %']];
+        let total = 0;
+        positions.forEach(p=>{ total += Number(p.value || p.market_value || 0) || 0; });
+        positions.forEach(p=>{
+            const val = Number(p.value || p.market_value || 0) || 0;
+            const w = total>0 ? (val/total*100) : 0;
+            rows.push([
+                p.symbol || p.ticker || '',
+                (p.name || p.label || '').replace(/[;\n\r]/g,' '),
+                p.qty ?? p.quantity ?? '',
+                p.price ?? p.last_price ?? '',
+                val.toFixed(2),
+                w.toFixed(2),
+                p.pnl ?? p.unrealized_pnl ?? '',
+                p.pnl_pct ?? p.pnl_percent ?? '',
+            ]);
+        });
+        const csv = rows.map(r=>r.map(c=>{
+            const s = String(c ?? '');
+            return /[";\n,]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+        }).join(';')).join('\r\n');
+        const bom = '\uFEFF';
+        const blob = new Blob([bom + csv], {type:'text/csv;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const ymd = new Date().toISOString().slice(0,10);
+        const mode = (set && set.paper_mode) ? 'paper' : 'live';
+        a.href = url; a.download = `portfolioquant-${mode}-${ymd}.csv`;
+        document.body.appendChild(a); a.click();
+        setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+        if(typeof toast==='function') toast(`Export CSV · ${positions.length} positions`, 'success');
+    } catch(e){
+        console.warn('qaExportCSV', e);
+        if(typeof toast==='function') toast('Export impossible : '+e.message, true);
+    }
+}
+
+async function qaRefresh(){
+    try {
+        const tasks = [];
+        if(typeof refreshStatus==='function') tasks.push(Promise.resolve(refreshStatus()));
+        if(typeof loadContextBanner==='function') tasks.push(Promise.resolve(loadContextBanner()));
+        if(typeof loadHome==='function') tasks.push(Promise.resolve(loadHome()));
+        if(typeof loadHomeAllocation==='function') tasks.push(Promise.resolve(loadHomeAllocation()));
+        if(tasks.length === 0){ location.reload(); return; }
+        if(typeof toast==='function') toast('Actualisation…', 'info');
+        await Promise.allSettled(tasks);
+        if(typeof toast==='function') toast('Données actualisées', 'success');
+    } catch(e){
+        console.warn('qaRefresh', e);
+        if(typeof toast==='function') toast('Rafraîchissement partiel', true);
+    }
+}
+
+async function qaPaperLive(){
+    try {
+        const s = await fetch('/api/settings').then(r=>r.json());
+        const currentlyPaper = s.paper_mode !== false;
+        const nextPaper = !currentlyPaper;
+        const goingLive = !nextPaper;
+        if(goingLive && !confirm('Passer en LIVE : des ordres RÉELS seront envoyés au broker. Confirmer ?')) return;
+        await fetch('/api/settings/paper-mode',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ enabled: nextPaper })
+        });
+        if(typeof refreshStatus==='function') refreshStatus();
+        if(typeof loadContextBanner==='function') loadContextBanner();
+        if(typeof loadSecurite==='function') loadSecurite();
+        if(typeof toast==='function') toast(nextPaper ? 'Mode PAPER activé (simulé)' : 'Mode LIVE activé (ordres réels)', nextPaper ? 'success' : 'info');
+    } catch(e){
+        console.warn('qaPaperLive', e);
+        if(typeof toast==='function') toast('Bascule impossible : '+e.message, true);
+    }
+}
+
 function quickAction(kind){
     try {
         switch(kind){
             case 'scan':
                 showView('scanner');
-                setTimeout(()=>{ const b=document.querySelector('#view-scanner button[onclick*="scan" i], #view-scanner .btn-primary'); if(b) b.click(); }, 350);
-                if(typeof toast==='function') toast('Scanner lancé', 'info');
+                setTimeout(()=>{
+                    if(typeof runFullScan==='function') runFullScan();
+                    else { const b=document.querySelector('#view-scanner button[onclick*="scan" i], #view-scanner .btn-primary'); if(b) b.click(); }
+                }, 350);
                 break;
             case 'rebalance':
                 showView('portfolio');
-                setTimeout(()=>{ const b=document.querySelector('#view-portfolio button[onclick*="rebalance" i], #view-portfolio [data-action="rebalance"]'); if(b) b.click(); }, 350);
+                setTimeout(()=>{
+                    if(typeof loadRebalance==='function') loadRebalance();
+                    const el = document.getElementById('rebalance-section') || document.querySelector('#view-portfolio .dcard:last-of-type');
+                    if(el && el.scrollIntoView) el.scrollIntoView({behavior:'smooth', block:'start'});
+                }, 400);
                 if(typeof toast==='function') toast('Simulation de rebalance', 'info');
                 break;
             case 'dca':
                 showView('dca');
-                if(typeof toast==='function') toast('Nouveau plan DCA', 'info');
+                setTimeout(()=>{ const inp=document.querySelector('#view-dca input[type="number"]'); if(inp) inp.focus(); }, 400);
                 break;
             case 'export':
-                if(typeof exportPortfolioCSV==='function') exportPortfolioCSV();
-                else if(typeof toast==='function') toast('Export CSV — disponible bientôt', 'info');
+                qaExportCSV();
                 break;
             case 'paperlive':
-                showView('trading');
-                setTimeout(()=>{ const t=document.querySelector('#view-trading [data-action="toggle-mode"], #view-trading .paper-live-toggle'); if(t) t.click(); }, 350);
-                if(typeof toast==='function') toast('Bascule Paper / Live', 'info');
+                qaPaperLive();
                 break;
             case 'refresh':
-                if(typeof refreshAll==='function') refreshAll();
-                else if(typeof loadPortfolio==='function') loadPortfolio();
-                if(typeof toast==='function') toast('Données actualisées', 'success');
+                qaRefresh();
                 break;
         }
     } catch(e){ console.warn('quickAction error', e); }
