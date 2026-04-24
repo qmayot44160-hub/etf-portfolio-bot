@@ -5471,8 +5471,29 @@
 <button class="cmdk-hint" onclick="openCmdK()" aria-label="Ouvrir la palette">
     <span class="sfi" data-icon="search" style="width:12px;height:12px"></span>
     <span>Recherche rapide</span>
-    <span class="cmdk-kbd">⌘K</span>
+    <span class="cmdk-kbd" id="cmdk-kbd-hint">Ctrl K</span>
 </button>
+<script>
+/* Adapte le raccourci affiché selon l'OS détecté :
+   - Mac → ⌘K
+   - Windows/Linux → Ctrl K
+   - Mobile/tablette → caché (pas de clavier physique généralement) */
+(function(){
+    const el = document.getElementById('cmdk-kbd-hint');
+    if(!el) return;
+    const ua = navigator.userAgent || '';
+    const platform = (navigator.platform || '').toLowerCase();
+    const isMac = /mac|iphone|ipad|ipod/i.test(platform) || /Mac OS X/.test(ua);
+    const isTouchOnly = window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(pointer: fine)').matches;
+    if(isTouchOnly){
+        el.style.display = 'none';
+    } else if(isMac){
+        el.textContent = '⌘ K';
+    } else {
+        el.textContent = 'Ctrl K';
+    }
+})();
+</script>
 
 <!-- ═══════════════════════════════════════════════════════
      USER MENU POPOVER
