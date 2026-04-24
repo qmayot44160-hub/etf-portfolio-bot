@@ -178,8 +178,13 @@
         }
         .globalheader-logo {
             font-size: 1.2rem; font-weight: 700; color: var(--sf-text);
-            letter-spacing: -0.02em; cursor: default;
+            letter-spacing: -0.02em; cursor: pointer;
+            user-select: none;
+            transition: opacity 0.15s, transform 0.15s;
+            -webkit-tap-highlight-color: transparent;
         }
+        .globalheader-logo:hover { opacity: 0.78; }
+        .globalheader-logo:active { transform: scale(0.96); }
         .globalheader-links { display: flex; gap: 4px; }
         .globalheader-link {
             font-size: 1rem; color: var(--sf-text-secondary);
@@ -5492,7 +5497,7 @@
         <button class="mobile-nav-toggle" onclick="openCmdK()" aria-label="Ouvrir la navigation" title="Menu · Recherche rapide">
             <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
         </button>
-        <div class="globalheader-logo">PortfolioQuant</div>
+        <div class="globalheader-logo" role="button" tabindex="0" aria-label="Retour à l'accueil" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goHome();}">PortfolioQuant</div>
         <div class="globalheader-links">
             <button class="globalheader-link active" data-view="home">Accueil</button>
 
@@ -7497,6 +7502,21 @@ function quickAction(kind){
                 break;
         }
     } catch(e){ console.warn('quickAction error', e); }
+}
+
+// Helper global : ferme tout overlay puis revient à l'accueil. Utilisé par
+// le clic sur le logo PortfolioQuant.
+function goHome(){
+    try {
+        const sd = document.getElementById('settings-drawer');
+        if(sd && sd.classList.contains('open') && typeof closeSettingsDrawer === 'function') closeSettingsDrawer();
+        const wd = document.getElementById('wallet-drawer');
+        if(wd && wd.classList.contains('open') && typeof closeWalletDrawer === 'function') closeWalletDrawer();
+        const cmdk = document.getElementById('cmdk');
+        if(cmdk && cmdk.classList.contains('open')){ cmdk.classList.remove('open'); document.body.style.overflow = ''; }
+        document.body.classList.remove('drawer-open');
+    } catch(e){}
+    if(typeof showView === 'function') showView('home');
 }
 
 function showView(v, opts){
