@@ -11828,9 +11828,36 @@ function investInCurrentPick(){
         home: 'home',
         portfolio: 'portfolio', crypto: 'portfolio', watchlist: 'portfolio',
         dca: 'dca', trading: 'dca', scanner: 'dca', discover: 'dca',
-        analytics: 'analytics',
+        analytics: 'analytics', projection: 'analytics',
         broker: 'more', auto: 'more', securite: 'more', glossaire: 'more'
     };
+
+    // Ferme tout drawer/modal/palette ouvert pour que la nav vers la nouvelle vue
+    // soit visible. Sinon le drawer Profil/Wallet/etc. cache la page derrière.
+    function closeAllOverlays(){
+        try {
+            // Settings drawer
+            const sd = document.getElementById('settings-drawer');
+            if(sd && sd.classList.contains('open') && typeof closeSettingsDrawer === 'function'){
+                closeSettingsDrawer();
+            }
+            // Wallet drawer
+            const wd = document.getElementById('wallet-drawer');
+            if(wd && wd.classList.contains('open') && typeof closeWalletDrawer === 'function'){
+                closeWalletDrawer();
+            }
+            // Palette ⌘K
+            const cmdk = document.getElementById('cmdk');
+            if(cmdk && cmdk.classList.contains('open')){
+                cmdk.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+            // Force unlock body scroll si un drawer l'avait verrouillé
+            document.body.style.overflow = '';
+            // Ferme tout dropdown nav éventuellement ouvert
+            document.querySelectorAll('.nav-group.open').forEach(g=>g.classList.remove('open'));
+        } catch(e){ console.warn('closeAllOverlays', e); }
+    }
 
     function syncActiveTab(){
         const current = document.querySelector('[id^="view-"].show');
@@ -11851,25 +11878,42 @@ function investInCurrentPick(){
         };
     }
 
-    document.addEventListener('click', (e)=>{
-        const btn = e.target.closest('.bottom-tab');
-        if(!btn) return;
-        const tab = btn.dataset.tab;
+    function handleTabClick(tab){
+        // Toujours fermer drawers/menus avant de naviguer pour que la vue cible soit visible
+        closeAllOverlays();
         if(tab === 'more'){
-            // Ouvrir la palette ⌘K
-            const hint = document.querySelector('.cmdk-hint');
-            if(hint) hint.click();
-            else if(typeof openCmdK === 'function') openCmdK();
-            else {
+            // Ouvrir la palette ⌘K (seul "Plus" garde un overlay — c'est sa raison d'être)
+            setTimeout(()=>{
+                if(typeof openCmdK === 'function'){ openCmdK(); return; }
+                const hint = document.querySelector('.cmdk-hint');
+                if(hint){ hint.click(); return; }
                 // Fallback : trigger Ctrl+K
                 const ev = new KeyboardEvent('keydown', {key:'k', ctrlKey:true, bubbles:true});
                 document.dispatchEvent(ev);
-            }
+            }, 50);
             return;
         }
         const target = TAB_VIEW_MAP[tab];
         if(target && typeof showView === 'function') showView(target);
-    });
+    }
+
+    // Binding direct sur chaque bouton (plus robuste que la délégation document
+    // qui peut être interceptée par stopPropagation depuis du contenu de page)
+    function bindTabs(){
+        document.querySelectorAll('.bottom-tab').forEach(btn=>{
+            if(btn._tabBound) return;
+            btn._tabBound = true;
+            btn.addEventListener('click', (e)=>{
+                e.preventDefault();
+                e.stopPropagation();
+                handleTabClick(btn.dataset.tab);
+            });
+        });
+    }
+    bindTabs();
+    // Re-bind si le DOM est modifié dynamiquement
+    setTimeout(bindTabs, 200);
+    setTimeout(bindTabs, 1000);
 
     // Sync initial (après mount)
     setTimeout(syncActiveTab, 100);
