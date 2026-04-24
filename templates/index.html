@@ -2,7 +2,15 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- viewport-fit=cover : étend le canvas sous la barre gestuelle Samsung /
+         notch iPhone. Couplé aux env(safe-area-inset-*) dans le CSS. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- theme-color : la barre de statut Android (Chrome, Samsung Internet) prend cette couleur.
+         Rend l'expérience plus app-like sur Samsung. -->
+    <meta name="theme-color" content="#0a0a0e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>PortfolioQuant</title>
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -5197,6 +5205,118 @@
                 padding-left: max(14px, env(safe-area-inset-left));
                 padding-right: max(14px, env(safe-area-inset-right));
             }
+        }
+
+        /* ════════════════════════════════════════════════════════════
+           BOTTOM TAB BAR (mobile uniquement) — pattern natif MEXC/Binance
+           Visible sous 720px, remplace la nav top pour les raccourcis
+           principaux. Les vues secondaires restent accessibles via la
+           palette ⌘K (bouton "Plus" ouvre la palette).
+           ════════════════════════════════════════════════════════════ */
+        .bottom-tabbar {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: 9995;
+            /* Fallback opaque pour Samsung Internet / Android Chrome sans backdrop-filter */
+            background: rgba(10,10,14,0.97);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            /* Safe-area : marche sur iOS + Android Chrome 69+ (barre gestuelle Samsung) */
+            padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)) 4px;
+        }
+        /* Effet glass seulement si supporté (iOS Safari, Chrome récent) —
+           sinon on garde le fond opaque défini au-dessus */
+        @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+            .bottom-tabbar {
+                background: rgba(10,10,14,0.82);
+                backdrop-filter: saturate(180%) blur(22px);
+                -webkit-backdrop-filter: saturate(180%) blur(22px);
+            }
+        }
+        .bottom-tabbar-inner {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 2px;
+        }
+        .bottom-tab {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 4px;
+            padding: 8px 4px;
+            background: transparent;
+            border: 0;
+            color: var(--sf-text-muted);
+            font-family: inherit;
+            cursor: pointer;
+            /* Material Design recommande 48×48 min ; iOS HIG recommande 44×44.
+               On prend 52 pour confort + lisibilité du label. */
+            min-height: 52px;
+            border-radius: 10px;
+            transition: color 0.2s, background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            /* Empêche Android Chrome de zoomer / sélectionner le label au long-press */
+            -webkit-touch-callout: none;
+            user-select: none;
+            -webkit-user-select: none;
+            /* Samsung Internet : retire le highlight bleu natif */
+            outline: none;
+        }
+        .bottom-tab:active { background: rgba(255,255,255,0.05); }
+        .bottom-tab.active { color: var(--sf-text); }
+        .bottom-tab.active .bottom-tab-icon { color: var(--sf-blue); }
+        .bottom-tab-icon {
+            width: 22px; height: 22px;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .bottom-tab-icon svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .bottom-tab-label {
+            font-size: 0.62rem; font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+
+        /* Indicateur pill actif */
+        .bottom-tab.active {
+            position: relative;
+        }
+        .bottom-tab.active::before {
+            content: '';
+            position: absolute; top: 2px;
+            left: 50%; transform: translateX(-50%);
+            width: 32px; height: 3px;
+            background: var(--sf-blue);
+            border-radius: 0 0 3px 3px;
+            box-shadow: 0 0 8px rgba(10,132,255,0.6);
+        }
+
+        /* Activation mobile : afficher bottom bar + padding-bottom pour
+           éviter que le contenu soit caché dessous.
+           Fonctionne iOS + Android (Samsung, Pixel, etc.) — la media query
+           est indépendante de l'OS, basée sur la largeur viewport. */
+        @media (max-width: 720px) {
+            .bottom-tabbar { display: block; }
+            /* 76px = hauteur barre + padding ; +safe-area pour barre gestuelle
+               Samsung (One UI) qui prend ~16-24px en bas */
+            .page { padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+            /* La palette ⌘K hint (bouton flottant) ferait doublon avec la
+               bottom bar — on la cache puisqu'on a le tab "Plus" */
+            .cmdk-hint { display: none; }
+        }
+        /* Très petits écrans (Galaxy S8/S9 ~360px, iPhone SE ~375px) :
+           on compacte encore les labels pour pas que ça déborde */
+        @media (max-width: 380px) {
+            .bottom-tab-label { font-size: 0.58rem; }
+            .bottom-tab { padding: 6px 2px; }
+            .bottom-tab-icon { width: 20px; height: 20px; }
+        }
+
+        /* Effet "slim top bar" sur mobile : on enlève le surplus visuel
+           du header pour matcher le style MEXC/Binance (juste logo + actions
+           essentielles à droite). Déjà largement traité plus haut, on
+           force juste une hauteur un peu plus compacte ici. */
+        @media (max-width: 720px) {
+            .globalheader { height: 56px; }
+            .page { padding-top: 56px; }
+            .globalheader-logo { font-size: 0.98rem; }
         }
     </style>
 </head>
@@ -11577,7 +11697,97 @@ function investInCurrentPick(){
     if(typeof showView === 'function') showView('dca');
     if(typeof toast === 'function') toast(`${p.ticker} ajouté à ton prochain DCA ETF.`);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   BOTTOM TAB BAR (mobile only) — sync actif avec showView()
+   ═══════════════════════════════════════════════════════════ */
+(function(){
+    // Map tab → view cible (Plus ouvre la palette ⌘K)
+    const TAB_VIEW_MAP = {
+        home: 'home',
+        portfolio: 'portfolio',
+        dca: 'dca',
+        analytics: 'analytics'
+    };
+    // Views qui mettent tel ou tel tab en actif (fallback pour les vues secondaires)
+    const VIEW_TAB_MAP = {
+        home: 'home',
+        portfolio: 'portfolio', crypto: 'portfolio', watchlist: 'portfolio',
+        dca: 'dca', trading: 'dca', scanner: 'dca', discover: 'dca',
+        analytics: 'analytics',
+        broker: 'more', auto: 'more', securite: 'more', glossaire: 'more'
+    };
+
+    function syncActiveTab(){
+        const current = document.querySelector('[id^="view-"].show');
+        if(!current) return;
+        const view = current.id.replace(/^view-/, '');
+        const activeTab = VIEW_TAB_MAP[view] || 'more';
+        document.querySelectorAll('.bottom-tab').forEach(b=>{
+            b.classList.toggle('active', b.dataset.tab === activeTab);
+        });
+    }
+
+    // Hook dans showView : on wrappe pour sync après chaque nav
+    if(typeof window.showView === 'function'){
+        const origShowView = window.showView;
+        window.showView = function(v){
+            origShowView(v);
+            setTimeout(syncActiveTab, 20);
+        };
+    }
+
+    document.addEventListener('click', (e)=>{
+        const btn = e.target.closest('.bottom-tab');
+        if(!btn) return;
+        const tab = btn.dataset.tab;
+        if(tab === 'more'){
+            // Ouvrir la palette ⌘K
+            const hint = document.querySelector('.cmdk-hint');
+            if(hint) hint.click();
+            else if(typeof openCmdK === 'function') openCmdK();
+            else {
+                // Fallback : trigger Ctrl+K
+                const ev = new KeyboardEvent('keydown', {key:'k', ctrlKey:true, bubbles:true});
+                document.dispatchEvent(ev);
+            }
+            return;
+        }
+        const target = TAB_VIEW_MAP[tab];
+        if(target && typeof showView === 'function') showView(target);
+    });
+
+    // Sync initial (après mount)
+    setTimeout(syncActiveTab, 100);
+    window.addEventListener('load', ()=>setTimeout(syncActiveTab, 50));
+})();
 </script>
+
+<!-- Bottom tab bar (mobile only — activé via @media max-width:720px) -->
+<nav class="bottom-tabbar" role="navigation" aria-label="Navigation mobile">
+    <div class="bottom-tabbar-inner">
+        <button class="bottom-tab" data-tab="home" type="button" aria-label="Accueil">
+            <span class="bottom-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2h-4v-6h-6v6H5a2 2 0 0 1-2-2V10z"/></svg></span>
+            <span class="bottom-tab-label">Accueil</span>
+        </button>
+        <button class="bottom-tab" data-tab="portfolio" type="button" aria-label="Portefeuille">
+            <span class="bottom-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 7h18v13H3zM8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/></svg></span>
+            <span class="bottom-tab-label">Portefeuille</span>
+        </button>
+        <button class="bottom-tab" data-tab="dca" type="button" aria-label="Trader">
+            <span class="bottom-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></span>
+            <span class="bottom-tab-label">Trader</span>
+        </button>
+        <button class="bottom-tab" data-tab="analytics" type="button" aria-label="Analyse">
+            <span class="bottom-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 20V10M9 20V4M15 20v-7M21 20v-11"/></svg></span>
+            <span class="bottom-tab-label">Analyse</span>
+        </button>
+        <button class="bottom-tab" data-tab="more" type="button" aria-label="Plus">
+            <span class="bottom-tab-icon"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></span>
+            <span class="bottom-tab-label">Plus</span>
+        </button>
+    </div>
+</nav>
 
 </body>
 </html>
