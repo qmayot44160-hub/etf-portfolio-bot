@@ -5068,7 +5068,7 @@
             <div id="mode-badge" class="hdr-chip mode-chip"><span class="chip-dot"></span>PAPER</div>
             <button id="kill-switch-btn" class="hdr-chip kill-chip" onclick="triggerKillSwitch()" title="Arrêt d'urgence du bot"><span class="sfi" data-icon="power"></span>KILL</button>
             <div id="bot-status" class="globalheader-status"><span class="dot" style="background:var(--sf-orange)"></span> Simulation</div>
-            <button id="wallet-btn" class="wallet-btn" onclick="toggleWalletDrawer()" title="Wallet — patrimoine & activité" aria-haspopup="dialog"><span class="sfi" data-icon="wallet"></span></button>
+            <button id="wallet-btn" class="wallet-btn" onclick="toggleWalletDrawer()" title="Wallet : patrimoine et activité" aria-haspopup="dialog"><span class="sfi" data-icon="wallet"></span></button>
             <span class="hdr-divider" aria-hidden="true"></span>
             <button id="avatar-btn" class="avatar-btn" onclick="toggleSettingsFromAvatar()" oncontextmenu="event.preventDefault(); toggleUserMenu(event);" title="Profil & Paramètres (clic droit pour menu rapide)" aria-haspopup="dialog">QM</button>
         </div>
@@ -5315,7 +5315,7 @@
         <!-- Actions rapides (remplace les anciens raccourcis de navigation déjà présents dans la nav + footer) -->
         <div class="dcard home-module" data-module-id="home-shortcuts" data-module-label="Actions rapides">
             <div class="dcard-title" style="display:flex;align-items:center;gap:10px"><span class="sfi sfi-lg c-blue" data-icon="bolt"></span>Actions rapides</div>
-            <div class="dcard-sub" style="margin-bottom:18px;color:var(--sf-text-muted);font-size:.9rem">Les opérations les plus courantes, en un clic — sans naviguer.</div>
+            <div class="dcard-sub" style="margin-bottom:18px;color:var(--sf-text-muted);font-size:.9rem">Les opérations les plus courantes, en un clic, sans avoir à naviguer.</div>
             <div class="shortcut-grid">
                 <button class="shortcut-tile" onclick="quickAction('scan')">
                     <div class="shortcut-tile-icon"><span class="sfi" data-icon="search"></span></div>
@@ -5491,7 +5491,7 @@
                     </select>
                 </div>
                 <div class="form-group" style="margin-bottom:0">
-                    <div class="form-label">Objectif (€) — optionnel</div>
+                    <div class="form-label">Objectif en € (optionnel)</div>
                     <input type="number" id="pj-target" value="100000" min="0" step="1000" class="ainput">
                 </div>
                 <div class="form-group" style="margin-bottom:0">
@@ -5705,7 +5705,7 @@
 
             <!-- ── Kelly Criterion ── -->
             <div class="dcard">
-                <div class="dcard-title"><span class="sfi" data-icon="target"></span>Allocation Kelly (¼ Kelly — sécurisé)</div>
+                <div class="dcard-title"><span class="sfi" data-icon="target"></span>Allocation Kelly (¼ Kelly, version sécurisée)</div>
                 <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:12px">
                     Fraction optimale à allouer selon Kelly, réduite à 25% pour limiter la volatilité (pratique institutionnelle).
                 </p>
@@ -6302,7 +6302,7 @@
                     <div class="settings-row">
                         <div>
                             <div class="settings-row-label">Email</div>
-                            <div class="settings-row-hint">Optionnel — pour les futures notifications email.</div>
+                            <div class="settings-row-hint">Optionnel, pour les futures notifications email.</div>
                         </div>
                         <div class="settings-row-control">
                             <input id="prof-email" class="ainput" type="email" placeholder="toi@exemple.com">
@@ -6702,7 +6702,7 @@
             <div class="settings-panel" data-panel="apropos">
                 <div class="settings-panel-header">
                     <h1 class="settings-panel-title">À propos</h1>
-                    <p class="settings-panel-sub">PortfolioQuant — bot de gestion ETF & crypto.</p>
+                    <p class="settings-panel-sub">PortfolioQuant, bot de gestion ETF et crypto.</p>
                 </div>
                 <div class="settings-group">
                     <div class="settings-group-title">Application</div>
@@ -7680,20 +7680,20 @@ const GLOSSARY = {
     "Sharpe Ratio": "Mesure le rendement excédentaire par unité de risque. Formule : (Rendement - Taux sans risque) / Volatilité. Un Sharpe > 1 est considéré bon, > 2 excellent.",
     "Sortino Ratio": "Variante du Sharpe qui pénalise uniquement la volatilité baissière (les baisses). Plus pertinent car les hausses ne sont pas un 'risque'.",
     "Calmar Ratio": "Rendement annualisé divisé par le drawdown maximum. Mesure l'efficacité du rendement par rapport au pire scénario historique.",
-    "VaR 95%": "Value at Risk — Perte journalière maximale avec 95% de probabilité. Ex: VaR -1.5% signifie que 95% du temps vous ne perdrez pas plus de 1.5% en un jour.",
-    "CVaR 95%": "Conditional VaR — Perte moyenne dans les pires 5% des jours. Donne une image plus complète du risque extrême que la VaR seule.",
+    "VaR 95%": "Value at Risk. Perte journalière maximale avec 95% de probabilité. Ex: VaR -1.5% signifie que 95% du temps vous ne perdrez pas plus de 1.5% en un jour.",
+    "CVaR 95%": "Conditional VaR. Perte moyenne dans les pires 5% des jours. Donne une image plus complète du risque extrême que la VaR seule.",
     "Drawdown": "Baisse en % depuis le dernier sommet historique. Ex: si le portefeuille passe de 10 000€ à 8 500€, le drawdown est -15%.",
-    "DCA": "Dollar Cost Averaging — Stratégie d'investissement régulier à montant fixe, indépendamment des conditions de marché. Réduit l'impact du timing.",
+    "DCA": "Dollar Cost Averaging. Stratégie d'investissement régulier à montant fixe, indépendamment des conditions de marché. Réduit l'impact du timing.",
     "Rééquilibrage": "Réajustement périodique du portefeuille pour retrouver les poids cibles. Permet de 'vendre haut, acheter bas' automatiquement.",
-    "ETF": "Exchange Traded Fund — Fonds indiciel coté en bourse. Réplique un indice (S&P 500, MSCI World...) avec des frais très faibles.",
+    "ETF": "Exchange Traded Fund. Fonds indiciel coté en bourse. Réplique un indice (S&P 500, MSCI World...) avec des frais très faibles.",
     "MSCI World": "Indice qui suit les performances de ~1 500 grandes entreprises dans 23 pays développés. Représente ~85% de la capitalisation mondiale.",
     "S&P 500": "Indice des 500 plus grandes capitalisations boursières américaines. Considéré comme le baromètre de l'économie américaine.",
     "Volatilité": "Mesure de l'amplitude des variations de prix. Une volatilité de 15% annualisée signifie que le portefeuille varie d'environ ±15%/an en moyenne.",
     "Benchmark": "Indice de référence utilisé pour comparer la performance d'un portefeuille. Souvent le S&P 500 ou le MSCI World.",
     "Hurst Exponent": "Mesure la persistance des tendances. H > 0.5 = tendance persistante, H < 0.5 = mean-reversion probable, H = 0.5 = mouvement aléatoire.",
-    "ADX": "Average Directional Index — Mesure la force d'une tendance de 0 à 100. ADX > 25 indique une tendance forte, < 20 marché sans tendance.",
-    "RSI": "Relative Strength Index — Oscillateur de momentum (0-100). RSI > 70 = surachat (signal de vente potentiel), RSI < 30 = survente (signal d'achat potentiel).",
-    "TWAP": "Time-Weighted Average Price — Stratégie d'exécution qui divise un ordre en petites tranches sur une durée pour minimiser l'impact sur le marché.",
+    "ADX": "Average Directional Index. Mesure la force d'une tendance de 0 à 100. ADX > 25 indique une tendance forte, < 20 marché sans tendance.",
+    "RSI": "Relative Strength Index. Oscillateur de momentum (0-100). RSI > 70 = surachat (signal de vente potentiel), RSI < 30 = survente (signal d'achat potentiel).",
+    "TWAP": "Time-Weighted Average Price. Stratégie d'exécution qui divise un ordre en petites tranches sur une durée pour minimiser l'impact sur le marché.",
     "Kelly Criterion": "Formule mathématique qui calcule la taille optimale d'une position en fonction du win rate et du ratio gain/perte.",
     "Profit Factor": "Ratio des gains totaux divisé par les pertes totales. Un Profit Factor > 1.5 est considéré bon, > 2 excellent.",
     "Expectancy": "Gain moyen espéré par trade en unité monétaire. Expectancy = (Win Rate × Gain moyen) - (Loss Rate × Perte moyenne).",
@@ -7707,8 +7707,8 @@ const GLOSSARY = {
     "Monte Carlo": "Méthode de simulation qui génère des milliers de trajectoires aléatoires pour estimer la distribution des résultats futurs possibles. Utilisée pour projeter les gains avec une marge d'incertitude.",
     "Percentile": "Seuil statistique. Ex : P50 = médiane (50% des scénarios font mieux, 50% font moins bien). P5 = scénario pessimiste (seuls 5% des cas font pire). P95 = scénario optimiste (seuls 5% des cas font mieux).",
     "Inflation": "Perte de pouvoir d'achat au fil du temps. Un portefeuille qui gagne 5%/an avec 2% d'inflation a un rendement réel de seulement 3%. Les projections affichent aussi la valeur 'réelle' ajustée.",
-    "GBM": "Geometric Brownian Motion — Modèle mathématique supposant que les prix suivent une distribution log-normale avec drift (μ) et volatilité (σ). Base de Black-Scholes et du Monte Carlo financier.",
-    "Markowitz": "Théorie moderne du portefeuille (1952) — Pour un niveau de risque donné, il existe un portefeuille optimal qui maximise le rendement espéré. L'ensemble de ces portefeuilles forme la frontière efficiente.",
+    "GBM": "Geometric Brownian Motion. Modèle mathématique supposant que les prix suivent une distribution log-normale avec drift (μ) et volatilité (σ). Base de Black-Scholes et du Monte Carlo financier.",
+    "Markowitz": "Théorie moderne du portefeuille (1952). Pour un niveau de risque donné, il existe un portefeuille optimal qui maximise le rendement espéré. L'ensemble de ces portefeuilles forme la frontière efficiente.",
     "Frontière efficiente": "Courbe qui représente l'ensemble des portefeuilles offrant le meilleur rendement possible pour chaque niveau de risque. Tout ce qui est en dessous est sous-optimal.",
     "Max Sharpe": "Portefeuille qui maximise le ratio de Sharpe (rendement par unité de risque). Considéré comme le 'meilleur' portefeuille en termes d'efficacité.",
     "Min Variance": "Portefeuille qui minimise la volatilité totale, quel que soit le rendement. Adapté aux profils très averses au risque.",
@@ -7966,7 +7966,7 @@ async function triggerKillSwitch(){
     const reason = prompt('Raison du kill-switch ?', 'Arrêt manuel');
     if(reason === null)return;
     await fetch('/api/kill-switch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reason})});
-    toast('Kill-switch activé — le bot est arrêté', true);
+    toast('Kill-switch activé. Le bot est arrêté.', true);
     loadSecurite();
     refreshStatus();
     loadContextBanner();
@@ -8005,7 +8005,7 @@ async function saveTelegram(){
 
 async function testTelegram(){
     const r = await (await fetch('/api/notifications/test',{method:'POST'})).json();
-    toast(r.sent ? 'Message test envoyé — vérifie Telegram' : 'Échec : vérifie token + chat_id + activation', !r.sent);
+    toast(r.sent ? 'Message test envoyé. Vérifie Telegram.' : 'Échec : vérifie token, chat_id et activation.', !r.sent);
 }
 
 /* ═══ Health ═══ */
@@ -8424,7 +8424,7 @@ async function loadHome(){
 
         // Subtitle contextuel
         let sub;
-        if(s.killSwitch) sub = 'Kill-switch actif — aucun trade ne sera exécuté.';
+        if(s.killSwitch) sub = 'Kill-switch actif. Aucun trade ne sera exécuté.';
         else if(!s.broker && !s.cryptoBroker) sub = 'Commence par connecter un broker pour activer le bot.';
         else if(s.paperMode) sub = 'Ton bot tourne en mode simulation (PAPER). Aucun ordre réel.';
         else sub = 'Ton bot est opérationnel en mode LIVE. Trades réels activés.';
