@@ -3414,6 +3414,15 @@
             overflow: hidden;
         }
         .settings-drawer.open { transform: translateX(0); }
+        /* Quand un drawer est ouvert, on masque le ctx-banner (z-index 9998)
+           qui flottait par-dessus, et la bottom tab bar (qui ferait doublon
+           avec le contenu plein écran du drawer sur mobile) */
+        body.drawer-open .ctx-banner,
+        body.drawer-open .bottom-tabbar {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
         .settings-drawer::before {
             /* accent line */
             content: ''; position: absolute;
@@ -3710,6 +3719,32 @@
                 flex-shrink: 0; padding: 8px 12px;
             }
             .settings-rail-item.active::before { display: none; }
+        }
+        /* Mobile : empile chaque ligne (label en haut, champ en bas, full-width)
+           Sinon les inputs débordent (cf. "Toyan" / "q.ma..." tronqués). */
+        @media (max-width: 720px) {
+            .settings-drawer {
+                width: 100vw;
+                /* Padding bottom pour éviter que la bottom-tabbar mange le contenu
+                   (même si on la cache via body.drawer-open, par sécurité) */
+            }
+            .settings-row {
+                flex-direction: column; align-items: stretch;
+                gap: 8px; padding: 12px 0;
+            }
+            .settings-row-control {
+                width: 100%; min-width: 0;
+                justify-content: stretch;
+            }
+            .settings-row-control > * {
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .settings-row-hint { max-width: 100%; }
+            .settings-content { padding: 16px 14px 80px; }
+            .settings-panel-title { font-size: 1.4rem; }
+            /* Inputs prennent 100% sans déborder */
+            .settings-row .ainput { width: 100%; box-sizing: border-box; }
         }
 
         /* ════════════════════════════════════════════════
@@ -10149,6 +10184,7 @@ function openSettingsDrawer(){
     drawer.setAttribute('aria-hidden', 'false');
     if(backdrop) backdrop.classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.body.classList.add('drawer-open');
     loadSettingsView();
 }
 
@@ -10166,6 +10202,9 @@ function closeSettingsDrawer(){
     drawer.setAttribute('aria-hidden', 'true');
     if(backdrop) backdrop.classList.remove('open');
     document.body.style.overflow = '';
+    // Retire drawer-open seulement si aucun autre drawer n'est ouvert
+    const wd = document.getElementById('wallet-drawer');
+    if(!wd || !wd.classList.contains('open')) document.body.classList.remove('drawer-open');
 }
 
 /* ═══ USER MENU POPOVER ═══ */
@@ -10664,6 +10703,7 @@ function openWalletDrawer(){
     backdrop.classList.add('open');
     WALLET_STATE.open = true;
     document.body.style.overflow = 'hidden';
+    document.body.classList.add('drawer-open');
     loadWalletData();
     // Charge le chart portefeuille
     try { _bindPfRangePills('wallet'); loadPortfolioChart('wallet'); } catch(e){}
@@ -10677,6 +10717,8 @@ function closeWalletDrawer(){
     backdrop.classList.remove('open');
     WALLET_STATE.open = false;
     document.body.style.overflow = '';
+    const sd = document.getElementById('settings-drawer');
+    if(!sd || !sd.classList.contains('open')) document.body.classList.remove('drawer-open');
 }
 
 // ESC to close
@@ -11859,22 +11901,29 @@ function investInCurrentPick(){
         } catch(e){ console.warn('closeAllOverlays', e); }
     }
 
-    function syncActiveTab(){
-        const current = document.querySelector('[id^="view-"].show');
-        if(!current) return;
-        const view = current.id.replace(/^view-/, '');
+    function syncActiveTab(forcedView){
+        let view = forcedView;
+        if(!view){
+            const current = document.querySelector('[id^="view-"].show');
+            if(!current) return;
+            view = current.id.replace(/^view-/, '');
+        }
         const activeTab = VIEW_TAB_MAP[view] || 'more';
         document.querySelectorAll('.bottom-tab').forEach(b=>{
             b.classList.toggle('active', b.dataset.tab === activeTab);
         });
     }
 
-    // Hook dans showView : on wrappe pour sync après chaque nav
+    // Hook dans showView : on wrappe pour sync immédiatement (avant l'anim)
+    // ET après l'anim — comme ça l'indicateur bleu bouge dès le 1er tap.
     if(typeof window.showView === 'function'){
         const origShowView = window.showView;
-        window.showView = function(v){
-            origShowView(v);
-            setTimeout(syncActiveTab, 20);
+        window.showView = function(v, opts){
+            // Sync instantané sur la vue cible (sans attendre la fin d'anim)
+            syncActiveTab(v);
+            origShowView(v, opts);
+            setTimeout(()=>syncActiveTab(v), 20);
+            setTimeout(()=>syncActiveTab(v), 280);
         };
     }
 
