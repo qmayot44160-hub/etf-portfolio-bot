@@ -361,7 +361,12 @@
         .stat-grid-3 { grid-template-columns: repeat(3, 1fr); }
         .stat-grid-2 { grid-template-columns: repeat(2, 1fr); }
         @media (max-width: 860px) { .stat-grid-4,.stat-grid-3 { grid-template-columns: repeat(2,1fr); } }
-        @media (max-width: 500px) { .stat-grid-4,.stat-grid-3,.stat-grid-2 { grid-template-columns: 1fr; } }
+        /* Sous 500px on garde 2 colonnes pour stat-grid-4 (sinon 4 cards
+           empilées = scroll interminable). Grid-3 et 2 passent à 1 col. */
+        @media (max-width: 500px) {
+            .stat-grid-4 { grid-template-columns: repeat(2, 1fr); }
+            .stat-grid-3, .stat-grid-2 { grid-template-columns: 1fr; }
+        }
 
         .stat-card {
             position: relative; overflow: hidden;
@@ -5022,6 +5027,51 @@
 
             /* Inputs plus confortables au toucher */
             input, select, textarea { font-size: 16px; /* empêche le zoom iOS */ }
+
+            /* Décor ambiant (beams, glows, side-dots) : consomme du scroll
+               et alourdit sans apporter d'info sur mobile */
+            .page-sides-decor { display: none; }
+
+            /* Hero-portfolio : padding plus compact */
+            .hero-portfolio { padding: 20px 18px; margin-bottom: 18px; }
+            .hp-label { margin-bottom: 10px; font-size: 0.68rem; }
+
+            /* Home-hero (accueil greeting) : réduire l'espace vertical */
+            .home-hero { padding: 24px 14px 12px; }
+            .home-title { font-size: 1.6rem; }
+            .home-subtitle { font-size: 0.88rem; }
+            .home-greeting { font-size: 0.68rem; }
+
+            /* Market ticker : scroll horizontal naturel (CSS animé existant) */
+            .market-ticker { overflow-x: auto; }
+            .market-ticker-track { padding: 8px 12px; gap: 18px; }
+
+            /* Action-card (Que faire maintenant) : layout plus compact */
+            .action-card { padding: 14px 14px; }
+            .action-icon { width: 32px; height: 32px; font-size: 1.1rem; }
+            .action-title { font-size: 0.92rem; }
+            .action-desc { font-size: 0.78rem; line-height: 1.45; }
+
+            /* Shortcut tiles (Actions rapides) : 2 colonnes au lieu d'une
+               longue liste verticale */
+            .shortcut-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 16px; }
+            .shortcut-tile { padding: 14px 12px; border-radius: 12px; }
+            .shortcut-tile-icon { font-size: 1.2rem; margin-bottom: 6px; }
+            .shortcut-tile-title { font-size: 0.82rem; }
+            .shortcut-tile-desc { font-size: 0.7rem; }
+
+            /* Home-dual (Répartition + Principales positions) stack clean */
+            .home-dual { display: flex; flex-direction: column; gap: 14px; }
+            .home-dual-card { padding: 18px 16px; }
+            .home-dual-card-title { font-size: 1rem; }
+
+            /* Alloc-donut wrap : hauteur réduite quand vide */
+            .alloc-donut-wrap { min-height: 180px; }
+
+            /* Onboarding hero (bienvenue) : force un max-width qui tient */
+            #hero-total [style*="max-width:520px"],
+            #hero-total [style*="max-width: 520px"] { max-width: 100% !important; }
+            #hero-total button { font-size: 0.82rem !important; padding: 9px 14px !important; }
         }
 
         @media (max-width: 420px) {
