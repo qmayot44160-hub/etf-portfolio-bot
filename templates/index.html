@@ -11900,20 +11900,23 @@ function investInCurrentPick(){
    BOTTOM TAB BAR (mobile only) — sync actif avec showView()
    ═══════════════════════════════════════════════════════════ */
 (function(){
-    // Map tab → view cible (Plus ouvre la palette ⌘K)
+    // Map tab → view cible. ETF = portfolio, Crypto = crypto (accès direct)
     const TAB_VIEW_MAP = {
         home: 'home',
-        portfolio: 'portfolio',
+        portfolio: 'portfolio',  // tab "ETF"
+        crypto: 'crypto',        // tab "Crypto"
         dca: 'dca',
         analytics: 'analytics'
     };
-    // Views qui mettent tel ou tel tab en actif (fallback pour les vues secondaires)
+    // Views qui mettent tel ou tel tab en actif (fallback pour les vues secondaires).
+    // Les vues secondaires (broker/auto/securite/glossaire) n'activent plus aucun tab
+    // (Plus est retiré) — la nav vers ces vues garde tous les tabs inactifs.
     const VIEW_TAB_MAP = {
         home: 'home',
-        portfolio: 'portfolio', crypto: 'portfolio', watchlist: 'portfolio',
+        portfolio: 'portfolio', watchlist: 'portfolio',
+        crypto: 'crypto',
         dca: 'dca', trading: 'dca', scanner: 'dca', discover: 'dca',
-        analytics: 'analytics', projection: 'analytics',
-        broker: 'more', auto: 'more', securite: 'more', glossaire: 'more'
+        analytics: 'analytics', projection: 'analytics'
     };
 
     // Ferme tout drawer/modal/palette ouvert pour que la nav vers la nouvelle vue
@@ -11950,9 +11953,12 @@ function investInCurrentPick(){
             if(!current) return;
             view = current.id.replace(/^view-/, '');
         }
-        const activeTab = VIEW_TAB_MAP[view] || 'more';
+        // Pas de fallback "more" : si la vue n'est pas mappée (broker, securite,
+        // glossaire, etc.), aucun tab n'est actif. C'est plus honnête que de
+        // forcer un highlight arbitraire.
+        const activeTab = VIEW_TAB_MAP[view] || null;
         document.querySelectorAll('.bottom-tab').forEach(b=>{
-            b.classList.toggle('active', b.dataset.tab === activeTab);
+            b.classList.toggle('active', activeTab !== null && b.dataset.tab === activeTab);
         });
     }
 
@@ -11972,18 +11978,6 @@ function investInCurrentPick(){
     function handleTabClick(tab){
         // Toujours fermer drawers/menus avant de naviguer pour que la vue cible soit visible
         closeAllOverlays();
-        if(tab === 'more'){
-            // Ouvrir la palette ⌘K (seul "Plus" garde un overlay — c'est sa raison d'être)
-            setTimeout(()=>{
-                if(typeof openCmdK === 'function'){ openCmdK(); return; }
-                const hint = document.querySelector('.cmdk-hint');
-                if(hint){ hint.click(); return; }
-                // Fallback : trigger Ctrl+K
-                const ev = new KeyboardEvent('keydown', {key:'k', ctrlKey:true, bubbles:true});
-                document.dispatchEvent(ev);
-            }, 50);
-            return;
-        }
         const target = TAB_VIEW_MAP[tab];
         if(target && typeof showView === 'function') showView(target);
     }
@@ -12015,7 +12009,7 @@ function investInCurrentPick(){
        Style Instagram : swipe gauche = vue suivante, swipe droite = précédente
        ═══════════════════════════════════════════════════════ */
     // Ordre des vues principales pour le swipe (les autres restent accessibles via Plus)
-    const SWIPE_ORDER = ['home', 'portfolio', 'dca', 'analytics'];
+    const SWIPE_ORDER = ['home', 'portfolio', 'crypto', 'dca', 'analytics'];
     let touchStartX = 0, touchStartY = 0, touchStartT = 0, swipeBlocked = false;
     const SWIPE_MIN_DIST = 60;       // distance horizontale min
     const SWIPE_MAX_VERT = 50;       // tolérance verticale max
@@ -12086,16 +12080,23 @@ function investInCurrentPick(){
 })();
 </script>
 
-<!-- Bottom tab bar (mobile only — activé via @media max-width:720px) -->
+<!-- Bottom tab bar (mobile only — activé via @media max-width:720px)
+     5 onglets : Accueil, ETF, Crypto, Trader, Analyse.
+     Le bouton "Plus" a été retiré — la palette ⌘K et le menu sont
+     accessibles via le hamburger ☰ en haut à gauche (pas de doublon). -->
 <nav class="bottom-tabbar" role="navigation" aria-label="Navigation mobile">
     <div class="bottom-tabbar-inner">
         <button class="bottom-tab" data-tab="home" type="button" aria-label="Accueil">
             <span class="bottom-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2h-4v-6h-6v6H5a2 2 0 0 1-2-2V10z"/></svg></span>
             <span class="bottom-tab-label">Accueil</span>
         </button>
-        <button class="bottom-tab" data-tab="portfolio" type="button" aria-label="Portefeuille">
+        <button class="bottom-tab" data-tab="portfolio" type="button" aria-label="ETF">
             <span class="bottom-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 7h18v13H3zM8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/></svg></span>
-            <span class="bottom-tab-label">Portefeuille</span>
+            <span class="bottom-tab-label">ETF</span>
+        </button>
+        <button class="bottom-tab" data-tab="crypto" type="button" aria-label="Crypto">
+            <span class="bottom-tab-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9h4.5a2.5 2.5 0 0 1 0 5H9zM9 14h5a2.5 2.5 0 0 1 0 5H9zM10 7v2M10 19v2M14 7v2M14 19v2"/></svg></span>
+            <span class="bottom-tab-label">Crypto</span>
         </button>
         <button class="bottom-tab" data-tab="dca" type="button" aria-label="Trader">
             <span class="bottom-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></span>
@@ -12104,10 +12105,6 @@ function investInCurrentPick(){
         <button class="bottom-tab" data-tab="analytics" type="button" aria-label="Analyse">
             <span class="bottom-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 20V10M9 20V4M15 20v-7M21 20v-11"/></svg></span>
             <span class="bottom-tab-label">Analyse</span>
-        </button>
-        <button class="bottom-tab" data-tab="more" type="button" aria-label="Plus">
-            <span class="bottom-tab-icon"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></span>
-            <span class="bottom-tab-label">Plus</span>
         </button>
     </div>
 </nav>
