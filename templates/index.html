@@ -12,8 +12,56 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>PortfolioQuant</title>
-    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Plotly est lazy-loadé via le proxy window.Plotly défini dans le script principal.
+         Cela évite ~1 MB de JS bloquant au premier paint sur mobile 4G.
+         Le script réel est injecté dynamiquement au premier Plotly.newPlot(). -->
+    <script>
+    (function(){
+        let _plotlyPromise = null;
+        function loadPlotly(){
+            if(window.__plotlyReal) return Promise.resolve(window.__plotlyReal);
+            if(_plotlyPromise) return _plotlyPromise;
+            _plotlyPromise = new Promise((resolve, reject)=>{
+                const s = document.createElement('script');
+                s.src = 'https://cdn.plot.ly/plotly-2.27.0.min.js';
+                s.async = true;
+                s.onload = ()=>{
+                    // Plotly s'est défini sur window — on le sauve sous __plotlyReal,
+                    // puis on remplace le proxy par la vraie référence pour les appels suivants.
+                    const real = window.Plotly;
+                    window.__plotlyReal = real;
+                    // Remplacer le proxy par le vrai Plotly (pour les appels synchrones futurs)
+                    Object.defineProperty(window, 'Plotly', {value: real, writable: true, configurable: true});
+                    resolve(real);
+                };
+                s.onerror = (e)=>{ _plotlyPromise = null; reject(e); };
+                document.head.appendChild(s);
+            });
+            return _plotlyPromise;
+        }
+        window.loadPlotly = loadPlotly;
+
+        // Proxy : capture tous les appels Plotly.xxx() avant que la lib soit chargée
+        // et les redirige vers loadPlotly().then(real => real.xxx(...))
+        const stub = new Proxy({}, {
+            get(target, prop){
+                if(prop === 'then') return undefined; // évite que ce soit traité comme thenable
+                return function(...args){
+                    return loadPlotly().then(real => {
+                        if(typeof real[prop] === 'function') return real[prop](...args);
+                        return real[prop];
+                    });
+                };
+            }
+        });
+        Object.defineProperty(window, 'Plotly', {value: stub, writable: true, configurable: true});
+    })();
+    </script>
+    <!-- Préconnexion DNS+TLS aux origines critiques pour gagner ~100-200ms sur le 1er paint -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.plot.ly">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             /* User-customizable via Settings > Personnalisation */
