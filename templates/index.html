@@ -5261,31 +5261,68 @@
             /* Samsung Internet : retire le highlight bleu natif */
             outline: none;
         }
-        .bottom-tab:active { background: rgba(255,255,255,0.05); }
+        .bottom-tab:active { background: rgba(255,255,255,0.08); transform: scale(0.94); }
         .bottom-tab.active { color: var(--sf-text); }
-        .bottom-tab.active .bottom-tab-icon { color: var(--sf-blue); }
+        .bottom-tab.active .bottom-tab-icon {
+            color: var(--sf-blue);
+            transform: scale(1.12) translateY(-1px);
+        }
+        .bottom-tab.active .bottom-tab-label {
+            color: var(--sf-blue);
+            font-weight: 600;
+        }
         .bottom-tab-icon {
             width: 22px; height: 22px;
             display: inline-flex; align-items: center; justify-content: center;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s;
         }
         .bottom-tab-icon svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .bottom-tab-label {
             font-size: 0.62rem; font-weight: 500;
             letter-spacing: 0.02em;
+            transition: color 0.2s, font-weight 0.2s;
         }
 
-        /* Indicateur pill actif */
-        .bottom-tab.active {
-            position: relative;
-        }
+        /* Indicateur pill actif — plus large + glow visible */
+        .bottom-tab.active { position: relative; }
         .bottom-tab.active::before {
             content: '';
-            position: absolute; top: 2px;
+            position: absolute; top: 0;
             left: 50%; transform: translateX(-50%);
-            width: 32px; height: 3px;
+            width: 40px; height: 3px;
             background: var(--sf-blue);
-            border-radius: 0 0 3px 3px;
-            box-shadow: 0 0 8px rgba(10,132,255,0.6);
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 0 12px rgba(10,132,255,0.8), 0 2px 4px rgba(10,132,255,0.4);
+            animation: tab-pill-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        /* Halo derrière l'icône active pour booster la lisibilité */
+        .bottom-tab.active::after {
+            content: '';
+            position: absolute;
+            top: 8px; left: 50%;
+            transform: translateX(-50%);
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(10,132,255,0.18) 0%, rgba(10,132,255,0) 70%);
+            pointer-events: none;
+            animation: tab-halo-pop 0.4s ease-out;
+        }
+        @keyframes tab-pill-pop {
+            0%   { width: 0; opacity: 0; }
+            60%  { width: 48px; opacity: 1; }
+            100% { width: 40px; opacity: 1; }
+        }
+        @keyframes tab-halo-pop {
+            0%   { opacity: 0; transform: translateX(-50%) scale(0.5); }
+            100% { opacity: 1; transform: translateX(-50%) scale(1); }
+        }
+
+        /* Sur mobile : transition plus snappy (0.6s c'est lent au doigt) */
+        @media (max-width: 720px) {
+            [id^="view-"] {
+                transition: opacity 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                            transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            }
         }
 
         /* Activation mobile : afficher bottom bar + padding-bottom pour
@@ -7337,18 +7374,26 @@ function quickAction(kind){
     } catch(e){ console.warn('quickAction error', e); }
 }
 
-function showView(v){
+function showView(v, opts){
     const next=document.getElementById('view-'+v);
     if(!next)return;
     const current=document.querySelector('[id^="view-"].show');
+    // Direction de transition : 'left' = nouveau vient de la droite (swipe gauche / next),
+    // 'right' = nouveau vient de la gauche (swipe droite / prev), undefined = défaut vertical
+    const dir = opts && opts.dir;
+    const isMobile = window.matchMedia('(max-width: 720px)').matches;
+    // Enter/exit transforms — slide horizontal sur mobile, fade vertical sinon
+    const enterFrom = dir === 'left' ? 'translateX(40px)' : dir === 'right' ? 'translateX(-40px)' : (isMobile ? 'translateX(20px)' : 'translateY(20px)');
+    const exitTo    = dir === 'left' ? 'translateX(-40px)' : dir === 'right' ? 'translateX(40px)' : (isMobile ? 'translateX(-20px)' : 'translateY(20px)');
+    const restTransform = 'translateX(0) translateY(0)';
     const activate=()=>{
         next.style.display='block';
         next.style.opacity='0';
-        next.style.transform='translateY(20px)';
+        next.style.transform=enterFrom;
         requestAnimationFrame(()=>{
             next.classList.add('show');
             next.style.opacity='1';
-            next.style.transform='translateY(0)';
+            next.style.transform=restTransform;
         });
         window.scrollTo({top:0,behavior:'smooth'});
         const loaders={home:loadHome,portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire,securite:loadSecurite,watchlist:loadWatchlist,discover:loadDiscover};
@@ -7356,12 +7401,12 @@ function showView(v){
     };
     if(current&&current!==next){
         current.style.opacity='0';
-        current.style.transform='translateY(20px)';
+        current.style.transform=exitTo;
         setTimeout(()=>{
             current.classList.remove('show');
             current.style.display='none';
             activate();
-        },300);
+        },220);
     }else if(!current){
         activate();
     }
@@ -11781,6 +11826,80 @@ function investInCurrentPick(){
     // Sync initial (après mount)
     setTimeout(syncActiveTab, 100);
     window.addEventListener('load', ()=>setTimeout(syncActiveTab, 50));
+
+    /* ═══════════════════════════════════════════════════════
+       SWIPE HORIZONTAL ENTRE VUES (mobile uniquement)
+       Style Instagram : swipe gauche = vue suivante, swipe droite = précédente
+       ═══════════════════════════════════════════════════════ */
+    // Ordre des vues principales pour le swipe (les autres restent accessibles via Plus)
+    const SWIPE_ORDER = ['home', 'portfolio', 'dca', 'analytics'];
+    let touchStartX = 0, touchStartY = 0, touchStartT = 0, swipeBlocked = false;
+    const SWIPE_MIN_DIST = 60;       // distance horizontale min
+    const SWIPE_MAX_VERT = 50;       // tolérance verticale max
+    const SWIPE_MAX_TIME = 600;      // durée max d'un swipe valide (ms)
+
+    function isSwipeableTarget(el){
+        // Ne pas swiper si on touche un élément qui scrolle horizontalement
+        // (carousels, plots Plotly, code blocks, inputs, ranges, etc.)
+        let node = el;
+        while(node && node !== document.body){
+            if(node.tagName === 'INPUT' || node.tagName === 'TEXTAREA' || node.tagName === 'SELECT') return false;
+            if(node.dataset && node.dataset.noSwipe !== undefined) return false;
+            const cls = node.className || '';
+            if(typeof cls === 'string' && /(plotly|js-plotly|main-svg|scroll-x|carousel|hscroll|scroll-snap|cmdk|nav-dropdown|modal)/i.test(cls)) return false;
+            // élément qui scrolle horizontalement
+            if(node.scrollWidth > node.clientWidth + 4){
+                const cs = getComputedStyle(node);
+                if(/auto|scroll/.test(cs.overflowX)) return false;
+            }
+            node = node.parentElement;
+        }
+        return true;
+    }
+
+    document.addEventListener('touchstart', (e)=>{
+        if(!window.matchMedia('(max-width: 720px)').matches) return;
+        if(e.touches.length !== 1) { swipeBlocked = true; return; }
+        swipeBlocked = !isSwipeableTarget(e.target);
+        const t = e.touches[0];
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
+        touchStartT = Date.now();
+    }, {passive: true});
+
+    document.addEventListener('touchend', (e)=>{
+        if(swipeBlocked) return;
+        if(!window.matchMedia('(max-width: 720px)').matches) return;
+        const t = e.changedTouches[0];
+        if(!t) return;
+        const dx = t.clientX - touchStartX;
+        const dy = t.clientY - touchStartY;
+        const dt = Date.now() - touchStartT;
+        if(dt > SWIPE_MAX_TIME) return;
+        if(Math.abs(dy) > SWIPE_MAX_VERT) return;
+        if(Math.abs(dx) < SWIPE_MIN_DIST) return;
+
+        // Trouve la vue courante dans l'ordre swipeable
+        const cur = document.querySelector('[id^="view-"].show');
+        if(!cur) return;
+        const curView = cur.id.replace(/^view-/, '');
+        const idx = SWIPE_ORDER.indexOf(curView);
+        if(idx === -1) return; // vue actuelle pas dans l'ordre swipeable
+
+        if(dx < 0){
+            // swipe gauche → vue suivante
+            const nextIdx = idx + 1;
+            if(nextIdx < SWIPE_ORDER.length){
+                showView(SWIPE_ORDER[nextIdx], {dir: 'left'});
+            }
+        } else {
+            // swipe droite → vue précédente
+            const prevIdx = idx - 1;
+            if(prevIdx >= 0){
+                showView(SWIPE_ORDER[prevIdx], {dir: 'right'});
+            }
+        }
+    }, {passive: true});
 })();
 </script>
 
