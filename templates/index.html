@@ -364,14 +364,19 @@
         @media (max-width: 500px) { .stat-grid-4,.stat-grid-3,.stat-grid-2 { grid-template-columns: 1fr; } }
 
         .stat-card {
-            background: transparent;
+            position: relative; overflow: hidden;
+            background:
+                radial-gradient(ellipse 80% 60% at 0% 0%, rgba(41,151,255,0.07), transparent 60%),
+                linear-gradient(180deg, rgba(14,14,18,0.85), rgba(8,8,12,0.92));
+            border: 1px solid rgba(255,255,255,0.06);
             border-radius: var(--ui-radius);
             padding: 32px 26px;
             text-align: center;
-            transition: transform 0.3s, background 0.3s, border-color 0.3s;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+            transition: transform 0.3s, background 0.3s, border-color 0.3s, box-shadow 0.3s;
             cursor: default;
         }
-        .stat-card:hover { transform: scale(1.02); background: rgba(255,255,255,0.025); }
+        .stat-card:hover { transform: scale(1.02); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 32px rgba(0,0,0,0.4); }
         .stat-label {
             font-size: 0.72rem; font-weight: 500;
             text-transform: uppercase; letter-spacing: 0.08em;
@@ -389,20 +394,26 @@
         }
 
         /* ════════════════════════════════════════════════
-           DATA CARDS (content blocks)
+           DATA CARDS (content blocks) — définition unique consolidée
+           (inclut position:relative pour les pseudo-éléments,
+            transition + --mx/--my pour le spotlight, hover shadow)
            ════════════════════════════════════════════════ */
         .dcard {
+            position: relative;
+            --mx: 50%; --my: 50%;
             background:
                 radial-gradient(ellipse 80% 60% at 0% 0%, rgba(41,151,255,0.08), transparent 60%),
                 linear-gradient(180deg, rgba(14,14,18,0.85), rgba(8,8,12,0.92));
-            border: 1px solid rgba(255,255,255,0.06);
+            border: 1px solid transparent;
             border-radius: var(--ui-radius);
             padding: 38px 34px;
             margin-bottom: 28px;
             box-shadow:
                 inset 0 1px 0 rgba(255,255,255,0.04),
                 0 10px 40px -18px rgba(0,0,0,0.6);
+            transition: border-color 0.4s, box-shadow 0.4s, transform 0.3s;
         }
+        .dcard:hover { box-shadow: 0 14px 44px rgba(0,0,0,0.5); }
         .dcard-title {
             font-size: 1.3rem; font-weight: 600;
             letter-spacing: -0.02em;
@@ -1197,17 +1208,6 @@
         .skel-line-sm { width: 60%; height: 12px; }
 
         /* ════════════════════════════════════════════════
-           CARD GRADIENT BORDER
-           ════════════════════════════════════════════════ */
-        .dcard {
-            position: relative;
-            transition: box-shadow 0.3s;
-        }
-        .dcard:hover {
-            box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 8px 32px rgba(0,0,0,0.3);
-        }
-
-        /* ════════════════════════════════════════════════
            STAT CARD COLOR ACCENTS
            ════════════════════════════════════════════════ */
         .stat-card.accent-green { border-top: 2px solid rgba(48,209,88,0.3); }
@@ -1553,11 +1553,8 @@
 
         /* ════════════════════════════════════════════════
            DA+ : DCARD HOVER GLOW (gradient border reveal)
+           Base .dcard rules consolidées plus haut (ligne ~394)
            ════════════════════════════════════════════════ */
-        .dcard {
-            border: 1px solid transparent;
-            transition: border-color 0.4s, box-shadow 0.4s, transform 0.3s;
-        }
         .dcard::after {
             content: ''; position: absolute; inset: 0;
             border-radius: inherit; padding: 1px;
@@ -1568,15 +1565,12 @@
             pointer-events: none;
         }
         .dcard:hover::after { opacity: 1; }
-        .dcard:hover { box-shadow: 0 14px 44px rgba(0,0,0,0.5); }
 
         /* ════════════════════════════════════════════════
            DA+ : CURSOR-FOLLOW SPOTLIGHT on .dcard
-           Radial gradient suit la souris (vars --mx/--my set via JS)
+           Radial gradient suit la souris (vars --mx/--my set via JS,
+           valeurs par défaut déclarées dans la définition principale)
            ════════════════════════════════════════════════ */
-        .dcard {
-            --mx: 50%; --my: 50%;
-        }
         .dcard::before {
             content: ''; position: absolute; inset: 0;
             border-radius: inherit;
@@ -1592,16 +1586,9 @@
         .dcard:hover::before { opacity: 1; }
 
         /* ════════════════════════════════════════════════
-           DA+ : STAT CARDS PREMIUM (gradient + top line)
+           DA+ : STAT CARDS PREMIUM — ligne accent haut
+           (base consolidée plus haut ligne ~366)
            ════════════════════════════════════════════════ */
-        .stat-card {
-            background:
-                radial-gradient(ellipse 80% 60% at 0% 0%, rgba(41,151,255,0.07), transparent 60%),
-                linear-gradient(180deg, rgba(14,14,18,0.85), rgba(8,8,12,0.92));
-            border: 1px solid rgba(255,255,255,0.06);
-            position: relative; overflow: hidden;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
-        }
         .stat-card::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
@@ -8669,14 +8656,16 @@ async function loadSmartPicks(opts){
         // Charge l'historique en tâche de fond (pour le badge de count)
         loadSmartPicksHistory().catch(() => {});
         // Auto-refresh silencieux toutes les 5 min
+        // Tracké dans APP_INTERVALS pour cleanup global, skip si onglet caché
         if(!SP_STATE.refreshTimer){
             SP_STATE.refreshTimer = setInterval(() => {
-                // Ne rafraîchit que si l'accueil est visible
+                if(document.hidden) return;
                 const home = document.getElementById('view-home');
                 if(home && home.style.display !== 'none'){
                     loadSmartPicks().catch(e => console.warn('sp-refresh', e));
                 }
             }, 5 * 60 * 1000);
+            if(typeof APP_INTERVALS !== 'undefined') APP_INTERVALS.push(SP_STATE.refreshTimer);
         }
     } catch(e){
         list.innerHTML = `<div class="sp-empty">Impossible de charger les picks : ${e.message}</div>`;
@@ -9888,8 +9877,16 @@ loadProfile();
 loadHome();
 loadContextBanner();
 refreshStatus();
-// Refresh banner toutes les 30s
-setInterval(loadContextBanner, 30000);
+// Refresh banner toutes les 30s — skip si onglet caché, tracké pour cleanup
+if(typeof APP_INTERVALS === 'undefined') { window.APP_INTERVALS = []; }
+APP_INTERVALS.push(setInterval(() => {
+    if(document.hidden) return;
+    loadContextBanner();
+}, 30000));
+// Arrête tous les intervalles enregistrés au unload pour éviter les fuites SPA-like
+window.addEventListener('beforeunload', () => {
+    try { (APP_INTERVALS || []).forEach(id => clearInterval(id)); } catch(e){}
+});
 setTimeout(() => {
     initCustomSelects(); injectTooltips(); renderStaticIcons();
     initReveal(); initSpotlight();

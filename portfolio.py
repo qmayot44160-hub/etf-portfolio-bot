@@ -7,6 +7,7 @@ import os
 from datetime import datetime
 from config import PORTFOLIO, INITIAL_CAPITAL, DCA_MONTHLY, REBALANCE_THRESHOLD_PCT
 from market_data import get_current_prices
+from portfolio_allocation import allocate_by_target, compute_rebalance_orders
 from data_paths import data_path
 
 PORTFOLIO_FILE = data_path("portfolio_state.json")
@@ -79,54 +80,18 @@ def get_portfolio_value(state: dict = None) -> dict:
 def calculate_rebalance(state: dict = None) -> list:
     """Calcule les ordres nécessaires pour rééquilibrer le portefeuille."""
     portfolio_value = get_portfolio_value(state)
-    total = portfolio_value["total_value"]
-    orders = []
-
-    for pos in portfolio_value["positions"]:
-        drift = abs(pos["drift"])
-        if drift >= REBALANCE_THRESHOLD_PCT:
-            target_value = total * pos["target_pct"] / 100
-            diff_value = target_value - pos["value"]
-            if pos["price"] and pos["price"] > 0:
-                diff_shares = int(diff_value / pos["price"])
-                if diff_shares != 0:
-                    orders.append({
-                        "ticker": pos["ticker"],
-                        "name": pos["name"],
-                        "action": "BUY" if diff_shares > 0 else "SELL",
-                        "shares": abs(diff_shares),
-                        "price": pos["price"],
-                        "amount": round(abs(diff_shares) * pos["price"], 2),
-                        "drift": pos["drift"],
-                    })
-
-    return orders
+    return compute_rebalance_orders(
+        portfolio_value["positions"],
+        portfolio_value["total_value"],
+        REBALANCE_THRESHOLD_PCT,
+    )
 
 
 def calculate_dca_allocation(amount: float = None) -> list:
     """Calcule la répartition DCA selon l'allocation cible."""
     if amount is None:
         amount = DCA_MONTHLY
-
-    prices = get_current_prices()
-    allocation = []
-
-    for ticker, config in PORTFOLIO.items():
-        alloc_amount = amount * config["target_pct"] / 100
-        price = prices.get(ticker, 0)
-        if price and price > 0:
-            shares = int(alloc_amount / price)
-            real_amount = shares * price
-            allocation.append({
-                "ticker": ticker,
-                "name": config["name"],
-                "target_amount": round(alloc_amount, 2),
-                "price": price,
-                "shares_to_buy": shares,
-                "real_amount": round(real_amount, 2),
-            })
-
-    return allocation
+    return allocate_by_target(amount, PORTFOLIO, get_current_prices())
 
 
 def execute_buy(state: dict, ticker: str, shares: int, price: float) -> dict:

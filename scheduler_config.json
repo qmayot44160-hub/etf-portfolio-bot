@@ -1,0 +1,12 @@
+{
+  "dca_enabled": false,
+  "dca_day": 1,
+  "dca_hour": 9,
+  "dca_amount": 500,
+  "rebalance_enabled": false,
+  "rebalance_day": "mon",
+  "rebalance_hour": 10,
+  "last_dca": null,
+  "last_rebalance": null,
+  "logs": []
+}

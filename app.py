@@ -524,6 +524,12 @@ def api_rebalance():
 def api_rebalance_execute():
     """Exécute le rééquilibrage via le broker."""
     results = engine.execute_rebalance()
+    # Un rebalance modifie les positions -> invalide le cache prix pour la prochaine lecture
+    try:
+        from market_data import invalidate_price_cache
+        invalidate_price_cache()
+    except Exception:
+        pass
     return jsonify(results)
 
 

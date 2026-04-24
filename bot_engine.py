@@ -10,6 +10,7 @@ from config import PORTFOLIO, DCA_MONTHLY, REBALANCE_THRESHOLD_PCT
 from brokers import get_broker, list_brokers, BrokerOrder, OrderSide, OrderType
 from brokers.base import BaseBroker
 from market_data import get_current_prices
+from portfolio_allocation import allocate_by_target, compute_rebalance_orders
 from data_paths import data_path
 
 BROKER_CONFIG_FILE = data_path("broker_config.json")
@@ -157,35 +158,30 @@ class BotEngine:
         return sim_dca(amount=amount)
 
     def _broker_dca(self, amount: float) -> list:
-        """DCA via le broker réel."""
-        prices = get_current_prices()
+        """DCA via le broker réel — calcul d'allocation partagé, puis ordres."""
+        allocation = allocate_by_target(amount, PORTFOLIO, get_current_prices())
         results = []
 
-        for ticker, config in PORTFOLIO.items():
-            alloc = amount * config["target_pct"] / 100
-            price = prices.get(ticker, 0)
-            if not price or price <= 0:
-                continue
-
-            shares = int(alloc / price)
+        for alloc in allocation:
+            shares = alloc["shares_to_buy"]
             if shares <= 0:
                 continue
-
+            ticker = alloc["ticker"]
             try:
                 order = self.broker.buy(ticker, shares)
                 results.append({
                     "ticker": ticker,
-                    "name": config["name"],
+                    "name": alloc["name"],
                     "shares": shares,
-                    "price": price,
-                    "amount": round(shares * price, 2),
+                    "price": alloc["price"],
+                    "amount": alloc["real_amount"],
                     "order_id": order.order_id,
                     "status": order.status,
                 })
             except Exception as e:
                 results.append({
                     "ticker": ticker,
-                    "name": config["name"],
+                    "name": alloc["name"],
                     "shares": shares,
                     "error": str(e),
                     "status": "FAILED",
@@ -194,56 +190,46 @@ class BotEngine:
         return results
 
     def execute_rebalance(self) -> list:
-        """Calcule et exécute le rééquilibrage."""
+        """Calcule (via helper partagé) puis exécute le rééquilibrage."""
         portfolio = self.get_portfolio()
         if "error" in portfolio:
             return [{"error": portfolio["error"]}]
 
-        total = portfolio["total_value"]
+        orders = compute_rebalance_orders(
+            portfolio["positions"], portfolio["total_value"], REBALANCE_THRESHOLD_PCT
+        )
         results = []
 
-        for pos in portfolio["positions"]:
-            drift = abs(pos.get("drift", 0))
-            if drift < REBALANCE_THRESHOLD_PCT:
-                continue
-
-            target_value = total * pos["target_pct"] / 100
-            diff = target_value - pos["value"]
-            price = pos["price"]
-            if not price or price <= 0:
-                continue
-
-            shares = int(abs(diff) / price)
-            if shares <= 0:
-                continue
-
+        for o in orders:
+            ticker = o["ticker"]
+            shares = o["shares"]
+            action = o["action"]
             try:
                 if self.broker and self.broker.connected:
-                    if diff > 0:
-                        order = self.broker.buy(pos["ticker"], shares)
-                    else:
-                        order = self.broker.sell(pos["ticker"], shares)
+                    order = (self.broker.buy(ticker, shares)
+                             if action == "BUY"
+                             else self.broker.sell(ticker, shares))
                     results.append({
-                        "ticker": pos["ticker"],
-                        "name": pos["name"],
-                        "action": "BUY" if diff > 0 else "SELL",
+                        "ticker": ticker,
+                        "name": o["name"],
+                        "action": action,
                         "shares": shares,
-                        "amount": round(shares * price, 2),
+                        "amount": o["amount"],
                         "order_id": order.order_id,
                         "status": order.status,
                     })
                 else:
                     results.append({
-                        "ticker": pos["ticker"],
-                        "name": pos["name"],
-                        "action": "BUY" if diff > 0 else "SELL",
+                        "ticker": ticker,
+                        "name": o["name"],
+                        "action": action,
                         "shares": shares,
-                        "amount": round(shares * price, 2),
+                        "amount": o["amount"],
                         "status": "SIMULATED",
                     })
             except Exception as e:
                 results.append({
-                    "ticker": pos["ticker"],
+                    "ticker": ticker,
                     "error": str(e),
                     "status": "FAILED",
                 })
