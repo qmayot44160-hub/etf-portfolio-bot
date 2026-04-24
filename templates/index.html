@@ -4953,6 +4953,93 @@
         body.reduce-motion .stagger-children > * {
             animation: none !important;
         }
+
+        /* ════════════════════════════════════════════════════════
+           MOBILE RESPONSIVE — passe consolidée.
+           Tout ce qui est spécifique aux petits écrans est regroupé
+           ici pour éviter les règles dispersées et contradictoires.
+           ════════════════════════════════════════════════════════ */
+
+        /* Hamburger visible uniquement sur mobile */
+        .mobile-nav-toggle {
+            display: none;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--sf-text);
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            align-items: center; justify-content: center;
+            cursor: pointer;
+            padding: 0;
+        }
+        .mobile-nav-toggle:hover { background: rgba(255,255,255,0.08); }
+        .mobile-nav-toggle svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+
+        @media (max-width: 720px) {
+            /* Nav : on cache les liens + dropdowns (accessibles via cmdk),
+               on montre un hamburger, et on épure la barre de droite */
+            .globalheader-inner { padding: 0 14px; }
+            .globalheader-links { display: none; }
+            .globalheader-logo { font-size: 1.05rem; }
+            .mobile-nav-toggle { display: inline-flex; }
+            #mode-badge, #bot-status, .hdr-divider { display: none; }
+            .hdr-chip { padding: 6px 10px; font-size: 0.7rem; }
+            .wallet-btn, .avatar-btn { width: 36px; height: 36px; font-size: 0.78rem; }
+
+            /* Section : on récupère de la place horizontale */
+            .section, .section-wide { padding: 16px 14px 80px; }
+
+            /* Cards : padding divisé par ~1.7 */
+            .dcard { padding: 22px 18px; margin-bottom: 18px; }
+            .dcard-title { font-size: 1.05rem; gap: 10px; margin-bottom: 14px; }
+            .stat-card { padding: 20px 16px; }
+            .stat-value { font-size: 1.75rem; }
+            .stat-grid { gap: 12px; margin-bottom: 28px; }
+
+            /* Hero portefeuille : le gros chiffre doit tenir sur une ligne */
+            .hp-value { font-size: 2rem; letter-spacing: -0.02em; }
+            .hp-value-row { gap: 10px; margin-bottom: 14px; }
+            .hp-change { padding: 4px 9px; font-size: 0.74rem; }
+            .hp-timerange { gap: 2px; flex-wrap: wrap; }
+            .hp-timerange button { padding: 6px 10px; font-size: 0.74rem; }
+            .hp-sparkline { height: 90px; }
+
+            /* Hero générique (hero-title / eyebrow / badge) */
+            .hero-title { font-size: 1.6rem; }
+            .hero-subtitle { font-size: 0.88rem; line-height: 1.5; }
+            .hero-eyebrow { font-size: 0.65rem; }
+
+            /* Tables : scroll horizontal plutôt que débordement */
+            .dcard table, .section table { display: block; overflow-x: auto; white-space: nowrap; }
+            .dcard table tbody, .dcard table thead { width: max-content; min-width: 100%; }
+
+            /* Palette ⌘K : hint flottant plus discret */
+            .cmdk-hint { bottom: 12px; right: 12px; padding: 8px 12px; font-size: 0.78rem; }
+            .cmdk-hint .cmdk-kbd { display: none; }
+
+            /* Ctx banner : réduit au minimum */
+            .ctx-banner { padding: 6px 14px; font-size: 0.68rem; overflow-x: auto; white-space: nowrap; }
+
+            /* Inputs plus confortables au toucher */
+            input, select, textarea { font-size: 16px; /* empêche le zoom iOS */ }
+        }
+
+        @media (max-width: 420px) {
+            /* Phones très compacts */
+            .globalheader-inner { padding: 0 10px; gap: 8px; }
+            .stat-value { font-size: 1.45rem; }
+            .stat-card { padding: 16px 12px; }
+            .hero-title { font-size: 1.35rem; }
+            .hp-value { font-size: 1.7rem; }
+            .dcard { padding: 18px 14px; margin-bottom: 14px; }
+            .dcard-title { font-size: 1rem; margin-bottom: 12px; }
+            /* Avatar + wallet compact */
+            .wallet-btn, .avatar-btn { width: 34px; height: 34px; font-size: 0.72rem; }
+            /* Kill-switch : icône seule sans label */
+            .hdr-chip.kill-chip { padding: 6px 8px; }
+            .hdr-chip.kill-chip { font-size: 0; }
+            .hdr-chip.kill-chip .sfi { font-size: 14px; }
+        }
     </style>
 </head>
 <body>
@@ -4962,6 +5049,9 @@
      ════════════════════════════════════════════════════════ -->
 <nav class="globalheader">
     <div class="globalheader-inner">
+        <button class="mobile-nav-toggle" onclick="openCmdK()" aria-label="Ouvrir la navigation" title="Menu · Recherche rapide">
+            <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+        </button>
         <div class="globalheader-logo">PortfolioQuant</div>
         <div class="globalheader-links">
             <button class="globalheader-link active" data-view="home">Accueil</button>
