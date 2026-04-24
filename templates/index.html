@@ -8444,15 +8444,27 @@ async function loadHome(){
                 }
             }).catch(() => {});
         }else{
-            totalEl.textContent = '—';
+            totalEl.innerHTML = '<span title="Aucun broker connecté — la valeur de ton portefeuille apparaîtra ici une fois IBKR ou Binance branché" style="color:var(--sf-text-muted);cursor:help">—</span>';
             document.getElementById('home-total-sub').textContent = 'Aucun broker connecté';
-            // Still show hero with a default (so layout doesn't look broken) if user has no broker yet
+            // Onboarding hero : plutôt qu'un simple label gris, on propose un vrai CTA
             const heroTot = document.getElementById('hero-total');
             if(heroTot && !heroTot.dataset.placeholder){
                 heroTot.dataset.placeholder = '1';
-                heroTot.innerHTML = '<span style="color:var(--sf-text-muted);font-size:1.4rem;font-weight:500">Connecte un broker pour voir ton portefeuille</span>';
+                heroTot.innerHTML = `
+                    <div style="display:flex;flex-direction:column;align-items:flex-start;gap:14px;max-width:440px">
+                      <div style="display:inline-flex;align-items:center;gap:10px;padding:6px 12px;border:1px solid rgba(10,132,255,0.25);background:rgba(10,132,255,0.08);border-radius:99px;font-size:0.72rem;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;color:var(--sf-blue)">
+                        <span style="width:6px;height:6px;border-radius:50%;background:var(--sf-blue);box-shadow:0 0 8px rgba(10,132,255,0.6)"></span>
+                        Bienvenue
+                      </div>
+                      <div style="font-size:1.35rem;font-weight:600;letter-spacing:-0.02em;line-height:1.3;color:var(--sf-text)">Connecte un broker pour démarrer</div>
+                      <div style="font-size:0.88rem;color:var(--sf-text-secondary);line-height:1.5">IBKR pour les ETF et actions, Binance pour les cryptos. Tes identifiants sont chiffrés Fernet AES, stockés uniquement sur ton serveur.</div>
+                      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+                        <button onclick="showView('broker')" style="background:linear-gradient(180deg,#3ba4ff 0%,#0d84ff 100%);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:0.88rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(10,132,255,0.3)">Connecter IBKR <span style="font-size:1.1em">→</span></button>
+                        <button onclick="showView('crypto')" style="background:rgba(255,255,255,0.06);color:var(--sf-text);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 18px;font-size:0.88rem;font-weight:500;cursor:pointer">Connecter Binance</button>
+                      </div>
+                    </div>`;
                 const spark = document.getElementById('hero-sparkline-wrap');
-                if(spark) spark.style.opacity = '0.35';
+                if(spark) spark.style.display = 'none';
             }
         }
         const modeEl = document.getElementById('home-mode');
@@ -8553,10 +8565,22 @@ async function loadHomeAllocation(){
     // Empty state : broker non connecté ou pas de positions
     const positions = Array.isArray(d && d.positions) ? d.positions.filter(p => p && p.shares > 0 && p.value > 0) : [];
     if(d && d.mode === 'not_connected' || positions.length === 0){
-        donutEl.innerHTML = `<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--sf-text-muted);font-size:0.82rem;padding:20px;text-align:center">Aucune position.<br>Connectez un broker pour voir votre répartition.</div>`;
+        const notConnected = d && d.mode === 'not_connected';
+        const emptyIcon = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--sf-text-muted);opacity:0.7"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
+        donutEl.innerHTML = `
+            <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;text-align:center">
+              ${emptyIcon}
+              <div style="color:var(--sf-text);font-size:0.9rem;font-weight:500">Pas encore de répartition</div>
+              <div style="color:var(--sf-text-muted);font-size:0.78rem;line-height:1.45;max-width:220px">${notConnected ? 'Connecte un broker pour afficher ton allocation réelle par catégorie.' : 'Aucune position active. Lance un DCA pour commencer.'}</div>
+              <button onclick="showView('${notConnected ? 'broker' : 'portfolio'}')" style="margin-top:4px;background:rgba(10,132,255,0.1);color:var(--sf-blue);border:1px solid rgba(10,132,255,0.25);border-radius:8px;padding:7px 14px;font-size:0.78rem;font-weight:500;cursor:pointer">${notConnected ? 'Connecter un broker' : 'Lancer un DCA'} →</button>
+            </div>`;
         legendEl.innerHTML = '';
         if(centerEl) centerEl.style.display = 'none';
-        listEl.innerHTML = `<div style="color:var(--sf-text-muted);font-size:0.82rem;padding:30px 0;text-align:center">Connectez un broker pour voir vos positions.</div>`;
+        listEl.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:36px 16px;text-align:center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--sf-text-muted);opacity:0.7"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              <div style="color:var(--sf-text-muted);font-size:0.82rem;line-height:1.5">${notConnected ? 'Aucun broker connecté.' : 'Aucune position pour l\'instant.'}<br><span style="font-size:0.75rem;opacity:0.75">Tes 5 plus grosses lignes apparaîtront ici.</span></div>
+            </div>`;
         return;
     }
 

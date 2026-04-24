@@ -22,7 +22,8 @@ from config import PORTFOLIO, DCA_MONTHLY, CRYPTO_PORTFOLIO, CRYPTO_DCA_MONTHLY
 from crypto_engine import CryptoEngine
 from auto_trader import AutoTrader
 from security import (
-    get_flask_secret, is_auth_enabled, verify_password, login_required,
+    get_flask_secret, is_auth_enabled, verify_credentials, is_username_required,
+    login_required,
 )
 from settings import (
     load_settings, save_settings,
@@ -49,15 +50,21 @@ def login():
     if not is_auth_enabled():
         return redirect("/")
     if request.method == "POST":
+        user = request.form.get("username", "")
         pwd = request.form.get("password", "")
-        if verify_password(pwd):
+        if verify_credentials(user, pwd):
             session["auth_ok"] = True
             session.permanent = True
             return redirect("/")
-        return render_template("login.html", error="Mot de passe incorrect."), 401
+        msg = ("Identifiant ou mot de passe incorrect."
+               if is_username_required() else "Mot de passe incorrect.")
+        return render_template(
+            "login.html", error=msg,
+            require_username=is_username_required(),
+        ), 401
     if session.get("auth_ok"):
         return redirect("/")
-    return render_template("login.html")
+    return render_template("login.html", require_username=is_username_required())
 
 
 @app.route("/logout")

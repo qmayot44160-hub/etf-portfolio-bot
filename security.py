@@ -24,6 +24,7 @@ from data_paths import data_path
 # ─────────────────────────────────────────────────────────
 
 APP_PASSWORD_ENV = "APP_PASSWORD"         # Mot de passe de l'app
+APP_USERNAME_ENV = "APP_USERNAME"         # Identifiant (optionnel)
 FERNET_KEY_ENV = "FERNET_KEY"             # Clé de chiffrement (base64)
 SECRET_KEY_ENV = "FLASK_SECRET_KEY"       # Session Flask
 KEY_FILE = data_path(".secret_key")       # Fallback local (gitignored)
@@ -49,16 +50,41 @@ def get_app_password() -> str:
     return os.environ.get(APP_PASSWORD_ENV, "").strip()
 
 
+def get_app_username() -> str:
+    """Identifiant de l'app (optionnel). Si vide → aucun check d'identifiant."""
+    return os.environ.get(APP_USERNAME_ENV, "").strip()
+
+
 def is_auth_enabled() -> bool:
     return bool(get_app_password())
 
 
+def is_username_required() -> bool:
+    """True si un APP_USERNAME est défini (donc à saisir côté login)."""
+    return bool(get_app_username())
+
+
 def verify_password(candidate: str) -> bool:
-    """Comparaison constant-time."""
+    """Comparaison constant-time du mot de passe."""
     expected = get_app_password()
     if not expected:
         return True
     return hmac.compare_digest(expected.encode(), (candidate or "").encode())
+
+
+def verify_credentials(username: str, password: str) -> bool:
+    """Vérifie (identifiant, mot de passe) en constant-time.
+
+    Si ``APP_USERNAME`` n'est pas défini, l'identifiant est ignoré
+    (rétrocompatibilité avec les installations password-only).
+    """
+    expected_user = get_app_username()
+    user_ok = True
+    if expected_user:
+        user_ok = hmac.compare_digest(expected_user.encode(), (username or "").encode())
+    pw_ok = verify_password(password)
+    # Eviter un short-circuit qui fuirait du timing
+    return user_ok and pw_ok
 
 
 # ─────────────────────────────────────────────────────────

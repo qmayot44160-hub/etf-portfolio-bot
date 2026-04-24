@@ -73,7 +73,9 @@
       "Bash(python -c \"import portfolio; print\\('OK portfolio'\\)\")",
       "Bash(python -c \"import bot_engine; print\\('OK bot_engine'\\)\")",
       "Bash(python -c \"import market_data; print\\('OK market_data'\\); print\\('invalidate:', hasattr\\(market_data, 'invalidate_price_cache'\\)\\)\")",
-      "Bash(venv/Scripts/python.exe -c \"import portfolio, bot_engine, market_data, portfolio_allocation; print\\('All imports OK'\\); print\\('invalidate_price_cache:', hasattr\\(market_data, 'invalidate_price_cache'\\)\\); print\\('allocate_by_target:', hasattr\\(portfolio_allocation, 'allocate_by_target'\\)\\)\")"
+      "Bash(venv/Scripts/python.exe -c \"import portfolio, bot_engine, market_data, portfolio_allocation; print\\('All imports OK'\\); print\\('invalidate_price_cache:', hasattr\\(market_data, 'invalidate_price_cache'\\)\\); print\\('allocate_by_target:', hasattr\\(portfolio_allocation, 'allocate_by_target'\\)\\)\")",
+      "Bash(venv/Scripts/python.exe -c \"import app, security; print\\('OK', security.is_username_required\\(\\)\\)\")",
+      "Bash(venv/Scripts/python.exe -c \"import app; print\\('import OK'\\)\")"
     ]
   }
 }
