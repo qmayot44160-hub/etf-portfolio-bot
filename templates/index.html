@@ -1397,16 +1397,11 @@
            CONTEXT BANNER (persistent status bar)
            ════════════════════════════════════════════════ */
         .ctx-banner {
-            position: fixed; top: 68px; left: 0; right: 0; z-index: 9998;
-            background: rgba(16,16,16,0.92);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding: 8px 24px;
-            font-size: 0.74rem;
-            display: flex; align-items: center; justify-content: center;
-            gap: 20px; flex-wrap: wrap;
-            color: var(--sf-text-secondary);
-            transition: background 0.3s;
+            /* Bandeau de statut désactivé visuellement — il polluait la DA.
+               Les infos (mode PAPER/LIVE, broker, uptime) restent accessibles
+               via le user menu (avatar) et la page Sécurité. Le JS qui le peuple
+               continue de tourner pour préserver le futur retour éventuel. */
+            display: none !important;
         }
         .ctx-banner.warn { background: rgba(255,159,10,0.08); border-bottom-color: rgba(255,159,10,0.3); }
         .ctx-banner.danger { background: rgba(255,69,58,0.10); border-bottom-color: rgba(255,69,58,0.3); }
@@ -1424,7 +1419,7 @@
         }
         .ctx-link:hover { text-decoration: underline; }
 
-        .page { padding-top: 102px; } /* nav 68 + banner ~34 */
+        .page { padding-top: 68px; } /* nav 68, plus de banner */
 
         /* ════════════════════════════════════════════════
            HOME DASHBOARD
@@ -1526,8 +1521,7 @@
         @media (max-width: 760px) {
             .globalheader-links { gap: 0; }
             .nav-group-trigger, .globalheader-link { padding: 0 10px; font-size: 0.78rem; }
-            .ctx-banner { font-size: 0.68rem; gap: 10px; padding: 6px 12px; }
-            .page { padding-top: 86px; }
+            .page { padding-top: 68px; }
         }
 
         /* ════════════════════════════════════════════════
