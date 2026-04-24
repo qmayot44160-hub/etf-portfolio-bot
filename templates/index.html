@@ -6094,53 +6094,67 @@
         <p class="hero-subtitle">Mode d'exécution, kill-switch, alertes Telegram, authentification.</p>
     </div>
     <div class="section">
+        <!-- KPIs synthétiques — sobres, alignés sur la DA du glossaire
+             (texte blanc pour la valeur, la couleur d'état est portée par
+              un petit dot + le stat-sub, pas par la valeur en majuscule) -->
         <div class="stat-grid stat-grid-3">
-            <div class="stat-card"><div class="stat-label">Mode d'exécution</div><div class="stat-value" id="sec-mode">—</div><div class="stat-sub" id="sec-mode-sub"></div></div>
-            <div class="stat-card"><div class="stat-label">Kill-switch</div><div class="stat-value" id="sec-kill">—</div><div class="stat-sub" id="sec-kill-sub"></div></div>
-            <div class="stat-card"><div class="stat-label">Authentification</div><div class="stat-value" id="sec-auth">—</div><div class="stat-sub">Via variable d'env APP_PASSWORD</div></div>
+            <div class="stat-card">
+                <div class="stat-label">Mode d'exécution</div>
+                <div class="stat-value" id="sec-mode" style="font-size:1.25rem;display:inline-flex;align-items:center;gap:10px">—</div>
+                <div class="stat-sub" id="sec-mode-sub">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Kill-switch</div>
+                <div class="stat-value" id="sec-kill" style="font-size:1.25rem;display:inline-flex;align-items:center;gap:10px">—</div>
+                <div class="stat-sub" id="sec-kill-sub">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Authentification</div>
+                <div class="stat-value" id="sec-auth" style="font-size:1.25rem;display:inline-flex;align-items:center;gap:10px">—</div>
+                <div class="stat-sub">Via variable d'env APP_PASSWORD</div>
+            </div>
         </div>
 
         <div class="dcard">
-            <div class="dcard-label"><span class="sfi" data-icon="flask"></span>Mode PAPER / LIVE</div>
-            <p style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">
-                En mode <b>PAPER</b>, aucun ordre réel n'est envoyé aux brokers : les trades sont simulés avec un portefeuille virtuel.
-                Passez en <b>LIVE</b> uniquement après avoir testé votre stratégie sur plusieurs semaines.
+            <div class="dcard-title"><span class="sfi" data-icon="flask"></span>Mode PAPER / LIVE</div>
+            <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:20px;line-height:1.55">
+                En mode <b>PAPER</b>, aucun ordre réel n'est envoyé aux brokers : les trades sont simulés avec un portefeuille virtuel. Passez en <b>LIVE</b> uniquement après avoir testé votre stratégie sur plusieurs semaines.
             </p>
-            <div style="display:flex;gap:12px;margin-top:16px;align-items:center">
+            <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
                 <button class="link-more" onclick="togglePaperMode(true)">Activer PAPER</button>
-                <button class="link-more" onclick="togglePaperMode(false)" style="color:#ff453a">Passer en LIVE</button>
+                <button class="link-more" onclick="togglePaperMode(false)">Passer en LIVE</button>
                 <button class="link-more" onclick="resetPaper()">Réinitialiser paper</button>
             </div>
         </div>
 
         <div class="dcard">
-            <div class="dcard-label"><span class="sfi" data-icon="power"></span>Kill-switch d'urgence</div>
-            <p style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">
+            <div class="dcard-title"><span class="sfi" data-icon="power"></span>Kill-switch d'urgence</div>
+            <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:20px;line-height:1.55">
                 Stoppe instantanément toutes les activités du bot : trader auto, scheduler DCA/rebalance, et bloque tout nouvel ordre jusqu'à réactivation manuelle.
             </p>
-            <div style="display:flex;gap:12px;margin-top:16px;align-items:center">
-                <button class="link-more" style="color:#ff453a;display:inline-flex;align-items:center;gap:6px" onclick="triggerKillSwitch()"><span class="sfi" data-icon="power"></span>Activer kill-switch</button>
+            <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+                <button class="link-more" style="display:inline-flex;align-items:center;gap:6px" onclick="triggerKillSwitch()"><span class="sfi" data-icon="power"></span>Activer kill-switch</button>
                 <button class="link-more" onclick="releaseKillSwitch()">Désactiver (confirme)</button>
             </div>
         </div>
 
         <div class="dcard">
-            <div class="dcard-label"><span class="sfi" data-icon="phone"></span>Notifications Telegram</div>
-            <p style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">
+            <div class="dcard-title"><span class="sfi" data-icon="phone"></span>Notifications Telegram</div>
+            <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:20px;line-height:1.55">
                 Reçois les trades, erreurs, kill-switch et résumés quotidiens. Crée un bot via <b>@BotFather</b> sur Telegram et récupère ton chat_id via <b>@userinfobot</b>.
             </p>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
                 <div>
-                    <label style="font-size:12px;color:var(--sf-text-muted)">Bot Token</label>
-                    <input type="password" id="tg-token" placeholder="123456:AAE..." style="width:100%;background:var(--sf-bg);border:1px solid var(--sf-border);color:var(--sf-text);border-radius:6px;padding:8px 10px;font-size:13px">
-                    <div id="tg-token-mask" style="font-size:11px;color:var(--sf-text-muted);margin-top:4px"></div>
+                    <label style="font-size:0.72rem;color:var(--sf-text-muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px">Bot Token</label>
+                    <input type="password" id="tg-token" placeholder="123456:AAE..." style="width:100%;background:var(--sf-bg);border:1px solid var(--sf-border);color:var(--sf-text);border-radius:8px;padding:10px 12px;font-size:0.88rem">
+                    <div id="tg-token-mask" style="font-size:0.72rem;color:var(--sf-text-muted);margin-top:6px"></div>
                 </div>
                 <div>
-                    <label style="font-size:12px;color:var(--sf-text-muted)">Chat ID</label>
-                    <input type="text" id="tg-chat" placeholder="123456789" style="width:100%;background:var(--sf-bg);border:1px solid var(--sf-border);color:var(--sf-text);border-radius:6px;padding:8px 10px;font-size:13px">
+                    <label style="font-size:0.72rem;color:var(--sf-text-muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px">Chat ID</label>
+                    <input type="text" id="tg-chat" placeholder="123456789" style="width:100%;background:var(--sf-bg);border:1px solid var(--sf-border);color:var(--sf-text);border-radius:8px;padding:10px 12px;font-size:0.88rem">
                 </div>
             </div>
-            <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:13px">
+            <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;font-size:0.85rem;color:var(--sf-text-secondary)">
                 <label><input type="checkbox" id="tg-enabled"> Activer Telegram</label>
                 <label><input type="checkbox" id="tg-trades" checked> Trades</label>
                 <label><input type="checkbox" id="tg-errors" checked> Erreurs</label>
@@ -6148,40 +6162,41 @@
                 <label><input type="checkbox" id="tg-daily" checked> Résumé quotidien</label>
                 <label><input type="checkbox" id="tg-regime" checked> Changement de régime</label>
             </div>
-            <div style="display:flex;gap:12px;margin-top:16px">
+            <div style="display:flex;gap:20px;margin-top:18px">
                 <button class="link-more" onclick="saveTelegram()">Enregistrer</button>
                 <button class="link-more" onclick="testTelegram()">Envoyer test</button>
             </div>
         </div>
 
         <div class="dcard">
-            <div class="dcard-label"><span class="sfi" data-icon="flask"></span>Paper portfolio</div>
-            <div id="paper-portfolio" style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">—</div>
+            <div class="dcard-title"><span class="sfi" data-icon="flask"></span>Paper portfolio</div>
+            <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:16px;line-height:1.55">
+                État du portefeuille virtuel utilisé en mode PAPER pour simuler les trades sans risque.
+            </p>
+            <div id="paper-portfolio" style="color:var(--sf-text-secondary);font-size:0.85rem">—</div>
         </div>
 
         <div class="dcard">
-            <div class="dcard-label"><span class="sfi" data-icon="checkCircle"></span>Santé du bot</div>
-            <p style="color:var(--sf-text-muted);font-size:13px;margin-top:8px">
+            <div class="dcard-title"><span class="sfi" data-icon="checkCircle"></span>Santé du bot</div>
+            <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:20px;line-height:1.55">
                 Heartbeat quotidien Telegram à <b>09:00 UTC</b>. Notification automatique à chaque démarrage/redéploiement. Endpoint public <code>/health</code> pour monitoring externe (UptimeRobot, etc.).
             </p>
-            <div class="stat-grid stat-grid-3" style="margin-top:14px">
-                <div class="stat-card"><div class="stat-label">État</div><div class="stat-value" id="health-status" style="font-size:18px">—</div><div class="stat-sub" id="health-last-seen">—</div></div>
-                <div class="stat-card"><div class="stat-label">Uptime</div><div class="stat-value" id="health-uptime" style="font-size:18px">—</div><div class="stat-sub" id="health-startups">— démarrages</div></div>
-                <div class="stat-card"><div class="stat-label">Activité (24h)</div><div class="stat-value" id="health-activity" style="font-size:18px">—</div><div class="stat-sub" id="health-errors">— erreurs</div></div>
+            <div class="stat-grid stat-grid-3">
+                <div class="stat-card"><div class="stat-label">État</div><div class="stat-value" id="health-status" style="font-size:1.1rem">—</div><div class="stat-sub" id="health-last-seen">—</div></div>
+                <div class="stat-card"><div class="stat-label">Uptime</div><div class="stat-value" id="health-uptime" style="font-size:1.1rem">—</div><div class="stat-sub" id="health-startups">— démarrages</div></div>
+                <div class="stat-card"><div class="stat-label">Activité (24h)</div><div class="stat-value" id="health-activity" style="font-size:1.1rem">—</div><div class="stat-sub" id="health-errors">— erreurs</div></div>
             </div>
         </div>
 
         <div class="dcard">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                <div class="dcard-label" style="margin-bottom:0"><span class="sfi" data-icon="inbox"></span>Backups automatiques</div>
-                <div>
-                    <button class="link-more" style="display:inline-flex;align-items:center;gap:6px" onclick="createBackup()"><span class="sfi" data-icon="inbox"></span>Créer un backup maintenant</button>
-                </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:6px">
+                <div class="dcard-title" style="margin-bottom:0"><span class="sfi" data-icon="inbox"></span>Backups automatiques</div>
+                <button class="link-more" style="display:inline-flex;align-items:center;gap:6px" onclick="createBackup()"><span class="sfi" data-icon="inbox"></span>Créer un backup maintenant</button>
             </div>
-            <p style="color:var(--sf-text-muted);font-size:13px;margin-top:4px">
+            <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:20px;line-height:1.55">
                 Snapshot ZIP quotidien de toutes tes configs + états (portfolio, trades, settings, Telegram). Rétention automatique : <b>14 jours</b>. Stockés dans le volume Railway.
             </p>
-            <div id="backups-list" style="margin-top:14px;font-size:13px"><div class="skel skel-line" style="width:80%"></div><div class="skel skel-line" style="width:60%"></div><div class="skel skel-line" style="width:70%"></div></div>
+            <div id="backups-list" style="font-size:0.85rem;color:var(--sf-text-secondary)"><div class="skel skel-line" style="width:80%"></div><div class="skel skel-line" style="width:60%"></div><div class="skel skel-line" style="width:70%"></div></div>
         </div>
     </div>
 </div>
@@ -7919,14 +7934,24 @@ async function loadSecurite(){
     try{
         const s = await (await fetch('/api/settings')).json();
         const mode = s.paper_mode ? 'PAPER' : 'LIVE';
-        document.getElementById('sec-mode').textContent = mode;
-        document.getElementById('sec-mode').style.color = s.paper_mode ? '#ff9f0a' : '#32d74b';
+        // Helper : valeur sobre = label blanc + petit dot coloré (on n'inonde
+        // plus la page d'oranges/rouges/verts criards, seul le dot porte
+        // l'information chromatique).
+        const dot = (color) => `<span style="width:8px;height:8px;border-radius:50%;background:${color};box-shadow:0 0 8px ${color}80;display:inline-block"></span>`;
+        const modeColor = s.paper_mode ? 'var(--sf-orange)' : 'var(--sf-green)';
+        const killColor = s.kill_switch ? 'var(--sf-red)' : 'var(--sf-green)';
+        const authColor = s.auth_enabled ? 'var(--sf-green)' : 'var(--sf-orange)';
+        const secMode = document.getElementById('sec-mode');
+        secMode.innerHTML = `${dot(modeColor)}<span style="color:var(--sf-text)">${mode}</span>`;
+        secMode.style.color = '';
         document.getElementById('sec-mode-sub').textContent = s.paper_mode ? 'Ordres simulés' : 'Ordres réels envoyés au broker';
-        document.getElementById('sec-kill').textContent = s.kill_switch ? 'ACTIF' : 'INACTIF';
-        document.getElementById('sec-kill').style.color = s.kill_switch ? '#ff453a' : '#32d74b';
-        document.getElementById('sec-kill-sub').textContent = s.kill_switch ? (s.kill_switch_reason || '') : 'Bot opérationnel';
-        document.getElementById('sec-auth').textContent = s.auth_enabled ? 'Activée' : 'Désactivée';
-        document.getElementById('sec-auth').style.color = s.auth_enabled ? '#32d74b' : '#ff9f0a';
+        const secKill = document.getElementById('sec-kill');
+        secKill.innerHTML = `${dot(killColor)}<span style="color:var(--sf-text)">${s.kill_switch ? 'Actif' : 'Inactif'}</span>`;
+        secKill.style.color = '';
+        document.getElementById('sec-kill-sub').textContent = s.kill_switch ? (s.kill_switch_reason || 'Arrêt manuel') : 'Bot opérationnel';
+        const secAuth = document.getElementById('sec-auth');
+        secAuth.innerHTML = `${dot(authColor)}<span style="color:var(--sf-text)">${s.auth_enabled ? 'Activée' : 'Désactivée'}</span>`;
+        secAuth.style.color = '';
         // Badge global
         const badge = document.getElementById('mode-badge');
         if(badge){
