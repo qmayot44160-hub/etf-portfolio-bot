@@ -3687,6 +3687,38 @@
             padding-bottom: 20px;
             border-bottom: 1px solid rgba(255,255,255,0.06);
         }
+        /* Bouton "Retour au menu" injecté en tête de chaque panel.
+           Visible uniquement en mode détail mobile (master-detail). */
+        .panel-back-btn {
+            display: none;
+            align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--sf-text);
+            padding: 8px 14px 8px 10px;
+            border-radius: 999px;
+            font-family: inherit;
+            font-size: 0.84rem; font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 16px;
+            transition: all .18s;
+        }
+        .panel-back-btn:hover {
+            background: rgba(41,151,255,0.12);
+            border-color: rgba(41,151,255,0.3);
+            color: var(--sf-blue);
+            transform: translateX(-2px);
+        }
+        .panel-back-btn svg {
+            width: 14px; height: 14px;
+            stroke: currentColor; stroke-width: 2.5;
+            fill: none; stroke-linecap: round; stroke-linejoin: round;
+        }
+        @media (max-width: 900px) {
+            body.settings-detail-mode .settings-panel.active .panel-back-btn {
+                display: inline-flex;
+            }
+        }
         .settings-panel-title {
             font-size: 1.8rem; font-weight: 700;
             letter-spacing: -0.03em;
@@ -8871,25 +8903,16 @@ window.goBackView = function(){
     showView(prev, { dir: 'right', _fromBack: true });
 };
 
-// Vues qui doivent afficher un bouton retour (vues "détail" / drill-down).
-// Les tabs principaux (home, patrimoine, dca, analytics) n'en ont pas.
-const BACK_BTN_VIEWS = new Set([
-    'portfolio', 'crypto', 'projection', 'trading', 'scanner',
-    'broker', 'auto', 'glossaire', 'securite', 'watchlist', 'discover'
-]);
+// Tabs principaux (visibles en bottom tab bar). Pas de back button par défaut
+// dessus car la nav primaire = bottom tab. Mais s'ils ont de l'historique, on
+// affiche quand même un back pour respecter l'attente utilisateur.
+const PRIMARY_TABS = new Set(['home', 'patrimoine', 'dca', 'analytics']);
 
 function _injectBackButton(viewName){
     const view = document.getElementById('view-' + viewName);
     if(!view) return;
     const hero = view.querySelector('.hero');
     if(!hero) return;
-    // Skip si pas une vue détail
-    if(!BACK_BTN_VIEWS.has(viewName)){
-        // Retire un eventuel back-btn existant
-        const existing = hero.querySelector(':scope > .back-btn');
-        if(existing) existing.remove();
-        return;
-    }
     // Injecte si pas déjà présent
     if(hero.querySelector(':scope > .back-btn')) return;
     const btn = document.createElement('button');
@@ -8903,17 +8926,50 @@ function _injectBackButton(viewName){
         if(window._viewHistory.length >= 2){
             window.goBackView();
         } else {
-            // Fallback : retour à l'accueil si pas d'historique
             showView('home');
         }
     });
     hero.appendChild(btn);
 }
 
-// Injection au load pour toutes les vues détail
+// Affiche/cache le back-btn dynamiquement selon l'historique.
+// Pour les tabs principaux : caché si l'utilisateur arrive directement (pas d'historique).
+// Pour les vues détail : toujours visible.
+function _updateBackButtonsVisibility(){
+    const hist = window._viewHistory || [];
+    const currentView = (document.querySelector('[id^="view-"].show') || {}).id;
+    if(!currentView) return;
+    const viewName = currentView.replace(/^view-/, '');
+    document.querySelectorAll('[id^="view-"] .hero > .back-btn').forEach(btn => {
+        const ownerView = btn.closest('[id^="view-"]');
+        const ownerName = ownerView ? ownerView.id.replace(/^view-/, '') : '';
+        // Sur les tabs principaux : visible seulement si on a de l'historique
+        if(PRIMARY_TABS.has(ownerName)){
+            btn.style.display = (hist.length >= 2) ? 'inline-flex' : 'none';
+        } else {
+            btn.style.display = 'inline-flex';
+        }
+    });
+}
+
+// Injection initiale pour toutes les vues qui ont une .hero
 document.addEventListener('DOMContentLoaded', () => {
-    BACK_BTN_VIEWS.forEach(_injectBackButton);
+    document.querySelectorAll('[id^="view-"]').forEach(v => {
+        const name = v.id.replace(/^view-/, '');
+        _injectBackButton(name);
+    });
+    _updateBackButtonsVisibility();
 });
+
+// Hook : à chaque navigation, on update la visibilité
+const _origShowViewForBack = window.showView;
+if(typeof _origShowViewForBack === 'function'){
+    window.showView = function(...args){
+        const r = _origShowViewForBack.apply(this, args);
+        setTimeout(_updateBackButtonsVisibility, 50);
+        return r;
+    };
+}
 
 function showView(v, opts){
     const next=document.getElementById('view-'+v);
@@ -12349,6 +12405,24 @@ window.settingsBackToList = function(){
     const body = document.querySelector('.settings-drawer-body');
     if(body) body.scrollTop = 0;
 };
+
+// Injecte un bouton "Retour au menu" au début de chaque settings-panel.
+// Visible uniquement en mode mobile détail via la CSS.
+function _injectPanelBackButtons(){
+    document.querySelectorAll('.settings-panel').forEach(panel => {
+        if(panel.querySelector(':scope > .panel-back-btn')) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'panel-back-btn';
+        btn.setAttribute('aria-label', 'Retour au menu Paramètres');
+        btn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg><span>Retour au menu</span>';
+        btn.addEventListener('click', () => {
+            if(typeof settingsBackToList === 'function') settingsBackToList();
+        });
+        panel.insertBefore(btn, panel.firstChild);
+    });
+}
+document.addEventListener('DOMContentLoaded', _injectPanelBackButtons);
 
 // Toggle intelligent de la roue dentée :
 // - Drawer fermé → ouvre (vue liste)
