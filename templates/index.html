@@ -3519,8 +3519,13 @@
         }
         .settings-drawer[data-mode="profile"].open { transform: translateX(0); }
         /* Mode "profile" : on cache le rail (uniquement Profil visible)
-           et on cache aussi le bouton retour menu (rien à reculer vers). */
+           et on cache aussi le bouton retour menu (rien à reculer vers).
+           IMPORTANT : on bascule la grille en 1 colonne pleine largeur,
+           sinon le grid reserve les 200px du rail et le panel est etrique. */
         .settings-drawer[data-mode="profile"] .settings-rail { display: none; }
+        .settings-drawer[data-mode="profile"] .settings-layout {
+            grid-template-columns: 1fr !important;
+        }
         .settings-drawer[data-mode="profile"] .settings-back-btn { display: none !important; }
         .settings-drawer[data-mode="profile"] .panel-back-btn { display: none !important; }
         .settings-drawer[data-mode="profile"] .settings-content { display: block !important; }
@@ -5326,9 +5331,9 @@
            ici pour éviter les règles dispersées et contradictoires.
            ════════════════════════════════════════════════════════ */
 
-        /* Hamburger visible uniquement sur mobile */
+        /* Roue dentée visible aussi sur desktop (pas seulement mobile) */
         .mobile-nav-toggle {
-            display: none;
+            display: inline-flex;
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.08);
             color: var(--sf-text);
@@ -5337,8 +5342,14 @@
             align-items: center; justify-content: center;
             cursor: pointer;
             padding: 0;
+            transition: all .18s;
         }
-        .mobile-nav-toggle:hover { background: rgba(255,255,255,0.08); }
+        .mobile-nav-toggle:hover {
+            background: rgba(41,151,255,0.12);
+            border-color: rgba(41,151,255,0.3);
+            color: var(--sf-blue);
+            transform: rotate(30deg);
+        }
         .mobile-nav-toggle svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
 
         @media (max-width: 720px) {
