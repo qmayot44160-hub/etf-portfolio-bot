@@ -8439,6 +8439,111 @@ function _renderAllocationDonuts(d){
 }
 async function executeRebalance(){try{const o=await(await fetch('/api/rebalance')).json();const c=document.getElementById('rebalance-orders');if(!o.length){c.innerHTML=`<div class="hint-cta" style="border-color:rgba(48,209,88,0.3);color:var(--sf-green);cursor:default">${icon('checkCircle','c-green')}<span>Portefeuille déjà équilibré</span></div>`;return;}c.innerHTML=`<table><thead><tr><th>ETF</th><th>Action</th><th>Parts</th><th>Montant</th></tr></thead><tbody>${o.map(x=>`<tr><td>${x.name||x.ticker}</td><td><span class="pill ${(x.action||'').includes('BUY')?'pill-green':'pill-red'}">${x.action||'-'}</span></td><td class="mono">${x.shares||'-'}</td><td class="mono">${x.amount?fmt(x.amount):'-'}</td></tr>`).join('')}</tbody></table>`;}catch(e){toast(e.message,true);}}
 
+/* ═══════════════════════════════════════════════════════
+   LIGHTWEIGHT-CHARTS — Wrapper helpers
+   Migration progressive depuis Plotly. Charts time-series fluides 60fps,
+   bibliothèque utilisée par Binance/Trading212/Robinhood.
+   ═══════════════════════════════════════════════════════ */
+const _lwInstances = new Map(); // garde une ref par container pour resize/cleanup
+const LW_THEME = {
+    layout: {
+        background: { type: 'solid', color: 'transparent' },
+        textColor: '#86868b',
+        fontFamily: 'Inter, -apple-system, sans-serif',
+        fontSize: 11,
+    },
+    grid: {
+        vertLines: { color: 'rgba(255,255,255,0.04)' },
+        horzLines: { color: 'rgba(255,255,255,0.04)' },
+    },
+    rightPriceScale: {
+        borderColor: 'rgba(255,255,255,0.06)',
+        scaleMargins: { top: 0.1, bottom: 0.1 },
+    },
+    timeScale: {
+        borderColor: 'rgba(255,255,255,0.06)',
+        timeVisible: false,
+        secondsVisible: false,
+    },
+    crosshair: {
+        mode: 1, // CrosshairMode.Magnet
+        vertLine: { color: 'rgba(255,255,255,0.18)', width: 1, style: 3 },
+        horzLine: { color: 'rgba(255,255,255,0.18)', width: 1, style: 3 },
+    },
+    handleScroll: { vertTouchDrag: false }, // évite que le scroll tactile soit volé par le chart
+    handleScale: { axisPressedMouseMove: { time: false } },
+};
+
+/* Convertit dates 'YYYY-MM-DD' (ou Date) + values en format lightweight-charts. */
+function _lwData(dates, values){
+    const out = [];
+    for(let i = 0; i < dates.length; i++){
+        const v = values[i];
+        if(v == null || isNaN(v)) continue;
+        const d = dates[i];
+        // lightweight-charts veut soit { time: 'YYYY-MM-DD' } soit { time: unix_seconds }
+        const time = (typeof d === 'string') ? d : Math.floor(new Date(d).getTime() / 1000);
+        out.push({ time, value: Number(v) });
+    }
+    return out;
+}
+
+/* Crée un chart time-series avec plusieurs séries.
+   series = [{name, dates, values, color, lineWidth?, type?: 'line'|'area', topColor?, bottomColor?, lineStyle?}]
+   Retourne le chart pour customisation. */
+async function lwTimeSeriesChart(elementId, series, opts){
+    opts = opts || {};
+    const LWC = await window.loadLW();
+    const el = document.getElementById(elementId);
+    if(!el) return null;
+    // Cleanup ancien chart si re-render
+    if(_lwInstances.has(elementId)){
+        try { _lwInstances.get(elementId).remove(); } catch(e){}
+    }
+    el.innerHTML = '';
+    const chart = LWC.createChart(el, {
+        ...LW_THEME,
+        width: el.clientWidth || 600,
+        height: opts.height || 360,
+        autoSize: true,
+    });
+    series.forEach(s => {
+        const data = _lwData(s.dates, s.values);
+        if(s.type === 'area'){
+            const series = chart.addAreaSeries({
+                lineColor: s.color || '#2997ff',
+                topColor: s.topColor || 'rgba(41,151,255,0.32)',
+                bottomColor: s.bottomColor || 'rgba(41,151,255,0)',
+                lineWidth: s.lineWidth || 2,
+                priceLineVisible: false,
+                lastValueVisible: s.lastValueVisible !== false,
+                title: s.name || '',
+            });
+            series.setData(data);
+        } else {
+            const series = chart.addLineSeries({
+                color: s.color || '#2997ff',
+                lineWidth: s.lineWidth || 2,
+                lineStyle: s.lineStyle || 0, // Solid
+                priceLineVisible: false,
+                lastValueVisible: s.lastValueVisible !== false,
+                title: s.name || '',
+            });
+            series.setData(data);
+        }
+    });
+    chart.timeScale().fitContent();
+    _lwInstances.set(elementId, chart);
+    // Resize observer pour la réactivité
+    if(window.ResizeObserver){
+        const ro = new ResizeObserver(() => {
+            chart.applyOptions({ width: el.clientWidth, height: opts.height || 360 });
+        });
+        ro.observe(el);
+    }
+    return chart;
+}
+
 /* ═══ DCA ═══ */
 async function calculateDCA(){try{const d=await(await fetch('/api/dca?amount='+document.getElementById('dca-amount').value)).json();document.getElementById('dca-table').innerHTML=d.map(x=>`<tr><td><strong>${x.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${x.ticker}</span></td><td class="mono">${fmt(x.target_amount)}</td><td class="mono">${fmt(x.price)}</td><td class="mono">${x.shares_to_buy}</td><td class="mono">${fmt(x.real_amount)}</td></tr>`).join('');}catch(e){}}
 async function executeDCA(){try{const d=await(await fetch('/api/dca/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:parseFloat(document.getElementById('dca-amount').value)})})).json();toast('DCA: '+d.length+' ordres');refreshPortfolio();}catch(e){toast(e.message,true);}}
@@ -8488,40 +8593,32 @@ async function runProjection(){
         document.getElementById('pj-prob-triple').textContent=d.probabilities.triple+'%';
         document.getElementById('pj-prob-loss').textContent=d.probabilities.loss+'%';
 
-        // ── Fan chart : bandes de confiance + médiane + échantillon trajectoires ──
-        const x=d.dates;
-        const fanTraces=[];
-        // Bande P5-P95 (claire)
-        fanTraces.push({x,y:d.percentiles.p95,name:'P95',type:'scatter',mode:'lines',line:{width:0},showlegend:false,hoverinfo:'skip'});
-        fanTraces.push({x,y:d.percentiles.p5,name:'P5-P95 (90%)',type:'scatter',mode:'lines',line:{width:0},fill:'tonexty',fillcolor:'rgba(41,151,255,0.12)',hoverinfo:'skip'});
-        // Bande P25-P75 (foncée)
-        fanTraces.push({x,y:d.percentiles.p75,name:'P75',type:'scatter',mode:'lines',line:{width:0},showlegend:false,hoverinfo:'skip'});
-        fanTraces.push({x,y:d.percentiles.p25,name:'P25-P75 (50%)',type:'scatter',mode:'lines',line:{width:0},fill:'tonexty',fillcolor:'rgba(41,151,255,0.28)',hoverinfo:'skip'});
-        // Échantillon de 30 trajectoires fines (fantôme)
-        const sample=d.sample_paths.slice(0,30);
-        sample.forEach((p,i)=>{
-            fanTraces.push({x,y:p,type:'scatter',mode:'lines',line:{color:'rgba(255,255,255,0.04)',width:0.8},showlegend:false,hoverinfo:'skip'});
-        });
-        // Médiane
-        fanTraces.push({x,y:d.percentiles.p50,name:'Médiane (P50)',type:'scatter',mode:'lines',line:{color:'#2997ff',width:2.5}});
-        // Ligne investi
-        const invested=x.map((_,i)=>d.params.capital + d.params.dca * i);
-        fanTraces.push({x,y:invested,name:'Capital investi',type:'scatter',mode:'lines',line:{color:'rgba(255,255,255,0.3)',width:1.2,dash:'dot'}});
-        // Objectif (si défini)
+        // ── Fan chart : bandes de confiance + médiane (lightweight-charts) ──
+        const x = d.dates;
+        const invested = x.map((_,i) => d.params.capital + d.params.dca * i);
+        // 5 lignes (P5/P25/P50/P75/P95) avec opacités graduées pour suggérer
+        // les bandes de confiance, sans avoir à faire du fill complexe.
+        const fanSeries = [
+            { name: 'P5',  dates: x, values: d.percentiles.p5,  color: 'rgba(41,151,255,0.35)', lineWidth: 1, lineStyle: 2 },
+            { name: 'P25', dates: x, values: d.percentiles.p25, color: 'rgba(41,151,255,0.55)', lineWidth: 1 },
+            { name: 'Médiane', dates: x, values: d.percentiles.p50, color: '#2997ff', lineWidth: 2.5, type: 'area', topColor: 'rgba(41,151,255,0.18)', bottomColor: 'rgba(41,151,255,0)' },
+            { name: 'P75', dates: x, values: d.percentiles.p75, color: 'rgba(41,151,255,0.55)', lineWidth: 1 },
+            { name: 'P95', dates: x, values: d.percentiles.p95, color: 'rgba(41,151,255,0.35)', lineWidth: 1, lineStyle: 2 },
+            { name: 'Capital investi', dates: x, values: invested, color: 'rgba(255,255,255,0.4)', lineWidth: 1, lineStyle: 1 },
+        ];
         if(d.probabilities.target_amount){
-            fanTraces.push({x:[x[0],x[x.length-1]],y:[d.probabilities.target_amount,d.probabilities.target_amount],name:'Objectif',type:'scatter',mode:'lines',line:{color:'#30d158',width:1.5,dash:'dash'}});
+            fanSeries.push({ name: 'Objectif', dates: x, values: x.map(()=>d.probabilities.target_amount), color: '#30d158', lineWidth: 1.5, lineStyle: 2 });
         }
-        Plotly.newPlot('pj-fan-chart',fanTraces,{...PL,height:460,legend:{orientation:'h',y:-0.18,font:{color:'#86868b',size:11}}},{responsive:true});
+        lwTimeSeriesChart('pj-fan-chart', fanSeries, { height: 420 });
 
-        // ── Scénarios déterministes ──
-        const sc=d.scenarios;
-        const scX=x; // mêmes dates
-        Plotly.newPlot('pj-scenarios-chart',[
-            {x:scX,y:sc.bull.history,name:`Optimiste (+${sc.bull.annual_rate_pct}%/an)`,type:'scatter',mode:'lines',line:{color:'#30d158',width:2}},
-            {x:scX,y:sc.base.history,name:`Médian (${sc.base.annual_rate_pct}%/an)`,type:'scatter',mode:'lines',line:{color:'#2997ff',width:2.5}},
-            {x:scX,y:sc.bear.history,name:`Pessimiste (${sc.bear.annual_rate_pct}%/an)`,type:'scatter',mode:'lines',line:{color:'#ff453a',width:2}},
-            {x:scX,y:invested,name:'Investi',type:'scatter',mode:'lines',line:{color:'rgba(255,255,255,0.3)',width:1,dash:'dot'}},
-        ],{...PL,height:360,legend:{orientation:'h',y:-0.18,font:{color:'#86868b',size:11}}},{responsive:true});
+        // ── Scénarios déterministes (lightweight-charts) ──
+        const sc = d.scenarios;
+        lwTimeSeriesChart('pj-scenarios-chart', [
+            { name: `Optimiste (+${sc.bull.annual_rate_pct}%/an)`, dates: x, values: sc.bull.history, color: '#30d158', lineWidth: 2 },
+            { name: `Médian (${sc.base.annual_rate_pct}%/an)`,    dates: x, values: sc.base.history, color: '#2997ff', lineWidth: 2.5, type: 'area', topColor: 'rgba(41,151,255,0.20)', bottomColor: 'rgba(41,151,255,0)' },
+            { name: `Pessimiste (${sc.bear.annual_rate_pct}%/an)`,dates: x, values: sc.bear.history, color: '#ff453a', lineWidth: 2 },
+            { name: 'Investi', dates: x, values: invested, color: 'rgba(255,255,255,0.4)', lineWidth: 1, lineStyle: 1 },
+        ], { height: 340 });
 
         document.getElementById('pj-scenarios-table').innerHTML=`<table><thead><tr><th>Scénario</th><th>Rendement/an</th><th>Valeur finale</th><th>Gain</th><th>Gain %</th></tr></thead><tbody>
             <tr><td style="color:var(--sf-green)"><strong>Optimiste</strong></td><td class="mono">+${sc.bull.annual_rate_pct}%</td><td class="mono green">${fmt(sc.bull.final_value)}</td><td class="mono green">+${fmt(sc.bull.gain)}</td><td class="mono green">+${sc.bull.gain_pct}%</td></tr>
