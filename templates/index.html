@@ -3488,17 +3488,19 @@
         .settings-drawer-backdrop.open {
             opacity: 1; pointer-events: auto;
         }
-        /* Drawer Paramètres : slide depuis la GAUCHE (inverse du drawer Profil
-           qui slide depuis la droite). Cohérent avec la position de la roue
-           dentée en haut-gauche du header. */
+        /* Drawer Paramètres : par défaut slide depuis la GAUCHE (gear top-left).
+           Mode "profile" (avatar top-right) : bascule en slide depuis la DROITE
+           via data-mode="profile". Cohérent avec la position du déclencheur. */
         .settings-drawer {
             position: fixed;
-            top: 0; left: 0; bottom: 0;
+            top: 0; bottom: 0;
+            left: 0; right: auto;
             width: min(860px, 100vw);
             background: linear-gradient(180deg, rgba(14,14,18,0.96), rgba(10,10,14,0.94));
             backdrop-filter: blur(28px) saturate(180%);
             -webkit-backdrop-filter: blur(28px) saturate(180%);
             border-right: 1px solid rgba(255,255,255,0.08);
+            border-left: none;
             box-shadow: 24px 0 70px -12px rgba(0,0,0,0.7), inset -1px 0 0 rgba(255,255,255,0.03);
             transform: translateX(-100%);
             transition: transform 0.4s cubic-bezier(0.2,0.9,0.2,1);
@@ -3507,6 +3509,24 @@
             overflow: hidden;
         }
         .settings-drawer.open { transform: translateX(0); }
+        /* Mode "profile" : drawer ancré à droite, slide depuis la droite. */
+        .settings-drawer[data-mode="profile"] {
+            left: auto; right: 0;
+            border-left: 1px solid rgba(255,255,255,0.08);
+            border-right: none;
+            box-shadow: -24px 0 70px -12px rgba(0,0,0,0.7), inset 1px 0 0 rgba(255,255,255,0.03);
+            transform: translateX(100%);
+        }
+        .settings-drawer[data-mode="profile"].open { transform: translateX(0); }
+        /* Mode "profile" : on cache le rail (uniquement Profil visible)
+           et on cache aussi le bouton retour menu (rien à reculer vers). */
+        .settings-drawer[data-mode="profile"] .settings-rail { display: none; }
+        .settings-drawer[data-mode="profile"] .settings-back-btn { display: none !important; }
+        .settings-drawer[data-mode="profile"] .panel-back-btn { display: none !important; }
+        .settings-drawer[data-mode="profile"] .settings-content { display: block !important; }
+        /* Mode "settings" : on cache l'item Profil du rail (accessible via avatar). */
+        .settings-drawer[data-mode="settings"] .settings-rail-item[data-panel="profil"] { display: none; }
+        .settings-drawer[data-mode="settings"] .settings-panel[data-panel="profil"] { display: none; }
         /* Quand un drawer est ouvert, on masque le ctx-banner (z-index 9998)
            qui flottait par-dessus, et la bottom tab bar (qui ferait doublon
            avec le contenu plein écran du drawer sur mobile) */
@@ -6910,7 +6930,7 @@
             <div class="user-menu-email" id="user-menu-email">Aucune adresse définie</div>
         </div>
     </div>
-    <button class="user-menu-item" onclick="openSettingsPanel('profil')"><span class="sfi" data-icon="user"></span>Profil</button>
+    <button class="user-menu-item" onclick="openSettingsDrawer('profile')"><span class="sfi" data-icon="user"></span>Profil</button>
     <button class="user-menu-item" onclick="openSettingsPanel('apparence')"><span class="sfi" data-icon="sparkles"></span>Apparence</button>
     <button class="user-menu-item" onclick="openSettingsPanel('notifications')"><span class="sfi" data-icon="phone"></span>Notifications</button>
     <button class="user-menu-item" onclick="openSettingsPanel('confidentialite')"><span class="sfi" data-icon="shield"></span>Confidentialité</button>
@@ -12343,25 +12363,35 @@ function resetUiScale(){
 try { applyCustomPrefs(); } catch(e){}
 document.addEventListener('DOMContentLoaded', () => { try { applyCustomPrefs(); } catch(e){} });
 
-function openSettingsDrawer(){
+function openSettingsDrawer(mode){
     const drawer = document.getElementById('settings-drawer');
     const backdrop = document.getElementById('settings-backdrop');
     if(!drawer) return;
     // Close wallet drawer if open to avoid overlap
     try { if(typeof WALLET_STATE !== 'undefined' && WALLET_STATE.open) closeWalletDrawer(); } catch(e){}
+    // Mode : "settings" (gear, gauche, sans Profil) ou "profile" (avatar, droite, juste Profil)
+    drawer.dataset.mode = mode || 'settings';
     drawer.classList.add('open');
     drawer.setAttribute('aria-hidden', 'false');
     if(backdrop) backdrop.classList.add('open');
     document.body.style.overflow = 'hidden';
     document.body.classList.add('drawer-open');
-    // Mobile : par défaut on affiche la liste (master), pas le détail.
-    // Desktop : on affiche les deux côte à côte (pas de class detail-mode).
-    if(window.matchMedia('(max-width: 900px)').matches){
+    // Mobile master-detail réinitialisé seulement en mode settings
+    if(mode === 'profile'){
+        // Mode profile : on affiche directement le panel Profil, pas de master-detail
+        document.body.classList.add('settings-detail-mode');
+        document.querySelectorAll('.settings-panel').forEach(p => {
+            p.classList.toggle('active', p.dataset.panel === 'profil');
+        });
+        document.querySelectorAll('.settings-rail-item').forEach(b => {
+            b.classList.toggle('active', b.dataset.panel === 'profil');
+        });
+        const titleText = document.getElementById('settings-drawer-title-text');
+        if(titleText) titleText.textContent = 'Profil';
+    } else {
         document.body.classList.remove('settings-detail-mode');
         const titleText = document.getElementById('settings-drawer-title-text');
         if(titleText) titleText.textContent = 'Paramètres';
-    } else {
-        document.body.classList.remove('settings-detail-mode');
     }
     loadSettingsView();
 }
@@ -12400,7 +12430,8 @@ document.addEventListener('DOMContentLoaded', _injectPanelBackButtons);
 window.toggleSettingsBack = function(){
     const drawer = document.getElementById('settings-drawer');
     if(!drawer || !drawer.classList.contains('open')){
-        openSettingsDrawer();
+        // Gear = mode settings : drawer ancré à gauche
+        openSettingsDrawer('settings');
         return;
     }
     if(document.body.classList.contains('settings-detail-mode')){
@@ -12412,8 +12443,13 @@ window.toggleSettingsBack = function(){
 
 function toggleSettingsFromAvatar(){
     const drawer = document.getElementById('settings-drawer');
-    if(drawer && drawer.classList.contains('open')) closeSettingsDrawer();
-    else openSettingsPanel('profil');
+    if(drawer && drawer.classList.contains('open')){
+        closeSettingsDrawer();
+    } else {
+        // Avatar = mode profile : drawer ancré à droite, slide depuis droite,
+        // affiche directement Profil sans master-detail.
+        openSettingsDrawer('profile');
+    }
 }
 
 function closeSettingsDrawer(){
