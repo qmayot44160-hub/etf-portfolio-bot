@@ -82,7 +82,8 @@ def api_auth_status():
 
 
 # ── Auth Guard global ─────────────────────────────────
-_AUTH_WHITELIST = {"/login", "/logout", "/api/auth/status", "/static", "/health"}
+_AUTH_WHITELIST = {"/login", "/logout", "/api/auth/status", "/static", "/health",
+                   "/manifest.webmanifest", "/sw.js", "/favicon.ico"}
 
 
 @app.before_request
@@ -140,6 +141,33 @@ def _handle_500(e):
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+# ── PWA: manifest et service worker servis depuis la racine ──
+# (le SW doit être servi depuis "/" pour avoir un scope global)
+
+@app.route("/manifest.webmanifest")
+def pwa_manifest():
+    from flask import send_from_directory
+    return send_from_directory("static", "manifest.webmanifest",
+                               mimetype="application/manifest+json")
+
+
+@app.route("/sw.js")
+def pwa_service_worker():
+    from flask import send_from_directory, make_response
+    resp = make_response(send_from_directory("static", "sw.js",
+                                              mimetype="application/javascript"))
+    # Empêche le navigateur de cacher le SW lui-même → MAJ rapides
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    resp.headers["Service-Worker-Allowed"] = "/"
+    return resp
+
+
+@app.route("/favicon.ico")
+def favicon():
+    from flask import send_from_directory
+    return send_from_directory("static", "icon.svg", mimetype="image/svg+xml")
 
 
 # ── API: Settings (kill-switch, paper mode) ───────────

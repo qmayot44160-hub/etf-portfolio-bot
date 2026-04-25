@@ -11,6 +11,11 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PortfolioQuant">
+    <!-- PWA: installable sur écran d'accueil (Android Chrome, Samsung Internet, iOS Safari) -->
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="/static/icon.svg">
+    <link rel="apple-touch-icon" href="/static/icon.svg">
     <title>PortfolioQuant</title>
     <!-- Plotly est lazy-loadé via le proxy window.Plotly défini dans le script principal.
          Cela évite ~1 MB de JS bloquant au premier paint sur mobile 4G.
@@ -12170,6 +12175,29 @@ function investInCurrentPick(){
         </button>
     </div>
 </nav>
+
+<!-- PWA: enregistrement du service worker.
+     Différé en window.load pour ne pas concurrencer le first paint. -->
+<script>
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            .then(reg => {
+                // Détecte une nouvelle version: prochain reload appliquera la MAJ.
+                reg.addEventListener('updatefound', () => {
+                    const sw = reg.installing;
+                    if (!sw) return;
+                    sw.addEventListener('statechange', () => {
+                        if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+                            console.log('[PWA] Nouvelle version disponible — reload pour l\'activer.');
+                        }
+                    });
+                });
+            })
+            .catch(err => console.warn('[PWA] SW registration failed:', err));
+    });
+}
+</script>
 
 </body>
 </html>

@@ -1,0 +1,21 @@
+{
+  "name": "PortfolioQuant",
+  "short_name": "PortfolioQuant",
+  "description": "Gestion de portefeuille ETF & crypto, scoring quant et exécution.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "lang": "fr",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    {
+      "src": "/static/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
