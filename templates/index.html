@@ -9208,6 +9208,77 @@ async function loadHome(){
    ═══════════════════════════════════════════════════════ */
 const ALLOC_COLORS = ['#2997ff','#30d158','#ff9f0a','#bf5af2','#ff453a','#64d2ff','#ffd60a','#ff375f'];
 
+/* Donut SVG natif — remplace Plotly sur la page d'accueil.
+ * Avantages : pas de chargement Plotly (~1 MB), instantané, animation propre,
+ * tooltip natif via <title>, scalable sans pixelisation.
+ * segments: [{label, value, color}], opts: { size, stroke, animateMs }
+ */
+function renderSvgDonut(el, segments, opts){
+    opts = opts || {};
+    const size = opts.size || 220;
+    const stroke = opts.stroke || 28;
+    const r = (size - stroke) / 2 - 2;
+    const cx = size / 2, cy = size / 2;
+    const C = 2 * Math.PI * r;
+    const total = segments.reduce((a, s) => a + (s.value || 0), 0) || 1;
+    const animMs = opts.animateMs == null ? 600 : opts.animateMs;
+
+    // Cas dégénéré : un seul segment → cercle plein simple
+    if(segments.length === 1){
+        el.innerHTML = `<svg viewBox="0 0 ${size} ${size}" width="100%" height="100%" style="display:block;max-height:${size}px;overflow:visible" role="img" aria-label="Répartition par catégorie">
+            <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${segments[0].color}" stroke-width="${stroke}">
+                <title>${segments[0].label} · 100%</title>
+            </circle>
+        </svg>`;
+        return;
+    }
+
+    let offset = 0;
+    const circles = segments.map((s) => {
+        const frac = (s.value || 0) / total;
+        const len = frac * C;
+        const dash = `${len} ${C - len}`;
+        const dashoffset = -offset;
+        offset += len;
+        const pctTxt = (frac * 100).toFixed(1);
+        const valTxt = Math.round(s.value || 0).toLocaleString('fr-FR');
+        return `<circle cx="${cx}" cy="${cy}" r="${r}"
+                fill="none" stroke="${s.color}" stroke-width="${stroke}"
+                stroke-dasharray="${dash}" stroke-dashoffset="${dashoffset}"
+                transform="rotate(-90 ${cx} ${cy})"
+                style="transition: stroke-width .18s ease; cursor: pointer">
+                <title>${s.label} · ${pctTxt}% · ${valTxt} €</title>
+            </circle>`;
+    }).join('');
+
+    el.innerHTML = `<svg viewBox="0 0 ${size} ${size}" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style="display:block;max-height:${size}px;overflow:visible" role="img" aria-label="Répartition par catégorie">
+        ${circles}
+    </svg>`;
+
+    // Animation d'entrée : on reveal chaque segment via stroke-dasharray
+    if(animMs > 0){
+        const nodes = el.querySelectorAll('circle');
+        let cum = 0;
+        nodes.forEach((node) => {
+            const frac = (segments[cum] && (segments[cum].value || 0)) / total;
+            const len = frac * C;
+            node.style.strokeDasharray = `0 ${C}`;
+            node.getBoundingClientRect(); // force reflow
+            node.style.transition = `stroke-dasharray ${animMs}ms cubic-bezier(.2,.8,.2,1), stroke-width .18s ease`;
+            requestAnimationFrame(() => {
+                node.style.strokeDasharray = `${len} ${C - len}`;
+            });
+            cum++;
+        });
+    }
+
+    // Hover : épaissir le segment survolé
+    el.querySelectorAll('circle').forEach((node) => {
+        node.addEventListener('mouseenter', () => { node.style.strokeWidth = (stroke + 4) + 'px'; });
+        node.addEventListener('mouseleave', () => { node.style.strokeWidth = stroke + 'px'; });
+    });
+}
+
 async function loadHomeAllocation(){
     const donutEl = document.getElementById('home-alloc-donut');
     const legendEl = document.getElementById('home-alloc-legend');
@@ -9257,27 +9328,15 @@ async function loadHomeAllocation(){
     const labels = cats.map(([c]) => c);
     const values = cats.map(([,v]) => v);
 
-    // Donut Plotly — style minimal, mêmes couleurs que portfolio
+    // Donut SVG natif — pas de Plotly, instantané, animation propre.
     try {
-        if(typeof Plotly !== 'undefined'){
-            Plotly.newPlot(donutEl, [{
-                values: values,
-                labels: labels,
-                type: 'pie',
-                hole: 0.72,
-                marker: { colors: ALLOC_COLORS, line: { color: 'rgba(0,0,0,0)', width: 0 } },
-                textinfo: 'none',
-                hovertemplate: '<b>%{label}</b><br>%{percent} · %{value:,.0f} €<extra></extra>',
-                sort: false,
-                direction: 'clockwise',
-            }], {
-                ...PL,
-                margin: { t: 10, b: 10, l: 10, r: 10 },
-                showlegend: false,
-                height: 220,
-            }, { responsive: true, displayModeBar: false });
-        }
-    } catch(e){ console.warn('alloc-donut plotly', e); }
+        const segments = labels.map((lab, i) => ({
+            label: lab,
+            value: values[i],
+            color: ALLOC_COLORS[i % ALLOC_COLORS.length]
+        }));
+        renderSvgDonut(donutEl, segments, { size: 220, stroke: 28, animateMs: 600 });
+    } catch(e){ console.warn('alloc-donut svg', e); }
 
     // Centre du donut : nombre de positions
     if(centerEl && centerValEl){
