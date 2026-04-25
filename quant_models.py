@@ -67,11 +67,11 @@ class QuantModels:
         high = df["high"].values
         low = df["low"].values
 
-        # 1. ADX — force de la tendance
+        # 1. ADX - force de la tendance
         adx, plus_di, minus_di = QuantModels._adx(high, low, close, 14)
         trend_strength = adx[-1] if len(adx) > 0 else 0
 
-        # 2. Hurst exponent — trending vs mean-reverting
+        # 2. Hurst exponent - trending vs mean-reverting
         hurst = QuantModels._hurst_exponent(close)
 
         # 3. Volatilite realisee

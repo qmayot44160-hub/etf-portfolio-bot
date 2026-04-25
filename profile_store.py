@@ -150,7 +150,7 @@ def save_profile(updates: dict) -> dict:
 
 
 # ─────────────────────────────────────────────────────────
-#  AUDIT LOG — journal d'activité simple
+#  AUDIT LOG - journal d'activité simple
 # ─────────────────────────────────────────────────────────
 
 def log_event(event_type: str, details: str = "", meta: Optional[dict] = None) -> None:

@@ -1,5 +1,5 @@
 """
-Moteur principal du bot — orchestre broker, portefeuille et stratégie.
+Moteur principal du bot - orchestre broker, portefeuille et stratégie.
 """
 
 import json
@@ -52,7 +52,7 @@ class BotEngine:
             if success:
                 self.save_broker_config(broker_id, credentials)
                 return {"status": "connected", "broker": self.broker.name}
-            return {"status": "error", "message": "Connexion échouée — vérifiez vos identifiants"}
+            return {"status": "error", "message": "Connexion échouée - vérifiez vos identifiants"}
         except ImportError as e:
             return {"status": "error", "message": str(e)}
         except Exception as e:
@@ -84,7 +84,7 @@ class BotEngine:
 
     def get_portfolio(self) -> dict:
         """
-        Récupère le portefeuille — du broker si connecté, sinon message non connecté.
+        Récupère le portefeuille - du broker si connecté, sinon message non connecté.
         """
         if self.broker and self.broker.connected:
             return self._get_broker_portfolio()
@@ -147,7 +147,7 @@ class BotEngine:
         return result
 
     def execute_dca(self, amount: float = None) -> list:
-        """Exécute un DCA — via broker ou simulation."""
+        """Exécute un DCA - via broker ou simulation."""
         if amount is None:
             amount = DCA_MONTHLY
 
@@ -158,7 +158,7 @@ class BotEngine:
         return sim_dca(amount=amount)
 
     def _broker_dca(self, amount: float) -> list:
-        """DCA via le broker réel — calcul d'allocation partagé, puis ordres."""
+        """DCA via le broker réel - calcul d'allocation partagé, puis ordres."""
         allocation = allocate_by_target(amount, PORTFOLIO, get_current_prices())
         results = []
 

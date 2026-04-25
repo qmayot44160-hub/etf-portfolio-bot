@@ -54,7 +54,7 @@ def _save(data: dict):
 # ─────────────────────────────────────────────────────────
 
 def touch():
-    """À appeler à chaque requête — met à jour last_seen_at."""
+    """À appeler à chaque requête - met à jour last_seen_at."""
     data = _load()
     data["last_seen_at"] = datetime.now().isoformat(timespec="seconds")
     _save(data)

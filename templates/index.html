@@ -31,7 +31,7 @@
                 s.src = 'https://cdn.plot.ly/plotly-2.27.0.min.js';
                 s.async = true;
                 s.onload = ()=>{
-                    // Plotly s'est défini sur window — on le sauve sous __plotlyReal,
+                    // Plotly s'est défini sur window - on le sauve sous __plotlyReal,
                     // puis on remplace le proxy par la vraie référence pour les appels suivants.
                     const real = window.Plotly;
                     window.__plotlyReal = real;
@@ -62,7 +62,7 @@
         Object.defineProperty(window, 'Plotly', {value: stub, writable: true, configurable: true});
     })();
 
-    /* TradingView lightweight-charts — lazy load.
+    /* TradingView lightweight-charts - lazy load.
        ~45 KB gzip. Bibliothèque utilisée par Binance, Trading212, Robinhood.
        Esthétique fintech native, charts time-series performants 60fps. */
     (function(){
@@ -130,7 +130,7 @@
             overflow-x: hidden;
             position: relative;
         }
-        /* Tap highlight off pour tous les éléments interactifs — on a déjà
+        /* Tap highlight off pour tous les éléments interactifs - on a déjà
            des :active states custom, le flash bleu Android pollue l'UX. */
         button, a, [role="button"], .bottom-tab, .nav-dropdown-item,
         .settings-rail-item, .user-menu-item {
@@ -255,7 +255,7 @@
                 0 2px 8px rgba(10,40,90,0.35);
             position: relative;
         }
-        /* Gloss top — reflet doux sur la moitié supérieure */
+        /* Gloss top - reflet doux sur la moitié supérieure */
         .globalheader-logo .ghl-mark::before {
             content: ''; position: absolute; inset: 0;
             border-radius: inherit;
@@ -337,7 +337,7 @@
             opacity: 0.9;
         }
 
-        /* PAPER / LIVE mode badge — glass neutre + accent couleur discret */
+        /* PAPER / LIVE mode badge - glass neutre + accent couleur discret */
         .mode-chip {
             color: #d6d6d9;
             background: rgba(255,255,255,0.04);
@@ -354,7 +354,7 @@
             box-shadow: 0 0 3px rgba(48,209,88,0.5);
         }
 
-        /* Kill switch — neutre en repos, glow rouge au hover seulement */
+        /* Kill switch - neutre en repos, glow rouge au hover seulement */
         .kill-chip {
             cursor: pointer;
             color: #d6d6d9;
@@ -384,7 +384,7 @@
         .kill-chip:hover::before { opacity: 0.6; }
         .kill-chip:active { transform: translateY(0); }
 
-        /* Bot status pill — neutre + petit dot coloré */
+        /* Bot status pill - neutre + petit dot coloré */
         .globalheader-status {
             height: 26px; padding: 0 10px;
             font-size: 0.66rem; font-weight: 600;
@@ -413,7 +413,7 @@
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
         /* ════════════════════════════════════════════════
-           PAGE VIEWS — Apple full-viewport sections
+           PAGE VIEWS - Apple full-viewport sections
            ════════════════════════════════════════════════ */
         .page { padding-top: 68px; min-height: 100vh; }
 
@@ -431,7 +431,7 @@
         }
 
         /* ════════════════════════════════════════════════
-           HERO SECTIONS — Like Apple product pages
+           HERO SECTIONS - Like Apple product pages
            ════════════════════════════════════════════════ */
         .hero {
             min-height: 62vh;
@@ -502,7 +502,7 @@
         }
 
         /* ════════════════════════════════════════════════
-           STAT CARDS — Apple product-grid style
+           STAT CARDS - Apple product-grid style
            ════════════════════════════════════════════════ */
         .stat-grid {
             display: grid;
@@ -551,7 +551,7 @@
         }
 
         /* ════════════════════════════════════════════════
-           DATA CARDS (content blocks) — définition unique consolidée
+           DATA CARDS (content blocks) - définition unique consolidée
            (inclut position:relative pour les pseudo-éléments,
             transition + --mx/--my pour le spotlight, hover shadow)
            ════════════════════════════════════════════════ */
@@ -644,7 +644,7 @@
             /* Already has background from base rules */
         }
 
-        /* Inline text links / pills cliquables — petit soulignement animé au hover */
+        /* Inline text links / pills cliquables - petit soulignement animé au hover */
         .ilink {
             color: var(--sf-blue); cursor: pointer;
             background: none; border: none; font-family: inherit;
@@ -661,7 +661,7 @@
         .ilink:hover::after { transform: scaleX(1); }
 
         /* ════════════════════════════════════════════════
-           DA+ : "HOW IT WORKS" — steps-row 3-columns
+           DA+ : "HOW IT WORKS" - steps-row 3-columns
            Pattern inspiré MEXC "How to Buy Cryptocurrencies"
            ════════════════════════════════════════════════ */
         .steps-row {
@@ -828,7 +828,7 @@
             .gfooter-inner { grid-template-columns: 1fr; }
         }
 
-        /* Hero badge — large icon above title for strong identity */
+        /* Hero badge - large icon above title for strong identity */
         .hero-badge {
             display: inline-flex; align-items: center; justify-content: center;
             width: 56px; height: 56px; border-radius: 18px;
@@ -850,7 +850,7 @@
         #view-glossaire .hero-badge  { --hero-accent: #64d2ff; box-shadow: 0 0 40px rgba(100,210,255,0.12); }
 
         /* ════════════════════════════════════════════════
-           TABLES — DA+ : sticky header, zebra subtile, hover glow
+           TABLES - DA+ : sticky header, zebra subtile, hover glow
            ════════════════════════════════════════════════ */
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         thead th {
@@ -880,7 +880,7 @@
         tbody tr:hover td {
             background: linear-gradient(90deg, rgba(10,132,255,0.08), rgba(10,132,255,0.03) 55%, transparent);
         }
-        /* Left accent bar — grows from center on hover */
+        /* Left accent bar - grows from center on hover */
         tbody tr td:first-child {
             position: relative;
         }
@@ -1016,7 +1016,7 @@
         }
 
         /* ════════════════════════════════════════════════
-           DA+ : PROGRESS BAR — gradient animé + shimmer
+           DA+ : PROGRESS BAR - gradient animé + shimmer
            Usage : <div class="prog"><span style="width:45%"></span></div>
            ════════════════════════════════════════════════ */
         .prog {
@@ -1075,7 +1075,7 @@
         .pill-gray   { background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03)); color: var(--sf-text-secondary); border-color: rgba(255,255,255,0.1); }
 
         /* ════════════════════════════════════════════════
-           BUTTONS — Apple style
+           BUTTONS - Apple style
            ════════════════════════════════════════════════ */
         .abtn {
             display: inline-flex; align-items: center; justify-content: center;
@@ -1099,7 +1099,7 @@
         .abtn:disabled { opacity: 0.3; cursor: not-allowed; }
 
         /* ════════════════════════════════════════════════
-           FORMS — Apple style
+           FORMS - Apple style
            ════════════════════════════════════════════════ */
         .ainput {
             background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
@@ -1122,10 +1122,10 @@
             box-shadow: 0 0 0 4px rgba(10,132,255,0.14), inset 0 1px 0 rgba(255,255,255,0.04);
         }
         .ainput:disabled { opacity: 0.5; cursor: not-allowed; }
-        select.ainput { display: none; } /* hidden — replaced by .cselect */
+        select.ainput { display: none; } /* hidden - replaced by .cselect */
 
         /* ════════════════════════════════════════════════
-           CUSTOM SELECT — premium dropdown
+           CUSTOM SELECT - premium dropdown
            ════════════════════════════════════════════════ */
         .cselect {
             position: relative; width: 100%; user-select: none;
@@ -1177,7 +1177,7 @@
         .cselect-option.selected::after { content: '✓'; font-size: 0.85rem; }
 
         /* ════════════════════════════════════════════════
-           TOOLTIP — terme avec définition
+           TOOLTIP - terme avec définition
            ════════════════════════════════════════════════ */
         .tip {
             cursor: help; border-bottom: 1px dotted rgba(255,255,255,0.3);
@@ -1310,7 +1310,7 @@
         .dbar-fill { height: 100%; border-radius: 2px; }
 
         /* ════════════════════════════════════════════════
-           HINT CTA — clickable empty state
+           HINT CTA - clickable empty state
            ════════════════════════════════════════════════ */
         .hint-cta {
             display: flex; align-items: center; justify-content: center;
@@ -1328,7 +1328,7 @@
         .hint-icon { font-size: 1.4rem; }
 
         /* ════════════════════════════════════════════════
-           HERO GLOW — unique per page
+           HERO GLOW - unique per page
            ════════════════════════════════════════════════ */
         .hero { position: relative; overflow: hidden; }
         .hero::before {
@@ -1488,7 +1488,7 @@
            CONTEXT BANNER (persistent status bar)
            ════════════════════════════════════════════════ */
         .ctx-banner {
-            /* Bandeau de statut désactivé visuellement — il polluait la DA.
+            /* Bandeau de statut désactivé visuellement - il polluait la DA.
                Les infos (mode PAPER/LIVE, broker, uptime) restent accessibles
                via le user menu (avatar) et la page Sécurité. Le JS qui le peuple
                continue de tourner pour préserver le futur retour éventuel. */
@@ -1633,7 +1633,7 @@
         .sfi-xl { width: 2em; height: 2em; }
         .sfi-sm { width: 0.85em; height: 0.85em; }
 
-        /* Action & shortcut tile icons — larger, boxed */
+        /* Action & shortcut tile icons - larger, boxed */
         .action-icon .sfi { width: 22px; height: 22px; }
         .shortcut-tile-icon .sfi { width: 26px; height: 26px; color: var(--sf-blue); }
         .shortcut-tile:hover .shortcut-tile-icon .sfi { color: var(--sf-blue); }
@@ -1737,7 +1737,7 @@
         .dcard:hover::before { opacity: 1; }
 
         /* ════════════════════════════════════════════════
-           DA+ : STAT CARDS PREMIUM — ligne accent haut
+           DA+ : STAT CARDS PREMIUM - ligne accent haut
            (base consolidée plus haut ligne ~366)
            ════════════════════════════════════════════════ */
         .stat-card::before {
@@ -1761,7 +1761,7 @@
         }
 
         /* ════════════════════════════════════════════════
-           DA+ : TOAST 2.0 — slide-in, icon, accent bar, progress, stack
+           DA+ : TOAST 2.0 - slide-in, icon, accent bar, progress, stack
            ════════════════════════════════════════════════ */
         .toast2 {
             position: fixed; top: 90px; right: 24px; z-index: 100000;
@@ -1870,7 +1870,7 @@
         [id^="view-"].show .stat-grid .stat-card:nth-child(4) { animation-delay: 0.18s; }
 
         /* ════════════════════════════════════════════════
-           DA+ : HERO BADGE — floating + pulsing halo
+           DA+ : HERO BADGE - floating + pulsing halo
            ════════════════════════════════════════════════ */
         .hero-badge {
             position: relative; z-index: 1;
@@ -2056,7 +2056,7 @@
             opacity: 0.85;
         }
 
-        /* Wallet button — logo + pastille verte si positions */
+        /* Wallet button - logo + pastille verte si positions */
         .wallet-btn {
             display: inline-flex; align-items: center; justify-content: center;
             width: 30px; height: 30px; border-radius: 9px;
@@ -2105,7 +2105,7 @@
         }
 
         /* ════════════════════════════════════════════════
-           WALLET DRAWER — panneau latéral right-side
+           WALLET DRAWER - panneau latéral right-side
            Plus compact que le settings-drawer (420-480px),
            focus "banque" : balance, positions, activité, actions.
            ════════════════════════════════════════════════ */
@@ -2251,7 +2251,7 @@
         .wd-balance-chg.flat { background: rgba(255,255,255,0.05); color: var(--sf-text-muted); }
 
         /* ═══════════════════════════════════════════════════════
-           PORTFOLIO CHART — hero line chart (Robinhood-style)
+           PORTFOLIO CHART - hero line chart (Robinhood-style)
            ═══════════════════════════════════════════════════════ */
         .pf-chart {
             position: relative;
@@ -2402,7 +2402,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════
-           TOP MOVERS — horizontal scrollable strip (Coinbase-style)
+           TOP MOVERS - horizontal scrollable strip (Coinbase-style)
            ═══════════════════════════════════════════════════════ */
         .movers-section {
             margin-bottom: 18px;
@@ -2550,7 +2550,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════
-           WATCHLIST — étoile sur cards + onglet dédié
+           WATCHLIST - étoile sur cards + onglet dédié
            ═══════════════════════════════════════════════════════ */
         .wl-star-btn {
             position: absolute; top: 10px; right: 10px;
@@ -2829,7 +2829,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════
-           DISCOVER — thèmes d'investissement (Coinbase/eToro-style)
+           DISCOVER - thèmes d'investissement (Coinbase/eToro-style)
            ═══════════════════════════════════════════════════════ */
         .dc-grid {
             display: grid;
@@ -3474,7 +3474,7 @@
         body.reduce-motion .page-sides-decor .beam { animation: none; }
 
         /* ════════════════════════════════════════════════
-           DA+ : SETTINGS — SIDE DRAWER (volet latéral droite)
+           DA+ : SETTINGS - SIDE DRAWER (volet latéral droite)
            ════════════════════════════════════════════════ */
         .settings-drawer-backdrop {
             position: fixed; inset: 0;
@@ -3579,7 +3579,7 @@
         }
 
         /* ════════════════════════════════════════════════
-           DA+ : SETTINGS VIEW (rail + content) — now inside drawer
+           DA+ : SETTINGS VIEW (rail + content) - now inside drawer
            ════════════════════════════════════════════════ */
         .settings-layout {
             display: grid;
@@ -4349,7 +4349,7 @@
         .cell-spark.down path { stroke: var(--sf-red);   filter: drop-shadow(0 0 3px rgba(255,69,58,0.4)); }
 
         /* ════════════════════════════════════════════════
-           SMART PICKS — "Le bot choisit pour toi"
+           SMART PICKS - "Le bot choisit pour toi"
            Carte trading-app qui affiche les top picks auto-découverts
            ════════════════════════════════════════════════ */
         .smart-picks {
@@ -4910,7 +4910,7 @@
         }
 
         /* ════════════════════════════════════════════════
-           HEATMAP — Finviz-style market map
+           HEATMAP - Finviz-style market map
            ════════════════════════════════════════════════ */
         .heatmap-card {
             position: relative;
@@ -5075,7 +5075,7 @@
             z-index: 2;
         }
 
-        /* Tile color variants — intensity by magnitude */
+        /* Tile color variants - intensity by magnitude */
         .hm-tile.bull-1 { --tile-bg: rgba(48,209,88,0.08);  --tile-opacity: 1; }
         .hm-tile.bull-2 { --tile-bg: rgba(48,209,88,0.18);  --tile-opacity: 1; }
         .hm-tile.bull-3 { --tile-bg: rgba(48,209,88,0.32);  --tile-opacity: 1; }
@@ -5119,7 +5119,7 @@
         }
 
         /* ════════════════════════════════════════════════
-           DA+ : MICRO-INTERACTIONS — alive feel
+           DA+ : MICRO-INTERACTIONS - alive feel
            ════════════════════════════════════════════════ */
 
         /* KPI value enter animation (triggered when textContent changes) */
@@ -5224,7 +5224,7 @@
         }
 
         /* ════════════════════════════════════════════════════════
-           MOBILE RESPONSIVE — passe consolidée.
+           MOBILE RESPONSIVE - passe consolidée.
            Tout ce qui est spécifique aux petits écrans est regroupé
            ici pour éviter les règles dispersées et contradictoires.
            ════════════════════════════════════════════════════════ */
@@ -5359,10 +5359,10 @@
            MOBILE-FIRST REFINEMENTS (v3)
            Appliqué en fin de feuille pour surcharger les règles desktop
            sans réécrire les 11k lignes existantes. Quatre axes :
-           1. Typo fluide — clamp() remplace les valeurs fixes
-           2. Targets tactiles — min 44x44px
-           3. Micro-interactions — :active feedback, pas de hover sur touch
-           4. Perf — content-visibility pour le lazy render hors-viewport
+           1. Typo fluide - clamp() remplace les valeurs fixes
+           2. Targets tactiles - min 44x44px
+           3. Micro-interactions - :active feedback, pas de hover sur touch
+           4. Perf - content-visibility pour le lazy render hors-viewport
            ════════════════════════════════════════════════════════════ */
 
         /* 1. TYPO FLUIDE : min, preferred, max (pas de saut brutal au breakpoint) */
@@ -5372,7 +5372,7 @@
         .dcard-title { font-size: clamp(1rem, 0.6vw + 0.9rem, 1.3rem); }
         .home-title { font-size: clamp(1.5rem, 3vw + 0.8rem, 2.6rem); }
 
-        /* 2. TARGETS TACTILES — tout ce qui est cliquable doit faire 44px min
+        /* 2. TARGETS TACTILES - tout ce qui est cliquable doit faire 44px min
            sur pointer:coarse (écrans tactiles), sans impacter desktop */
         @media (pointer: coarse) {
             .link-more,
@@ -5411,7 +5411,7 @@
             }
         }
 
-        /* 4. PERF — content-visibility pour les sections hors-viewport
+        /* 4. PERF - content-visibility pour les sections hors-viewport
            Le navigateur skip le layout/paint tant qu'elles ne sont pas
            visibles. Gain 20-40% sur first paint mobile. */
         @media (max-width: 720px) {
@@ -5464,7 +5464,7 @@
         }
 
         /* ════════════════════════════════════════════════════════════
-           BOTTOM TAB BAR (mobile uniquement) — pattern natif MEXC/Binance
+           BOTTOM TAB BAR (mobile uniquement) - pattern natif MEXC/Binance
            Visible sous 720px, remplace la nav top pour les raccourcis
            principaux. Les vues secondaires restent accessibles via la
            palette ⌘K (bouton "Plus" ouvre la palette).
@@ -5480,7 +5480,7 @@
             /* Safe-area : marche sur iOS + Android Chrome 69+ (barre gestuelle Samsung) */
             padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)) 4px;
         }
-        /* Effet glass seulement si supporté (iOS Safari, Chrome récent) —
+        /* Effet glass seulement si supporté (iOS Safari, Chrome récent) -
            sinon on garde le fond opaque défini au-dessus */
         @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
             .bottom-tabbar {
@@ -5539,7 +5539,7 @@
             transition: color 0.2s, font-weight 0.2s;
         }
 
-        /* Indicateur pill actif — plus large + glow visible */
+        /* Indicateur pill actif - plus large + glow visible */
         .bottom-tab.active { position: relative; }
         .bottom-tab.active::before {
             content: '';
@@ -5583,7 +5583,7 @@
 
         /* Activation mobile : afficher bottom bar + padding-bottom pour
            éviter que le contenu soit caché dessous.
-           Fonctionne iOS + Android (Samsung, Pixel, etc.) — la media query
+           Fonctionne iOS + Android (Samsung, Pixel, etc.) - la media query
            est indépendante de l'OS, basée sur la largeur viewport. */
         @media (max-width: 720px) {
             .bottom-tabbar { display: block; }
@@ -5591,7 +5591,7 @@
                Samsung (One UI) qui prend ~16-24px en bas */
             .page { padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
             /* La palette ⌘K hint (bouton flottant) ferait doublon avec la
-               bottom bar — on la cache puisqu'on a le tab "Plus" */
+               bottom bar - on la cache puisqu'on a le tab "Plus" */
             .cmdk-hint { display: none; }
         }
         /* Très petits écrans (Galaxy S8/S9 ~360px, iPhone SE ~375px) :
@@ -5742,7 +5742,7 @@
         }
         .onb-cta-final { padding: 16px 40px; font-size: 1rem; }
 
-        /* Étape 2 — quiz */
+        /* Étape 2 - quiz */
         .onb-step-title {
             font-size: 1.7rem; font-weight: 700;
             letter-spacing: -0.02em; margin-bottom: 6px;
@@ -5797,7 +5797,7 @@
         }
         .onb-result.show { display: block; }
 
-        /* Étape 3 — broker */
+        /* Étape 3 - broker */
         .onb-broker-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
             margin-bottom: 24px;
@@ -5898,7 +5898,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════
-           FOCUS MODE — clic sur une carte → plein écran avec
+           FOCUS MODE - clic sur une carte → plein écran avec
            backdrop blur, le reste s'estompe.
            Inspiration : Apple Stocks expand widget, Robinhood chart fullscreen.
            ═══════════════════════════════════════════════════════ */
@@ -5939,7 +5939,7 @@
         @media (pointer: coarse){
             .focus-expand-btn { opacity: 0.7; }
         }
-        /* Overlay de focus — backdrop sombre + blur du reste */
+        /* Overlay de focus - backdrop sombre + blur du reste */
         .focus-overlay {
             position: fixed; inset: 0;
             z-index: 99998;
@@ -6017,7 +6017,7 @@
         body.focus-locked { overflow: hidden; }
 
         /* ═══════════════════════════════════════════════════════
-           INSIGHTS STORIES — rail horizontal de cartes éphémères
+           INSIGHTS STORIES - rail horizontal de cartes éphémères
            Inspiration : Revolut Stories, Spotify Wrapped daily.
            Donne une raison d'ouvrir l'app chaque matin.
            ═══════════════════════════════════════════════════════ */
@@ -6049,7 +6049,7 @@
             box-shadow: 0 16px 40px rgba(0,0,0,0.5);
         }
         .insight-card:active { transform: translateY(0) scale(1); }
-        /* Variantes colorées — chaque type d'insight a sa palette */
+        /* Variantes colorées - chaque type d'insight a sa palette */
         .insight-card.gain {
             background: linear-gradient(135deg, #0d4d2a, #1e8449 70%, #30d158);
         }
@@ -6139,7 +6139,7 @@
             .insight-big-num { font-size: 2.1rem; }
         }
 
-        /* Allocation donuts twin (Cible vs Actuel) — SVG natif */
+        /* Allocation donuts twin (Cible vs Actuel) - SVG natif */
         .alloc-twin {
             display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
             margin-bottom: 16px;
@@ -6183,7 +6183,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════
-           PORTFOLIO POSITIONS — grille de cartes type Trade Republic
+           PORTFOLIO POSITIONS - grille de cartes type Trade Republic
            ═══════════════════════════════════════════════════════ */
         .positions-grid {
             display: grid;
@@ -6341,7 +6341,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════
-           MOBILE COMPACTNESS — overrides spécifiques téléphone
+           MOBILE COMPACTNESS - overrides spécifiques téléphone
            Indépendants du desktop. Objectif : densité d'info type
            Robinhood/MEXC, pas de carte de 200px de haut juste pour
            afficher "0".
@@ -6601,7 +6601,7 @@
     <div class="user-menu-footer" id="user-menu-footer">PortfolioQuant · v1.0</div>
 </div>
 
-<!-- Ambient side decor (aesthetic only — pas de contenu utile sur les côtés) -->
+<!-- Ambient side decor (aesthetic only - pas de contenu utile sur les côtés) -->
 <div class="page-sides-decor" aria-hidden="true">
     <div class="edge-glow tl"></div>
     <div class="edge-glow br"></div>
@@ -6638,9 +6638,9 @@
                     <span class="skel skel-val" style="width:180px;height:42px;border-radius:8px"></span>
                 </div>
                 <div class="hp-change flat" id="hero-change">
-                    <span class="hp-change-arrow">—</span>
-                    <span id="hero-change-amount">—</span>
-                    <span id="hero-change-pct">—</span>
+                    <span class="hp-change-arrow">-</span>
+                    <span id="hero-change-amount">-</span>
+                    <span id="hero-change-pct">-</span>
                     <span class="hp-change-sub" id="hero-change-period">aujourd'hui</span>
                 </div>
             </div>
@@ -6671,7 +6671,7 @@
             </div>
         </div>
 
-        <!-- Insights stories — rail horizontal de cartes générées dynamiquement.
+        <!-- Insights stories - rail horizontal de cartes générées dynamiquement.
              Style Revolut Stories. Donne une raison d'ouvrir l'app le matin. -->
         <div class="insights-rail home-module" id="insights-rail" data-module-id="insights" data-module-label="Insights du jour" aria-label="Insights du jour"></div>
 
@@ -6687,22 +6687,22 @@
             <div class="stat-card accent-blue">
                 <div class="stat-label">Valeur totale</div>
                 <div class="stat-value" id="home-total"><span class="skel skel-val"></span></div>
-                <div class="stat-sub" id="home-total-sub">—</div>
+                <div class="stat-sub" id="home-total-sub">-</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Mode actif</div>
-                <div class="stat-value" id="home-mode" style="font-size:1.6rem">—</div>
-                <div class="stat-sub" id="home-mode-sub">—</div>
+                <div class="stat-value" id="home-mode" style="font-size:1.6rem">-</div>
+                <div class="stat-sub" id="home-mode-sub">-</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Santé du bot</div>
-                <div class="stat-value" id="home-health" style="font-size:1.6rem">—</div>
-                <div class="stat-sub" id="home-health-sub">—</div>
+                <div class="stat-value" id="home-health" style="font-size:1.6rem">-</div>
+                <div class="stat-sub" id="home-health-sub">-</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Positions ouvertes</div>
-                <div class="stat-value" id="home-positions">—</div>
-                <div class="stat-sub" id="home-positions-sub">—</div>
+                <div class="stat-value" id="home-positions">-</div>
+                <div class="stat-sub" id="home-positions-sub">-</div>
             </div>
         </div>
 
@@ -6719,7 +6719,7 @@
                 </div>
                 <div class="alloc-donut-wrap" id="home-alloc-donut"></div>
                 <div class="alloc-donut-center" id="home-alloc-center" style="display:none">
-                    <div class="adc-value" id="home-alloc-center-value">—</div>
+                    <div class="adc-value" id="home-alloc-center-value">-</div>
                     <div class="adc-label">Positions</div>
                 </div>
                 <div class="alloc-legend" id="home-alloc-legend"></div>
@@ -6742,7 +6742,7 @@
             </div>
         </div>
 
-        <!-- ═══ SMART PICKS — le bot choisit lui-même ═══ -->
+        <!-- ═══ SMART PICKS - le bot choisit lui-même ═══ -->
         <div class="smart-picks home-module" data-focusable="true" data-module-id="smart-picks" data-module-label="Picks du jour (smart picks IA)">
             <div class="sp-header">
                 <div class="sp-title-wrap">
@@ -6760,10 +6760,10 @@
                 </div>
             </div>
             <div class="sp-tabs" id="sp-tabs">
-                <button class="sp-tab active" data-tab="all" onclick="switchSmartPicksTab('all')">Tous <span class="count" id="sp-c-all">—</span></button>
-                <button class="sp-tab" data-tab="etf" onclick="switchSmartPicksTab('etf')">ETF <span class="count" id="sp-c-etf">—</span></button>
-                <button class="sp-tab" data-tab="crypto" onclick="switchSmartPicksTab('crypto')">Crypto <span class="count" id="sp-c-crypto">—</span></button>
-                <button class="sp-tab" data-tab="history" onclick="switchSmartPicksTab('history')"><span class="sfi" data-icon="clock" style="width:12px;height:12px"></span>Historique <span class="count" id="sp-c-hist">—</span></button>
+                <button class="sp-tab active" data-tab="all" onclick="switchSmartPicksTab('all')">Tous <span class="count" id="sp-c-all">-</span></button>
+                <button class="sp-tab" data-tab="etf" onclick="switchSmartPicksTab('etf')">ETF <span class="count" id="sp-c-etf">-</span></button>
+                <button class="sp-tab" data-tab="crypto" onclick="switchSmartPicksTab('crypto')">Crypto <span class="count" id="sp-c-crypto">-</span></button>
+                <button class="sp-tab" data-tab="history" onclick="switchSmartPicksTab('history')"><span class="sfi" data-icon="clock" style="width:12px;height:12px"></span>Historique <span class="count" id="sp-c-hist">-</span></button>
             </div>
             <div class="sp-list" id="sp-list">
                 <div class="sp-loading">
@@ -6827,7 +6827,7 @@
             </div>
         </div>
 
-        <!-- ═══ HEATMAP — Carte du marché (déplacée sous Raccourcis, scroll interne) ═══ -->
+        <!-- ═══ HEATMAP - Carte du marché (déplacée sous Raccourcis, scroll interne) ═══ -->
         <div class="heatmap-card home-module" data-focusable="true" data-module-id="heatmap-market" data-module-label="Carte du marché (heatmap ETF)">
             <div class="hm-header">
                 <div class="hm-title-wrap">
@@ -6876,11 +6876,11 @@
             <div class="stat-card"><div class="stat-label">Cash disponible</div><div class="stat-value" id="cash-value"><span class="skel skel-val"></span></div></div>
             <div class="stat-card"><div class="stat-label">Positions</div><div class="stat-value" id="positions-count"><span class="skel skel-val"></span></div><div class="stat-sub" id="etf-count"></div></div>
         </div>
-        <div class="dcard">
+        <div class="dcard" data-focusable="true">
             <div class="dcard-label"><span class="sfi" data-icon="chart"></span>Allocation</div>
             <div id="allocation-chart" class="chart-box"></div>
         </div>
-        <div class="dcard">
+        <div class="dcard" data-focusable="true">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
                 <div class="dcard-label" style="margin-bottom:0"><span class="sfi" data-icon="briefcase"></span>Positions</div>
                 <div class="pos-toolbar">
@@ -7016,7 +7016,7 @@
             </div>
 
             <!-- Graphique principal : fan chart -->
-            <div class="dcard">
+            <div class="dcard" data-focusable="true">
                 <div class="dcard-title"><span class="sfi" data-icon="trending"></span>Trajectoire probable (bandes de confiance)</div>
                 <div id="pj-fan-chart" style="height:460px"></div>
                 <p style="color:var(--sf-text-muted);font-size:0.78rem;margin-top:10px">
@@ -7025,26 +7025,26 @@
             </div>
 
             <!-- Graphique scénarios déterministes -->
-            <div class="dcard">
+            <div class="dcard" data-focusable="true">
                 <div class="dcard-title"><span class="sfi" data-icon="chart"></span>Scénarios : Pessimiste · Médian · Optimiste</div>
                 <div id="pj-scenarios-chart" style="height:360px"></div>
                 <div id="pj-scenarios-table" style="margin-top:16px"></div>
             </div>
 
             <!-- Distribution des valeurs finales -->
-            <div class="dcard">
+            <div class="dcard" data-focusable="true">
                 <div class="dcard-title"><span class="sfi" data-icon="chartUp"></span>Distribution des valeurs finales (histogramme)</div>
                 <div id="pj-distribution-chart" style="height:300px"></div>
             </div>
 
             <!-- Table annuelle -->
-            <div class="dcard">
+            <div class="dcard" data-focusable="true">
                 <div class="dcard-title"><span class="sfi" data-icon="clock"></span>Projection année par année</div>
                 <div id="pj-yearly-table" style="overflow-x:auto"></div>
             </div>
 
             <!-- Projection par ETF -->
-            <div class="dcard">
+            <div class="dcard" data-focusable="true">
                 <div class="dcard-title"><span class="sfi" data-icon="briefcase"></span>Projection par ETF</div>
                 <div id="pj-etf-chart" style="height:300px"></div>
                 <div id="pj-etf-table" style="margin-top:16px"></div>
@@ -7133,7 +7133,7 @@
             </div>
 
             <!-- ── Frontière efficiente ── -->
-            <div class="dcard">
+            <div class="dcard" data-focusable="true">
                 <div class="dcard-title"><span class="sfi" data-icon="trending"></span>Frontière efficiente (Markowitz)</div>
                 <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:12px">
                     Chaque point = un portefeuille. La ligne = meilleur rendement possible pour chaque niveau de risque.
@@ -7143,7 +7143,7 @@
             </div>
 
             <!-- ── Matrice de corrélation ── -->
-            <div class="dcard">
+            <div class="dcard" data-focusable="true">
                 <div class="dcard-title"><span class="sfi" data-icon="chart"></span>Matrice de corrélation</div>
                 <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:12px">
                     Rouge = forte corrélation (mauvaise diversification). Bleu = actifs décorrélés (bonne diversif).
@@ -7152,7 +7152,7 @@
             </div>
 
             <!-- ── Contribution au risque ── -->
-            <div class="dcard">
+            <div class="dcard" data-focusable="true">
                 <div class="dcard-title"><span class="sfi" data-icon="shield"></span>Contribution au risque par ETF</div>
                 <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:12px">
                     Poids vs contribution réelle à la volatilité globale. Si la contribution dépasse le poids, l'ETF est un driver de risque.
@@ -7162,7 +7162,7 @@
             </div>
 
             <!-- ── Stress tests ── -->
-            <div class="dcard">
+            <div class="dcard" data-focusable="true">
                 <div class="dcard-title"><span class="sfi" data-icon="alert"></span>Stress tests historiques</div>
                 <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:12px">
                     Performance qu'aurait eu votre portefeuille actuel lors de chocs passés.
@@ -7172,7 +7172,7 @@
             </div>
 
             <!-- ── Rolling metrics ── -->
-            <div class="dcard">
+            <div class="dcard" data-focusable="true">
                 <div class="dcard-title"><span class="sfi" data-icon="clock"></span>Métriques glissantes (fenêtre 3 mois)</div>
                 <div id="an-rolling-chart" style="height:360px"></div>
             </div>
@@ -7322,7 +7322,7 @@
      SCANNER
      ═══════════════════════════════════════════════════════ -->
 <!-- ═══════════════════════════════════════════════════════
-     WATCHLIST — suivi d'actifs sans les détenir
+     WATCHLIST - suivi d'actifs sans les détenir
      ═══════════════════════════════════════════════════════ -->
 <div id="view-watchlist">
     <div class="hero">
@@ -7372,7 +7372,7 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
-     DISCOVER — thèmes d'investissement multi-classes
+     DISCOVER - thèmes d'investissement multi-classes
      ═══════════════════════════════════════════════════════ -->
 <div id="view-discover">
     <div class="hero">
@@ -7391,8 +7391,8 @@
             <div class="dc-detail-header" id="dc-detail-header">
                 <div class="dc-detail-icon" id="dc-detail-icon">🎯</div>
                 <div class="dc-detail-titles">
-                    <div class="dc-detail-name" id="dc-detail-name">—</div>
-                    <div class="dc-detail-desc" id="dc-detail-desc">—</div>
+                    <div class="dc-detail-name" id="dc-detail-name">-</div>
+                    <div class="dc-detail-desc" id="dc-detail-desc">-</div>
                 </div>
                 <button class="dc-detail-back" onclick="discoverBackToList()">← Retour</button>
             </div>
@@ -7568,23 +7568,23 @@
         <p class="hero-subtitle">Mode d'exécution, kill-switch, alertes Telegram, authentification.</p>
     </div>
     <div class="section">
-        <!-- KPIs synthétiques — sobres, alignés sur la DA du glossaire
+        <!-- KPIs synthétiques - sobres, alignés sur la DA du glossaire
              (texte blanc pour la valeur, la couleur d'état est portée par
               un petit dot + le stat-sub, pas par la valeur en majuscule) -->
         <div class="stat-grid stat-grid-3">
             <div class="stat-card">
                 <div class="stat-label">Mode d'exécution</div>
-                <div class="stat-value" id="sec-mode" style="font-size:1.25rem;display:inline-flex;align-items:center;gap:10px">—</div>
-                <div class="stat-sub" id="sec-mode-sub">—</div>
+                <div class="stat-value" id="sec-mode" style="font-size:1.25rem;display:inline-flex;align-items:center;gap:10px">-</div>
+                <div class="stat-sub" id="sec-mode-sub">-</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Kill-switch</div>
-                <div class="stat-value" id="sec-kill" style="font-size:1.25rem;display:inline-flex;align-items:center;gap:10px">—</div>
-                <div class="stat-sub" id="sec-kill-sub">—</div>
+                <div class="stat-value" id="sec-kill" style="font-size:1.25rem;display:inline-flex;align-items:center;gap:10px">-</div>
+                <div class="stat-sub" id="sec-kill-sub">-</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Authentification</div>
-                <div class="stat-value" id="sec-auth" style="font-size:1.25rem;display:inline-flex;align-items:center;gap:10px">—</div>
+                <div class="stat-value" id="sec-auth" style="font-size:1.25rem;display:inline-flex;align-items:center;gap:10px">-</div>
                 <div class="stat-sub">Via variable d'env APP_PASSWORD</div>
             </div>
         </div>
@@ -7647,7 +7647,7 @@
             <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:16px;line-height:1.55">
                 État du portefeuille virtuel utilisé en mode PAPER pour simuler les trades sans risque.
             </p>
-            <div id="paper-portfolio" style="color:var(--sf-text-secondary);font-size:0.85rem">—</div>
+            <div id="paper-portfolio" style="color:var(--sf-text-secondary);font-size:0.85rem">-</div>
         </div>
 
         <div class="dcard">
@@ -7656,9 +7656,9 @@
                 Heartbeat quotidien Telegram à <b>09:00 UTC</b>. Notification automatique à chaque démarrage/redéploiement. Endpoint public <code>/health</code> pour monitoring externe (UptimeRobot, etc.).
             </p>
             <div class="stat-grid stat-grid-3">
-                <div class="stat-card"><div class="stat-label">État</div><div class="stat-value" id="health-status" style="font-size:1.1rem">—</div><div class="stat-sub" id="health-last-seen">—</div></div>
-                <div class="stat-card"><div class="stat-label">Uptime</div><div class="stat-value" id="health-uptime" style="font-size:1.1rem">—</div><div class="stat-sub" id="health-startups">— démarrages</div></div>
-                <div class="stat-card"><div class="stat-label">Activité (24h)</div><div class="stat-value" id="health-activity" style="font-size:1.1rem">—</div><div class="stat-sub" id="health-errors">— erreurs</div></div>
+                <div class="stat-card"><div class="stat-label">État</div><div class="stat-value" id="health-status" style="font-size:1.1rem">-</div><div class="stat-sub" id="health-last-seen">-</div></div>
+                <div class="stat-card"><div class="stat-label">Uptime</div><div class="stat-value" id="health-uptime" style="font-size:1.1rem">-</div><div class="stat-sub" id="health-startups">- démarrages</div></div>
+                <div class="stat-card"><div class="stat-label">Activité (24h)</div><div class="stat-value" id="health-activity" style="font-size:1.1rem">-</div><div class="stat-sub" id="health-errors">- erreurs</div></div>
             </div>
         </div>
 
@@ -7736,7 +7736,7 @@
 </footer>
 
 <!-- ═══════════════════════════════════════════════════════
-     SETTINGS — SIDE DRAWER (volet latéral droite)
+     SETTINGS - SIDE DRAWER (volet latéral droite)
      ═══════════════════════════════════════════════════════ -->
 <div class="settings-drawer-backdrop" id="settings-backdrop" onclick="closeSettingsDrawer()"></div>
 <aside class="settings-drawer" id="settings-drawer" role="dialog" aria-modal="true" aria-labelledby="settings-drawer-title" aria-hidden="true">
@@ -8203,11 +8203,11 @@
                     </div>
                     <div class="settings-row">
                         <div class="settings-row-label">Profil créé le</div>
-                        <div class="settings-row-control"><span id="about-created" style="color:var(--sf-text-secondary);font-size:0.88rem">—</span></div>
+                        <div class="settings-row-control"><span id="about-created" style="color:var(--sf-text-secondary);font-size:0.88rem">-</span></div>
                     </div>
                     <div class="settings-row">
                         <div class="settings-row-label">Dernière mise à jour</div>
-                        <div class="settings-row-control"><span id="about-updated" style="color:var(--sf-text-secondary);font-size:0.88rem">—</span></div>
+                        <div class="settings-row-control"><span id="about-updated" style="color:var(--sf-text-secondary);font-size:0.88rem">-</span></div>
                     </div>
                 </div>
                 <div class="settings-group">
@@ -8242,7 +8242,7 @@
 
 <script>
 /* ═══════════════════════════════════════════════════════
-   ICON LIBRARY — inline SVG, hérite de currentColor
+   ICON LIBRARY - inline SVG, hérite de currentColor
    ═══════════════════════════════════════════════════════ */
 const ICN = {
     home: '<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a2 2 0 01-2 2h-4v-7h-6v7H5a2 2 0 01-2-2v-9z"/></svg>',
@@ -8306,7 +8306,7 @@ const PL={paper_bgcolor:'transparent',plot_bgcolor:'transparent',colorway:BRAND_
 let selectedBrokerId=null;
 
 /* ═══ Apple-style view transitions ═══ */
-/* ═══ QUICK ACTIONS — Actions rapides de l'accueil ═══ */
+/* ═══ QUICK ACTIONS - Actions rapides de l'accueil ═══ */
 
 async function qaExportCSV(){
     try {
@@ -8453,7 +8453,7 @@ function showView(v, opts){
     const isMobile = window.matchMedia('(max-width: 720px)').matches;
     // Distance translate : mobile = vraie sensation de "swipe carte" (60px), desktop = subtil (24px)
     const dist = isMobile ? 60 : 24;
-    // Courbe douce et perceptible — pas trop rapide, pas trop lente.
+    // Courbe douce et perceptible - pas trop rapide, pas trop lente.
     // Apple-like mais avec plus de "dwell" sur l'arrivée.
     const EASING = 'cubic-bezier(0.22, 0.61, 0.36, 1)';
     const DUR_OUT = isMobile ? 320 : 280;
@@ -8487,7 +8487,7 @@ function showView(v, opts){
         });
         // Scroll instantané pendant la slide (smooth = bagarre visuelle avec la slide)
         window.scrollTo(0, 0);
-        // Charge le contenu APRÈS le début de l'anim — évite le layout thrash
+        // Charge le contenu APRÈS le début de l'anim - évite le layout thrash
         if(loaders[v]){
             requestAnimationFrame(()=>requestAnimationFrame(loaders[v]));
         }
@@ -8575,7 +8575,7 @@ document.querySelectorAll('.nav-group').forEach(group=>{
 });
 
 /* ═══════════════════════════════════════════════════════
-   Toast 2.0 — slide-in, icône, progress bar, pause on hover,
+   Toast 2.0 - slide-in, icône, progress bar, pause on hover,
    stack animé, bouton close + action optionnelle.
 
    API:
@@ -8879,7 +8879,7 @@ function _renderPositionCards(){
             ? renderMiniSparkline(p.ticker || p.name, { points: 30, width: 280, height: 36, volatility: 0.012 })
             : { html: '', dir: 'up' };
         const chgCls = sp.dir === 'up' ? 'up' : sp.dir === 'down' ? 'down' : 'flat';
-        const chgArrow = sp.dir === 'up' ? '▲' : sp.dir === 'down' ? '▼' : '—';
+        const chgArrow = sp.dir === 'up' ? '▲' : sp.dir === 'down' ? '▼' : '-';
         return `<div class="pos-card" style="--pos-color:${accent}" onclick="showView('portfolio')">
             <div class="pos-accent"></div>
             <div class="pos-head">
@@ -8901,7 +8901,7 @@ function _renderPositionCards(){
                 </div>
                 <div class="pos-meta-item">
                     <div class="pos-meta-label">Prix</div>
-                    <div class="pos-meta-val">${p.price ? fmt(p.price) : '—'}</div>
+                    <div class="pos-meta-val">${p.price ? fmt(p.price) : '-'}</div>
                 </div>
                 <div class="pos-meta-item">
                     <div class="pos-meta-label">Allocation</div>
@@ -8931,7 +8931,7 @@ document.addEventListener('click', (e) => {
 
 async function refreshPortfolio(){refreshStatus();try{const d=await(await fetch('/api/portfolio')).json();if(d.mode==='not_connected'){document.getElementById('total-value').textContent='--';document.getElementById('cash-value').textContent='--';document.getElementById('total-mode').textContent='Non connecté';document.getElementById('positions-count').textContent='0';document.getElementById('etf-count').textContent='';const cardsEl=document.getElementById('positions-cards');if(cardsEl)cardsEl.innerHTML=emptyState(icon('bank','c-muted sfi-xl'),'Aucun broker ETF connecté','Connectez Interactive Brokers, Degiro ou Alpaca via l\'onglet Connexions.');document.getElementById('allocation-chart').innerHTML=emptyState(icon('chart','c-muted sfi-xl'),'En attente de données','Connectez un broker ETF pour voir votre allocation.');return;}animateVal(document.getElementById('total-value'),d.total_value,'','€');animateVal(document.getElementById('cash-value'),d.cash,'','€');document.getElementById('total-mode').textContent=d.mode==='live'?d.broker:'--';const ap=d.positions.filter(p=>p.shares>0);document.getElementById('positions-count').textContent=ap.length;document.getElementById('etf-count').textContent=d.positions.length+' ETFs suivis';_portfolioState.data=d;_renderPositionCards();_renderAllocationDonuts(d);}catch(e){toast(e.message,true);}}
 
-/* Donuts SVG natifs Cible vs Actuel — remplace le double pie Plotly.
+/* Donuts SVG natifs Cible vs Actuel - remplace le double pie Plotly.
    Élimine Plotly de la page Portefeuille entièrement. */
 function _renderAllocationDonuts(d){
     const wrap = document.getElementById('allocation-chart');
@@ -8971,7 +8971,7 @@ function _renderAllocationDonuts(d){
 async function executeRebalance(){try{const o=await(await fetch('/api/rebalance')).json();const c=document.getElementById('rebalance-orders');if(!o.length){c.innerHTML=`<div class="hint-cta" style="border-color:rgba(48,209,88,0.3);color:var(--sf-green);cursor:default">${icon('checkCircle','c-green')}<span>Portefeuille déjà équilibré</span></div>`;return;}c.innerHTML=`<table><thead><tr><th>ETF</th><th>Action</th><th>Parts</th><th>Montant</th></tr></thead><tbody>${o.map(x=>`<tr><td>${x.name||x.ticker}</td><td><span class="pill ${(x.action||'').includes('BUY')?'pill-green':'pill-red'}">${x.action||'-'}</span></td><td class="mono">${x.shares||'-'}</td><td class="mono">${x.amount?fmt(x.amount):'-'}</td></tr>`).join('')}</tbody></table>`;}catch(e){toast(e.message,true);}}
 
 /* ═══════════════════════════════════════════════════════
-   LIGHTWEIGHT-CHARTS — Wrapper helpers
+   LIGHTWEIGHT-CHARTS - Wrapper helpers
    Migration progressive depuis Plotly. Charts time-series fluides 60fps,
    bibliothèque utilisée par Binance/Trading212/Robinhood.
    ═══════════════════════════════════════════════════════ */
@@ -9075,7 +9075,7 @@ async function lwTimeSeriesChart(elementId, series, opts){
     return chart;
 }
 
-/* Bar chart SVG natif — remplace les bar Plotly.
+/* Bar chart SVG natif - remplace les bar Plotly.
    bars = [{label, value, color?}], opts = { height, showValues, suffix, sort, groupedSeries }
    Pour bars groupés (2 séries côte à côte) : passer { groupedSeries: [{name, color, values}] } */
 function renderSvgBars(elementId, bars, opts){
@@ -9447,7 +9447,7 @@ async function loadAnalytics(){
 const BF={ibkr:[{id:'host',label:'TWS Host',type:'text',value:'127.0.0.1'},{id:'port',label:'Port',type:'number',value:'7497'},{id:'client_id',label:'Client ID',type:'number',value:'1'}],degiro:[{id:'username',label:'Username',type:'text',value:''},{id:'password',label:'Password',type:'password',value:''},{id:'totp_secret',label:'TOTP',type:'text',value:''},{id:'one_time_password',label:'OTP',type:'text',value:''}],alpaca:[{id:'api_key',label:'API Key',type:'text',value:''},{id:'secret_key',label:'Secret',type:'password',value:''}],mexc:[{id:'api_key',label:'API Key',type:'text',value:''},{id:'secret_key',label:'Secret Key',type:'password',value:''},{id:'wallet_type',label:'Wallet',type:'select',value:'spot',options:[{v:'spot',l:'Spot (trading crypto)'},{v:'futures',l:'Futures / Swap (contrats)'}]}]};
 const CRYPTO_BROKERS=['mexc'];
 async function loadBrokers(){refreshStatus();try{const b=await(await fetch('/api/brokers')).json();const etfList=b.filter(x=>!CRYPTO_BROKERS.includes(x.id));const cryptoList=b.filter(x=>CRYPTO_BROKERS.includes(x.id));const card=(x)=>`<div class="stat-card" style="cursor:pointer;text-align:left" onclick="selectBroker('${x.id}')"><div class="stat-label">${x.name}</div><p style="color:var(--sf-text-secondary);font-size:0.85rem;margin-top:8px">${x.description}</p></div>`;document.getElementById('etf-broker-list').innerHTML=etfList.map(card).join('');document.getElementById('crypto-exchange-list').innerHTML=cryptoList.map(card).join('');const s=await(await fetch('/api/status')).json();const cs=await(await fetch('/api/crypto/status')).json();const sd=document.getElementById('broker-current-status');let html='';if(s.broker_connected)html+=`<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--sf-green);display:inline-block"></span><strong style="color:var(--sf-green)">${s.broker_name}</strong><span class="pill pill-green" style="font-size:0.6rem;animation:pulse 2s infinite">ETF LIVE</span></div>`;if(cs.connected)html+=`<div style="display:flex;align-items:center;justify-content:center;gap:8px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--sf-green);display:inline-block"></span><strong style="color:var(--sf-green)">${cs.broker_name}</strong><span class="pill pill-green" style="font-size:0.6rem;animation:pulse 2s infinite">CRYPTO LIVE</span></div>`;if(!html)html='<p style="color:var(--sf-text-muted)">Aucun broker connecte. Choisissez ci-dessous.</p>';sd.innerHTML=html;}catch(e){}}
-function selectBroker(id){selectedBrokerId=id;document.getElementById('broker-form').style.display='block';document.getElementById('broker-form-title').textContent=id.toUpperCase()+(CRYPTO_BROKERS.includes(id)?' — Exchange Crypto':' — Broker ETF');const f=BF[id]||[];document.getElementById('broker-fields').innerHTML=f.map(x=>{if(x.type==='select'){return`<div class="form-group"><div class="form-label">${x.label}</div><select id="bf-${x.id}" class="ainput">${x.options.map(o=>`<option value="${o.v}"${o.v===x.value?' selected':''}>${o.l}</option>`).join('')}</select></div>`;}return`<div class="form-group"><div class="form-label">${x.label}</div><input type="${x.type}" id="bf-${x.id}" value="${x.value}" class="ainput"></div>`;}).join('');}
+function selectBroker(id){selectedBrokerId=id;document.getElementById('broker-form').style.display='block';document.getElementById('broker-form-title').textContent=id.toUpperCase()+(CRYPTO_BROKERS.includes(id)?' - Exchange Crypto':' - Broker ETF');const f=BF[id]||[];document.getElementById('broker-fields').innerHTML=f.map(x=>{if(x.type==='select'){return`<div class="form-group"><div class="form-label">${x.label}</div><select id="bf-${x.id}" class="ainput">${x.options.map(o=>`<option value="${o.v}"${o.v===x.value?' selected':''}>${o.l}</option>`).join('')}</select></div>`;}return`<div class="form-group"><div class="form-label">${x.label}</div><input type="${x.type}" id="bf-${x.id}" value="${x.value}" class="ainput"></div>`;}).join('');}
 async function connectBroker(){if(!selectedBrokerId)return;const f=BF[selectedBrokerId]||[];const c={};f.forEach(x=>{const el=document.getElementById('bf-'+x.id);c[x.id]=x.type==='number'?parseInt(el.value):el.value;});
 const rd=document.getElementById('broker-connect-result');rd.innerHTML='<span style="color:var(--sf-orange)">Connexion...</span>';try{const isCrypto=CRYPTO_BROKERS.includes(selectedBrokerId);const url=isCrypto?'/api/crypto/connect':'/api/broker/connect';const body=isCrypto?{broker_id:selectedBrokerId,credentials:c}:{broker_id:selectedBrokerId,credentials:c};const d=await(await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).json();if(d.status==='connected'){rd.innerHTML=`<span style="color:var(--sf-green)">Connecte</span>`;toast(selectedBrokerId.toUpperCase()+' connecte');refreshStatus();loadBrokers();}else rd.innerHTML=`<span style="color:var(--sf-red)">${d.message}</span>`;}catch(e){rd.innerHTML=`<span style="color:var(--sf-red)">${e.message}</span>`;}}
 async function disconnectBroker(){if(selectedBrokerId&&CRYPTO_BROKERS.includes(selectedBrokerId)){await fetch('/api/crypto/disconnect',{method:'POST'});}else{await fetch('/api/broker/disconnect',{method:'POST'});}toast('Deconnecte');refreshStatus();loadBrokers();}
@@ -9630,7 +9630,7 @@ function showHeaderTooltip(el){
     tipPopup.style.left = left + 'px';
 }
 
-/* Auto-inject small "i" dot inside any th[data-tooltip] — idempotent */
+/* Auto-inject small "i" dot inside any th[data-tooltip] - idempotent */
 function injectHeaderTooltipDots(){
     document.querySelectorAll('th[data-tooltip]').forEach(th => {
         if(!th.querySelector('.th-tip-dot')){
@@ -9644,7 +9644,7 @@ function injectHeaderTooltipDots(){
 }
 
 /* ═══════════════════════════════════════════════════════
-   SORTABLE TABLES — universal helper
+   SORTABLE TABLES - universal helper
    Usage : <th class="sortable" data-sort-type="num|text|date">Col</th>
    Puis appelle makeSortable(tableEl) (ou via class auto .sortable-table).
    ═══════════════════════════════════════════════════════ */
@@ -9890,7 +9890,7 @@ async function loadHealth(){
         statusEl.textContent = labels[h.health] || h.health;
         statusEl.style.color = colors[h.health] || '#e6ecf4';
         document.getElementById('health-last-seen').textContent = h.last_seen_at ? ('Vu : '+new Date(h.last_seen_at).toLocaleString('fr-FR')) : 'Jamais';
-        document.getElementById('health-uptime').textContent = h.uptime_human || '—';
+        document.getElementById('health-uptime').textContent = h.uptime_human || '-';
         document.getElementById('health-startups').textContent = (h.startup_count||0)+' démarrages';
         document.getElementById('health-activity').textContent = (h.trades_last_24h||0)+' trades';
         document.getElementById('health-errors').textContent = (h.errors_last_24h||0)+' erreurs';
@@ -9910,7 +9910,7 @@ async function loadBackups(){
         let html = '<table style="width:100%"><thead><tr><th>Date</th><th>Label</th><th>Fichiers</th><th>Taille</th><th>Actions</th></tr></thead><tbody>';
         for(const b of list){
             const date = new Date(b.created_at).toLocaleString('fr-FR');
-            const label = b.label || '—';
+            const label = b.label || '-';
             html += `<tr>
                 <td>${date}</td>
                 <td>${label}</td>
@@ -10072,7 +10072,7 @@ function renderMiniSparkline(seed, options){
 }
 
 /* ═══════════════════════════════════════════════════════
-   TRADING-APP HERO — big portfolio value + sparkline + time range
+   TRADING-APP HERO - big portfolio value + sparkline + time range
    ═══════════════════════════════════════════════════════ */
 
 const HERO_STATE = { range: '1D', lastTotal: null, lastChange: null };
@@ -10251,7 +10251,7 @@ function _initHeroTimeRange(){
 }
 
 /* ═══════════════════════════════════════════════════════
-   MARKET TICKER — scrolling strip of top ETF/crypto symbols
+   MARKET TICKER - scrolling strip of top ETF/crypto symbols
    ═══════════════════════════════════════════════════════ */
 const TICKER_SYMBOLS = [
     { sym: 'IWDA',  name: 'MSCI World',     val: 99.28,  chg: 0.42 },
@@ -10306,7 +10306,7 @@ async function loadHome(){
         const totalEl = document.getElementById('home-total');
         if(s.totalValue !== null){
             totalEl.innerHTML = ''; animateVal(totalEl, s.totalValue, '', '€', 0);
-            document.getElementById('home-total-sub').textContent = s.brokerName || '—';
+            document.getElementById('home-total-sub').textContent = s.brokerName || '-';
             // Trading-app hero : big portfolio value + sparkline (vraies données via /api/portfolio/history)
             updateHeroPortfolio(s.totalValue, HERO_STATE.range);
             _heroLoadRealSeries(HERO_STATE.range).then(real => {
@@ -10316,7 +10316,7 @@ async function loadHome(){
                 }
             }).catch(() => {});
         }else{
-            totalEl.innerHTML = '<span title="Aucun broker connecté — la valeur de ton portefeuille apparaîtra ici une fois IBKR ou Binance branché" style="color:var(--sf-text-muted);cursor:help">—</span>';
+            totalEl.innerHTML = '<span title="Aucun broker connecté - la valeur de ton portefeuille apparaîtra ici une fois IBKR ou Binance branché" style="color:var(--sf-text-muted);cursor:help">-</span>';
             document.getElementById('home-total-sub').textContent = 'Aucun broker connecté';
             // Onboarding hero : plutôt qu'un simple label gris, on propose un vrai CTA
             const heroTot = document.getElementById('hero-total');
@@ -10342,8 +10342,8 @@ async function loadHome(){
                     </div>`;
                 const spark = document.getElementById('hero-sparkline-wrap');
                 if(spark) spark.style.display = 'none';
-                // Masque aussi le badge "— — — aujourd'hui" et le selector 1J/1S/…
-                // — inutiles sans données, brouillent l'onboarding.
+                // Masque aussi le badge "- - - aujourd'hui" et le selector 1J/1S/…
+                // - inutiles sans données, brouillent l'onboarding.
                 const heroChange = document.getElementById('hero-change');
                 if(heroChange) heroChange.style.display = 'none';
                 const heroRange = document.getElementById('hero-timerange');
@@ -10364,7 +10364,7 @@ async function loadHome(){
             unknown:    ['Inconnu', 'var(--sf-red)',        'alert'],
             never_seen: ['N/A',     'var(--sf-text-muted)', 'hourglass'],
         };
-        const [hlbl, hcol, hicon] = hMap2[s.health] || ['—','var(--sf-text-muted)','hourglass'];
+        const [hlbl, hcol, hicon] = hMap2[s.health] || ['-','var(--sf-text-muted)','hourglass'];
         healthEl.innerHTML = `<span style="display:inline-flex;align-items:center;gap:8px">${icon(hicon)} ${hlbl}</span>`;
         healthEl.style.color = hcol;
         document.getElementById('home-health-sub').textContent = s.uptime ? 'Uptime '+s.uptime : 'Pas de données';
@@ -10372,7 +10372,7 @@ async function loadHome(){
         document.getElementById('home-positions').textContent = s.positions;
         document.getElementById('home-positions-sub').textContent = s.trades24+' trades (24h) · '+s.errors24+' erreurs';
 
-        // Actions suggérées — chaque action = icône SVG + classe de couleur
+        // Actions suggérées - chaque action = icône SVG + classe de couleur
         const actions = [];
         if(s.killSwitch){
             actions.push({cls:'urgent',ico:'alert',title:'Désactiver le kill-switch',desc:'Tant qu\'il est actif, aucun trade ne passera.',fn:"releaseKillSwitch()"});
@@ -10414,24 +10414,24 @@ async function loadHome(){
 
         // Home dual block : allocation donut + top holdings
         loadHomeAllocation().catch(e => console.warn('loadHomeAllocation', e));
-        // Smart Picks — le bot choisit lui-même
+        // Smart Picks - le bot choisit lui-même
         loadSmartPicks().catch(e => console.warn('loadSmartPicks', e));
-        // Heatmap — carte du marché
+        // Heatmap - carte du marché
         loadHeatmap().catch(e => console.warn('loadHeatmap', e));
-        // Insights stories — cartes générées dynamiquement selon l'état actuel
+        // Insights stories - cartes générées dynamiquement selon l'état actuel
         loadInsights(s).catch(e => console.warn('loadInsights', e));
     }catch(e){ console.error('loadHome', e); }
 }
 
 /* ═══════════════════════════════════════════════════════
-   HOME DUAL BLOCK — Répartition (donut) + Top 5 holdings
+   HOME DUAL BLOCK - Répartition (donut) + Top 5 holdings
    Fetches /api/portfolio, aggregates by category, renders
    Plotly donut + custom legend + top-value list with sparklines.
    Gracefully no-ops if no broker connected.
    ═══════════════════════════════════════════════════════ */
 const ALLOC_COLORS = ['#2997ff','#30d158','#ff9f0a','#bf5af2','#ff453a','#64d2ff','#ffd60a','#ff375f'];
 
-/* Donut SVG natif — remplace Plotly sur la page d'accueil.
+/* Donut SVG natif - remplace Plotly sur la page d'accueil.
  * Avantages : pas de chargement Plotly (~1 MB), instantané, animation propre,
  * tooltip natif via <title>, scalable sans pixelisation.
  * segments: [{label, value, color}], opts: { size, stroke, animateMs }
@@ -10551,7 +10551,7 @@ async function loadHomeAllocation(){
     const labels = cats.map(([c]) => c);
     const values = cats.map(([,v]) => v);
 
-    // Donut SVG natif — pas de Plotly, instantané, animation propre.
+    // Donut SVG natif - pas de Plotly, instantané, animation propre.
     try {
         const segments = labels.map((lab, i) => ({
             label: lab,
@@ -10605,7 +10605,7 @@ async function loadHomeAllocation(){
 }
 
 /* ═══════════════════════════════════════════════════════
-   INSIGHTS STORIES — cartes éphémères style Revolut Stories
+   INSIGHTS STORIES - cartes éphémères style Revolut Stories
    Génération dynamique selon l'état du portefeuille.
    Chaque card = 1 fait remarquable (perf, drift, milestone, alerte).
    ═══════════════════════════════════════════════════════ */
@@ -10616,7 +10616,7 @@ async function loadInsights(state){
 
     // Carte 1 : performance journalière (toujours présente si data dispo)
     if(state && typeof state.totalValue === 'number' && state.totalValue > 0){
-        // Variation simulée — à brancher sur /api/portfolio/history quand l'endpoint sera prêt
+        // Variation simulée - à brancher sur /api/portfolio/history quand l'endpoint sera prêt
         try {
             const histRes = await fetch('/api/portfolio/history?range=1D').catch(() => null);
             if(histRes && histRes.ok){
@@ -10751,7 +10751,7 @@ async function loadInsights(state){
 }
 
 /* ═══════════════════════════════════════════════════════
-   SMART PICKS — "Le bot choisit pour toi"
+   SMART PICKS - "Le bot choisit pour toi"
    Fetch /api/smart-picks → render dans la carte d'accueil.
    Auto-refresh toutes les 5min. Onglets tous/ETF/crypto.
    ═══════════════════════════════════════════════════════ */
@@ -10847,7 +10847,7 @@ async function loadSmartPicksHistory(){
         const d = await (await fetch('/api/smart-picks/history?limit=20')).json();
         SP_STATE.history = d;
         const cEl = document.getElementById('sp-c-hist');
-        if(cEl) cEl.textContent = d.stats ? d.stats.total : '—';
+        if(cEl) cEl.textContent = d.stats ? d.stats.total : '-';
         if(SP_STATE.tab === 'history') renderSmartPicksHistory();
     } catch(e){
         console.warn('loadSmartPicksHistory', e);
@@ -10902,7 +10902,7 @@ function renderSmartPicksHistory(){
         const age = p.days_elapsed === 0 ? "aujourd'hui" : p.days_elapsed === 1 ? "hier" : `il y a ${p.days_elapsed}j`;
         let retHtml;
         if(p.return_pct === null || p.return_pct === undefined){
-            retHtml = `<div class="sp-hist-return pending">—</div>`;
+            retHtml = `<div class="sp-hist-return pending">-</div>`;
         } else {
             const cls = p.return_pct >= 0 ? 'up' : 'down';
             const sign = p.return_pct >= 0 ? '+' : '';
@@ -10935,7 +10935,7 @@ function _renderSmartPickCard(p){
     const cls1  = chg1  >= 0 ? 'up' : 'down';
 
     const tick = (p.ticker || '').split('.')[0].slice(0,4).toUpperCase();
-    const reason = (p.reasons && p.reasons.length) ? p.reasons[0] : '—';
+    const reason = (p.reasons && p.reasons.length) ? p.reasons[0] : '-';
 
     // Sparkline : si le backend envoie des closes réelles, on les utilise
     let sparkHtml = '', sparkDir = cls30;
@@ -11036,7 +11036,7 @@ function switchSmartPicksTab(tab){
 }
 
 /* ═══════════════════════════════════════════════════════
-   HEATMAP — carte du marché façon Finviz
+   HEATMAP - carte du marché façon Finviz
    Tuiles colorées (vert/rouge, intensité = amplitude du mouvement)
    regroupées par catégorie. Click → ouvre la modale pick details.
    ═══════════════════════════════════════════════════════ */
@@ -11102,7 +11102,7 @@ function _renderHeatmapTile(t, range){
     if(chg === null || chg === undefined || score === null || score === undefined){
         return `<div class="hm-tile pending" title="${t.name || t.ticker}">
             <div class="hm-tile-ticker">${ticker}</div>
-            <div class="hm-tile-chg">—</div>
+            <div class="hm-tile-chg">-</div>
         </div>`;
     }
 
@@ -11128,7 +11128,7 @@ function _renderHeatmapTile(t, range){
 
     const sign = chg >= 0 ? '+' : '';
     const chgTxt = `${sign}${chg.toFixed(range === 'change_1d' ? 2 : 1)}%`;
-    const title = `${t.name || t.ticker} — Score ${score.toFixed(0)} · ${t.direction || 'NEUTRAL'} · ${chgTxt}`;
+    const title = `${t.name || t.ticker} - Score ${score.toFixed(0)} · ${t.direction || 'NEUTRAL'} · ${chgTxt}`;
 
     return `<div class="hm-tile ${cls}"
                  title="${title}"
@@ -11259,7 +11259,7 @@ function initSpotlight(root){
 }
 
 /* ═══════════════════════════════════════════════════════
-   PROFIL UTILISATEUR — load, save, apply prefs
+   PROFIL UTILISATEUR - load, save, apply prefs
    ═══════════════════════════════════════════════════════ */
 const AVATAR_COLORS = ['#0a84ff','#30d158','#bf5af2','#ff9f0a','#64d2ff','#ff453a','#ffd60a','#ff375f'];
 let _profileCache = null;
@@ -11389,7 +11389,7 @@ function getSegmented(id){
 }
 
 function fmtDateTime(iso){
-    if(!iso) return '—';
+    if(!iso) return '-';
     try {
         const d = new Date(iso);
         return d.toLocaleString('fr-FR', {dateStyle:'medium', timeStyle:'short'});
@@ -11920,7 +11920,7 @@ function _initKPIObserver(){
             seen.add(el);
             if(el.querySelector('.skel')) continue;
             const txt = (el.textContent || '').trim();
-            if(!txt || txt === '—' || txt === '--') continue;
+            if(!txt || txt === '-' || txt === '--') continue;
             // Price flash : compare numeric old vs new for this element
             if(el.dataset.noFlash !== '1'){
                 const parsed = _parseFormattedNumber(txt);
@@ -11962,7 +11962,7 @@ function applyStagger(container, selector){
     container.classList.add('stagger-children');
 }
 
-/* Auto-wire stagger on tables that render rows dynamically — caller just adds
+/* Auto-wire stagger on tables that render rows dynamically - caller just adds
    class="stagger-on-render" to a <tbody> (or any container). We observe it. */
 function _initStaggerAutoWire(){
     if(document.body.classList.contains('reduce-motion')) return;
@@ -11995,7 +11995,7 @@ loadProfile();
 loadHome();
 loadContextBanner();
 refreshStatus();
-// Refresh banner toutes les 30s — skip si onglet caché, tracké pour cleanup
+// Refresh banner toutes les 30s - skip si onglet caché, tracké pour cleanup
 if(typeof APP_INTERVALS === 'undefined') { window.APP_INTERVALS = []; }
 APP_INTERVALS.push(setInterval(() => {
     if(document.hidden) return;
@@ -12018,19 +12018,19 @@ setTimeout(() => {
     updateMarketTicker();
 }, 200);
 
-// Navigation re-init handled inside showView() — no duplicate handler needed.
+// Navigation re-init handled inside showView() - no duplicate handler needed.
 </script>
 
 <!-- ═══════════════════════════════════════════════════════
-     PICK DETAILS MODAL — full analysis per Smart Pick
+     PICK DETAILS MODAL - full analysis per Smart Pick
      ═══════════════════════════════════════════════════════ -->
 <div class="pick-modal-backdrop" id="pick-modal-backdrop" onclick="closePickModal()"></div>
 <div class="pick-modal" id="pick-modal" role="dialog" aria-modal="true" aria-labelledby="pm-title">
     <div class="pm-head">
-        <div class="pm-badge" id="pm-badge">—</div>
+        <div class="pm-badge" id="pm-badge">-</div>
         <div class="pm-title-block">
-            <div class="pm-title" id="pm-title">—<span class="sp-dir neutral" id="pm-dir">—</span></div>
-            <div class="pm-subtitle" id="pm-subtitle">—</div>
+            <div class="pm-title" id="pm-title">-<span class="sp-dir neutral" id="pm-dir">-</span></div>
+            <div class="pm-subtitle" id="pm-subtitle">-</div>
         </div>
         <button class="pm-close" onclick="closePickModal()" aria-label="Fermer">✕</button>
     </div>
@@ -12039,7 +12039,7 @@ setTimeout(() => {
         <div class="pm-score-bar">
             <div class="pm-score-bar-header">
                 <span class="pm-score-bar-label">Score d'opportunité</span>
-                <span class="pm-score-bar-val" id="pm-score-val">—</span>
+                <span class="pm-score-bar-val" id="pm-score-val">-</span>
             </div>
             <div class="pm-score-bar-track"><div class="pm-score-bar-fill" id="pm-score-fill" style="width:0%"></div></div>
         </div>
@@ -12056,7 +12056,7 @@ setTimeout(() => {
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
-     WALLET DRAWER — patrimoine, positions, activité, actions
+     WALLET DRAWER - patrimoine, positions, activité, actions
      ═══════════════════════════════════════════════════════ -->
 <div class="wallet-drawer-backdrop" id="wallet-drawer-backdrop" onclick="closeWalletDrawer()"></div>
 <aside class="wallet-drawer" id="wallet-drawer" role="dialog" aria-modal="true" aria-labelledby="wd-title">
@@ -12075,18 +12075,18 @@ setTimeout(() => {
                 <span style="font-size:0.72rem; color:var(--sf-text-muted); text-transform:uppercase; letter-spacing:0.06em;">Valeur totale</span>
                 <span class="wd-mode-pill" id="wd-mode-pill">PAPER</span>
             </div>
-            <div class="wd-balance-value" id="wd-balance-value">—</div>
-            <div class="wd-balance-chg" id="wd-balance-chg">—</div>
+            <div class="wd-balance-value" id="wd-balance-value">-</div>
+            <div class="wd-balance-chg" id="wd-balance-chg">-</div>
         </div>
 
         <!-- Hero Portfolio Chart (Robinhood-style) -->
         <div class="pf-chart" data-scope="wallet">
             <div class="pf-chart-head">
                 <div class="pf-chart-title">Évolution du patrimoine</div>
-                <div class="pf-chart-perf flat" id="pf-chart-perf-wallet">—</div>
+                <div class="pf-chart-perf flat" id="pf-chart-perf-wallet">-</div>
             </div>
             <div style="position:relative;" id="pf-chart-wrap-wallet">
-                <div class="pf-chart-tip" id="pf-chart-tip-wallet">—</div>
+                <div class="pf-chart-tip" id="pf-chart-tip-wallet">-</div>
                 <svg class="pf-chart-svg" id="pf-chart-svg-wallet" viewBox="0 0 400 110" preserveAspectRatio="none">
                     <defs>
                         <linearGradient id="pf-grad-up" x1="0" y1="0" x2="0" y2="1">
@@ -12136,7 +12136,7 @@ setTimeout(() => {
         <div class="wd-breakdown" id="wd-breakdown">
             <div class="wd-breakdown-title">
                 <span>Répartition par classe</span>
-                <span class="wd-breakdown-total" id="wd-breakdown-total">—</span>
+                <span class="wd-breakdown-total" id="wd-breakdown-total">-</span>
             </div>
             <div class="wd-bar" id="wd-bar">
                 <div class="wd-bar-seg actions" style="width:0%"></div>
@@ -12176,11 +12176,11 @@ setTimeout(() => {
         <div class="wd-stats">
             <div class="wd-stat">
                 <div class="wd-stat-label">Cash disponible</div>
-                <div class="wd-stat-val" id="wd-stat-cash">—</div>
+                <div class="wd-stat-val" id="wd-stat-cash">-</div>
             </div>
             <div class="wd-stat">
                 <div class="wd-stat-label">Positions ouvertes</div>
-                <div class="wd-stat-val" id="wd-stat-positions">—</div>
+                <div class="wd-stat-val" id="wd-stat-positions">-</div>
             </div>
         </div>
 
@@ -12218,7 +12218,7 @@ setTimeout(() => {
 
 <script>
 /* ═══════════════════════════════════════════════════════
-   WALLET DRAWER — ouverture, chargement, rendu
+   WALLET DRAWER - ouverture, chargement, rendu
    ═══════════════════════════════════════════════════════ */
 const WALLET_STATE = { open: false, loading: false, data: null };
 
@@ -12294,19 +12294,19 @@ async function loadWalletData(){
 }
 
 function _fmtMoney(v){
-    if(v == null || isNaN(v)) return '—';
+    if(v == null || isNaN(v)) return '-';
     const sign = v < 0 ? '-' : '';
     const abs = Math.abs(v);
     if(abs >= 1000) return sign + '$' + abs.toLocaleString('fr-FR', {maximumFractionDigits: 0});
     return sign + '$' + abs.toFixed(2);
 }
 function _fmtPct(v){
-    if(v == null || isNaN(v)) return '—';
+    if(v == null || isNaN(v)) return '-';
     return (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
 }
 
 /* ═══════════════════════════════════════════════════════
-   PORTFOLIO CHART — Robinhood-style line chart, multi-scope
+   PORTFOLIO CHART - Robinhood-style line chart, multi-scope
    ═══════════════════════════════════════════════════════ */
 const PF_CHART_STATE = {
     wallet: { range: '1m', benchmark: null, data: null, loading: false },
@@ -12379,7 +12379,7 @@ function _renderPortfolioChart(scope, data){
         empty.setAttribute('font-size', '11');
         empty.textContent = 'Données insuffisantes';
         svg.appendChild(empty);
-        if(perfEl){ perfEl.textContent = '—'; perfEl.className = 'pf-chart-perf flat'; }
+        if(perfEl){ perfEl.textContent = '-'; perfEl.className = 'pf-chart-perf flat'; }
         return;
     }
 
@@ -12489,7 +12489,7 @@ function _renderPortfolioChart(scope, data){
     // Perf pill
     if(perfEl){
         if(perfPct == null){
-            perfEl.textContent = '—';
+            perfEl.textContent = '-';
             perfEl.className = 'pf-chart-perf flat';
         } else {
             const sign = perfPct >= 0 ? '+' : '';
@@ -12500,7 +12500,7 @@ function _renderPortfolioChart(scope, data){
 }
 
 /* ═══════════════════════════════════════════════════════
-   TOP MOVERS — tri automatique des gagnants/perdants du jour
+   TOP MOVERS - tri automatique des gagnants/perdants du jour
    ═══════════════════════════════════════════════════════ */
 const MOVERS_STATE = { direction: 'up', items: [] };
 
@@ -12648,7 +12648,7 @@ function openMoverTile(m){
 }
 
 /* ═══════════════════════════════════════════════════════
-   WATCHLIST — état global + toggle star + rendu onglet
+   WATCHLIST - état global + toggle star + rendu onglet
    ═══════════════════════════════════════════════════════ */
 window.WL_STATE = { watched: new Set(), items: [], loaded: false, currentEditing: null };
 
@@ -12760,9 +12760,9 @@ function _wlCardHtml(it){
     const sym = tk.split('.')[0].slice(0, 4);
     const chg = it.change_1d;
     const chgCls = chg == null ? 'flat' : chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat';
-    const chgTxt = chg == null ? '—' : (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
+    const chgTxt = chg == null ? '-' : (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
     const price = it.price;
-    const priceTxt = price == null ? '—' :
+    const priceTxt = price == null ? '-' :
         (price >= 1000 ? '$' + price.toLocaleString('fr-FR', {maximumFractionDigits:2}) :
          price < 1 ? '$' + price.toFixed(4) : '$' + price.toFixed(2));
 
@@ -12835,7 +12835,7 @@ function openWatchlistAlertModal(ticker){
     WL_STATE.currentEditing = ticker;
     document.getElementById('wl-alert-title').textContent = `Alerte sur ${ticker}`;
     document.getElementById('wl-alert-sub').textContent =
-        `Prix actuel : ${item.price != null ? '$' + item.price : '—'} · Notification Telegram dès franchissement.`;
+        `Prix actuel : ${item.price != null ? '$' + item.price : '-'} · Notification Telegram dès franchissement.`;
     document.getElementById('wl-alert-above').value = item.alerts?.above ?? '';
     document.getElementById('wl-alert-below').value = item.alerts?.below ?? '';
     document.getElementById('wl-alert-modal-backdrop').classList.add('open');
@@ -12882,7 +12882,7 @@ async function clearWatchlistAlert(){
 })();
 
 /* ═══════════════════════════════════════════════════════
-   DISCOVER — thèmes d'investissement multi-classes
+   DISCOVER - thèmes d'investissement multi-classes
    ═══════════════════════════════════════════════════════ */
 const DC_STATE = { themes: [], current: null, loaded: false };
 
@@ -12893,7 +12893,7 @@ function _dcPerfCls(v){
     return 'flat';
 }
 function _dcPerfTxt(v){
-    if(v == null) return '—';
+    if(v == null) return '-';
     return (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
 }
 
@@ -13039,13 +13039,13 @@ function _dcRenderTickersTable(t){
         const cls = tk.asset_class || 'etf';
         const chg = tk.change_1m;
         const chgCls = chg == null ? 'flat' : chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat';
-        const chgTxt = chg == null ? '—' : (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
-        const priceTxt = tk.price == null ? '—' :
+        const chgTxt = chg == null ? '-' : (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
+        const priceTxt = tk.price == null ? '-' :
             (tk.price >= 1000 ? '$' + tk.price.toLocaleString('fr-FR', {maximumFractionDigits:2}) :
              tk.price < 1 ? '$' + tk.price.toFixed(4) : '$' + tk.price.toFixed(2));
         const score = tk.score;
         const scoreCls = score == null ? 'low' : score >= 65 ? 'high' : score >= 45 ? 'mid' : 'low';
-        const scoreTxt = score == null ? '—' : score.toFixed(0);
+        const scoreTxt = score == null ? '-' : score.toFixed(0);
         const tickerEsc = (tk.ticker || '').replace(/'/g, '');
         const nameEsc = (tk.name || '').replace(/'/g, '').slice(0, 40);
         const catEsc = (tk.category || '').replace(/'/g, '').slice(0, 30);
@@ -13261,7 +13261,7 @@ function renderWalletActivity(trades){
 
 <script>
 /* ═══════════════════════════════════════════════════════
-   PICK MODAL — gestion ouverture / rendu / actions
+   PICK MODAL - gestion ouverture / rendu / actions
    ═══════════════════════════════════════════════════════ */
 let _currentPick = null;
 
@@ -13392,7 +13392,7 @@ function investInCurrentPick(){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   BOTTOM TAB BAR (mobile only) — sync actif avec showView()
+   BOTTOM TAB BAR (mobile only) - sync actif avec showView()
    ═══════════════════════════════════════════════════════════ */
 (function(){
     // Map tab → view cible. ETF = portfolio, Crypto = crypto (accès direct)
@@ -13405,7 +13405,7 @@ function investInCurrentPick(){
     };
     // Views qui mettent tel ou tel tab en actif (fallback pour les vues secondaires).
     // Les vues secondaires (broker/auto/securite/glossaire) n'activent plus aucun tab
-    // (Plus est retiré) — la nav vers ces vues garde tous les tabs inactifs.
+    // (Plus est retiré) - la nav vers ces vues garde tous les tabs inactifs.
     const VIEW_TAB_MAP = {
         home: 'home',
         portfolio: 'portfolio', watchlist: 'portfolio',
@@ -13458,7 +13458,7 @@ function investInCurrentPick(){
     }
 
     // Hook dans showView : on wrappe pour sync immédiatement (avant l'anim)
-    // ET après l'anim — comme ça l'indicateur bleu bouge dès le 1er tap.
+    // ET après l'anim - comme ça l'indicateur bleu bouge dès le 1er tap.
     if(typeof window.showView === 'function'){
         const origShowView = window.showView;
         window.showView = function(v, opts){
@@ -13575,9 +13575,9 @@ function investInCurrentPick(){
 })();
 </script>
 
-<!-- Bottom tab bar (mobile only — activé via @media max-width:720px)
+<!-- Bottom tab bar (mobile only - activé via @media max-width:720px)
      5 onglets : Accueil, ETF, Crypto, Trader, Analyse.
-     Le bouton "Plus" a été retiré — la palette ⌘K et le menu sont
+     Le bouton "Plus" a été retiré - la palette ⌘K et le menu sont
      accessibles via le hamburger ☰ en haut à gauche (pas de doublon). -->
 <nav class="bottom-tabbar" role="navigation" aria-label="Navigation mobile">
     <div class="bottom-tabbar-inner">
@@ -13605,7 +13605,7 @@ function investInCurrentPick(){
 </nav>
 
 <!-- ════════════════════════════════════════════════════════
-     ONBOARDING WIZARD — premier login
+     ONBOARDING WIZARD - premier login
      4 étapes plein écran : welcome / profil quiz / broker / API.
      Déclenché si localStorage.pq_onboarded n'est pas set.
      ════════════════════════════════════════════════════════ -->
@@ -13622,7 +13622,7 @@ function investInCurrentPick(){
                     <svg viewBox="0 0 512 512" width="64" height="64"><text x="256" y="262" text-anchor="middle" dominant-baseline="central" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif" font-weight="700" font-size="380" letter-spacing="-16" fill="#fff">Q</text></svg>
                 </div>
                 <h1 class="onb-title">Bienvenue sur PortfolioQuant</h1>
-                <p class="onb-sub">Ton portefeuille ETF & crypto, géré comme un hedge fund. <br>Avant de commencer, on configure tout en 3 étapes — moins d'une minute.</p>
+                <p class="onb-sub">Ton portefeuille ETF & crypto, géré comme un hedge fund. <br>Avant de commencer, on configure tout en 3 étapes - moins d'une minute.</p>
                 <div class="onb-bullets">
                     <div class="onb-bullet"><span class="sfi" data-icon="brain"></span><div><strong>Quel investisseur es-tu ?</strong><span>3 questions pour calibrer le bot</span></div></div>
                     <div class="onb-bullet"><span class="sfi" data-icon="bank"></span><div><strong>Connecte ton broker</strong><span>IBKR, Degiro ou Alpaca</span></div></div>
@@ -13741,7 +13741,7 @@ function investInCurrentPick(){
 </div>
 
 <!-- ════════════════════════════════════════════════════════
-     FOCUS MODE — expand widget pattern
+     FOCUS MODE - expand widget pattern
      Click sur le bouton ⤢ d'un module → modal centrée + backdrop blur.
      ════════════════════════════════════════════════════════ -->
 <div class="focus-overlay" id="focus-overlay" role="dialog" aria-modal="true" aria-hidden="true">
@@ -13780,7 +13780,7 @@ function investInCurrentPick(){
     function openFocus(sourceEl){
         if(!sourceEl) return;
         activeSourceEl = sourceEl;
-        // Déplace le contenu réel dans le stage (pas un clone — comme ça les
+        // Déplace le contenu réel dans le stage (pas un clone - comme ça les
         // event listeners et les charts lightweight-charts continuent de marcher)
         const placeholder = document.createElement('div');
         placeholder.id = '_focus_placeholder_' + Date.now();
@@ -13841,7 +13841,7 @@ function investInCurrentPick(){
 </script>
 
 <!-- ════════════════════════════════════════════════════════
-     ONBOARDING — controller
+     ONBOARDING - controller
      ════════════════════════════════════════════════════════ -->
 <script>
 (function(){
@@ -13998,7 +13998,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
                     if (!sw) return;
                     sw.addEventListener('statechange', () => {
                         if (sw.state === 'installed' && navigator.serviceWorker.controller) {
-                            console.log('[PWA] Nouvelle version disponible — reload pour l\'activer.');
+                            console.log('[PWA] Nouvelle version disponible - reload pour l\'activer.');
                         }
                     });
                 });

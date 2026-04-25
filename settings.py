@@ -1,5 +1,5 @@
 """
-Module de configuration globale — kill-switch + mode paper/live.
+Module de configuration globale - kill-switch + mode paper/live.
 
 Persiste dans settings.json. Consulté par tous les modules qui placent des ordres.
 """
@@ -91,7 +91,7 @@ def set_paper_mode(enabled: bool) -> dict:
 
 
 # ─────────────────────────────────────────────────────────
-#  GARDE GLOBALE — À APPELER AVANT CHAQUE ORDRE
+#  GARDE GLOBALE - À APPELER AVANT CHAQUE ORDRE
 # ─────────────────────────────────────────────────────────
 
 def can_trade_live() -> tuple:

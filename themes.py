@@ -1,5 +1,5 @@
 """
-Module Discover Themes — baskets thématiques multi-classes.
+Module Discover Themes - baskets thématiques multi-classes.
 
 Chaque thème regroupe 4-8 tickers (ETF, Actions directes, Crypto, Matières)
 autour d'un sujet d'investissement. L'utilisateur peut scanner un thème
@@ -120,7 +120,7 @@ THEMES: Dict[str, dict] = {
         "emoji": "🛡️",
         "color": "#ffd60a",
         "gradient": ["#ffd60a", "#ffcc00"],
-        "description": "Obligations d'État, high-grade credit et or — le côté défensif du portefeuille.",
+        "description": "Obligations d'État, high-grade credit et or - le côté défensif du portefeuille.",
         "tickers": [
             {"ticker": "TLT",     "name": "iShares 20+ Year Treasury",   "asset_class": "etf",        "category": "ETF T-Bonds long"},
             {"ticker": "IEF",     "name": "iShares 7-10 Year Treasury",  "asset_class": "etf",        "category": "ETF T-Bonds moyen"},
@@ -327,7 +327,7 @@ def get_theme_detail(theme_id: str) -> Optional[dict]:
         vals = [t.get(key) for t in enriched_tickers if t.get(key) is not None]
         if vals:
             perf["perf_" + key.split("_")[1]] = round(sum(vals) / len(vals), 2)
-    # perf_1y non calculé ici (on a 3mo period) — fallback cache
+    # perf_1y non calculé ici (on a 3mo period) - fallback cache
     with _PERF_LOCK:
         cached = _PERF_CACHE.get(theme_id, {})
     if cached.get("perf_1y") is not None:

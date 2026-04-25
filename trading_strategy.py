@@ -1,5 +1,5 @@
 """
-Moteur de stratégie de trading — génère des signaux BUY/SELL/HOLD.
+Moteur de stratégie de trading - génère des signaux BUY/SELL/HOLD.
 
 Stratégie multi-indicateurs :
 - Tendance : EMA 9/21 crossover + SMA 50

@@ -391,7 +391,7 @@ class RiskEngine:
             if len(recent) >= self.config["cooldown_after_losses"]:
                 if all(t.get("pnl", 0) < 0 for t in recent):
                     circuit_breaker = True
-                    warnings.append(f"{self.config['cooldown_after_losses']} pertes consecutives — cooldown active")
+                    warnings.append(f"{self.config['cooldown_after_losses']} pertes consecutives - cooldown active")
 
         # Risk score composite (0=safe, 100=danger)
         risk_score = 0
@@ -446,7 +446,7 @@ class RiskEngine:
 
         # Circuit breaker
         if risk.circuit_breaker_triggered:
-            self.log_event("BLOCKED", f"Circuit breaker — trade {new_trade.get('symbol')} refuse", {"risk_score": risk.risk_score})
+            self.log_event("BLOCKED", f"Circuit breaker - trade {new_trade.get('symbol')} refuse", {"risk_score": risk.risk_score})
             return {
                 "authorized": False,
                 "reason": "Circuit breaker active - trading suspendu",

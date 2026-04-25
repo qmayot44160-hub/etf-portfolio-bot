@@ -1,5 +1,5 @@
 """
-Module d'analyse technique — indicateurs pour le trading actif.
+Module d'analyse technique - indicateurs pour le trading actif.
 """
 
 import pandas as pd
@@ -28,7 +28,7 @@ def rsi(series: pd.Series, period: int = 14) -> pd.Series:
 
 
 def macd(series: pd.Series, fast: int = 12, slow: int = 26, signal: int = 9) -> dict:
-    """MACD — Moving Average Convergence Divergence."""
+    """MACD - Moving Average Convergence Divergence."""
     ema_fast = ema(series, fast)
     ema_slow = ema(series, slow)
     macd_line = ema_fast - ema_slow
@@ -53,7 +53,7 @@ def bollinger_bands(series: pd.Series, period: int = 20, std_dev: float = 2.0) -
 
 
 def atr(high: pd.Series, low: pd.Series, close: pd.Series, period: int = 14) -> pd.Series:
-    """Average True Range — mesure de volatilité."""
+    """Average True Range - mesure de volatilité."""
     tr1 = high - low
     tr2 = abs(high - close.shift(1))
     tr3 = abs(low - close.shift(1))

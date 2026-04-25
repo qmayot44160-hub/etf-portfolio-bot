@@ -1,5 +1,5 @@
 """
-Module d'analyse quantitative avancée — niveau institutionnel.
+Module d'analyse quantitative avancée - niveau institutionnel.
 
 Contient :
 - Optimisation Mean-Variance (frontière efficiente de Markowitz)
@@ -78,7 +78,7 @@ def full_analytics(years: int = 5, custom_weights: dict = None) -> dict:
 
 
 # ─────────────────────────────────────────────────────────
-#  OPTIMISATION — Mean-Variance (Markowitz)
+#  OPTIMISATION - Mean-Variance (Markowitz)
 # ─────────────────────────────────────────────────────────
 
 def _port_ret(w, mu): return float(np.dot(w, mu))
@@ -119,7 +119,7 @@ def _efficient_frontier(mu: np.ndarray, cov: np.ndarray,
 
     if not HAS_SCIPY:
         return {
-            "error": "scipy indisponible — optimisation désactivée",
+            "error": "scipy indisponible - optimisation désactivée",
             "current": _point(current_w, "Portefeuille actuel", "#2997ff"),
             "equal_weight": _point(ew, "Equal Weight", "#ff9f0a"),
         }
@@ -218,7 +218,7 @@ def _diversification_ratio(weights: np.ndarray, sigmas: np.ndarray,
 
 
 # ─────────────────────────────────────────────────────────
-#  STRESS TESTS — Rejouer des crises historiques
+#  STRESS TESTS - Rejouer des crises historiques
 # ─────────────────────────────────────────────────────────
 
 def _stress_tests(prices: pd.DataFrame, weights: np.ndarray,

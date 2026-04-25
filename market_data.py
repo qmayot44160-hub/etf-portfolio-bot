@@ -17,7 +17,7 @@ from config import PORTFOLIO, BACKTEST_YEARS
 
 
 # ─────────────────────────────────────────────────────────────
-# Cache prix courant — partagé entre threads (Flask = multi-req)
+# Cache prix courant - partagé entre threads (Flask = multi-req)
 # ─────────────────────────────────────────────────────────────
 PRICE_CACHE_TTL_SEC = 60
 _price_cache: dict = {}
@@ -34,7 +34,7 @@ def invalidate_price_cache() -> None:
 
 
 def _fetch_prices_from_yf() -> dict:
-    """Appel yfinance réel — extrait ici pour la lisibilité + testabilité."""
+    """Appel yfinance réel - extrait ici pour la lisibilité + testabilité."""
     prices = {}
     tickers = list(PORTFOLIO.keys())
     data = yf.download(tickers, period="5d", progress=False)
@@ -74,7 +74,7 @@ def get_current_prices(force: bool = False) -> dict:
         return dict(_price_cache)  # copie défensive
 
     with _price_cache_lock:
-        # Double-check — un autre thread a peut-être rafraîchi pendant qu'on attendait le lock
+        # Double-check - un autre thread a peut-être rafraîchi pendant qu'on attendait le lock
         if not force and _price_cache and (time.time() - _price_cache_ts) < PRICE_CACHE_TTL_SEC:
             return dict(_price_cache)
         prices = _fetch_prices_from_yf()

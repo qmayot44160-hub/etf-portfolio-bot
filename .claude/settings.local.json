@@ -78,7 +78,9 @@
       "Bash(venv/Scripts/python.exe -c \"import app; print\\('import OK'\\)\")",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(python -c \"from data_paths import user_data_path, get_current_user_id, data_path; print\\('uid:', get_current_user_id\\(\\)\\); print\\('legacy:', data_path\\('foo.json'\\)\\); print\\('user:', user_data_path\\('foo.json'\\)\\)\")",
+      "Bash(grep -v \":0$\")"
     ]
   }
 }

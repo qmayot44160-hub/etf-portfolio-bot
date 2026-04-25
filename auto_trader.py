@@ -1,5 +1,5 @@
 """
-Auto-trader institutionnel — niveau hedge fund.
+Auto-trader institutionnel - niveau hedge fund.
 
 Architecture :
 1. Quant Models : detection de regime, multi-strategie, scoring
@@ -232,7 +232,7 @@ class AutoTrader:
                 "reasons": ta.reasons,
             }
 
-            # 3. Quant Models — regime + multi-strategy
+            # 3. Quant Models - regime + multi-strategy
             if config.get("use_quant_models", True):
                 quant = QuantModels.generate_quant_signal(df, symbol)
                 regime = QuantModels.detect_regime(df)
@@ -426,7 +426,7 @@ class AutoTrader:
         # Downgrade si pas de confirmation multi-TF
         if not all_confirmed and config.get("only_strong_signals"):
             signal = "HOLD"
-            reasons.append("Signal annule — pas de confirmation multi-TF")
+            reasons.append("Signal annule - pas de confirmation multi-TF")
 
         # Minimum confidence gate
         if weighted_confidence < config.get("min_confidence", 40):
@@ -578,7 +578,7 @@ class AutoTrader:
             return {"status": "SKIP", "reason": f"Max trades ouverts ({config['max_open_trades']})"}
 
         if signal not in ("STRONG_BUY", "BUY", "STRONG_SELL", "SELL"):
-            return {"status": "SKIP", "reason": "Signal HOLD — pas d'action"}
+            return {"status": "SKIP", "reason": "Signal HOLD - pas d'action"}
 
         side = "BUY" if signal in ("STRONG_BUY", "BUY") else "SELL"
 
@@ -982,7 +982,7 @@ class AutoTrader:
                     try:
                         self.scanner.exchange = self.exchange
                         self.scanner.full_scan()
-                        print(f"[AutoTrader] Market scan complete — {len(self.scanner.cache.get('results', []))} opportunities")
+                        print(f"[AutoTrader] Market scan complete - {len(self.scanner.cache.get('results', []))} opportunities")
                     except Exception as e:
                         print(f"[AutoTrader] Scan error: {e}")
                 scan_counter += 1

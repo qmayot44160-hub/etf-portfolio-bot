@@ -306,7 +306,7 @@ def get_history_or_reconstruct(pf: Optional[dict], crypto_pf: Optional[dict],
 
 
 # ──────────────────────────────────────────────────────────
-#  Benchmark (SPY, MSCI World) — overlay chart
+#  Benchmark (SPY, MSCI World) - overlay chart
 # ──────────────────────────────────────────────────────────
 
 def get_benchmark_series(benchmark: str = "SPY", range_key: str = "1m") -> List[dict]:

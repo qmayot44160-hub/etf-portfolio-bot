@@ -1,5 +1,5 @@
 """
-Module de projection future — simulation Monte Carlo des gains futurs.
+Module de projection future - simulation Monte Carlo des gains futurs.
 
 Au lieu de regarder le passé (backtest), on projette dans le futur :
 - Calibration μ/σ depuis l'historique réel du portefeuille pondéré

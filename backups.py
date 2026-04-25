@@ -1,5 +1,5 @@
 """
-Module de backups — snapshot quotidien des fichiers de données critiques.
+Module de backups - snapshot quotidien des fichiers de données critiques.
 
 Crée une archive ZIP datée dans DATA_DIR/backups/ contenant tous les JSON
 de l'app. Rétention configurable (par défaut 14 jours).

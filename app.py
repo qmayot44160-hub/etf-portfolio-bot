@@ -269,7 +269,7 @@ def api_profile_update():
 
 @app.route("/api/profile/export")
 def api_profile_export():
-    """Export complet RGPD — tout ce que l'app sait sur l'utilisateur."""
+    """Export complet RGPD - tout ce que l'app sait sur l'utilisateur."""
     from flask import Response
     import json as _json
     payload = profile_store.full_export()
@@ -866,7 +866,7 @@ def api_trading_symbols():
 
 
 # ── API: Smart Picks ────────────────────────────────────
-#   Picks du jour — le bot choisit lui-même les meilleurs actifs
+#   Picks du jour - le bot choisit lui-même les meilleurs actifs
 #   en combinant son scanner ETF autonome + le scanner crypto existant.
 
 @app.route("/api/smart-picks")

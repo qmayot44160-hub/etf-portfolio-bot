@@ -1,5 +1,5 @@
 """
-Scheduler automatique — DCA mensuel + rééquilibrage.
+Scheduler automatique - DCA mensuel + rééquilibrage.
 """
 
 import json

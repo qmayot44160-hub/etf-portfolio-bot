@@ -1,5 +1,5 @@
 """
-Module Watchlist — suivi d'actifs sans les détenir.
+Module Watchlist - suivi d'actifs sans les détenir.
 
 - Stockage JSON persistant avec verrou thread
 - Alertes de seuil (prix au-dessus / en-dessous) → notif Telegram
@@ -301,7 +301,7 @@ def _check_alerts_once() -> None:
                 arrow = "🔼" if triggered_direction == "above" else "🔽"
                 msg = (
                     f"{arrow} <b>Alerte Watchlist</b>\n\n"
-                    f"<b>{k}</b> — {it.get('name') or k}\n"
+                    f"<b>{k}</b> - {it.get('name') or k}\n"
                     f"Prix actuel : <b>{price}</b>\n"
                     f"Seuil {triggered_direction} : {threshold}\n"
                     f"Variation 1j : {p.get('change_1d', 0):+.2f}%"

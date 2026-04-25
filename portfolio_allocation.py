@@ -4,9 +4,9 @@ Utilitaires d'allocation partagés entre ``portfolio``, ``bot_engine`` et ``cryp
 Avant ce module, la même math d'allocation était recopiée 3 fois. Un bug
 ici devait être corrigé en 3 endroits. Désormais tout passe par :
 
-- :func:`allocate_by_target` — répartit un montant sur des cibles pondérées
+- :func:`allocate_by_target` - répartit un montant sur des cibles pondérées
   (utilisé par DCA, ETF et crypto).
-- :func:`compute_rebalance_orders` — transforme des positions + drift en
+- :func:`compute_rebalance_orders` - transforme des positions + drift en
   ordres BUY/SELL (utilisé par le rebalance simulé et réel).
 
 Les formes de retour sont stables (pas d'évolutions silencieuses), ce qui
@@ -63,7 +63,7 @@ def compute_rebalance_orders(
 
     Chaque entrée de ``positions`` doit exposer au minimum :
     ``ticker``, ``name``, ``target_pct``, ``value``, ``price``, ``drift``.
-    (Les deux portefeuilles — simulé et broker — fournissent déjà ce schéma.)
+    (Les deux portefeuilles - simulé et broker - fournissent déjà ce schéma.)
 
     Forme de retour stable :
 

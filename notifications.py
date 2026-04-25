@@ -1,5 +1,5 @@
 """
-Module de notifications — Telegram.
+Module de notifications - Telegram.
 
 Envoie des alertes pour :
 - Trade ouvert / fermé
@@ -136,7 +136,7 @@ def notify_trade_opened(symbol: str, side: str, price: float,
     mode = "🧪 PAPER" if paper else "💰 LIVE"
     emoji = "🟢" if side == "BUY" else "🔴"
     msg = (
-        f"{emoji} <b>{mode} — Trade ouvert</b>\n\n"
+        f"{emoji} <b>{mode} - Trade ouvert</b>\n\n"
         f"<b>{symbol}</b> · {side}\n"
         f"Prix : {price:.4f}\n"
         f"Quantité : {quantity}\n"
@@ -151,7 +151,7 @@ def notify_trade_closed(symbol: str, side: str, pnl: float, pnl_pct: float,
     mode = "🧪 PAPER" if paper else "💰 LIVE"
     emoji = "✅" if pnl >= 0 else "❌"
     msg = (
-        f"{emoji} <b>{mode} — Trade fermé</b>\n\n"
+        f"{emoji} <b>{mode} - Trade fermé</b>\n\n"
         f"<b>{symbol}</b> · {side}\n"
         f"P&L : <b>{pnl:+.2f}$</b> ({pnl_pct:+.2f}%)\n"
         f"Raison : {reason or 'N/A'}"
@@ -177,7 +177,7 @@ def notify_smart_pick(pick: dict) -> bool:
 
     msg = (
         f"{arrow} <b>Smart Pick détecté</b>\n\n"
-        f"<b>{ticker}</b> — {name}\n"
+        f"<b>{ticker}</b> - {name}\n"
         f"Classe : {asset_class} · Score : <b>{score:.0f}/100</b>\n"
         f"30j : <b>{chg_30d:+.2f}%</b> · Direction : <b>{direction}</b>\n\n"
         f"{reasons_txt}"

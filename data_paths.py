@@ -23,7 +23,7 @@ if DATA_DIR:
 
 
 # ════════════════════════════════════════════════════════════════════
-# Multi-user readiness — voir CLAUDE.md / docs internes.
+# Multi-user readiness - voir CLAUDE.md / docs internes.
 #
 # Aujourd'hui PortfolioQuant est mono-utilisateur : un seul login défini
 # via APP_USERNAME / APP_PASSWORD côté Railway. Toutes les données vivent
@@ -32,7 +32,7 @@ if DATA_DIR:
 # Quand on basculera en multi-user, tous les fichiers user-specific
 # devront vivre dans DATA_DIR/users/{user_id}/. Pour que la transition
 # soit indolore, TOUTE NOUVELLE feature qui persiste de la donnée user
-# doit utiliser user_data_path() au lieu de data_path() — même si l'ID
+# doit utiliser user_data_path() au lieu de data_path() - même si l'ID
 # n'est pas encore réel. Le jour J, on changera get_current_user_id()
 # pour retourner le vrai ID de session, et tout sera scopé d'un coup.
 # ════════════════════════════════════════════════════════════════════
@@ -79,7 +79,7 @@ def user_data_path(filename: str, user_id: str | None = None) -> str:
     Demain (multi-user) : retourne data_path("users/{user_id}/{filename}").
 
     Le code de migration tournera une fois pour déplacer les fichiers
-    legacy à plat vers users/default/ — d'où l'importance d'utiliser
+    legacy à plat vers users/default/ - d'où l'importance d'utiliser
     user_data_path() dès maintenant pour les nouveaux fichiers.
 
     Exemple :

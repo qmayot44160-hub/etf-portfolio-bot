@@ -1,5 +1,5 @@
 """
-Moteur crypto — gestion du portefeuille crypto via MEXC.
+Moteur crypto - gestion du portefeuille crypto via MEXC.
 """
 
 import json

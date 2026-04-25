@@ -1,5 +1,5 @@
 """
-Scanner ETF autonome — le bot choisit lui-même les meilleurs ETF du moment.
+Scanner ETF autonome - le bot choisit lui-même les meilleurs ETF du moment.
 
 Pipeline (inspiré de market_scanner.py mais pour le marché actions/ETF):
 1. Univers curaté de ~40 ETF populaires (Monde, US, Tech, Sectors, Commodities, Bonds)
@@ -30,7 +30,7 @@ from data_paths import data_path
 ETF_SCANNER_CACHE = data_path("etf_scanner_cache.json")
 ETF_PICKS_HISTORY = data_path("etf_picks_history.json")
 
-# Univers curaté — tickers yfinance (US + EU). Mélange délibéré pour la découverte.
+# Univers curaté - tickers yfinance (US + EU). Mélange délibéré pour la découverte.
 ETF_UNIVERSE = [
     # Core global / broad
     {"ticker": "IWDA.AS",  "name": "iShares MSCI World",         "category": "Monde"},
@@ -102,7 +102,7 @@ class ETFScanResult:
 
 
 class ETFScanner:
-    """Scanner autonome d'ETF — ne nécessite aucun broker, uniquement yfinance."""
+    """Scanner autonome d'ETF - ne nécessite aucun broker, uniquement yfinance."""
 
     def __init__(self):
         self._lock = threading.Lock()

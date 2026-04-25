@@ -1,5 +1,5 @@
 """
-Scanner de marche temps reel — scanne tout le marche MEXC pour trouver
+Scanner de marche temps reel - scanne tout le marche MEXC pour trouver
 les meilleures opportunites automatiquement.
 
 Pipeline :
@@ -417,7 +417,7 @@ class MarketScanner:
                 reasons.append(f"Volatilite favorable ({volatility:.0f}%)")
             elif volatility > 200:
                 score_adj -= 10
-                reasons.append(f"Volatilite extreme ({volatility:.0f}%) — risque eleve")
+                reasons.append(f"Volatilite extreme ({volatility:.0f}%) - risque eleve")
 
             # Price action
             if candidate["change_24h"] > 5:

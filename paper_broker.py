@@ -1,5 +1,5 @@
 """
-Paper trading engine — simule les ordres sans exécution réelle.
+Paper trading engine - simule les ordres sans exécution réelle.
 
 Persiste dans paper_trades.json. Utilisé quand settings.paper_mode = True.
 """

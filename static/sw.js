@@ -1,4 +1,4 @@
-/* PortfolioQuant — Service Worker
+/* PortfolioQuant - Service Worker
  * Stratégie:
  *  - Navigations HTML (mode === 'navigate'): network-first avec fallback cache.
  *    On veut TOUJOURS la dernière UI quand le réseau répond, mais garantir

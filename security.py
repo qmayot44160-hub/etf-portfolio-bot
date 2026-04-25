@@ -1,5 +1,5 @@
 """
-Module de sécurité — authentification + chiffrement des credentials.
+Module de sécurité - authentification + chiffrement des credentials.
 
 Fonctionnalités :
 - Authentification par mot de passe (session Flask)
@@ -31,7 +31,7 @@ KEY_FILE = data_path(".secret_key")       # Fallback local (gitignored)
 
 
 def get_flask_secret() -> str:
-    """Clé Flask session — via env ou fichier local persistant."""
+    """Clé Flask session - via env ou fichier local persistant."""
     env = os.environ.get(SECRET_KEY_ENV)
     if env:
         return env
@@ -107,7 +107,7 @@ def login_required(f):
 
 
 # ─────────────────────────────────────────────────────────
-#  CHIFFREMENT — FERNET
+#  CHIFFREMENT - FERNET
 # ─────────────────────────────────────────────────────────
 
 def _get_fernet_key() -> bytes:

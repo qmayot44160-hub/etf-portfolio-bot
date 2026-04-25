@@ -1,5 +1,5 @@
 """
-Module de backtest avancé — simulation institutionnelle du portefeuille ETF.
+Module de backtest avancé - simulation institutionnelle du portefeuille ETF.
 
 Fonctionnalités :
 - Simulation DCA mensuel avec/sans rééquilibrage

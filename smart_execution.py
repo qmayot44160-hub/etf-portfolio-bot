@@ -327,7 +327,7 @@ class SmartExecution:
                 if low[i] <= level <= high[i]:
                     vol_profile[j] += volume[i]
 
-        # Points of control (POC) — niveaux de volume max
+        # Points of control (POC) - niveaux de volume max
         poc_indices = np.argsort(vol_profile)[-5:]
         poc_levels = price_range[poc_indices]
 

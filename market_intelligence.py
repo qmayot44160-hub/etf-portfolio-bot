@@ -163,7 +163,7 @@ class MarketIntelligence:
 
         current = close[-1]
 
-        # Volume profile — zones de fort volume = S/R
+        # Volume profile - zones de fort volume = S/R
         n_bins = 50
         price_range = np.linspace(np.min(low[-100:]), np.max(high[-100:]), n_bins)
         vol_profile = np.zeros(n_bins)
@@ -356,7 +356,7 @@ class MarketIntelligence:
             if recent_low < prev_low and recent_vol_avg < prev_vol_avg * 0.8:
                 divergences.append({
                     "type": "BULLISH",
-                    "description": f"Prix plus bas avec volume decroissant — epuisement vendeur (lookback={lookback})",
+                    "description": f"Prix plus bas avec volume decroissant - epuisement vendeur (lookback={lookback})",
                     "strength": round((1 - recent_vol_avg / prev_vol_avg) * 100, 1),
                 })
 
@@ -378,7 +378,7 @@ class MarketIntelligence:
         mom_20 = (close[-1] / close[-20] - 1) * 100
         score += np.clip(mom_20 * 2, -20, 20)
 
-        # 2. Volatility (15pts) — haute vol = fear
+        # 2. Volatility (15pts) - haute vol = fear
         returns = np.diff(np.log(close[-30:]))
         vol = np.std(returns) * np.sqrt(365) * 100
         if vol > 80:
