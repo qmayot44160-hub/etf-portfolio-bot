@@ -1,48 +1,44 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Quant">
   <defs>
-    <!-- Gloss : reflet subtil en haut, fade vers transparent au milieu.
-         Modéré pour rester dans l'esthétique Apple moderne (pas du iOS 6). -->
     <linearGradient id="qi-gloss" x1="0.5" y1="0" x2="0.5" y2="1">
       <stop offset="0%" stop-color="#ffffff" stop-opacity="0.10"/>
       <stop offset="45%" stop-color="#ffffff" stop-opacity="0.02"/>
       <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
     </linearGradient>
-    <!-- Inner light edge : fine ligne lumineuse en haut pour le côté bombé -->
     <linearGradient id="qi-inner-edge" x1="0.5" y1="0" x2="0.5" y2="1">
       <stop offset="0%" stop-color="#ffffff" stop-opacity="0.18"/>
       <stop offset="20%" stop-color="#ffffff" stop-opacity="0"/>
     </linearGradient>
   </defs>
 
-  <!-- Fond noir profond, aligné sur la DA -->
+  <!-- Carte sombre alignée DA -->
   <rect width="512" height="512" rx="116" fill="#0a0a0e"/>
-
-  <!-- Gloss overlay : reflet doux haut → milieu -->
   <rect width="512" height="512" rx="116" fill="url(#qi-gloss)"/>
-
-  <!-- Inner edge highlight : reflet fin tout en haut -->
   <rect width="512" height="512" rx="116" fill="url(#qi-inner-edge)"
         style="mix-blend-mode: screen"/>
 
-  <!-- Q blanc — anneau compact, padding généreux. -->
-  <path fill="#ffffff" fill-rule="evenodd" d="
-    M 256 138
-    a 118 118 0 1 0 0.001 0
-    Z
-    M 256 202
-    a 54 54 0 1 1 -0.001 0
-    Z
-  "/>
+  <!-- Q stylisé : anneau + queue tapered (même path que le glyph header,
+       mais centré sur 256/256 dans une carte) -->
+  <g fill="#ffffff" transform="translate(0,0)">
+    <!-- Anneau plus compact (outer 130, inner 60) pour padding généreux -->
+    <path fill-rule="evenodd" d="
+      M 256 126 a 130 130 0 1 0 0.001 0 Z
+      M 256 196 a 60 60 0 1 1 -0.001 0 Z
+    "/>
+    <!-- Queue tapered, recentrée sur la nouvelle taille d'anneau -->
+    <path d="
+      M 314 348
+      L 348 314
+      L 410 380
+      Q 420 392 412 402
+      Q 402 412 396 400
+      Z
+    "/>
+  </g>
 
-  <!-- Queue diagonale 45°, blanche. -->
-  <rect x="304" y="332" width="78" height="28" rx="14"
-        fill="#ffffff"
-        transform="rotate(45 343 346)"/>
-
-  <!-- Contour bleu nuit fin par-dessus tout : signature DA fintech. -->
+  <!-- Contour bleu nuit + liseré intérieur "verre" -->
   <rect x="2" y="2" width="508" height="508" rx="114"
         fill="none" stroke="#1a3a7a" stroke-width="3"/>
-  <!-- Liseré intérieur ultra-fin pour le côté "verre" -->
   <rect x="5" y="5" width="502" height="502" rx="111"
         fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
 </svg>

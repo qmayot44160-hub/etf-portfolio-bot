@@ -1,16 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Quant">
-  <!-- Glyphe Q seul, sans fond. À utiliser inline dans le header
-       (où le fond noir de l'app sert déjà de carte). currentColor pour
-       hériter de la couleur du parent — bascule auto en thème clair. -->
-  <path fill="currentColor" fill-rule="evenodd" d="
-    M 256 60
-    a 168 168 0 1 0 0.001 0
-    Z
-    M 256 152
-    a 76 76 0 1 1 -0.001 0
-    Z
-  "/>
-  <rect x="304" y="346" width="120" height="40" rx="20"
-        fill="currentColor"
-        transform="rotate(45 364 366)"/>
+  <!-- Q stylisé : anneau parfait + queue trapézoïdale tapered.
+       La queue traverse le stroke de l'anneau (intégrée, pas posée)
+       et s'effile vers l'extérieur — clin d'œil typo SF Pro Display. -->
+  <g fill="currentColor">
+    <!-- Anneau : outer 168, inner 76 -->
+    <path fill-rule="evenodd" d="
+      M 256 88 a 168 168 0 1 0 0.001 0 Z
+      M 256 180 a 76 76 0 1 1 -0.001 0 Z
+    "/>
+    <!-- Queue tapered : 4 points, 45°, base large (44px) → pointe fine (20px),
+         coins légèrement arrondis sur la pointe pour la signature. -->
+    <path d="
+      M 332 364
+      L 364 332
+      L 442 428
+      Q 452 442 442 452
+      Q 432 462 428 442
+      Z
+    "/>
+  </g>
 </svg>
