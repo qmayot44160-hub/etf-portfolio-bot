@@ -2014,6 +2014,10 @@
             .cmdk-overlay { padding-top: 6vh; }
             .cmdk-panel { width: 96vw; }
         }
+        /* Cache aussi le hint sur desktop : la barre de recherche header le remplace */
+        @media (min-width: 1101px){
+            .cmdk-hint { display: none !important; }
+        }
 
         /* ════════════════════════════════════════════════
            DA+ : AVATAR + USER MENU POPOVER
@@ -6047,6 +6051,7 @@
             flex: 1; min-width: 0;
             text-align: left;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            font-size: 0.82rem;
         }
         .header-search-kbd {
             font-size: 0.68rem; font-weight: 600;
@@ -6947,7 +6952,7 @@
         <!-- Barre de recherche desktop : visible, clic ouvre la palette cmd-K -->
         <button class="header-search" type="button" onclick="openCmdK()" aria-label="Rechercher" title="Rechercher (Ctrl+K)">
             <span class="sfi" data-icon="search"></span>
-            <span class="header-search-placeholder">Chercher un ETF, une page, une commande...</span>
+            <span class="header-search-placeholder">Rechercher</span>
             <span class="header-search-kbd" id="header-search-kbd">Ctrl K</span>
         </button>
         <div style="display:flex;align-items:center;gap:8px">
