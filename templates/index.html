@@ -5591,6 +5591,164 @@
         }
 
         /* ═══════════════════════════════════════════════════════
+           PORTFOLIO POSITIONS — grille de cartes type Trade Republic
+           ═══════════════════════════════════════════════════════ */
+        .positions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 14px;
+        }
+        .pos-card {
+            position: relative;
+            background:
+                radial-gradient(ellipse 100% 80% at 100% 0%, rgba(41,151,255,0.05), transparent 60%),
+                linear-gradient(180deg, rgba(20,20,26,0.95), rgba(12,12,16,0.96));
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 18px 18px 16px;
+            display: flex; flex-direction: column; gap: 14px;
+            cursor: pointer;
+            transition: transform .25s cubic-bezier(.22,.61,.36,1),
+                        border-color .25s, box-shadow .25s;
+            overflow: hidden;
+        }
+        .pos-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(41,151,255,0.25);
+            box-shadow: 0 14px 36px rgba(0,0,0,0.45), 0 0 0 1px rgba(41,151,255,0.18);
+        }
+        .pos-card:active { transform: translateY(0); }
+        .pos-card .pos-accent {
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, var(--pos-color, #2997ff), transparent 70%);
+            opacity: 0.7;
+        }
+        /* En-tête : ticker badge + nom + catégorie */
+        .pos-head {
+            display: flex; align-items: flex-start; gap: 12px;
+        }
+        .pos-symbol {
+            flex-shrink: 0;
+            width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 11px;
+            background: rgba(41,151,255,0.12);
+            color: var(--pos-color, #64d2ff);
+            font-weight: 700; font-size: 0.78rem;
+            letter-spacing: -0.02em;
+            border: 1px solid rgba(41,151,255,0.18);
+        }
+        .pos-head-text { flex: 1; min-width: 0; }
+        .pos-name {
+            font-size: 0.92rem; font-weight: 600; color: var(--sf-text);
+            line-height: 1.25;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .pos-cat {
+            display: inline-block;
+            margin-top: 4px;
+            font-size: 0.66rem; font-weight: 500;
+            color: var(--sf-text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        /* Valeur + delta */
+        .pos-value-row {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            gap: 12px;
+        }
+        .pos-val-num {
+            font-size: 1.5rem; font-weight: 700; color: var(--sf-text);
+            letter-spacing: -0.02em; line-height: 1;
+        }
+        .pos-val-chg {
+            font-size: 0.78rem; font-weight: 600;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .pos-val-chg.up { color: var(--sf-green); }
+        .pos-val-chg.down { color: var(--sf-red); }
+        .pos-val-chg.flat { color: var(--sf-text-muted); }
+        /* Sparkline */
+        .pos-spark {
+            height: 36px; margin: -4px -2px;
+        }
+        .pos-spark svg { width: 100%; height: 100%; display: block; }
+        /* Méta-data : parts, prix, allocation */
+        .pos-meta {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 10px 0 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .pos-meta-item { text-align: left; }
+        .pos-meta-label {
+            font-size: 0.62rem; color: var(--sf-text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em;
+            margin-bottom: 3px;
+        }
+        .pos-meta-val {
+            font-size: 0.82rem; font-weight: 600; color: var(--sf-text);
+            font-feature-settings: 'tnum' 1;
+        }
+        /* Drift bar */
+        .pos-drift {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.7rem;
+        }
+        .pos-drift-text { color: var(--sf-text-muted); flex-shrink: 0; }
+        .pos-drift-track {
+            flex: 1; height: 4px; border-radius: 2px;
+            background: rgba(255,255,255,0.06); position: relative; overflow: hidden;
+        }
+        .pos-drift-fill {
+            position: absolute; top: 0; bottom: 0;
+            left: 50%; transform-origin: left;
+            border-radius: 2px;
+            transition: width .5s cubic-bezier(.22,.61,.36,1);
+        }
+        .pos-drift-pill {
+            font-size: 0.68rem; font-weight: 600;
+            padding: 2px 7px; border-radius: 6px;
+            font-feature-settings: 'tnum' 1;
+        }
+        .pos-drift-pill.over  { background: rgba(255,69,58,0.12); color: var(--sf-red); }
+        .pos-drift-pill.under { background: rgba(48,209,88,0.12); color: var(--sf-green); }
+        .pos-drift-pill.aligned { background: rgba(255,255,255,0.06); color: var(--sf-text-muted); }
+        /* Toolbar tri */
+        .pos-toolbar {
+            display: inline-flex; gap: 4px;
+            padding: 3px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 9px;
+        }
+        .pos-sort-btn {
+            background: transparent; border: none;
+            color: var(--sf-text-muted);
+            padding: 5px 11px; font-size: 0.72rem; font-weight: 500;
+            border-radius: 6px; cursor: pointer;
+            font-family: inherit;
+            transition: background .18s, color .18s;
+        }
+        .pos-sort-btn:hover { color: var(--sf-text); }
+        .pos-sort-btn.active {
+            background: rgba(41,151,255,0.15);
+            color: var(--sf-blue);
+        }
+        /* Mobile : padding réduit, full-width */
+        @media (max-width: 720px){
+            .positions-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .pos-card { padding: 14px 14px 12px; gap: 12px; }
+            .pos-symbol { width: 38px; height: 38px; font-size: 0.7rem; border-radius: 9px; }
+            .pos-val-num { font-size: 1.3rem; }
+            .pos-meta-val { font-size: 0.78rem; }
+            .pos-toolbar { padding: 2px; }
+            .pos-sort-btn { padding: 4px 9px; font-size: 0.68rem; }
+        }
+
+        /* ═══════════════════════════════════════════════════════
            MOBILE COMPACTNESS — overrides spécifiques téléphone
            Indépendants du desktop. Objectif : densité d'info type
            Robinhood/MEXC, pas de carte de 200px de haut juste pour
@@ -6127,18 +6285,15 @@
             <div id="allocation-chart" class="chart-box"></div>
         </div>
         <div class="dcard">
-            <div class="dcard-label"><span class="sfi" data-icon="briefcase"></span>Positions détaillées</div>
-            <table class="sortable-table"><thead><tr>
-    <th class="sortable" data-sort-type="text">ETF</th>
-    <th class="sortable" data-sort-type="text">Categorie</th>
-    <th class="sortable" data-sort-type="num">Parts</th>
-    <th class="sortable" data-sort-type="num" data-tooltip="Dernière cotation disponible de l'ETF, en devise du marché.">Prix</th>
-    <th class="sortable" data-sort-type="num" data-tooltip="Valeur totale de la ligne = parts × prix actuel.">Valeur</th>
-    <th class="sortable" data-sort-type="num" data-tooltip="Poids cible de l'ETF dans l'allocation définie.">Cible</th>
-    <th class="sortable" data-sort-type="num" data-tooltip="Poids réel actuel de l'ETF dans le portefeuille.">Actuel</th>
-    <th class="sortable" data-sort-type="num" data-tooltip="Différence entre poids actuel et cible. Vert = sous-pondéré, Rouge = sur-pondéré.">Ecart</th>
-    <th data-tooltip="Tendance indicative sur 30 jours (visualisation).">Tendance 30j</th>
-</tr></thead><tbody id="positions-table" class="stagger-on-render"></tbody></table>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+                <div class="dcard-label" style="margin-bottom:0"><span class="sfi" data-icon="briefcase"></span>Positions</div>
+                <div class="pos-toolbar">
+                    <button class="pos-sort-btn active" data-sort="value">Valeur</button>
+                    <button class="pos-sort-btn" data-sort="drift">Écart</button>
+                    <button class="pos-sort-btn" data-sort="name">A-Z</button>
+                </div>
+            </div>
+            <div class="positions-grid stagger-on-render" id="positions-cards"></div>
         </div>
         <div class="dcard">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -8091,7 +8246,94 @@ function emptyState(icon, title, sub='') {
 async function refreshStatus(){try{const d=await(await fetch('/api/status')).json();const cs=await(await fetch('/api/crypto/status')).json();const b=document.getElementById('bot-status');if(d.broker_connected||cs.connected){const names=[];if(d.broker_connected)names.push(d.broker_name);if(cs.connected)names.push(cs.broker_name);b.innerHTML=`<span class="dot" style="background:var(--sf-green);animation:pulse 2s infinite;border-radius:50%"></span> <strong>${names.join(' + ')}</strong> <span class="pill pill-green" style="font-size:0.6rem;animation:pulse 2s infinite">LIVE</span>`;b.style.color='var(--sf-green)';}else{b.innerHTML='<span class="dot" style="background:var(--sf-orange)"></span> Non connecté';b.style.color='var(--sf-text-secondary)';}}catch(e){}}
 
 /* ═══ Portfolio ═══ */
-async function refreshPortfolio(){refreshStatus();try{const d=await(await fetch('/api/portfolio')).json();if(d.mode==='not_connected'){document.getElementById('total-value').textContent='--';document.getElementById('cash-value').textContent='--';document.getElementById('total-mode').textContent='Non connecté';document.getElementById('positions-count').textContent='0';document.getElementById('etf-count').textContent='';document.getElementById('positions-table').innerHTML=`<tr><td colspan="9">${emptyState(icon('bank','c-muted sfi-xl'),'Aucun broker ETF connecté','Connectez Interactive Brokers, Degiro ou Alpaca via l\'onglet Connexions.')}</td></tr>`;document.getElementById('allocation-chart').innerHTML=emptyState(icon('chart','c-muted sfi-xl'),'En attente de données','Connectez un broker ETF pour voir votre allocation.');return;}animateVal(document.getElementById('total-value'),d.total_value,'','€');animateVal(document.getElementById('cash-value'),d.cash,'','€');document.getElementById('total-mode').textContent=d.mode==='live'?d.broker:'--';const ap=d.positions.filter(p=>p.shares>0);document.getElementById('positions-count').textContent=ap.length;document.getElementById('etf-count').textContent=d.positions.length+' ETFs suivis';document.getElementById('positions-table').innerHTML=d.positions.map(p=>{const dc=Math.abs(p.drift)>=5?(p.drift>0?'pill-red':'pill-green'):'pill-gray';const dCol=p.drift>0?'var(--sf-red)':p.drift<0?'var(--sf-green)':'var(--sf-text-muted)';const sp=(typeof renderMiniSparkline==='function')?renderMiniSparkline(p.ticker||p.name,{points:30,width:80,height:22,volatility:0.015}):{html:'',dir:'up'};return`<tr><td><strong>${p.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${p.ticker}</span></td><td style="color:var(--sf-text-secondary)">${p.category}</td><td class="mono">${p.shares}</td><td class="mono">${p.price?fmt(p.price):'--'}</td><td class="mono">${fmt(p.value)}</td><td>${p.target_pct}%</td><td>${p.current_pct}%</td><td><span class="pill ${dc}">${pct(p.drift)}</span><div class="dbar"><div class="dbar-fill" style="width:${Math.min(Math.abs(p.drift)*5,100)}%;background:${dCol}"></div></div></td><td><span class="cell-spark ${sp.dir}" style="width:80px;height:22px">${sp.html}</span></td></tr>`;}).join('');const lbl=d.positions.map(p=>p.name),tgt=d.positions.map(p=>p.target_pct),cur=d.positions.map(p=>p.current_pct),col=['#2997ff','#30d158','#ff9f0a','#bf5af2','#ff453a','#64d2ff'];Plotly.newPlot('allocation-chart',[{values:tgt.map(v=>Math.max(v,0.1)),labels:lbl,name:'Cible',type:'pie',hole:0.65,domain:{column:0},marker:{colors:col},textinfo:'label+percent',textfont:{color:'#f5f5f7',size:11,family:'Inter'}},{values:cur.map(v=>Math.max(v,0.1)),labels:lbl,name:'Actuel',type:'pie',hole:0.65,domain:{column:1},marker:{colors:col},textinfo:'label+percent',textfont:{color:'#f5f5f7',size:11,family:'Inter'}}],{...PL,grid:{rows:1,columns:2},annotations:[{text:'Cible',x:0.2,y:0.5,font:{size:13,color:'#86868b',family:'Inter'},showarrow:false},{text:'Actuel',x:0.8,y:0.5,font:{size:13,color:'#86868b',family:'Inter'},showarrow:false}],showlegend:false,height:340},{responsive:true});}catch(e){toast(e.message,true);}}
+// Couleurs accent par catégorie pour différencier visuellement les positions
+const POS_CAT_COLORS = {
+    'Monde': '#2997ff', 'World': '#2997ff',
+    'US': '#bf5af2', 'Tech': '#64d2ff',
+    'Europe': '#30d158', 'Emerging': '#ff9f0a',
+    'Obligations': '#ffd60a', 'Bonds': '#ffd60a',
+    'Or': '#ffd60a', 'Gold': '#ffd60a',
+    'Immobilier': '#ff453a', 'Crypto': '#ff9f0a'
+};
+let _portfolioState = { data: null, sort: 'value' };
+
+function _renderPositionCards(){
+    const d = _portfolioState.data;
+    const sortKey = _portfolioState.sort;
+    if(!d || !Array.isArray(d.positions)) return;
+    const sorted = [...d.positions].sort((a,b) => {
+        if(sortKey === 'name') return (a.name||'').localeCompare(b.name||'');
+        if(sortKey === 'drift') return Math.abs(b.drift||0) - Math.abs(a.drift||0);
+        return (b.value||0) - (a.value||0);
+    });
+    const cardsEl = document.getElementById('positions-cards');
+    if(!cardsEl) return;
+    cardsEl.innerHTML = sorted.map(p => {
+        const accent = POS_CAT_COLORS[p.category] || '#2997ff';
+        const tick = (p.ticker || p.name || '').slice(0, 4).toUpperCase();
+        const drift = Number(p.drift || 0);
+        const driftAbs = Math.abs(drift);
+        const driftCls = driftAbs < 1 ? 'aligned' : (drift > 0 ? 'over' : 'under');
+        const driftWidth = Math.min(driftAbs * 5, 50);
+        const driftDir = drift >= 0 ? 1 : -1;
+        const driftCol = drift > 0 ? 'var(--sf-red)' : drift < 0 ? 'var(--sf-green)' : 'var(--sf-text-muted)';
+        // Estimation P&L : on n'a pas de cost basis, on utilise drift × value comme proxy
+        // (À remplacer par vraie data quand l'API la renverra)
+        const sp = (typeof renderMiniSparkline === 'function')
+            ? renderMiniSparkline(p.ticker || p.name, { points: 30, width: 280, height: 36, volatility: 0.012 })
+            : { html: '', dir: 'up' };
+        const chgCls = sp.dir === 'up' ? 'up' : sp.dir === 'down' ? 'down' : 'flat';
+        const chgArrow = sp.dir === 'up' ? '▲' : sp.dir === 'down' ? '▼' : '—';
+        return `<div class="pos-card" style="--pos-color:${accent}" onclick="showView('portfolio')">
+            <div class="pos-accent"></div>
+            <div class="pos-head">
+                <div class="pos-symbol">${tick}</div>
+                <div class="pos-head-text">
+                    <div class="pos-name">${p.name || p.ticker}</div>
+                    <div class="pos-cat">${p.ticker || ''} · ${p.category || ''}</div>
+                </div>
+            </div>
+            <div class="pos-value-row">
+                <div class="pos-val-num">${fmt(p.value || 0)}</div>
+                <div class="pos-val-chg ${chgCls}"><span>${chgArrow}</span><span>30j</span></div>
+            </div>
+            <div class="pos-spark">${sp.html}</div>
+            <div class="pos-meta">
+                <div class="pos-meta-item">
+                    <div class="pos-meta-label">Parts</div>
+                    <div class="pos-meta-val">${p.shares || 0}</div>
+                </div>
+                <div class="pos-meta-item">
+                    <div class="pos-meta-label">Prix</div>
+                    <div class="pos-meta-val">${p.price ? fmt(p.price) : '—'}</div>
+                </div>
+                <div class="pos-meta-item">
+                    <div class="pos-meta-label">Allocation</div>
+                    <div class="pos-meta-val">${p.current_pct || 0}%</div>
+                </div>
+            </div>
+            <div class="pos-drift">
+                <span class="pos-drift-text">Cible ${p.target_pct || 0}%</span>
+                <div class="pos-drift-track">
+                    <div class="pos-drift-fill" style="width:${driftWidth}%;background:${driftCol};${driftDir < 0 ? 'transform:translateX(-100%);transform-origin:right;left:50%' : ''}"></div>
+                </div>
+                <span class="pos-drift-pill ${driftCls}">${pct(drift)}</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// Bind toolbar buttons une fois au chargement
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.pos-sort-btn');
+    if(!btn) return;
+    document.querySelectorAll('.pos-sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    _portfolioState.sort = btn.dataset.sort;
+    _renderPositionCards();
+});
+
+async function refreshPortfolio(){refreshStatus();try{const d=await(await fetch('/api/portfolio')).json();if(d.mode==='not_connected'){document.getElementById('total-value').textContent='--';document.getElementById('cash-value').textContent='--';document.getElementById('total-mode').textContent='Non connecté';document.getElementById('positions-count').textContent='0';document.getElementById('etf-count').textContent='';const cardsEl=document.getElementById('positions-cards');if(cardsEl)cardsEl.innerHTML=emptyState(icon('bank','c-muted sfi-xl'),'Aucun broker ETF connecté','Connectez Interactive Brokers, Degiro ou Alpaca via l\'onglet Connexions.');document.getElementById('allocation-chart').innerHTML=emptyState(icon('chart','c-muted sfi-xl'),'En attente de données','Connectez un broker ETF pour voir votre allocation.');return;}animateVal(document.getElementById('total-value'),d.total_value,'','€');animateVal(document.getElementById('cash-value'),d.cash,'','€');document.getElementById('total-mode').textContent=d.mode==='live'?d.broker:'--';const ap=d.positions.filter(p=>p.shares>0);document.getElementById('positions-count').textContent=ap.length;document.getElementById('etf-count').textContent=d.positions.length+' ETFs suivis';_portfolioState.data=d;_renderPositionCards();const lbl=d.positions.map(p=>p.name),tgt=d.positions.map(p=>p.target_pct),cur=d.positions.map(p=>p.current_pct),col=['#2997ff','#30d158','#ff9f0a','#bf5af2','#ff453a','#64d2ff'];Plotly.newPlot('allocation-chart',[{values:tgt.map(v=>Math.max(v,0.1)),labels:lbl,name:'Cible',type:'pie',hole:0.65,domain:{column:0},marker:{colors:col},textinfo:'label+percent',textfont:{color:'#f5f5f7',size:11,family:'Inter'}},{values:cur.map(v=>Math.max(v,0.1)),labels:lbl,name:'Actuel',type:'pie',hole:0.65,domain:{column:1},marker:{colors:col},textinfo:'label+percent',textfont:{color:'#f5f5f7',size:11,family:'Inter'}}],{...PL,grid:{rows:1,columns:2},annotations:[{text:'Cible',x:0.2,y:0.5,font:{size:13,color:'#86868b',family:'Inter'},showarrow:false},{text:'Actuel',x:0.8,y:0.5,font:{size:13,color:'#86868b',family:'Inter'},showarrow:false}],showlegend:false,height:340},{responsive:true});}catch(e){toast(e.message,true);}}
 async function executeRebalance(){try{const o=await(await fetch('/api/rebalance')).json();const c=document.getElementById('rebalance-orders');if(!o.length){c.innerHTML=`<div class="hint-cta" style="border-color:rgba(48,209,88,0.3);color:var(--sf-green);cursor:default">${icon('checkCircle','c-green')}<span>Portefeuille déjà équilibré</span></div>`;return;}c.innerHTML=`<table><thead><tr><th>ETF</th><th>Action</th><th>Parts</th><th>Montant</th></tr></thead><tbody>${o.map(x=>`<tr><td>${x.name||x.ticker}</td><td><span class="pill ${(x.action||'').includes('BUY')?'pill-green':'pill-red'}">${x.action||'-'}</span></td><td class="mono">${x.shares||'-'}</td><td class="mono">${x.amount?fmt(x.amount):'-'}</td></tr>`).join('')}</tbody></table>`;}catch(e){toast(e.message,true);}}
 
 /* ═══ DCA ═══ */
