@@ -5538,6 +5538,69 @@
             .page { padding-top: 56px; }
             .globalheader-logo { font-size: 0.98rem; }
         }
+
+        /* ═══════════════════════════════════════════════════════
+           MOBILE COMPACTNESS — overrides spécifiques téléphone
+           Indépendants du desktop. Objectif : densité d'info type
+           Robinhood/MEXC, pas de carte de 200px de haut juste pour
+           afficher "0".
+           ═══════════════════════════════════════════════════════ */
+        @media (max-width: 720px){
+            /* Hero accueil : titre + sous-titre plus serrés */
+            .home-hero { padding: 18px 14px 8px !important; }
+            .home-greeting { font-size: 0.78rem; }
+            .home-title { font-size: 1.55rem !important; line-height: 1.2; margin: 4px 0; }
+            .home-subtitle { font-size: 0.85rem !important; line-height: 1.4; opacity: 0.85; }
+
+            /* KPIs rapides : transformation en rail horizontal scroll-snap.
+               4 cartes en 2x2 = trop d'espace vertical pour info à faible
+               valeur. Rail = on voit 2.5 cartes, on swipe pour les autres. */
+            .stat-grid-4 {
+                display: flex !important;
+                grid-template-columns: none !important;
+                gap: 8px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x mandatory;
+                scrollbar-width: none;
+                margin: 0 -14px 14px;
+                padding: 2px 14px 8px;
+            }
+            .stat-grid-4::-webkit-scrollbar { display: none; }
+            .stat-grid-4 > .stat-card {
+                flex: 0 0 auto;
+                width: 138px;
+                padding: 12px 14px !important;
+                border-radius: 14px;
+                scroll-snap-align: start;
+                text-align: left;
+            }
+            .stat-grid-4 > .stat-card:hover { transform: none; }
+            .stat-grid-4 .stat-label {
+                font-size: 0.6rem !important;
+                letter-spacing: 0.05em;
+                margin-bottom: 6px;
+                text-transform: uppercase;
+            }
+            .stat-grid-4 .stat-value {
+                font-size: 1.05rem !important;
+                line-height: 1.15;
+                letter-spacing: -0.01em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            /* Inline styles "font-size:1.6rem" sur Mode/Santé : on les écrase */
+            .stat-grid-4 .stat-value[style*="font-size"] { font-size: 1.05rem !important; }
+            .stat-grid-4 .stat-sub {
+                font-size: 0.66rem !important;
+                margin-top: 3px;
+                opacity: 0.7;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
     </style>
 </head>
 <body>
