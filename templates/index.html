@@ -4064,7 +4064,8 @@
         .hero-portfolio {
             position: relative;
             padding: 30px 34px 0;
-            margin: 0 0 36px;
+            margin: 0 auto 36px;
+            max-width: 100%;
             border-radius: 22px;
             background:
                 linear-gradient(135deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.012) 100%),
@@ -6345,7 +6346,8 @@
             color: var(--sf-text-muted);
             border-radius: 8px;
             cursor: pointer;
-            opacity: 0;
+            /* Toujours legerement visible sur desktop pour decouvrabilite */
+            opacity: 0.4;
             transition: opacity .2s, background .18s, color .18s, transform .15s;
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
@@ -11377,6 +11379,17 @@ async function loadPatrimoine(){
 async function loadInsights(state){
     const rail = document.getElementById('insights-rail');
     if(!rail) return;
+    // Rendu immediat d'une carte fallback pour eviter le rail vide pendant le fetch
+    if(!rail.innerHTML.trim()){
+        rail.innerHTML = `<div class="insight-card dark" data-idx="0">
+            <div class="insight-eyebrow"><span class="sfi" data-icon="sparkles"></span>Pret a demarrer</div>
+            <div class="insight-big-num">PQ</div>
+            <div class="insight-headline">Ton tableau de bord</div>
+            <div class="insight-sub">Connecte un broker pour voir tes insights personnalises ici chaque jour.</div>
+            <div class="insight-cta">Configurer</div>
+        </div>`;
+        if(typeof renderStaticIcons === 'function') renderStaticIcons();
+    }
     const cards = [];
 
     // Carte 1 : performance journalière (toujours présente si data dispo)
@@ -12271,9 +12284,10 @@ const DEFAULT_CUSTOM_PREFS = {
     maxWidth: 'wide',
     radius: 'round',
     homeModules: [
+        { id: 'hero-portfolio',  visible: true },
+        { id: 'insights',        visible: true },
         { id: 'market-ticker',   visible: true },
         { id: 'home-stats',      visible: true },
-        { id: 'hero-portfolio',  visible: true },
         { id: 'home-dual',       visible: true },
         { id: 'heatmap-market',  visible: true },
         { id: 'smart-picks',     visible: true },
