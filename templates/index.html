@@ -5939,6 +5939,10 @@
         @media (pointer: coarse){
             .focus-expand-btn { opacity: 0.7; }
         }
+        /* Quand l'element est en focus, on cache le bouton expand (deja agrandi) */
+        [data-focusable="true"].in-focus > .focus-expand-btn {
+            display: none !important;
+        }
         /* Overlay de focus - backdrop sombre + blur du reste */
         .focus-overlay {
             position: fixed; inset: 0;
@@ -13762,7 +13766,9 @@ function investInCurrentPick(){
 
     function injectExpandButtons(){
         document.querySelectorAll('[data-focusable="true"]').forEach(el => {
-            if(el.querySelector(':scope > .focus-expand-btn')) return; // déjà injecté
+            if(el.querySelector(':scope > .focus-expand-btn')) return; // deja injecte
+            // Skip si l'element est dans le focus stage (eviter recursion)
+            if(el.closest('#focus-stage')) return;
             const btn = document.createElement('button');
             btn.className = 'focus-expand-btn';
             btn.setAttribute('aria-label', 'Agrandir');
@@ -13779,6 +13785,10 @@ function investInCurrentPick(){
 
     function openFocus(sourceEl){
         if(!sourceEl) return;
+        // Garde-fou : si deja en focus ou si un autre focus est actif, on ignore.
+        // Empeche l'element d'etre deplace 2 fois (perte de placeholder).
+        if(sourceEl.classList.contains('in-focus')) return;
+        if(activeSourceEl) closeFocus();
         activeSourceEl = sourceEl;
         // Déplace le contenu réel dans le stage (pas un clone - comme ça les
         // event listeners et les charts lightweight-charts continuent de marcher)
