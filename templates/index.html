@@ -5898,6 +5898,125 @@
         }
 
         /* ═══════════════════════════════════════════════════════
+           FOCUS MODE — clic sur une carte → plein écran avec
+           backdrop blur, le reste s'estompe.
+           Inspiration : Apple Stocks expand widget, Robinhood chart fullscreen.
+           ═══════════════════════════════════════════════════════ */
+        /* Conteneur focusable : position relative + bouton d'expand au survol */
+        [data-focusable="true"] {
+            position: relative;
+        }
+        .focus-expand-btn {
+            position: absolute; top: 12px; right: 12px;
+            z-index: 5;
+            width: 32px; height: 32px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--sf-text-muted);
+            border-radius: 8px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity .2s, background .18s, color .18s, transform .15s;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        [data-focusable="true"]:hover .focus-expand-btn,
+        [data-focusable="true"]:focus-within .focus-expand-btn {
+            opacity: 1;
+        }
+        .focus-expand-btn:hover {
+            background: rgba(41,151,255,0.15);
+            color: var(--sf-blue);
+            transform: scale(1.05);
+        }
+        .focus-expand-btn svg {
+            width: 14px; height: 14px;
+            stroke: currentColor; stroke-width: 2;
+            fill: none; stroke-linecap: round; stroke-linejoin: round;
+        }
+        /* Sur mobile : bouton toujours visible (pas de hover) */
+        @media (pointer: coarse){
+            .focus-expand-btn { opacity: 0.7; }
+        }
+        /* Overlay de focus — backdrop sombre + blur du reste */
+        .focus-overlay {
+            position: fixed; inset: 0;
+            z-index: 99998;
+            background: rgba(0,0,0,0.72);
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            display: flex; align-items: center; justify-content: center;
+            padding: 32px 22px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .28s cubic-bezier(.22,.61,.36,1);
+        }
+        .focus-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .focus-stage {
+            position: relative;
+            width: 100%; max-width: 980px;
+            max-height: 88vh;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            background: linear-gradient(180deg, rgba(20,20,26,0.98), rgba(12,12,16,0.99));
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 22px;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.6),
+                        0 0 0 1px rgba(255,255,255,0.04);
+            padding: 28px 28px 32px;
+            transform: scale(0.96) translateY(8px);
+            transition: transform .32s cubic-bezier(.22,.61,.36,1);
+        }
+        .focus-overlay.active .focus-stage {
+            transform: scale(1) translateY(0);
+        }
+        .focus-close {
+            position: absolute; top: 14px; right: 14px;
+            width: 36px; height: 36px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--sf-text);
+            border-radius: 10px;
+            cursor: pointer; font-family: inherit;
+            font-size: 1.2rem; line-height: 1;
+            transition: all .18s;
+            z-index: 10;
+        }
+        .focus-close:hover {
+            background: rgba(255,69,58,0.15);
+            border-color: rgba(255,69,58,0.35);
+            color: var(--sf-red);
+        }
+        .focus-content {
+            padding-top: 4px;
+        }
+        /* Titre du focus si présent */
+        .focus-title {
+            font-size: 1.4rem; font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 18px;
+            padding-right: 50px;
+        }
+        @media (max-width: 720px){
+            .focus-overlay { padding: 16px 12px; }
+            .focus-stage {
+                max-height: 92vh;
+                padding: 22px 18px 24px;
+                border-radius: 18px;
+            }
+            .focus-close { top: 10px; right: 10px; width: 32px; height: 32px; }
+            .focus-title { font-size: 1.15rem; }
+            .focus-expand-btn { width: 28px; height: 28px; }
+        }
+        /* Anti-scroll body quand focus actif */
+        body.focus-locked { overflow: hidden; }
+
+        /* ═══════════════════════════════════════════════════════
            INSIGHTS STORIES — rail horizontal de cartes éphémères
            Inspiration : Revolut Stories, Spotify Wrapped daily.
            Donne une raison d'ouvrir l'app chaque matin.
@@ -6508,7 +6627,7 @@
 
     <!-- ═══ TRADING-APP HERO : big portfolio value + sparkline + time range ═══ -->
     <div class="section" id="home-modules-root">
-        <div class="hero-portfolio home-module" id="hero-portfolio" data-module-id="hero-portfolio" data-module-label="Hero portefeuille + sparkline">
+        <div class="hero-portfolio home-module" id="hero-portfolio" data-focusable="true" data-module-id="hero-portfolio" data-module-label="Hero portefeuille + sparkline">
             <div class="hp-label">
                 <span class="sfi" data-icon="briefcase"></span>
                 <span>Portefeuille total</span>
@@ -6588,7 +6707,7 @@
         </div>
 
         <!-- ═══ TRADING-APP DUAL BLOCK : Répartition + Top holdings ═══ -->
-        <div class="home-dual home-module" data-module-id="home-dual" data-module-label="Répartition + Top positions">
+        <div class="home-dual home-module" data-focusable="true" data-module-id="home-dual" data-module-label="Répartition + Top positions">
             <!-- Répartition : donut + legend -->
             <div class="home-dual-card">
                 <div class="home-dual-card-header">
@@ -6624,7 +6743,7 @@
         </div>
 
         <!-- ═══ SMART PICKS — le bot choisit lui-même ═══ -->
-        <div class="smart-picks home-module" data-module-id="smart-picks" data-module-label="Picks du jour (smart picks IA)">
+        <div class="smart-picks home-module" data-focusable="true" data-module-id="smart-picks" data-module-label="Picks du jour (smart picks IA)">
             <div class="sp-header">
                 <div class="sp-title-wrap">
                     <div class="sp-title-icon"><span class="sfi" data-icon="sparkles"></span></div>
@@ -6709,7 +6828,7 @@
         </div>
 
         <!-- ═══ HEATMAP — Carte du marché (déplacée sous Raccourcis, scroll interne) ═══ -->
-        <div class="heatmap-card home-module" data-module-id="heatmap-market" data-module-label="Carte du marché (heatmap ETF)">
+        <div class="heatmap-card home-module" data-focusable="true" data-module-id="heatmap-market" data-module-label="Carte du marché (heatmap ETF)">
             <div class="hm-header">
                 <div class="hm-title-wrap">
                     <div class="hm-title-icon"><span class="sfi" data-icon="chart"></span></div>
@@ -13620,6 +13739,106 @@ function investInCurrentPick(){
         </div>
     </div>
 </div>
+
+<!-- ════════════════════════════════════════════════════════
+     FOCUS MODE — expand widget pattern
+     Click sur le bouton ⤢ d'un module → modal centrée + backdrop blur.
+     ════════════════════════════════════════════════════════ -->
+<div class="focus-overlay" id="focus-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="focus-stage" id="focus-stage">
+        <button class="focus-close" id="focus-close" aria-label="Fermer (Échap)" title="Fermer (Échap)">✕</button>
+        <div class="focus-content" id="focus-content"></div>
+    </div>
+</div>
+<script>
+(function(){
+    const overlay = document.getElementById('focus-overlay');
+    const stage = document.getElementById('focus-stage');
+    const content = document.getElementById('focus-content');
+    const closeBtn = document.getElementById('focus-close');
+    let activeSourceEl = null;
+
+    const EXPAND_SVG = '<svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
+
+    function injectExpandButtons(){
+        document.querySelectorAll('[data-focusable="true"]').forEach(el => {
+            if(el.querySelector(':scope > .focus-expand-btn')) return; // déjà injecté
+            const btn = document.createElement('button');
+            btn.className = 'focus-expand-btn';
+            btn.setAttribute('aria-label', 'Agrandir');
+            btn.setAttribute('title', 'Agrandir');
+            btn.innerHTML = EXPAND_SVG;
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                openFocus(el);
+            });
+            el.appendChild(btn);
+        });
+    }
+
+    function openFocus(sourceEl){
+        if(!sourceEl) return;
+        activeSourceEl = sourceEl;
+        // Déplace le contenu réel dans le stage (pas un clone — comme ça les
+        // event listeners et les charts lightweight-charts continuent de marcher)
+        const placeholder = document.createElement('div');
+        placeholder.id = '_focus_placeholder_' + Date.now();
+        sourceEl.parentNode.insertBefore(placeholder, sourceEl);
+        sourceEl._focusPlaceholder = placeholder;
+        // Ajoute une classe pour adapter le style en mode focus
+        sourceEl.classList.add('in-focus');
+        content.innerHTML = '';
+        content.appendChild(sourceEl);
+        // Affiche overlay
+        overlay.classList.add('active');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('focus-locked');
+        // Force resize des charts lightweight-charts au cas où
+        setTimeout(() => {
+            window.dispatchEvent(new Event('resize'));
+        }, 350);
+    }
+
+    function closeFocus(){
+        if(!activeSourceEl) return;
+        const ph = activeSourceEl._focusPlaceholder;
+        if(ph && ph.parentNode){
+            ph.parentNode.insertBefore(activeSourceEl, ph);
+            ph.parentNode.removeChild(ph);
+        }
+        activeSourceEl.classList.remove('in-focus');
+        activeSourceEl._focusPlaceholder = null;
+        activeSourceEl = null;
+        content.innerHTML = '';
+        overlay.classList.remove('active');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('focus-locked');
+        // Resize après transition pour que les charts reprennent leur taille
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 350);
+    }
+
+    closeBtn.addEventListener('click', closeFocus);
+    overlay.addEventListener('click', (e) => {
+        if(e.target === overlay) closeFocus();
+    });
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape' && overlay.classList.contains('active')) closeFocus();
+    });
+
+    // Re-injection des boutons à chaque mutation DOM significative
+    // (les modules home sont rendus dynamiquement)
+    const observer = new MutationObserver(() => injectExpandButtons());
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // Premier passage au load
+    document.addEventListener('DOMContentLoaded', injectExpandButtons);
+
+    // Expose pour usage manuel
+    window.openFocus = openFocus;
+    window.closeFocus = closeFocus;
+})();
+</script>
 
 <!-- ════════════════════════════════════════════════════════
      ONBOARDING — controller
