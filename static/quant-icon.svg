@@ -1,9 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Quant">
-  <!-- Fond aligné sur la DA : noir profond comme le theme-color de l'app
-       (#0a0a0e). Liseré subtil 1px pour décoller du fond noir système. -->
+  <defs>
+    <!-- Gloss : reflet subtil en haut, fade vers transparent au milieu.
+         Modéré pour rester dans l'esthétique Apple moderne (pas du iOS 6). -->
+    <linearGradient id="qi-gloss" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.02"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Inner light edge : fine ligne lumineuse en haut pour le côté bombé -->
+    <linearGradient id="qi-inner-edge" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="20%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fond noir profond, aligné sur la DA -->
   <rect width="512" height="512" rx="116" fill="#0a0a0e"/>
-  <rect x="0.5" y="0.5" width="511" height="511" rx="115.5"
-        fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+
+  <!-- Gloss overlay : reflet doux haut → milieu -->
+  <rect width="512" height="512" rx="116" fill="url(#qi-gloss)"/>
+
+  <!-- Inner edge highlight : reflet fin tout en haut -->
+  <rect width="512" height="512" rx="116" fill="url(#qi-inner-edge)"
+        style="mix-blend-mode: screen"/>
 
   <!-- Q blanc — anneau compact, padding généreux. -->
   <path fill="#ffffff" fill-rule="evenodd" d="
@@ -19,4 +38,11 @@
   <rect x="304" y="332" width="78" height="28" rx="14"
         fill="#ffffff"
         transform="rotate(45 343 346)"/>
+
+  <!-- Contour bleu nuit fin par-dessus tout : signature DA fintech. -->
+  <rect x="2" y="2" width="508" height="508" rx="114"
+        fill="none" stroke="#1a3a7a" stroke-width="3"/>
+  <!-- Liseré intérieur ultra-fin pour le côté "verre" -->
+  <rect x="5" y="5" width="502" height="502" rx="111"
+        fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
 </svg>
