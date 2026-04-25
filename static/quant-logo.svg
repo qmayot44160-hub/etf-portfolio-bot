@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Quant">
+  <defs>
+    <!-- Fond : dégradé sombre app-like (cohérent avec le thème PortfolioQuant) -->
+    <linearGradient id="q-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#13131a"/>
+      <stop offset="100%" stop-color="#05050a"/>
+    </linearGradient>
+    <!-- Anneau du Q : bleu profond → cyan (signature DA) -->
+    <linearGradient id="q-ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a84ff"/>
+      <stop offset="100%" stop-color="#64d2ff"/>
+    </linearGradient>
+    <!-- Queue/courbe : cyan → vert (mouvement haussier) -->
+    <linearGradient id="q-tail" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#64d2ff"/>
+      <stop offset="100%" stop-color="#30d158"/>
+    </linearGradient>
+    <!-- Glow du point d'accent -->
+    <radialGradient id="q-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#30d158" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#30d158" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Carte de fond, coins arrondis style iOS / Material You -->
+  <rect width="512" height="512" rx="112" fill="url(#q-bg)"/>
+
+  <!-- Halo subtil bleu en haut à gauche pour profondeur -->
+  <circle cx="120" cy="120" r="180" fill="#0a84ff" opacity="0.08"/>
+
+  <!-- Anneau principal du Q (cercle ouvert pour laisser place à la queue) -->
+  <circle cx="240" cy="256" r="116" fill="none"
+          stroke="url(#q-ring)" stroke-width="32" stroke-linecap="round"
+          stroke-dasharray="640 80"
+          transform="rotate(-25 240 256)"/>
+
+  <!-- Queue du Q : courbe ascendante = chart line haussière -->
+  <path d="M 296 332
+           Q 332 360, 376 340
+           T 448 264"
+        fill="none" stroke="url(#q-tail)" stroke-width="28"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Point lumineux vert au sommet de la courbe (signal "up") -->
+  <circle cx="448" cy="264" r="48" fill="url(#q-glow)"/>
+  <circle cx="448" cy="264" r="14" fill="#30d158"/>
+
+  <!-- Wordmark "Quant" en bas, optionnel — discret -->
+  <text x="256" y="448" text-anchor="middle"
+        font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif"
+        font-weight="600" font-size="52" fill="#f5f5f7" letter-spacing="-1.5"
+        opacity="0.95">Quant</text>
+</svg>

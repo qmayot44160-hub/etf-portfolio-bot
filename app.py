@@ -167,7 +167,7 @@ def pwa_service_worker():
 @app.route("/favicon.ico")
 def favicon():
     from flask import send_from_directory
-    return send_from_directory("static", "icon.svg", mimetype="image/svg+xml")
+    return send_from_directory("static", "quant-icon.svg", mimetype="image/svg+xml")
 
 
 # ── API: Settings (kill-switch, paper mode) ───────────

@@ -7,12 +7,13 @@
  *  - API (/api/*): network-only, jamais en cache (données live, sensibles).
  */
 
-const VERSION = 'pq-v1';
+const VERSION = 'pq-v2';
 const STATIC_CACHE = `pq-static-${VERSION}`;
 const HTML_CACHE = `pq-html-${VERSION}`;
 
 const PRECACHE = [
-  '/static/icon.svg',
+  '/static/quant-icon.svg',
+  '/static/quant-logo.svg',
   '/static/manifest.webmanifest'
 ];
 

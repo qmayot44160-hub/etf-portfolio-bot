@@ -12,7 +12,7 @@
   "categories": ["finance", "productivity"],
   "icons": [
     {
-      "src": "/static/icon.svg",
+      "src": "/static/quant-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
