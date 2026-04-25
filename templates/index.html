@@ -5605,10 +5605,18 @@
         /* Effet "slim top bar" sur mobile : on enlève le surplus visuel
            du header pour matcher le style MEXC/Binance (juste logo + actions
            essentielles à droite). Déjà largement traité plus haut, on
-           force juste une hauteur un peu plus compacte ici. */
+           force juste une hauteur un peu plus compacte ici.
+           IMPORTANT iOS : safe-area-inset-top pour ne pas que le notch /
+           Dynamic Island grappille sur le contenu du header. */
         @media (max-width: 720px) {
-            .globalheader { height: 56px; }
-            .page { padding-top: 56px; }
+            .globalheader {
+                height: calc(56px + env(safe-area-inset-top, 0px));
+                padding-top: env(safe-area-inset-top, 0px);
+                box-sizing: border-box;
+            }
+            .page {
+                padding-top: calc(56px + env(safe-area-inset-top, 0px));
+            }
             .globalheader-logo { font-size: 0.98rem; }
         }
 
