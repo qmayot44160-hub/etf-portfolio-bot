@@ -8544,6 +8544,85 @@ async function lwTimeSeriesChart(elementId, series, opts){
     return chart;
 }
 
+/* Bar chart SVG natif — remplace les bar Plotly.
+   bars = [{label, value, color?}], opts = { height, showValues, suffix, sort, groupedSeries }
+   Pour bars groupés (2 séries côte à côte) : passer { groupedSeries: [{name, color, values}] } */
+function renderSvgBars(elementId, bars, opts){
+    opts = opts || {};
+    const el = document.getElementById(elementId);
+    if(!el) return;
+    const W = el.clientWidth || 600;
+    const H = opts.height || 320;
+    const padTop = 16, padBottom = 60, padLeft = 44, padRight = 12;
+    const innerW = W - padLeft - padRight;
+    const innerH = H - padTop - padBottom;
+
+    const grouped = opts.groupedSeries;
+    const labels = bars.map(b => b.label);
+    let values = [];
+    if(grouped){
+        grouped.forEach(g => values = values.concat(g.values));
+    } else {
+        values = bars.map(b => b.value);
+    }
+    const min = Math.min(0, ...values);
+    const max = Math.max(0, ...values);
+    const range = max - min || 1;
+    const yScale = (v) => padTop + innerH - ((v - min) / range) * innerH;
+    const baselineY = yScale(0);
+
+    const nGroups = labels.length;
+    const groupW = innerW / nGroups;
+    const seriesCount = grouped ? grouped.length : 1;
+    const barGap = 4;
+    const barW = (groupW - barGap * 2) / seriesCount * 0.8;
+
+    let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="display:block;font-family:Inter,sans-serif">`;
+    // Grille horizontale 5 lignes
+    for(let i = 0; i <= 4; i++){
+        const y = padTop + (innerH * i / 4);
+        const yVal = max - (range * i / 4);
+        svg += `<line x1="${padLeft}" x2="${W - padRight}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>`;
+        svg += `<text x="${padLeft - 6}" y="${y + 3}" text-anchor="end" font-size="9.5" fill="#6e6e73">${yVal.toFixed(0)}${opts.suffix||''}</text>`;
+    }
+    // Baseline (zéro)
+    if(min < 0 && max > 0){
+        svg += `<line x1="${padLeft}" x2="${W - padRight}" y1="${baselineY}" y2="${baselineY}" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>`;
+    }
+    // Bars
+    bars.forEach((b, i) => {
+        const groupX = padLeft + groupW * i + groupW / 2;
+        const seriesValues = grouped ? grouped.map(g => g.values[i]) : [b.value];
+        const seriesColors = grouped ? grouped.map(g => g.color) : [b.color || (b.value >= 0 ? 'rgba(48,209,88,0.65)' : 'rgba(255,69,58,0.65)')];
+        seriesValues.forEach((v, sIdx) => {
+            const x = groupX + (sIdx - (seriesCount - 1) / 2) * (barW + 1) - barW / 2;
+            const y = v >= 0 ? yScale(v) : baselineY;
+            const h = Math.abs(yScale(v) - baselineY);
+            const col = seriesColors[sIdx];
+            svg += `<rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="3" ry="3" fill="${col}">
+                <title>${grouped ? grouped[sIdx].name+': ' : ''}${b.label} = ${v}${opts.suffix||''}</title>
+            </rect>`;
+            if(opts.showValues && !grouped){
+                svg += `<text x="${groupX}" y="${v >= 0 ? y - 4 : y + h + 12}" text-anchor="middle" font-size="9.5" font-weight="600" fill="${v >= 0 ? '#30d158' : '#ff453a'}">${v >= 0 ? '+' : ''}${v}${opts.suffix||''}</text>`;
+            }
+        });
+        // Labels x (tronqués si trop longs)
+        const lbl = labels[i].length > 12 ? labels[i].slice(0, 11) + '…' : labels[i];
+        svg += `<text x="${groupX}" y="${H - 22}" text-anchor="middle" font-size="10" fill="#86868b" transform="rotate(-25 ${groupX} ${H - 22})">${lbl}</text>`;
+    });
+    // Légende grouped
+    if(grouped){
+        let lx = padLeft;
+        grouped.forEach(g => {
+            svg += `<rect x="${lx}" y="${H - 14}" width="10" height="10" rx="2" fill="${g.color}"/>`;
+            svg += `<text x="${lx + 14}" y="${H - 5}" font-size="10" fill="#86868b">${g.name}</text>`;
+            lx += g.name.length * 6 + 30;
+        });
+    }
+    svg += '</svg>';
+    el.innerHTML = svg;
+}
+
 /* ═══ DCA ═══ */
 async function calculateDCA(){try{const d=await(await fetch('/api/dca?amount='+document.getElementById('dca-amount').value)).json();document.getElementById('dca-table').innerHTML=d.map(x=>`<tr><td><strong>${x.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${x.ticker}</span></td><td class="mono">${fmt(x.target_amount)}</td><td class="mono">${fmt(x.price)}</td><td class="mono">${x.shares_to_buy}</td><td class="mono">${fmt(x.real_amount)}</td></tr>`).join('');}catch(e){}}
 async function executeDCA(){try{const d=await(await fetch('/api/dca/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:parseFloat(document.getElementById('dca-amount').value)})})).json();toast('DCA: '+d.length+' ordres');refreshPortfolio();}catch(e){toast(e.message,true);}}
@@ -8644,7 +8723,10 @@ async function runProjection(){
         // ── Projection par ETF ──
         if(d.etf_projection&&d.etf_projection.length){
             const ep=d.etf_projection;
-            Plotly.newPlot('pj-etf-chart',[{x:ep.map(e=>e.name),y:ep.map(e=>e.projected_gain),type:'bar',marker:{color:ep.map(e=>e.projected_gain>=0?'rgba(48,209,88,0.7)':'rgba(255,69,58,0.7)'),cornerradius:6},text:ep.map(e=>'+'+fmt(e.projected_gain)),textposition:'auto'}],{...PL,height:300},{responsive:true});
+            renderSvgBars('pj-etf-chart', ep.map(e => ({
+                label: e.name, value: Math.round(e.projected_gain),
+                color: e.projected_gain >= 0 ? 'rgba(48,209,88,0.7)' : 'rgba(255,69,58,0.7)'
+            })), { height: 300, showValues: true, suffix: '€' });
             document.getElementById('pj-etf-table').innerHTML=`<table><thead><tr><th>ETF</th><th>Poids</th><th>μ annuel</th><th>σ annuelle</th><th>Valeur projetée</th><th>Gain projeté</th></tr></thead><tbody>${ep.map(e=>`
                 <tr><td><strong>${e.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${e.ticker}</span></td><td class="mono">${e.weight}%</td><td class="mono" style="color:${e.mu_annual_pct>=0?'var(--sf-green)':'var(--sf-red)'}">${e.mu_annual_pct>=0?'+':''}${e.mu_annual_pct}%</td><td class="mono">${e.sigma_annual_pct}%</td><td class="mono">${fmt(e.projected_value)}</td><td class="mono ${e.projected_gain>=0?'green':'red'}"><strong>${e.projected_gain>=0?'+':''}${fmt(e.projected_gain)}</strong> (${e.projected_gain_pct>=0?'+':''}${e.projected_gain_pct}%)</td></tr>
             `).join('')}</tbody></table>`;
@@ -8764,13 +8846,13 @@ async function loadAnalytics(){
         // ── Contribution au risque ──
         if(st.risk_contribution){
             const rc=st.risk_contribution;
-            Plotly.newPlot('an-risk-contrib-chart',[
-                {x:rc.map(r=>r.name),y:rc.map(r=>r.weight_pct),name:'Poids',type:'bar',
-                 marker:{color:'rgba(41,151,255,0.55)',cornerradius:4}},
-                {x:rc.map(r=>r.name),y:rc.map(r=>r.risk_contribution_pct),name:'Contribution au risque',type:'bar',
-                 marker:{color:'rgba(255,69,58,0.65)',cornerradius:4}},
-            ],{...PL,height:320,barmode:'group',yaxis:{...PL.yaxis,ticksuffix:'%'},
-               legend:{orientation:'h',y:-0.25,font:{color:'#86868b',size:11}}},{responsive:true});
+            renderSvgBars('an-risk-contrib-chart', rc.map(r => ({ label: r.name })), {
+                height: 320, suffix: '%',
+                groupedSeries: [
+                    { name: 'Poids', color: 'rgba(41,151,255,0.55)', values: rc.map(r => r.weight_pct) },
+                    { name: 'Risque', color: 'rgba(255,69,58,0.65)', values: rc.map(r => r.risk_contribution_pct) },
+                ]
+            });
 
             document.getElementById('an-risk-contrib-table').innerHTML=`<table><thead><tr><th>ETF</th><th>Poids</th><th>Contribution au risque</th><th>Ratio</th></tr></thead><tbody>${rc.map(r=>{
                 const ratio=r.weight_pct>0?(r.risk_contribution_pct/r.weight_pct):0;
@@ -8785,11 +8867,10 @@ async function loadAnalytics(){
         // ── Stress tests ──
         if(d.stress_tests&&d.stress_tests.length){
             const s=d.stress_tests;
-            Plotly.newPlot('an-stress-chart',[{
-                x:s.map(x=>x.name),y:s.map(x=>x.portfolio_return_pct),type:'bar',
-                marker:{color:s.map(x=>x.portfolio_return_pct>=0?'rgba(48,209,88,0.7)':'rgba(255,69,58,0.75)'),cornerradius:6},
-                text:s.map(x=>(x.portfolio_return_pct>=0?'+':'')+x.portfolio_return_pct+'%'),textposition:'auto'
-            }],{...PL,height:340,yaxis:{...PL.yaxis,ticksuffix:'%'}},{responsive:true});
+            renderSvgBars('an-stress-chart', s.map(x => ({
+                label: x.name, value: x.portfolio_return_pct,
+                color: x.portfolio_return_pct >= 0 ? 'rgba(48,209,88,0.7)' : 'rgba(255,69,58,0.75)'
+            })), { height: 340, showValues: true, suffix: '%' });
 
             document.getElementById('an-stress-table').innerHTML=`<table><thead><tr><th>Scénario</th><th>Période</th><th>Performance portefeuille</th><th>Max DD</th></tr></thead><tbody>${s.map(x=>`
                 <tr>
@@ -8803,15 +8884,14 @@ async function loadAnalytics(){
         // ── Rolling metrics ──
         if(d.rolling){
             const r=d.rolling;
-            Plotly.newPlot('an-rolling-chart',[
-                {x:r.dates,y:r.rolling_sharpe,name:'Sharpe (3m)',type:'scatter',mode:'lines',line:{color:'#2997ff',width:1.8},yaxis:'y1'},
-                {x:r.dates,y:r.rolling_vol_pct,name:'Volatilité % (3m)',type:'scatter',mode:'lines',line:{color:'#ff9f0a',width:1.8},yaxis:'y2'},
-                {x:r.dates,y:r.rolling_drawdown_pct,name:'Drawdown % (roulant)',type:'scatter',mode:'lines',line:{color:'#ff453a',width:1.5,dash:'dot'},yaxis:'y2',fill:'tozeroy',fillcolor:'rgba(255,69,58,0.06)'},
-            ],{...PL,height:360,
-                yaxis:{...PL.yaxis,title:'Sharpe',side:'left'},
-                yaxis2:{...PL.yaxis,title:'%',side:'right',overlaying:'y',ticksuffix:'%'},
-                legend:{orientation:'h',y:-0.2,font:{color:'#86868b',size:11}}
-            },{responsive:true});
+            // Migration lightweight-charts. Sharpe et Vol/DD ont des échelles différentes
+            // mais on accepte une seule échelle pour la simplicité (lwc supporte aussi
+            // priceScaleId 'left'/'right' si on veut split). Ici on met tout sur la même.
+            lwTimeSeriesChart('an-rolling-chart', [
+                { name: 'Sharpe (3m)',         dates: r.dates, values: r.rolling_sharpe,        color: '#2997ff', lineWidth: 1.8 },
+                { name: 'Volatilité % (3m)',   dates: r.dates, values: r.rolling_vol_pct,       color: '#ff9f0a', lineWidth: 1.8 },
+                { name: 'Drawdown % roulant',  dates: r.dates, values: r.rolling_drawdown_pct,  color: '#ff453a', lineWidth: 1.5, lineStyle: 2 },
+            ], { height: 340 });
         }
 
         // ── Kelly Criterion table ──
