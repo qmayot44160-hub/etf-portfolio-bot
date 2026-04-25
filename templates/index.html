@@ -7702,10 +7702,11 @@ function showView(v, opts){
     const isMobile = window.matchMedia('(max-width: 720px)').matches;
     // Distance translate : mobile = vraie sensation de "swipe carte" (60px), desktop = subtil (24px)
     const dist = isMobile ? 60 : 24;
-    // Apple spring curve — sortie rapide, arrivée moelleuse. Sensation iOS native.
-    const EASING = 'cubic-bezier(0.32, 0.72, 0, 1)';
-    const DUR_OUT = isMobile ? 220 : 200;
-    const DUR_IN  = isMobile ? 320 : 260;
+    // Courbe douce et perceptible — pas trop rapide, pas trop lente.
+    // Apple-like mais avec plus de "dwell" sur l'arrivée.
+    const EASING = 'cubic-bezier(0.22, 0.61, 0.36, 1)';
+    const DUR_OUT = isMobile ? 320 : 280;
+    const DUR_IN  = isMobile ? 460 : 380;
 
     const enterFrom = dir === 'left' ? `translate3d(${dist}px,0,0)`
                     : dir === 'right' ? `translate3d(${-dist}px,0,0)`
