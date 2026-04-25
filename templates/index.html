@@ -3844,16 +3844,58 @@
                 grid-template-columns: 1fr;
                 padding: 24px 16px 60px;
             }
+            /* Mobile master-detail : rail = liste verticale style iOS Settings.
+               Pas de scroll horizontal qui masque les items, on voit tout. */
             .settings-rail {
                 position: static;
-                flex-direction: row; overflow-x: auto;
-                gap: 4px; padding: 6px;
+                flex-direction: column;
+                gap: 2px; padding: 6px;
             }
-            .settings-rail-header { display: none; }
+            .settings-rail-header {
+                display: block;
+                padding: 8px 14px 4px;
+                font-size: 0.66rem; letter-spacing: 0.10em;
+                text-transform: uppercase; color: var(--sf-text-muted);
+            }
             .settings-rail-item {
-                flex-shrink: 0; padding: 8px 12px;
+                flex-shrink: 0;
+                padding: 14px 16px;
+                font-size: 0.92rem;
+                justify-content: flex-start;
+                gap: 12px;
+                border-radius: 10px;
+            }
+            .settings-rail-item::after {
+                content: '›';
+                margin-left: auto;
+                color: var(--sf-text-muted);
+                font-size: 1.2rem; line-height: 1;
             }
             .settings-rail-item.active::before { display: none; }
+            .settings-rail-item .sfi { width: 18px; height: 18px; }
+            /* Master-detail : par défaut on voit la liste, panel caché.
+               Quand body.settings-detail-mode est posé, on affiche le panel
+               et on cache la liste. */
+            body:not(.settings-detail-mode) .settings-content { display: none; }
+            body.settings-detail-mode .settings-rail { display: none; }
+            /* Header back button visible en mode detail */
+            .settings-back-btn { display: none; }
+            body.settings-detail-mode .settings-back-btn {
+                display: inline-flex;
+                align-items: center; gap: 6px;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.08);
+                color: var(--sf-text);
+                padding: 6px 12px 6px 8px;
+                border-radius: 999px;
+                font-family: inherit; font-size: 0.82rem; font-weight: 500;
+                cursor: pointer;
+            }
+            .settings-back-btn svg {
+                width: 14px; height: 14px;
+                stroke: currentColor; stroke-width: 2.5;
+                fill: none; stroke-linecap: round; stroke-linejoin: round;
+            }
         }
         /* Mobile : empile chaque ligne (label en haut, champ en bas, full-width)
            Sinon les inputs débordent (cf. "Toyan" / "q.ma..." tronqués). */
@@ -6654,7 +6696,7 @@
      ════════════════════════════════════════════════════════ -->
 <nav class="globalheader">
     <div class="globalheader-inner">
-        <button class="mobile-nav-toggle" onclick="openSettingsPanel('apparence')" aria-label="Ouvrir les paramètres" title="Paramètres">
+        <button class="mobile-nav-toggle" onclick="openSettingsDrawer()" aria-label="Ouvrir les paramètres" title="Paramètres">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
         <div class="globalheader-logo" role="button" tabindex="0" aria-label="Retour à l'accueil" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goHome();}"><span class="ghl-mark" aria-hidden="true"><svg viewBox="0 0 512 512"><text x="256" y="262" text-anchor="middle" dominant-baseline="central" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', sans-serif" font-weight="700" font-size="380" letter-spacing="-16" fill="currentColor">Q</text></svg></span><span class="ghl-text">PortfolioQuant</span></div>
@@ -8109,9 +8151,13 @@
 <div class="settings-drawer-backdrop" id="settings-backdrop" onclick="closeSettingsDrawer()"></div>
 <aside class="settings-drawer" id="settings-drawer" role="dialog" aria-modal="true" aria-labelledby="settings-drawer-title" aria-hidden="true">
     <div class="settings-drawer-header">
+        <button class="settings-back-btn" type="button" onclick="settingsBackToList()" aria-label="Retour au menu">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            <span>Menu</span>
+        </button>
         <div class="settings-drawer-title" id="settings-drawer-title">
             <span class="sfi" data-icon="gear"></span>
-            Paramètres
+            <span id="settings-drawer-title-text">Paramètres</span>
         </div>
         <div class="settings-drawer-actions">
             <button class="settings-drawer-close" onclick="closeSettingsDrawer()" aria-label="Fermer les paramètres" title="Fermer (Échap)">
@@ -12280,8 +12326,26 @@ function openSettingsDrawer(){
     if(backdrop) backdrop.classList.add('open');
     document.body.style.overflow = 'hidden';
     document.body.classList.add('drawer-open');
+    // Mobile : par défaut on affiche la liste (master), pas le détail.
+    // Desktop : on affiche les deux côte à côte (pas de class detail-mode).
+    if(window.matchMedia('(max-width: 900px)').matches){
+        document.body.classList.remove('settings-detail-mode');
+        const titleText = document.getElementById('settings-drawer-title-text');
+        if(titleText) titleText.textContent = 'Paramètres';
+    } else {
+        document.body.classList.remove('settings-detail-mode');
+    }
     loadSettingsView();
 }
+
+// Mobile : retour de la vue panel à la liste (master view).
+window.settingsBackToList = function(){
+    document.body.classList.remove('settings-detail-mode');
+    const titleText = document.getElementById('settings-drawer-title-text');
+    if(titleText) titleText.textContent = 'Paramètres';
+    const body = document.querySelector('.settings-drawer-body');
+    if(body) body.scrollTop = 0;
+};
 
 function toggleSettingsFromAvatar(){
     const drawer = document.getElementById('settings-drawer');
@@ -12346,6 +12410,16 @@ function openSettingsPanel(panelId){
     // Scroll drawer body to top when switching panels
     const body = document.querySelector('.settings-drawer-body');
     if(body) body.scrollTop = 0;
+    // Mobile : on bascule en mode détail pour voir le panel
+    if(window.matchMedia('(max-width: 900px)').matches){
+        document.body.classList.add('settings-detail-mode');
+        // Met à jour le titre de la barre avec le nom du panel
+        const titleText = document.getElementById('settings-drawer-title-text');
+        const activeRail = document.querySelector('.settings-rail-item.active');
+        if(titleText && activeRail){
+            titleText.textContent = activeRail.textContent.trim();
+        }
+    }
     // Load panel-specific data
     if(panelId === 'confidentialite') loadAuditLog();
 }
