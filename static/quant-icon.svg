@@ -1,10 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Quant">
-  <!-- Carré arrondi monochrome — style icône système iOS / One UI. -->
-  <rect width="512" height="512" rx="116" fill="#0a84ff"/>
+  <!-- Fond aligné sur la DA : noir profond comme le theme-color de l'app
+       (#0a0a0e). Liseré subtil 1px pour décoller du fond noir système. -->
+  <rect width="512" height="512" rx="116" fill="#0a0a0e"/>
+  <rect x="0.5" y="0.5" width="511" height="511" rx="115.5"
+        fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
 
-  <!-- Q : anneau plus compact (rayons réduits → padding généreux autour,
-       comme les icônes système Apple). Outer 118, inner 54.
-       Even-odd pour évider l'anneau. -->
+  <!-- Q blanc — anneau compact, padding généreux. -->
   <path fill="#ffffff" fill-rule="evenodd" d="
     M 256 138
     a 118 118 0 1 0 0.001 0
@@ -14,8 +15,7 @@
     Z
   "/>
 
-  <!-- Queue : trait diagonal court à 45°, croisant l'anneau en bas-droite.
-       Largeur alignée sur l'épaisseur de l'anneau (64px) pour cohérence. -->
+  <!-- Queue diagonale 45°, blanche. -->
   <rect x="304" y="332" width="78" height="28" rx="14"
         fill="#ffffff"
         transform="rotate(45 343 346)"/>
