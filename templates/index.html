@@ -6696,7 +6696,7 @@
      ════════════════════════════════════════════════════════ -->
 <nav class="globalheader">
     <div class="globalheader-inner">
-        <button class="mobile-nav-toggle" onclick="openSettingsDrawer()" aria-label="Ouvrir les paramètres" title="Paramètres">
+        <button class="mobile-nav-toggle" onclick="toggleSettingsBack()" aria-label="Paramètres" title="Paramètres">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
         <div class="globalheader-logo" role="button" tabindex="0" aria-label="Retour à l'accueil" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goHome();}"><span class="ghl-mark" aria-hidden="true"><svg viewBox="0 0 512 512"><text x="256" y="262" text-anchor="middle" dominant-baseline="central" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', sans-serif" font-weight="700" font-size="380" letter-spacing="-16" fill="currentColor">Q</text></svg></span><span class="ghl-text">PortfolioQuant</span></div>
@@ -12345,6 +12345,23 @@ window.settingsBackToList = function(){
     if(titleText) titleText.textContent = 'Paramètres';
     const body = document.querySelector('.settings-drawer-body');
     if(body) body.scrollTop = 0;
+};
+
+// Toggle intelligent de la roue dentée :
+// - Drawer fermé → ouvre (vue liste)
+// - Drawer ouvert en mode détail → revient à la liste
+// - Drawer ouvert en mode liste → ferme
+window.toggleSettingsBack = function(){
+    const drawer = document.getElementById('settings-drawer');
+    if(!drawer || !drawer.classList.contains('open')){
+        openSettingsDrawer();
+        return;
+    }
+    if(document.body.classList.contains('settings-detail-mode')){
+        settingsBackToList();
+    } else {
+        closeSettingsDrawer();
+    }
 };
 
 function toggleSettingsFromAvatar(){
