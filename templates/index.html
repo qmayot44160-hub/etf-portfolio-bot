@@ -5898,6 +5898,66 @@
         }
 
         /* ═══════════════════════════════════════════════════════
+           INVEST SEGMENTED CONTROL - bascule ETF / Crypto sur la page Investir.
+           Style iOS segmented control, indicator anime entre les deux options.
+           ═══════════════════════════════════════════════════════ */
+        .invest-segmented {
+            position: relative;
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 0;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            padding: 4px;
+            margin-bottom: 18px;
+            overflow: hidden;
+        }
+        .invest-seg {
+            position: relative; z-index: 2;
+            background: transparent; border: none;
+            color: var(--sf-text-muted);
+            padding: 12px 16px;
+            font-size: 0.92rem; font-weight: 600;
+            font-family: inherit; cursor: pointer;
+            border-radius: 10px;
+            transition: color .25s cubic-bezier(.22,.61,.36,1);
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .invest-seg .sfi { width: 16px; height: 16px; }
+        .invest-seg.active { color: var(--sf-text); }
+        .invest-seg:hover:not(.active) { color: var(--sf-text); }
+        .invest-seg-indicator {
+            position: absolute; z-index: 1;
+            top: 4px; bottom: 4px;
+            left: 4px;
+            width: calc(50% - 4px);
+            background: linear-gradient(135deg, rgba(41,151,255,0.20), rgba(41,151,255,0.10));
+            border: 1px solid rgba(41,151,255,0.30);
+            border-radius: 10px;
+            transition: transform .35s cubic-bezier(.22,.61,.36,1);
+            box-shadow: 0 4px 14px rgba(41,151,255,0.18);
+        }
+        .invest-segmented[data-active="crypto"] .invest-seg-indicator {
+            transform: translateX(100%);
+            background: linear-gradient(135deg, rgba(255,159,10,0.20), rgba(255,159,10,0.10));
+            border-color: rgba(255,159,10,0.30);
+            box-shadow: 0 4px 14px rgba(255,159,10,0.18);
+        }
+        /* Panels : seul l'actif est visible, transition fade */
+        .invest-panel {
+            display: none;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity .3s cubic-bezier(.22,.61,.36,1),
+                        transform .3s cubic-bezier(.22,.61,.36,1);
+        }
+        .invest-panel.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ═══════════════════════════════════════════════════════
            FOCUS MODE - clic sur une carte → plein écran avec
            backdrop blur, le reste s'estompe.
            Inspiration : Apple Stocks expand widget, Robinhood chart fullscreen.
@@ -6435,8 +6495,8 @@
                     <button class="nav-dropdown-item" data-view="dca">
                         <span class="nav-icon" data-icon="euro"></span>
                         <span class="ndi-body">
-                            <span class="ndi-title">DCA mensuel</span>
-                            <span class="ndi-sub">Investis un montant fixe chaque mois</span>
+                            <span class="ndi-title">Investir (DCA)</span>
+                            <span class="ndi-sub">Plan mensuel ETF + Crypto unifié</span>
                         </span>
                     </button>
                     <button class="nav-dropdown-item" data-view="crypto">
@@ -6912,25 +6972,62 @@
     <div class="hero">
         <div class="hero-eyebrow"><span class="dot"></span>Investissement récurrent</div>
         <div class="hero-badge"><span class="sfi" data-icon="euro"></span></div>
-        <h1 class="hero-title">Dollar Cost Averaging</h1>
-        <p class="hero-subtitle">Investissez regulierement, sans vous soucier du timing.</p>
+        <h1 class="hero-title">Investir</h1>
+        <p class="hero-subtitle">Plan DCA mensuel automatique : tu choisis le montant, le bot répartit selon ta cible.</p>
     </div>
     <div class="section">
-        <div class="dcard">
-            <div style="display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap">
-                <input type="number" id="dca-amount" value="500" min="50" step="50" class="ainput" style="width:150px;text-align:center">
-                <span style="color:var(--sf-text-secondary)">EUR / mois</span>
-                <button class="abtn abtn-dark abtn-sm" onclick="calculateDCA()">Calculer</button>
-                <button class="abtn abtn-blue abtn-sm" onclick="executeDCA()">Executer</button>
+        <!-- Segmented control ETF / Crypto -->
+        <div class="invest-segmented" role="tablist" aria-label="Type d'actif">
+            <button type="button" class="invest-seg active" data-seg="etf" role="tab" aria-selected="true">
+                <span class="sfi" data-icon="briefcase"></span>
+                <span>ETF</span>
+            </button>
+            <button type="button" class="invest-seg" data-seg="crypto" role="tab" aria-selected="false">
+                <span class="sfi" data-icon="bitcoin"></span>
+                <span>Crypto</span>
+            </button>
+            <span class="invest-seg-indicator" aria-hidden="true"></span>
+        </div>
+
+        <!-- Panel ETF -->
+        <div class="invest-panel active" data-seg-panel="etf">
+            <div class="dcard">
+                <div style="display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap">
+                    <input type="number" id="dca-amount" value="500" min="50" step="50" class="ainput" style="width:150px;text-align:center">
+                    <span style="color:var(--sf-text-secondary)">EUR / mois</span>
+                    <button class="abtn abtn-dark abtn-sm" onclick="calculateDCA()">Calculer</button>
+                    <button class="abtn abtn-blue abtn-sm" onclick="executeDCA()">Executer</button>
+                </div>
+            </div>
+            <div class="dcard" data-focusable="true">
+                <div class="dcard-label"><span class="sfi" data-icon="briefcase"></span>Allocation DCA ETF</div>
+                <table class="sortable-table"><thead><tr>
+                    <th class="sortable" data-sort-type="text">ETF</th>
+                    <th class="sortable" data-sort-type="num" data-tooltip="Montant théorique à investir pour atteindre le poids cible ce mois.">Montant</th>
+                    <th class="sortable" data-sort-type="num">Prix</th>
+                    <th class="sortable" data-sort-type="num">Parts</th>
+                    <th class="sortable" data-sort-type="num" data-tooltip="Montant réellement investi après arrondi au nombre entier de parts.">Reel</th>
+                </tr></thead><tbody id="dca-table" class="stagger-on-render"></tbody></table>
             </div>
         </div>
-        <div class="dcard"><table class="sortable-table"><thead><tr>
-    <th class="sortable" data-sort-type="text">ETF</th>
-    <th class="sortable" data-sort-type="num" data-tooltip="Montant théorique à investir pour atteindre le poids cible ce mois.">Montant</th>
-    <th class="sortable" data-sort-type="num">Prix</th>
-    <th class="sortable" data-sort-type="num">Parts</th>
-    <th class="sortable" data-sort-type="num" data-tooltip="Montant réellement investi après arrondi au nombre entier de parts.">Reel</th>
-</tr></thead><tbody id="dca-table" class="stagger-on-render"></tbody></table></div>
+
+        <!-- Panel Crypto -->
+        <div class="invest-panel" data-seg-panel="crypto">
+            <div class="dcard">
+                <div style="display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap">
+                    <input type="number" id="crypto-dca-amount" value="200" min="10" step="10" class="ainput" style="width:140px;text-align:center">
+                    <span style="color:var(--sf-text-secondary)">USDT / mois</span>
+                    <button class="abtn abtn-dark abtn-sm" onclick="calculateCryptoDCA()">Calculer</button>
+                    <button class="abtn abtn-blue abtn-sm" onclick="executeCryptoDCA()">Executer</button>
+                </div>
+            </div>
+            <div class="dcard" data-focusable="true">
+                <div class="dcard-label"><span class="sfi" data-icon="bitcoin"></span>Allocation DCA Crypto</div>
+                <table><thead><tr>
+                    <th>Token</th><th>Montant</th><th>Prix</th><th>Qty</th><th>Reel</th>
+                </tr></thead><tbody id="crypto-dca-table" class="stagger-on-render"></tbody></table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -7463,15 +7560,10 @@
                 <div class="stat-card"><div class="stat-label">Tokens</div><div class="stat-value" id="crypto-count"><span class="skel skel-val"></span></div></div>
             </div>
             <div class="dcard"><div class="dcard-label"><span class="sfi" data-icon="briefcase"></span>Positions</div><table><thead><tr><th>Token</th><th>Cat.</th><th>Qty</th><th>Prix</th><th>Valeur</th><th>Cible</th><th>Actuel</th><th>Ecart</th></tr></thead><tbody id="crypto-positions-table" class="stagger-on-render"></tbody></table></div>
-            <div class="dcard">
-                <div class="dcard-label"><span class="sfi" data-icon="bitcoin"></span>DCA Crypto</div>
-                <div style="display:flex;gap:14px;align-items:center;justify-content:center;margin-bottom:16px;flex-wrap:wrap">
-                    <input type="number" id="crypto-dca-amount" value="200" min="10" step="10" class="ainput" style="width:140px;text-align:center">
-                    <span style="color:var(--sf-text-secondary)">USDT</span>
-                    <button class="abtn abtn-dark abtn-sm" onclick="calculateCryptoDCA()">Calculer</button>
-                    <button class="abtn abtn-blue abtn-sm" onclick="executeCryptoDCA()">Executer</button>
-                </div>
-                <table><thead><tr><th>Token</th><th>Montant</th><th>Prix</th><th>Qty</th><th>Reel</th></tr></thead><tbody id="crypto-dca-table" class="stagger-on-render"></tbody></table>
+            <!-- DCA Crypto deplace vers la page Investir (segment Crypto) pour unifier l'UX -->
+            <div class="dcard" style="text-align:center;padding:18px">
+                <div style="color:var(--sf-text-muted);font-size:0.86rem;margin-bottom:10px">Pour investir en crypto, va sur la page Investir.</div>
+                <button class="abtn abtn-blue abtn-sm" onclick="showView('dca'); setTimeout(()=>investSetSegment('crypto'),100)">Aller sur Investir &gt; Crypto &rarr;</button>
             </div>
             <div class="dcard">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -9157,6 +9249,52 @@ function renderSvgBars(elementId, bars, opts){
     svg += '</svg>';
     el.innerHTML = svg;
 }
+
+/* ═══════════════════════════════════════════════════════
+   INVEST SEGMENTED CONTROL - bascule ETF / Crypto.
+   Persistance localStorage pour retomber sur le bon segment au retour.
+   ═══════════════════════════════════════════════════════ */
+const INVEST_SEG_KEY = 'pq_invest_segment';
+
+function investSetSegment(seg){
+    if(seg !== 'etf' && seg !== 'crypto') seg = 'etf';
+    const wrap = document.querySelector('.invest-segmented');
+    if(!wrap) return;
+    wrap.dataset.active = seg;
+    document.querySelectorAll('.invest-seg').forEach(b => {
+        const isActive = b.dataset.seg === seg;
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    document.querySelectorAll('.invest-panel').forEach(p => {
+        p.classList.toggle('active', p.dataset.segPanel === seg);
+    });
+    try { localStorage.setItem(INVEST_SEG_KEY, seg); } catch(e){}
+    // Charge les donnees du segment actif si table vide
+    if(seg === 'etf'){
+        const tbl = document.getElementById('dca-table');
+        if(tbl && !tbl.children.length) calculateDCA();
+    } else {
+        const tbl = document.getElementById('crypto-dca-table');
+        if(tbl && !tbl.children.length) calculateCryptoDCA();
+    }
+}
+window.investSetSegment = investSetSegment;
+
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.invest-seg');
+    if(!btn) return;
+    investSetSegment(btn.dataset.seg);
+});
+
+// Au load : restaure le segment + initialise
+document.addEventListener('DOMContentLoaded', () => {
+    let saved = 'etf';
+    try { saved = localStorage.getItem(INVEST_SEG_KEY) || 'etf'; } catch(e){}
+    if(document.querySelector('.invest-segmented')){
+        investSetSegment(saved);
+    }
+});
 
 /* ═══ DCA ═══ */
 async function calculateDCA(){try{const d=await(await fetch('/api/dca?amount='+document.getElementById('dca-amount').value)).json();document.getElementById('dca-table').innerHTML=d.map(x=>`<tr><td><strong>${x.name}</strong><br><span style="color:var(--sf-text-muted);font-size:0.72rem">${x.ticker}</span></td><td class="mono">${fmt(x.target_amount)}</td><td class="mono">${fmt(x.price)}</td><td class="mono">${x.shares_to_buy}</td><td class="mono">${fmt(x.real_amount)}</td></tr>`).join('');}catch(e){}}
@@ -13597,9 +13735,9 @@ function investInCurrentPick(){
             <span class="bottom-tab-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9h4.5a2.5 2.5 0 0 1 0 5H9zM9 14h5a2.5 2.5 0 0 1 0 5H9zM10 7v2M10 19v2M14 7v2M14 19v2"/></svg></span>
             <span class="bottom-tab-label">Crypto</span>
         </button>
-        <button class="bottom-tab" data-tab="dca" type="button" aria-label="Trader">
+        <button class="bottom-tab" data-tab="dca" type="button" aria-label="Investir">
             <span class="bottom-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></span>
-            <span class="bottom-tab-label">Trader</span>
+            <span class="bottom-tab-label">Investir</span>
         </button>
         <button class="bottom-tab" data-tab="analytics" type="button" aria-label="Analyse">
             <span class="bottom-tab-icon"><svg viewBox="0 0 24 24"><path d="M3 20V10M9 20V4M15 20v-7M21 20v-11"/></svg></span>
