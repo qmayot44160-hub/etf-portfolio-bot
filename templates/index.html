@@ -101,8 +101,39 @@
             color: var(--sf-text);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1, 'ss01' 1;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
             overflow-x: hidden;
             position: relative;
+        }
+        /* Tap highlight off pour tous les éléments interactifs — on a déjà
+           des :active states custom, le flash bleu Android pollue l'UX. */
+        button, a, [role="button"], .bottom-tab, .nav-dropdown-item,
+        .settings-rail-item, .user-menu-item {
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Slide GPU acceleration : les vues sont des couches compositor.
+           Évite le repaint du document entier pendant la transition. */
+        [id^="view-"] {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+        /* Scroll natif fluide sur conteneurs internes (drawers, modals). */
+        .settings-drawer-body, .user-menu, .modal-body, .bottom-sheet-body {
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+        /* Réduit le motion blur pour les utilisateurs qui le préfèrent. */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
         }
 
         /* ════════════════════════════════════════════════
@@ -7669,31 +7700,72 @@ function showView(v, opts){
     // 'right' = nouveau vient de la gauche (swipe droite / prev), undefined = défaut vertical
     const dir = opts && opts.dir;
     const isMobile = window.matchMedia('(max-width: 720px)').matches;
-    // Enter/exit transforms — slide horizontal sur mobile, fade vertical sinon
-    const enterFrom = dir === 'left' ? 'translateX(40px)' : dir === 'right' ? 'translateX(-40px)' : (isMobile ? 'translateX(20px)' : 'translateY(20px)');
-    const exitTo    = dir === 'left' ? 'translateX(-40px)' : dir === 'right' ? 'translateX(40px)' : (isMobile ? 'translateX(-20px)' : 'translateY(20px)');
-    const restTransform = 'translateX(0) translateY(0)';
+    // Distance translate : mobile = vraie sensation de "swipe carte" (60px), desktop = subtil (24px)
+    const dist = isMobile ? 60 : 24;
+    // Apple spring curve — sortie rapide, arrivée moelleuse. Sensation iOS native.
+    const EASING = 'cubic-bezier(0.32, 0.72, 0, 1)';
+    const DUR_OUT = isMobile ? 220 : 200;
+    const DUR_IN  = isMobile ? 320 : 260;
+
+    const enterFrom = dir === 'left' ? `translate3d(${dist}px,0,0)`
+                    : dir === 'right' ? `translate3d(${-dist}px,0,0)`
+                    : (isMobile ? `translate3d(${dist*0.5}px,0,0)` : 'translate3d(0,16px,0)');
+    const exitTo    = dir === 'left' ? `translate3d(${-dist}px,0,0)`
+                    : dir === 'right' ? `translate3d(${dist}px,0,0)`
+                    : (isMobile ? `translate3d(${-dist*0.5}px,0,0)` : 'translate3d(0,16px,0)');
+    const rest = 'translate3d(0,0,0)';
+
+    const loaders={home:loadHome,portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire,securite:loadSecurite,watchlist:loadWatchlist,discover:loadDiscover};
+
     const activate=()=>{
+        // Pré-état : opacity 0, transform de départ. Pas encore visible à l'écran.
         next.style.display='block';
+        next.style.willChange='transform, opacity';
+        next.style.transition='none';
         next.style.opacity='0';
         next.style.transform=enterFrom;
+        // Force reflow puis lance la transition au frame suivant pour éviter
+        // les race conditions avec le compositor.
+        next.offsetHeight;
         requestAnimationFrame(()=>{
+            next.style.transition=`transform ${DUR_IN}ms ${EASING}, opacity ${Math.round(DUR_IN*0.7)}ms ${EASING}`;
             next.classList.add('show');
             next.style.opacity='1';
-            next.style.transform=restTransform;
+            next.style.transform=rest;
         });
-        window.scrollTo({top:0,behavior:'smooth'});
-        const loaders={home:loadHome,portfolio:refreshPortfolio,dca:calculateDCA,crypto:loadCrypto,trading:loadTrading,scanner:loadScannerCached,broker:loadBrokers,auto:loadScheduler,glossaire:loadGlossaire,securite:loadSecurite,watchlist:loadWatchlist,discover:loadDiscover};
-        if(loaders[v])loaders[v]();
+        // Scroll instantané pendant la slide (smooth = bagarre visuelle avec la slide)
+        window.scrollTo(0, 0);
+        // Charge le contenu APRÈS le début de l'anim — évite le layout thrash
+        if(loaders[v]){
+            requestAnimationFrame(()=>requestAnimationFrame(loaders[v]));
+        }
+        // Cleanup will-change après la transition pour libérer la couche compositor
+        const cleanup = () => {
+            next.style.willChange = '';
+            next.removeEventListener('transitionend', cleanup);
+        };
+        next.addEventListener('transitionend', cleanup, { once: true });
     };
+
     if(current&&current!==next){
+        current.style.willChange='transform, opacity';
+        current.style.transition=`transform ${DUR_OUT}ms ${EASING}, opacity ${DUR_OUT}ms ${EASING}`;
         current.style.opacity='0';
         current.style.transform=exitTo;
-        setTimeout(()=>{
+        // Utilise transitionend (plus fiable que setTimeout, pas de drift)
+        let done = false;
+        const onExit = () => {
+            if(done) return; done = true;
+            current.removeEventListener('transitionend', onExit);
             current.classList.remove('show');
             current.style.display='none';
+            current.style.willChange='';
+            current.style.transition='';
             activate();
-        },220);
+        };
+        current.addEventListener('transitionend', onExit, { once: true });
+        // Fallback de sécurité au cas où transitionend ne fire pas
+        setTimeout(onExit, DUR_OUT + 80);
     }else if(!current){
         activate();
     }
