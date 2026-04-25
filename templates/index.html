@@ -5897,6 +5897,129 @@
             .onb-btn-back { width: 100%; padding: 12px; }
         }
 
+        /* ═══════════════════════════════════════════════════════
+           INSIGHTS STORIES — rail horizontal de cartes éphémères
+           Inspiration : Revolut Stories, Spotify Wrapped daily.
+           Donne une raison d'ouvrir l'app chaque matin.
+           ═══════════════════════════════════════════════════════ */
+        .insights-rail {
+            display: flex; gap: 12px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding: 4px 4px 14px;
+            margin: 0 -4px 18px;
+        }
+        .insights-rail::-webkit-scrollbar { display: none; }
+        .insight-card {
+            flex: 0 0 auto;
+            width: 240px; height: 320px;
+            border-radius: 20px;
+            padding: 18px;
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+            cursor: pointer;
+            scroll-snap-align: start;
+            transition: transform .25s cubic-bezier(.22,.61,.36,1), box-shadow .25s;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .insight-card:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+        }
+        .insight-card:active { transform: translateY(0) scale(1); }
+        /* Variantes colorées — chaque type d'insight a sa palette */
+        .insight-card.gain {
+            background: linear-gradient(135deg, #0d4d2a, #1e8449 70%, #30d158);
+        }
+        .insight-card.loss {
+            background: linear-gradient(135deg, #4d0d18, #94203a 70%, #ff453a);
+        }
+        .insight-card.warn {
+            background: linear-gradient(135deg, #4d3a0d, #ad7c1e 70%, #ff9f0a);
+        }
+        .insight-card.info {
+            background: linear-gradient(135deg, #0d2a4d, #1e5e94 70%, #2997ff);
+        }
+        .insight-card.purple {
+            background: linear-gradient(135deg, #2a0d4d, #6a1e94 70%, #bf5af2);
+        }
+        .insight-card.dark {
+            background: linear-gradient(135deg, #1a1a22, #08080c);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        /* Pattern décoratif géométrique en background */
+        .insight-card::before {
+            content: ''; position: absolute;
+            top: -40px; right: -40px;
+            width: 180px; height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.12), transparent 70%);
+            pointer-events: none;
+        }
+        .insight-card::after {
+            content: ''; position: absolute;
+            bottom: -60px; left: -60px;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.04), transparent 70%);
+            pointer-events: none;
+        }
+        .insight-eyebrow {
+            font-size: 0.66rem; font-weight: 700;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 6px;
+            position: relative; z-index: 1;
+        }
+        .insight-eyebrow .sfi {
+            width: 14px; height: 14px;
+        }
+        .insight-headline {
+            font-size: 1.55rem; font-weight: 700;
+            line-height: 1.2; letter-spacing: -0.02em;
+            color: white;
+            margin-bottom: 10px;
+            position: relative; z-index: 1;
+        }
+        .insight-big-num {
+            font-size: 2.6rem; font-weight: 800;
+            letter-spacing: -0.04em; line-height: 1;
+            color: white;
+            margin-bottom: 8px;
+            font-feature-settings: 'tnum' 1;
+            position: relative; z-index: 1;
+        }
+        .insight-sub {
+            font-size: 0.84rem; line-height: 1.45;
+            color: rgba(255,255,255,0.78);
+            position: relative; z-index: 1;
+            margin-top: auto;
+        }
+        .insight-cta {
+            margin-top: 12px;
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 0.78rem; font-weight: 600;
+            color: white;
+            opacity: 0.95;
+            position: relative; z-index: 1;
+        }
+        .insight-cta::after {
+            content: '→'; transition: transform .2s;
+        }
+        .insight-card:hover .insight-cta::after {
+            transform: translateX(3px);
+        }
+        @media (max-width: 720px){
+            .insights-rail { padding: 2px 14px 14px; margin: 0 -14px 14px; }
+            .insight-card { width: 200px; height: 280px; padding: 16px; border-radius: 18px; }
+            .insight-headline { font-size: 1.3rem; }
+            .insight-big-num { font-size: 2.1rem; }
+        }
+
         /* Allocation donuts twin (Cible vs Actuel) — SVG natif */
         .alloc-twin {
             display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
@@ -6428,6 +6551,10 @@
                 </svg>
             </div>
         </div>
+
+        <!-- Insights stories — rail horizontal de cartes générées dynamiquement.
+             Style Revolut Stories. Donne une raison d'ouvrir l'app le matin. -->
+        <div class="insights-rail home-module" id="insights-rail" data-module-id="insights" data-module-label="Insights du jour" aria-label="Insights du jour"></div>
 
         <!-- Market ticker (scrolling horizontal strip) -->
         <div class="market-ticker home-module" id="market-ticker" data-module-id="market-ticker" data-module-label="Ticker marchés" aria-hidden="true">
@@ -10172,6 +10299,8 @@ async function loadHome(){
         loadSmartPicks().catch(e => console.warn('loadSmartPicks', e));
         // Heatmap — carte du marché
         loadHeatmap().catch(e => console.warn('loadHeatmap', e));
+        // Insights stories — cartes générées dynamiquement selon l'état actuel
+        loadInsights(s).catch(e => console.warn('loadInsights', e));
     }catch(e){ console.error('loadHome', e); }
 }
 
@@ -10354,6 +10483,152 @@ async function loadHomeAllocation(){
             </div>
         </div>`;
     }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   INSIGHTS STORIES — cartes éphémères style Revolut Stories
+   Génération dynamique selon l'état du portefeuille.
+   Chaque card = 1 fait remarquable (perf, drift, milestone, alerte).
+   ═══════════════════════════════════════════════════════ */
+async function loadInsights(state){
+    const rail = document.getElementById('insights-rail');
+    if(!rail) return;
+    const cards = [];
+
+    // Carte 1 : performance journalière (toujours présente si data dispo)
+    if(state && typeof state.totalValue === 'number' && state.totalValue > 0){
+        // Variation simulée — à brancher sur /api/portfolio/history quand l'endpoint sera prêt
+        try {
+            const histRes = await fetch('/api/portfolio/history?range=1D').catch(() => null);
+            if(histRes && histRes.ok){
+                const hist = await histRes.json();
+                const series = (hist && hist.values) || [];
+                if(series.length >= 2){
+                    const first = series[0], last = series[series.length - 1];
+                    const change = last - first;
+                    const pct = first > 0 ? (change / first * 100) : 0;
+                    const variant = change >= 0 ? 'gain' : 'loss';
+                    const arrow = change >= 0 ? '▲' : '▼';
+                    cards.push({
+                        variant, eyebrow: { icon: 'trending', text: 'Aujourd\'hui' },
+                        headline: 'Ton portefeuille',
+                        bigNum: `${arrow} ${Math.abs(pct).toFixed(2)}%`,
+                        sub: `${change >= 0 ? '+' : ''}${fmt(Math.round(change))} sur la séance · valeur actuelle ${fmt(Math.round(state.totalValue))}`,
+                        cta: 'Voir le détail',
+                        action: () => showView('portfolio')
+                    });
+                }
+            }
+        } catch(e){}
+    }
+
+    // Carte 2 : drift le plus important
+    try {
+        const pf = await fetch('/api/portfolio').then(r => r.json()).catch(() => null);
+        if(pf && Array.isArray(pf.positions) && pf.positions.length){
+            const sorted = [...pf.positions].sort((a,b) => Math.abs(b.drift||0) - Math.abs(a.drift||0));
+            const top = sorted[0];
+            if(top && Math.abs(top.drift||0) >= 2){
+                const drift = Number(top.drift);
+                const variant = Math.abs(drift) >= 5 ? 'warn' : 'info';
+                cards.push({
+                    variant, eyebrow: { icon: 'scale', text: 'Drift détecté' },
+                    headline: top.name || top.ticker,
+                    bigNum: `${drift > 0 ? '+' : ''}${drift}%`,
+                    sub: drift > 0
+                        ? `${top.ticker} dépasse sa cible. Un rééquilibrage allégerait la position.`
+                        : `${top.ticker} sous sa cible. Le prochain DCA augmentera cette ligne en priorité.`,
+                    cta: 'Rééquilibrer',
+                    action: () => { showView('portfolio'); setTimeout(() => { const el = document.getElementById('rebalance-orders'); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); }, 600); }
+                });
+            }
+        }
+    } catch(e){}
+
+    // Carte 3 : milestone valeur (palier rond atteint)
+    if(state && typeof state.totalValue === 'number' && state.totalValue >= 1000){
+        const milestones = [1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000];
+        const reached = milestones.filter(m => state.totalValue >= m);
+        if(reached.length){
+            const last = reached[reached.length - 1];
+            const next = milestones.find(m => m > last);
+            const progressPct = next ? Math.round((state.totalValue - last) / (next - last) * 100) : 100;
+            cards.push({
+                variant: 'purple', eyebrow: { icon: 'trophy', text: 'Palier' },
+                headline: next ? `Vers ${fmt(next)}` : 'Millionnaire 🎉',
+                bigNum: `${progressPct}%`,
+                sub: next
+                    ? `Tu as franchi ${fmt(last)}. Plus que ${fmt(Math.round(next - state.totalValue))} pour le prochain palier.`
+                    : `Bravo. Tu as atteint le palier le plus haut tracké par PortfolioQuant.`,
+                cta: next ? 'Voir progression' : 'Célébrer',
+                action: () => showView('portfolio')
+            });
+        }
+    }
+
+    // Carte 4 : régime de marché (si dispo via /api/analytics)
+    try {
+        const reg = await fetch('/api/market-regime').then(r => r.json()).catch(() => null);
+        if(reg && reg.label){
+            const variant = reg.regime === 'bull' ? 'gain' : reg.regime === 'bear' || reg.regime === 'crisis' ? 'loss' : 'info';
+            cards.push({
+                variant, eyebrow: { icon: 'globe', text: 'Régime de marché' },
+                headline: reg.label,
+                bigNum: reg.spy_price ? `S&P ${fmt(Math.round(reg.spy_price))}` : '',
+                sub: reg.vs_sma_pct != null
+                    ? `${reg.vs_sma_pct >= 0 ? '+' : ''}${reg.vs_sma_pct}% vs SMA200 · drawdown ${reg.drawdown_pct||0}%`
+                    : 'Le bot adapte son agressivité selon le régime détecté.',
+                cta: 'Voir l\'analyse',
+                action: () => showView('analytics')
+            });
+        }
+    } catch(e){}
+
+    // Carte 5 : kill switch actif (priorité haute)
+    if(state && state.killSwitch){
+        cards.unshift({
+            variant: 'loss', eyebrow: { icon: 'power', text: 'Sécurité active' },
+            headline: 'Kill switch ON',
+            bigNum: '🛑',
+            sub: 'Tous les ordres sont bloqués. Désactive depuis la page Sécurité quand tu es prêt à reprendre.',
+            cta: 'Désactiver',
+            action: () => showView('securite')
+        });
+    }
+
+    // Fallback : si rien à afficher, on met une carte d'accueil neutre
+    if(!cards.length){
+        cards.push({
+            variant: 'dark', eyebrow: { icon: 'sparkles', text: 'Prêt à démarrer' },
+            headline: 'Ton tableau de bord',
+            bigNum: 'PQ',
+            sub: 'Connecte un broker pour voir tes insights personnalisés ici chaque jour.',
+            cta: 'Configurer',
+            action: () => showView('broker')
+        });
+    }
+
+    // Render
+    rail.innerHTML = cards.map((c, i) => `
+        <div class="insight-card ${c.variant}" data-idx="${i}">
+            <div class="insight-eyebrow"><span class="sfi" data-icon="${c.eyebrow.icon}"></span>${c.eyebrow.text}</div>
+            ${c.bigNum ? `<div class="insight-big-num">${c.bigNum}</div>` : ''}
+            <div class="insight-headline">${c.headline}</div>
+            <div class="insight-sub">${c.sub}</div>
+            ${c.cta ? `<div class="insight-cta">${c.cta}</div>` : ''}
+        </div>
+    `).join('');
+
+    // Bind clicks
+    rail.querySelectorAll('.insight-card').forEach((el, i) => {
+        const card = cards[i];
+        if(card.action){
+            el.addEventListener('click', () => card.action());
+        }
+    });
+
+    // Re-render des icônes SFI dans les cartes (sinon les data-icon ne sont pas remplis)
+    if(typeof renderStaticIcons === 'function') renderStaticIcons();
 }
 
 /* ═══════════════════════════════════════════════════════
