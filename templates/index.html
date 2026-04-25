@@ -8903,17 +8903,17 @@ window.goBackView = function(){
     showView(prev, { dir: 'right', _fromBack: true });
 };
 
-// Tabs principaux (visibles en bottom tab bar). Pas de back button par défaut
-// dessus car la nav primaire = bottom tab. Mais s'ils ont de l'historique, on
-// affiche quand même un back pour respecter l'attente utilisateur.
+// Tabs principaux (visibles en bottom tab bar) : JAMAIS de back button.
+// La nav primaire = bottom tab, donc tout est accessible directement.
 const PRIMARY_TABS = new Set(['home', 'patrimoine', 'dca', 'analytics']);
 
 function _injectBackButton(viewName){
+    // Skip les tabs principaux : pas de back button
+    if(PRIMARY_TABS.has(viewName)) return;
     const view = document.getElementById('view-' + viewName);
     if(!view) return;
     const hero = view.querySelector('.hero');
     if(!hero) return;
-    // Injecte si pas déjà présent
     if(hero.querySelector(':scope > .back-btn')) return;
     const btn = document.createElement('button');
     btn.className = 'back-btn';
@@ -8932,44 +8932,13 @@ function _injectBackButton(viewName){
     hero.appendChild(btn);
 }
 
-// Affiche/cache le back-btn dynamiquement selon l'historique.
-// Pour les tabs principaux : caché si l'utilisateur arrive directement (pas d'historique).
-// Pour les vues détail : toujours visible.
-function _updateBackButtonsVisibility(){
-    const hist = window._viewHistory || [];
-    const currentView = (document.querySelector('[id^="view-"].show') || {}).id;
-    if(!currentView) return;
-    const viewName = currentView.replace(/^view-/, '');
-    document.querySelectorAll('[id^="view-"] .hero > .back-btn').forEach(btn => {
-        const ownerView = btn.closest('[id^="view-"]');
-        const ownerName = ownerView ? ownerView.id.replace(/^view-/, '') : '';
-        // Sur les tabs principaux : visible seulement si on a de l'historique
-        if(PRIMARY_TABS.has(ownerName)){
-            btn.style.display = (hist.length >= 2) ? 'inline-flex' : 'none';
-        } else {
-            btn.style.display = 'inline-flex';
-        }
-    });
-}
-
-// Injection initiale pour toutes les vues qui ont une .hero
+// Injection initiale pour toutes les vues qui ont une .hero (sauf tabs primaires)
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[id^="view-"]').forEach(v => {
         const name = v.id.replace(/^view-/, '');
         _injectBackButton(name);
     });
-    _updateBackButtonsVisibility();
 });
-
-// Hook : à chaque navigation, on update la visibilité
-const _origShowViewForBack = window.showView;
-if(typeof _origShowViewForBack === 'function'){
-    window.showView = function(...args){
-        const r = _origShowViewForBack.apply(this, args);
-        setTimeout(_updateBackButtonsVisibility, 50);
-        return r;
-    };
-}
 
 function showView(v, opts){
     const next=document.getElementById('view-'+v);
