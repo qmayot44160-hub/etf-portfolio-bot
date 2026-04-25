@@ -5906,6 +5906,46 @@
         }
 
         /* ═══════════════════════════════════════════════════════
+           BACK BUTTON - bouton retour sur les vues drill-down
+           ═══════════════════════════════════════════════════════ */
+        .back-btn {
+            position: absolute;
+            top: 16px; left: 16px;
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--sf-text);
+            padding: 8px 14px 8px 10px;
+            border-radius: 999px;
+            font-family: inherit; font-size: 0.84rem; font-weight: 500;
+            cursor: pointer; z-index: 5;
+            transition: all .18s;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .back-btn:hover {
+            background: rgba(41,151,255,0.12);
+            border-color: rgba(41,151,255,0.3);
+            color: var(--sf-blue);
+            transform: translateX(-2px);
+        }
+        .back-btn:active { transform: translateX(0); }
+        .back-btn svg {
+            width: 14px; height: 14px;
+            stroke: currentColor; stroke-width: 2.5;
+            fill: none; stroke-linecap: round; stroke-linejoin: round;
+        }
+        @media (max-width: 720px){
+            .back-btn {
+                top: 12px; left: 12px;
+                padding: 6px 12px 6px 8px;
+                font-size: 0.78rem;
+            }
+        }
+        /* La hero a besoin de position relative pour que le back-btn soit positionné dessus */
+        [id^="view-"] .hero { position: relative; }
+
+        /* ═══════════════════════════════════════════════════════
            PATRIMOINE HUB - vue consolidée multi-classes avec drill-down
            ═══════════════════════════════════════════════════════ */
         .patrimoine-hero {
@@ -6614,7 +6654,7 @@
      ════════════════════════════════════════════════════════ -->
 <nav class="globalheader">
     <div class="globalheader-inner">
-        <button class="mobile-nav-toggle" onclick="openSettingsDrawer()" aria-label="Ouvrir les paramètres" title="Paramètres">
+        <button class="mobile-nav-toggle" onclick="openSettingsPanel('apparence')" aria-label="Ouvrir les paramètres" title="Paramètres">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
         <div class="globalheader-logo" role="button" tabindex="0" aria-label="Retour à l'accueil" onclick="goHome()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goHome();}"><span class="ghl-mark" aria-hidden="true"><svg viewBox="0 0 512 512"><text x="256" y="262" text-anchor="middle" dominant-baseline="central" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', sans-serif" font-weight="700" font-size="380" letter-spacing="-16" fill="currentColor">Q</text></svg></span><span class="ghl-text">PortfolioQuant</span></div>
@@ -8771,9 +8811,72 @@ function goHome(){
     if(typeof showView === 'function') showView('home');
 }
 
+// Stack d'historique de navigation pour le bouton retour
+window._viewHistory = window._viewHistory || [];
+window.goBackView = function(){
+    const hist = window._viewHistory;
+    if(hist.length < 2) return; // rien à pop
+    hist.pop(); // current
+    const prev = hist[hist.length - 1];
+    hist.pop(); // sera repush par showView
+    showView(prev, { dir: 'right', _fromBack: true });
+};
+
+// Vues qui doivent afficher un bouton retour (vues "détail" / drill-down).
+// Les tabs principaux (home, patrimoine, dca, analytics) n'en ont pas.
+const BACK_BTN_VIEWS = new Set([
+    'portfolio', 'crypto', 'projection', 'trading', 'scanner',
+    'broker', 'auto', 'glossaire', 'securite', 'watchlist', 'discover'
+]);
+
+function _injectBackButton(viewName){
+    const view = document.getElementById('view-' + viewName);
+    if(!view) return;
+    const hero = view.querySelector('.hero');
+    if(!hero) return;
+    // Skip si pas une vue détail
+    if(!BACK_BTN_VIEWS.has(viewName)){
+        // Retire un eventuel back-btn existant
+        const existing = hero.querySelector(':scope > .back-btn');
+        if(existing) existing.remove();
+        return;
+    }
+    // Injecte si pas déjà présent
+    if(hero.querySelector(':scope > .back-btn')) return;
+    const btn = document.createElement('button');
+    btn.className = 'back-btn';
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Retour');
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg><span>Retour</span>';
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if(window._viewHistory.length >= 2){
+            window.goBackView();
+        } else {
+            // Fallback : retour à l'accueil si pas d'historique
+            showView('home');
+        }
+    });
+    hero.appendChild(btn);
+}
+
+// Injection au load pour toutes les vues détail
+document.addEventListener('DOMContentLoaded', () => {
+    BACK_BTN_VIEWS.forEach(_injectBackButton);
+});
+
 function showView(v, opts){
     const next=document.getElementById('view-'+v);
     if(!next)return;
+    // Push dans l'historique sauf si vient d'un goBack (évite empilement)
+    if(!(opts && opts._fromBack)){
+        const hist = window._viewHistory;
+        if(hist[hist.length - 1] !== v) hist.push(v);
+        if(hist.length > 50) hist.shift();
+    } else {
+        window._viewHistory.push(v);
+    }
     const current=document.querySelector('[id^="view-"].show');
     // Direction de transition : 'left' = nouveau vient de la droite (swipe gauche / next),
     // 'right' = nouveau vient de la gauche (swipe droite / prev), undefined = défaut vertical
