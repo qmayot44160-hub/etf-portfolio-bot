@@ -61,11 +61,33 @@
         });
         Object.defineProperty(window, 'Plotly', {value: stub, writable: true, configurable: true});
     })();
+
+    /* TradingView lightweight-charts — lazy load.
+       ~45 KB gzip. Bibliothèque utilisée par Binance, Trading212, Robinhood.
+       Esthétique fintech native, charts time-series performants 60fps. */
+    (function(){
+        let _lwPromise = null;
+        function loadLW(){
+            if(window.LightweightCharts) return Promise.resolve(window.LightweightCharts);
+            if(_lwPromise) return _lwPromise;
+            _lwPromise = new Promise((resolve, reject)=>{
+                const s = document.createElement('script');
+                s.src = 'https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js';
+                s.async = true;
+                s.onload = () => resolve(window.LightweightCharts);
+                s.onerror = (e) => { _lwPromise = null; reject(e); };
+                document.head.appendChild(s);
+            });
+            return _lwPromise;
+        }
+        window.loadLW = loadLW;
+    })();
     </script>
     <!-- Préconnexion DNS+TLS aux origines critiques pour gagner ~100-200ms sur le 1er paint -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.plot.ly">
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -5590,6 +5612,49 @@
             .globalheader-logo { font-size: 0.98rem; }
         }
 
+        /* Allocation donuts twin (Cible vs Actuel) — SVG natif */
+        .alloc-twin {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+            margin-bottom: 16px;
+        }
+        .alloc-twin-block {
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+        .alloc-twin-title {
+            font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em;
+            text-transform: uppercase; color: var(--sf-text-muted);
+        }
+        .alloc-twin-donut {
+            width: 200px; height: 200px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .alloc-twin-legend {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 6px 16px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .alloc-legend-row {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.78rem;
+        }
+        .alloc-legend-dot {
+            width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+        }
+        .alloc-legend-label {
+            color: var(--sf-text); flex: 1; min-width: 0;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .alloc-legend-pct {
+            color: var(--sf-text-muted);
+            font-feature-settings: 'tnum' 1;
+            font-size: 0.72rem;
+        }
+        @media (max-width: 720px){
+            .alloc-twin { gap: 12px; }
+            .alloc-twin-donut { width: 140px; height: 140px; }
+        }
+
         /* ═══════════════════════════════════════════════════════
            PORTFOLIO POSITIONS — grille de cartes type Trade Republic
            ═══════════════════════════════════════════════════════ */
@@ -8333,7 +8398,45 @@ document.addEventListener('click', (e) => {
     _renderPositionCards();
 });
 
-async function refreshPortfolio(){refreshStatus();try{const d=await(await fetch('/api/portfolio')).json();if(d.mode==='not_connected'){document.getElementById('total-value').textContent='--';document.getElementById('cash-value').textContent='--';document.getElementById('total-mode').textContent='Non connecté';document.getElementById('positions-count').textContent='0';document.getElementById('etf-count').textContent='';const cardsEl=document.getElementById('positions-cards');if(cardsEl)cardsEl.innerHTML=emptyState(icon('bank','c-muted sfi-xl'),'Aucun broker ETF connecté','Connectez Interactive Brokers, Degiro ou Alpaca via l\'onglet Connexions.');document.getElementById('allocation-chart').innerHTML=emptyState(icon('chart','c-muted sfi-xl'),'En attente de données','Connectez un broker ETF pour voir votre allocation.');return;}animateVal(document.getElementById('total-value'),d.total_value,'','€');animateVal(document.getElementById('cash-value'),d.cash,'','€');document.getElementById('total-mode').textContent=d.mode==='live'?d.broker:'--';const ap=d.positions.filter(p=>p.shares>0);document.getElementById('positions-count').textContent=ap.length;document.getElementById('etf-count').textContent=d.positions.length+' ETFs suivis';_portfolioState.data=d;_renderPositionCards();const lbl=d.positions.map(p=>p.name),tgt=d.positions.map(p=>p.target_pct),cur=d.positions.map(p=>p.current_pct),col=['#2997ff','#30d158','#ff9f0a','#bf5af2','#ff453a','#64d2ff'];Plotly.newPlot('allocation-chart',[{values:tgt.map(v=>Math.max(v,0.1)),labels:lbl,name:'Cible',type:'pie',hole:0.65,domain:{column:0},marker:{colors:col},textinfo:'label+percent',textfont:{color:'#f5f5f7',size:11,family:'Inter'}},{values:cur.map(v=>Math.max(v,0.1)),labels:lbl,name:'Actuel',type:'pie',hole:0.65,domain:{column:1},marker:{colors:col},textinfo:'label+percent',textfont:{color:'#f5f5f7',size:11,family:'Inter'}}],{...PL,grid:{rows:1,columns:2},annotations:[{text:'Cible',x:0.2,y:0.5,font:{size:13,color:'#86868b',family:'Inter'},showarrow:false},{text:'Actuel',x:0.8,y:0.5,font:{size:13,color:'#86868b',family:'Inter'},showarrow:false}],showlegend:false,height:340},{responsive:true});}catch(e){toast(e.message,true);}}
+async function refreshPortfolio(){refreshStatus();try{const d=await(await fetch('/api/portfolio')).json();if(d.mode==='not_connected'){document.getElementById('total-value').textContent='--';document.getElementById('cash-value').textContent='--';document.getElementById('total-mode').textContent='Non connecté';document.getElementById('positions-count').textContent='0';document.getElementById('etf-count').textContent='';const cardsEl=document.getElementById('positions-cards');if(cardsEl)cardsEl.innerHTML=emptyState(icon('bank','c-muted sfi-xl'),'Aucun broker ETF connecté','Connectez Interactive Brokers, Degiro ou Alpaca via l\'onglet Connexions.');document.getElementById('allocation-chart').innerHTML=emptyState(icon('chart','c-muted sfi-xl'),'En attente de données','Connectez un broker ETF pour voir votre allocation.');return;}animateVal(document.getElementById('total-value'),d.total_value,'','€');animateVal(document.getElementById('cash-value'),d.cash,'','€');document.getElementById('total-mode').textContent=d.mode==='live'?d.broker:'--';const ap=d.positions.filter(p=>p.shares>0);document.getElementById('positions-count').textContent=ap.length;document.getElementById('etf-count').textContent=d.positions.length+' ETFs suivis';_portfolioState.data=d;_renderPositionCards();_renderAllocationDonuts(d);}catch(e){toast(e.message,true);}}
+
+/* Donuts SVG natifs Cible vs Actuel — remplace le double pie Plotly.
+   Élimine Plotly de la page Portefeuille entièrement. */
+function _renderAllocationDonuts(d){
+    const wrap = document.getElementById('allocation-chart');
+    if(!wrap) return;
+    const colors = ['#2997ff','#30d158','#ff9f0a','#bf5af2','#ff453a','#64d2ff','#ffd60a','#ff375f'];
+    const segsTarget = d.positions.map((p,i) => ({
+        label: p.name || p.ticker, value: Math.max(p.target_pct||0, 0.1),
+        color: colors[i % colors.length]
+    }));
+    const segsCurrent = d.positions.map((p,i) => ({
+        label: p.name || p.ticker, value: Math.max(p.current_pct||0, 0.1),
+        color: colors[i % colors.length]
+    }));
+    wrap.innerHTML = `
+        <div class="alloc-twin">
+            <div class="alloc-twin-block">
+                <div class="alloc-twin-title">Cible</div>
+                <div class="alloc-twin-donut" id="alloc-donut-target"></div>
+            </div>
+            <div class="alloc-twin-block">
+                <div class="alloc-twin-title">Actuel</div>
+                <div class="alloc-twin-donut" id="alloc-donut-current"></div>
+            </div>
+        </div>
+        <div class="alloc-twin-legend" id="alloc-twin-legend"></div>`;
+    if(typeof renderSvgDonut === 'function'){
+        renderSvgDonut(document.getElementById('alloc-donut-target'), segsTarget, {size:200, stroke:24, animateMs:500});
+        renderSvgDonut(document.getElementById('alloc-donut-current'), segsCurrent, {size:200, stroke:24, animateMs:500});
+    }
+    document.getElementById('alloc-twin-legend').innerHTML = d.positions.map((p,i) => `
+        <div class="alloc-legend-row">
+            <span class="alloc-legend-dot" style="background:${colors[i % colors.length]}"></span>
+            <span class="alloc-legend-label">${p.name || p.ticker}</span>
+            <span class="alloc-legend-pct">${p.current_pct||0}% / ${p.target_pct||0}%</span>
+        </div>`).join('');
+}
 async function executeRebalance(){try{const o=await(await fetch('/api/rebalance')).json();const c=document.getElementById('rebalance-orders');if(!o.length){c.innerHTML=`<div class="hint-cta" style="border-color:rgba(48,209,88,0.3);color:var(--sf-green);cursor:default">${icon('checkCircle','c-green')}<span>Portefeuille déjà équilibré</span></div>`;return;}c.innerHTML=`<table><thead><tr><th>ETF</th><th>Action</th><th>Parts</th><th>Montant</th></tr></thead><tbody>${o.map(x=>`<tr><td>${x.name||x.ticker}</td><td><span class="pill ${(x.action||'').includes('BUY')?'pill-green':'pill-red'}">${x.action||'-'}</span></td><td class="mono">${x.shares||'-'}</td><td class="mono">${x.amount?fmt(x.amount):'-'}</td></tr>`).join('')}</tbody></table>`;}catch(e){toast(e.message,true);}}
 
 /* ═══ DCA ═══ */
