@@ -1,22 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Quant">
-  <!-- Q stylisé : anneau parfait + queue trapézoïdale tapered.
-       La queue traverse le stroke de l'anneau (intégrée, pas posée)
-       et s'effile vers l'extérieur — clin d'œil typo SF Pro Display. -->
-  <g fill="currentColor">
-    <!-- Anneau : outer 168, inner 76 -->
-    <path fill-rule="evenodd" d="
-      M 256 88 a 168 168 0 1 0 0.001 0 Z
-      M 256 180 a 76 76 0 1 1 -0.001 0 Z
-    "/>
-    <!-- Queue tapered : 4 points, 45°, base large (44px) → pointe fine (20px),
-         coins légèrement arrondis sur la pointe pour la signature. -->
-    <path d="
-      M 332 364
-      L 364 332
-      L 442 428
-      Q 452 442 442 452
-      Q 432 462 428 442
-      Z
-    "/>
-  </g>
+  <!-- Q typographique : on utilise le Q de la stack système
+       (SF Pro Display sur Apple, Segoe UI sur Windows, Roboto sur Android).
+       Bold (700), letterspacing serré, currentColor pour héritage thème. -->
+  <text x="256" y="256"
+        text-anchor="middle"
+        dominant-baseline="central"
+        font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', sans-serif"
+        font-weight="700"
+        font-size="440"
+        letter-spacing="-20"
+        fill="currentColor">Q</text>
 </svg>

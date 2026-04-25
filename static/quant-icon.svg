@@ -17,24 +17,15 @@
   <rect width="512" height="512" rx="116" fill="url(#qi-inner-edge)"
         style="mix-blend-mode: screen"/>
 
-  <!-- Q stylisé : anneau + queue tapered (même path que le glyph header,
-       mais centré sur 256/256 dans une carte) -->
-  <g fill="#ffffff" transform="translate(0,0)">
-    <!-- Anneau plus compact (outer 130, inner 60) pour padding généreux -->
-    <path fill-rule="evenodd" d="
-      M 256 126 a 130 130 0 1 0 0.001 0 Z
-      M 256 196 a 60 60 0 1 1 -0.001 0 Z
-    "/>
-    <!-- Queue tapered, recentrée sur la nouvelle taille d'anneau -->
-    <path d="
-      M 314 348
-      L 348 314
-      L 410 380
-      Q 420 392 412 402
-      Q 402 412 396 400
-      Z
-    "/>
-  </g>
+  <!-- Q typographique blanc, centré, en SF Pro Display Bold (ou fallback système). -->
+  <text x="256" y="262"
+        text-anchor="middle"
+        dominant-baseline="central"
+        font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', sans-serif"
+        font-weight="700"
+        font-size="380"
+        letter-spacing="-16"
+        fill="#ffffff">Q</text>
 
   <!-- Contour bleu nuit + liseré intérieur "verre" -->
   <rect x="2" y="2" width="508" height="508" rx="114"
