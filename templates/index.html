@@ -273,10 +273,11 @@
             position: relative; overflow: hidden;
         }
         .kill-chip .sfi {
-            color: var(--sf-red);
-            opacity: 0.85;
-            transition: opacity 0.22s ease;
+            color: rgba(235, 235, 240, 0.55);
+            opacity: 1;
+            transition: color 0.22s ease;
         }
+        .kill-chip:hover .sfi { color: var(--sf-red); }
         .kill-chip::before {
             content: ''; position: absolute; inset: 0;
             background: radial-gradient(circle at 50% 50%, rgba(255,69,58,0.28), transparent 70%);
@@ -3535,6 +3536,25 @@
             background: var(--sf-blue);
         }
         .settings-rail-item .sfi { width: 15px; height: 15px; flex-shrink: 0; }
+        .settings-rail-item.rail-logout {
+            margin-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            border-radius: 0 0 9px 9px;
+            color: var(--sf-text-muted);
+            padding-top: 12px;
+        }
+        .settings-rail-item.rail-logout:hover {
+            color: var(--sf-red);
+            background: rgba(255,69,58,0.08);
+        }
+        .settings-rail-item.rail-logout .sfi { color: inherit; }
+        .rail-spacer { flex: 1; min-height: 12px; }
+        @media (max-width: 720px){
+            .rail-spacer { display: none; }
+            .settings-rail-item.rail-logout {
+                margin-top: 0; border-top: none; padding-top: 8px;
+            }
+        }
         .settings-content {
             min-height: 60vh;
         }
@@ -6841,6 +6861,8 @@
             <button class="settings-rail-item" data-panel="integrations"><span class="sfi" data-icon="plug"></span>Intégrations</button>
             <button class="settings-rail-item" data-panel="raccourcis"><span class="sfi" data-icon="key"></span>Raccourcis</button>
             <button class="settings-rail-item" data-panel="apropos"><span class="sfi" data-icon="info"></span>À propos</button>
+            <div class="rail-spacer"></div>
+            <button class="settings-rail-item rail-logout" onclick="logoutUser()" type="button"><span class="sfi" data-icon="logout"></span>Se déconnecter</button>
         </nav>
 
         <!-- Content -->
