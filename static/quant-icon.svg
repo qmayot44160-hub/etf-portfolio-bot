@@ -1,23 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Quant">
-  <!-- Carré arrondi monochrome — pas de gradient, pas de glow.
-       Style icône système iOS / One UI : une seule couleur, une seule forme. -->
+  <!-- Carré arrondi monochrome — style icône système iOS / One UI. -->
   <rect width="512" height="512" rx="116" fill="#0a84ff"/>
 
-  <!-- Q : anneau parfait (outer 156 - inner 88 = épaisseur 68px)
-       + queue rectangulaire à 45° depuis le bord inférieur-droit.
-       Tout en blanc pur, en even-odd pour l'évidement de l'anneau. -->
+  <!-- Q : anneau plus compact (rayons réduits → padding généreux autour,
+       comme les icônes système Apple). Outer 118, inner 54.
+       Even-odd pour évider l'anneau. -->
   <path fill="#ffffff" fill-rule="evenodd" d="
-    M 256 100
-    a 156 156 0 1 0 0.001 0
+    M 256 138
+    a 118 118 0 1 0 0.001 0
     Z
-    M 256 188
-    a 68 68 0 1 1 -0.001 0
+    M 256 202
+    a 54 54 0 1 1 -0.001 0
     Z
   "/>
 
-  <!-- Queue : petit trait diagonal en bas-droite, sortant du Q.
-       Coins arrondis pour rester cohérent avec le rayon de la carte. -->
-  <rect x="338" y="324" width="118" height="38" rx="19"
+  <!-- Queue : trait diagonal court à 45°, croisant l'anneau en bas-droite.
+       Largeur alignée sur l'épaisseur de l'anneau (64px) pour cohérence. -->
+  <rect x="304" y="332" width="78" height="28" rx="14"
         fill="#ffffff"
-        transform="rotate(45 338 324)"/>
+        transform="rotate(45 343 346)"/>
 </svg>
