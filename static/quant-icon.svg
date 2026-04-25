@@ -1,33 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Quant">
-  <defs>
-    <linearGradient id="qi-bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#13131a"/>
-      <stop offset="100%" stop-color="#05050a"/>
-    </linearGradient>
-    <linearGradient id="qi-ring" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0a84ff"/>
-      <stop offset="100%" stop-color="#64d2ff"/>
-    </linearGradient>
-    <linearGradient id="qi-tail" x1="0" y1="1" x2="1" y2="0">
-      <stop offset="0%" stop-color="#64d2ff"/>
-      <stop offset="100%" stop-color="#30d158"/>
-    </linearGradient>
-    <radialGradient id="qi-glow" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0%" stop-color="#30d158" stop-opacity="0.55"/>
-      <stop offset="100%" stop-color="#30d158" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="512" height="512" rx="112" fill="url(#qi-bg)"/>
-  <circle cx="120" cy="120" r="200" fill="#0a84ff" opacity="0.08"/>
-  <circle cx="220" cy="256" r="136" fill="none"
-          stroke="url(#qi-ring)" stroke-width="38" stroke-linecap="round"
-          stroke-dasharray="760 100"
-          transform="rotate(-25 220 256)"/>
-  <path d="M 286 348
-           Q 332 384, 384 360
-           T 460 264"
-        fill="none" stroke="url(#qi-tail)" stroke-width="34"
-        stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="460" cy="264" r="56" fill="url(#qi-glow)"/>
-  <circle cx="460" cy="264" r="18" fill="#30d158"/>
+  <!-- Carré arrondi monochrome — pas de gradient, pas de glow.
+       Style icône système iOS / One UI : une seule couleur, une seule forme. -->
+  <rect width="512" height="512" rx="116" fill="#0a84ff"/>
+
+  <!-- Q : anneau parfait (outer 156 - inner 88 = épaisseur 68px)
+       + queue rectangulaire à 45° depuis le bord inférieur-droit.
+       Tout en blanc pur, en even-odd pour l'évidement de l'anneau. -->
+  <path fill="#ffffff" fill-rule="evenodd" d="
+    M 256 100
+    a 156 156 0 1 0 0.001 0
+    Z
+    M 256 188
+    a 68 68 0 1 1 -0.001 0
+    Z
+  "/>
+
+  <!-- Queue : petit trait diagonal en bas-droite, sortant du Q.
+       Coins arrondis pour rester cohérent avec le rayon de la carte. -->
+  <rect x="338" y="324" width="118" height="38" rx="19"
+        fill="#ffffff"
+        transform="rotate(45 338 324)"/>
 </svg>
