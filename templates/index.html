@@ -6003,6 +6003,83 @@
         }
 
         /* ═══════════════════════════════════════════════════════
+           HEADER SEARCH BAR + QUICK ACTIONS (desktop only)
+           ═══════════════════════════════════════════════════════ */
+        .header-search {
+            display: inline-flex; align-items: center; gap: 10px;
+            flex: 0 1 360px;
+            max-width: 360px;
+            min-width: 200px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 10px;
+            cursor: text;
+            color: var(--sf-text-muted);
+            font-family: inherit; font-size: 0.84rem;
+            transition: all .18s;
+            margin: 0 16px;
+        }
+        .header-search:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(41,151,255,0.25);
+            color: var(--sf-text-secondary);
+        }
+        .header-search:focus-visible {
+            outline: 2px solid var(--sf-blue);
+            outline-offset: 2px;
+        }
+        .header-search .sfi {
+            width: 14px; height: 14px; flex-shrink: 0;
+        }
+        .header-search-placeholder {
+            flex: 1; min-width: 0;
+            text-align: left;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .header-search-kbd {
+            font-size: 0.68rem; font-weight: 600;
+            padding: 2px 7px; border-radius: 5px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: var(--sf-text-muted);
+            font-family: 'SF Mono', Menlo, monospace;
+            white-space: nowrap;
+        }
+
+        .header-quick-actions {
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .header-qa-btn {
+            width: 32px; height: 32px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: var(--sf-text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all .18s;
+        }
+        .header-qa-btn:hover {
+            background: rgba(41,151,255,0.12);
+            border-color: rgba(41,151,255,0.3);
+            color: var(--sf-blue);
+            transform: translateY(-1px);
+        }
+        .header-qa-btn:active { transform: translateY(0); }
+        .header-qa-btn svg {
+            width: 15px; height: 15px;
+            stroke: currentColor; stroke-width: 2;
+            fill: none; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        /* Mobile : barre de recherche cachee (la loupe en bottom tab fait le job) */
+        @media (max-width: 1100px){
+            .header-search { display: none; }
+            .header-quick-actions { display: none; }
+        }
+
+        /* ═══════════════════════════════════════════════════════
            BACK BUTTON - bouton retour sur les vues drill-down
            ═══════════════════════════════════════════════════════ */
         .back-btn {
@@ -6856,8 +6933,27 @@
             <button class="globalheader-link" data-view="securite">Sécurité</button>
             <button class="globalheader-link" data-view="glossaire">Glossaire</button>
         </div>
-        <div style="display:flex;align-items:center;gap:12px">
-            <div id="mode-badge" class="hdr-chip mode-chip"><span class="chip-dot"></span>PAPER</div>
+        <!-- Barre de recherche desktop : visible, clic ouvre la palette cmd-K -->
+        <button class="header-search" type="button" onclick="openCmdK()" aria-label="Rechercher" title="Rechercher (Ctrl+K)">
+            <span class="sfi" data-icon="search"></span>
+            <span class="header-search-placeholder">Chercher un ETF, une page, une commande...</span>
+            <span class="header-search-kbd" id="header-search-kbd">Ctrl K</span>
+        </button>
+        <div style="display:flex;align-items:center;gap:8px">
+            <!-- Quick actions desktop : raccourcis pour les commandes les plus utilisees -->
+            <div class="header-quick-actions">
+                <button class="header-qa-btn" onclick="quickRefreshAll()" title="Rafraichir toutes les donnees" aria-label="Rafraichir">
+                    <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+                </button>
+                <button class="header-qa-btn" onclick="quickLaunchScan()" title="Lancer un scan d'opportunites" aria-label="Scanner">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/><path d="M11 8v6M8 11h6" opacity="0.5"/></svg>
+                </button>
+                <button class="header-qa-btn" onclick="quickExportCsv()" title="Exporter CSV" aria-label="Exporter">
+                    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </button>
+            </div>
+            <span class="hdr-divider" aria-hidden="true"></span>
+            <div id="mode-badge" class="hdr-chip mode-chip" onclick="quickTogglePaperLive()" style="cursor:pointer" title="Cliquer pour basculer Paper/Live"><span class="chip-dot"></span>PAPER</div>
             <button id="kill-switch-btn" class="hdr-chip kill-chip" onclick="triggerKillSwitch()" title="Arrêt d'urgence du bot"><span class="sfi" data-icon="power"></span>KILL</button>
             <div id="bot-status" class="globalheader-status"><span class="dot" style="background:var(--sf-orange)"></span> Simulation</div>
             <button id="wallet-btn" class="wallet-btn" onclick="toggleWalletDrawer()" title="Wallet : patrimoine et activité" aria-haspopup="dialog"><span class="sfi" data-icon="wallet"></span></button>
@@ -12423,6 +12519,78 @@ function _injectPanelBackButtons(){
     });
 }
 document.addEventListener('DOMContentLoaded', _injectPanelBackButtons);
+
+// ═══ QUICK ACTIONS (header desktop) ═══
+window.quickRefreshAll = function(){
+    if(typeof toast === 'function') toast('Rafraichissement...');
+    try { if(typeof refreshStatus === 'function') refreshStatus(); } catch(e){}
+    try { if(typeof refreshPortfolio === 'function') refreshPortfolio(); } catch(e){}
+    try { if(typeof refreshCryptoPortfolio === 'function') refreshCryptoPortfolio(); } catch(e){}
+    try { if(typeof loadHome === 'function') loadHome(); } catch(e){}
+    try { if(typeof loadPatrimoine === 'function') loadPatrimoine(); } catch(e){}
+};
+window.quickLaunchScan = function(){
+    if(typeof showView === 'function') showView('scanner');
+    setTimeout(() => {
+        try { if(typeof loadScannerCached === 'function') loadScannerCached(); } catch(e){}
+    }, 200);
+};
+window.quickExportCsv = function(){
+    // Telecharge le CSV des positions ETF via /api/portfolio
+    fetch('/api/portfolio').then(r => r.json()).then(d => {
+        if(!d || !Array.isArray(d.positions)){
+            if(typeof toast === 'function') toast('Aucune donnee a exporter', true);
+            return;
+        }
+        const headers = ['ticker','name','category','shares','price','value','target_pct','current_pct','drift'];
+        const lines = [headers.join(',')];
+        d.positions.forEach(p => {
+            lines.push(headers.map(h => {
+                const v = p[h];
+                if(v == null) return '';
+                const s = String(v);
+                return s.includes(',') ? `"${s.replace(/"/g,'""')}"` : s;
+            }).join(','));
+        });
+        const csv = lines.join('\n');
+        const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `portfolio-${new Date().toISOString().slice(0,10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        if(typeof toast === 'function') toast('CSV exporte');
+    }).catch(e => {
+        if(typeof toast === 'function') toast('Erreur export : ' + e.message, true);
+    });
+};
+window.quickTogglePaperLive = function(){
+    fetch('/api/settings').then(r => r.json()).then(s => {
+        const newPaper = !(s && s.paper_mode);
+        fetch('/api/settings/paper-mode', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({enabled: newPaper})
+        }).then(r => r.json()).then(res => {
+            if(typeof toast === 'function') toast('Mode bascule : ' + (res.paper_mode ? 'PAPER' : 'LIVE'));
+            // Refresh status badge
+            try { if(typeof refreshStatus === 'function') refreshStatus(); } catch(e){}
+        });
+    });
+};
+
+// Adapte le raccourci OS dans la barre de recherche header
+(function(){
+    const el = document.getElementById('header-search-kbd');
+    if(!el) return;
+    const ua = navigator.userAgent;
+    const platform = (navigator.platform || '').toLowerCase();
+    const isMac = /mac|iphone|ipad|ipod/i.test(platform) || /Mac OS X/.test(ua);
+    el.textContent = isMac ? '⌘ K' : 'Ctrl K';
+})();
 
 // Toggle intelligent de la roue dentée :
 // - Drawer fermé → ouvre (vue liste)
