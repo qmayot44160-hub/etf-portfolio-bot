@@ -3549,6 +3549,28 @@
         }
         .settings-rail-item.rail-logout .sfi { color: inherit; }
         .rail-spacer { flex: 1; min-height: 12px; }
+        /* MEXC-style big logout CTA at the bottom of the drawer body */
+        .drawer-logout-cta {
+            padding: 16px 16px 28px;
+            display: flex; justify-content: center;
+        }
+        .drawer-logout-btn {
+            width: 100%; max-width: 520px;
+            padding: 16px 20px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.04);
+            color: var(--sf-text);
+            font-size: 0.98rem; font-weight: 600;
+            font-family: inherit; cursor: pointer;
+            transition: all 0.18s ease;
+        }
+        .drawer-logout-btn:hover {
+            color: var(--sf-red);
+            border-color: rgba(255,69,58,0.4);
+            background: rgba(255,69,58,0.08);
+        }
+        .drawer-logout-btn:active { transform: scale(0.985); }
         @media (max-width: 720px){
             .rail-spacer { display: none; }
             .settings-rail-item.rail-logout {
@@ -7322,6 +7344,10 @@
             </div>
 
         </div>
+    </div>
+    </div>
+    <div class="drawer-logout-cta">
+        <button type="button" class="drawer-logout-btn" onclick="logoutUser()">Se déconnecter</button>
     </div>
     </div><!-- .settings-drawer-body -->
 </aside><!-- #settings-drawer -->
