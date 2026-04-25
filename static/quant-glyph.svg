@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Quant">
+  <!-- Glyphe Q seul, sans fond. À utiliser inline dans le header
+       (où le fond noir de l'app sert déjà de carte). currentColor pour
+       hériter de la couleur du parent — bascule auto en thème clair. -->
+  <path fill="currentColor" fill-rule="evenodd" d="
+    M 256 60
+    a 168 168 0 1 0 0.001 0
+    Z
+    M 256 152
+    a 76 76 0 1 1 -0.001 0
+    Z
+  "/>
+  <rect x="304" y="346" width="120" height="40" rx="20"
+        fill="currentColor"
+        transform="rotate(45 364 366)"/>
+</svg>
