@@ -190,13 +190,35 @@
             display: inline-flex; align-items: center; gap: 9px;
         }
         .globalheader-logo .ghl-mark {
-            width: 22px; height: 22px; flex-shrink: 0;
-            display: inline-flex; align-items: center; justify-content: center;
-            color: var(--sf-text);
+            width: 30px; height: 30px; flex-shrink: 0;
+            border-radius: 8px; overflow: hidden;
+            display: inline-block;
+            background: #0a0a0e;
+            border: 1px solid #1a3a7a;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.08),
+                inset 0 -1px 0 rgba(0,0,0,0.3),
+                0 0 0 1px rgba(255,255,255,0.04),
+                0 2px 8px rgba(10,40,90,0.35);
+            position: relative;
         }
-        .globalheader-logo .ghl-mark svg { width: 100%; height: 100%; display: block; }
+        /* Gloss top — reflet doux sur la moitié supérieure */
+        .globalheader-logo .ghl-mark::before {
+            content: ''; position: absolute; inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(180deg,
+                rgba(255,255,255,0.10) 0%,
+                rgba(255,255,255,0.02) 45%,
+                transparent 100%);
+            pointer-events: none;
+        }
+        .globalheader-logo .ghl-mark svg {
+            width: 70%; height: 70%; display: block;
+            margin: 15%; position: relative; z-index: 1;
+            color: #ffffff;
+        }
         @media (max-width: 720px){
-            .globalheader-logo .ghl-mark { width: 20px; height: 20px; }
+            .globalheader-logo .ghl-mark { width: 26px; height: 26px; border-radius: 7px; }
         }
         .globalheader-logo:hover { opacity: 0.78; }
         .globalheader-logo:active { transform: scale(0.96); }
