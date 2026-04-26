@@ -163,7 +163,7 @@
            ════════════════════════════════════════════════ */
         body::before {
             content: '';
-            position: fixed; inset: -20%; z-index: -2;
+            position: fixed; inset: 0; z-index: -2;
             pointer-events: none;
             background:
                 radial-gradient(40vw 40vw at 15% 10%,  rgba(10,132,255,0.14), transparent 60%),
@@ -175,8 +175,8 @@
         }
         @keyframes auroraDrift {
             0%   { transform: translate3d(0, 0, 0) scale(1); }
-            50%  { transform: translate3d(-3%, 2%, 0) scale(1.05); }
-            100% { transform: translate3d(2%, -3%, 0) scale(0.98); }
+            50%  { transform: translate3d(-3%, 2%, 0) scale(1.08); }
+            100% { transform: translate3d(2%, -3%, 0) scale(1.0); }
         }
 
         /* ════════════════════════════════════════════════
@@ -10835,6 +10835,9 @@ function _formatSignedCurrency(v, ccy='€'){
 function updateHeroPortfolio(totalValue, range, realValues){
     const wrap = document.getElementById('hero-portfolio');
     if(!wrap || totalValue == null || !isFinite(totalValue)) return;
+    wrap.style.maxWidth = '';
+    const _show = id => { const el = document.getElementById(id); if(el) el.style.display = ''; };
+    _show('hero-sparkline-wrap'); _show('hero-change'); _show('hero-timerange');
     HERO_STATE.lastTotal = totalValue;
     range = range || HERO_STATE.range;
     HERO_STATE.range = range;
@@ -10852,6 +10855,7 @@ function updateHeroPortfolio(totalValue, range, realValues){
     // Main value
     const totalEl = document.getElementById('hero-total');
     if(totalEl){
+        delete totalEl.dataset.placeholder;
         if(totalEl.querySelector('.skel')) totalEl.innerHTML = '';
         animateCountUp(totalEl, totalValue, {
             decimals: 0, duration: 900,
@@ -11008,6 +11012,8 @@ async function loadHome(){
             const heroTot = document.getElementById('hero-total');
             if(heroTot && !heroTot.dataset.placeholder){
                 heroTot.dataset.placeholder = '1';
+                const hpEl = document.getElementById('hero-portfolio');
+                if(hpEl) hpEl.style.maxWidth = '820px';
                 // IMPORTANT : #hero-total hérite de letter-spacing:-0.045em +
                 // -webkit-text-fill-color:transparent (dégradé du gros prix).
                 // On reset ces propriétés sur le wrapper, sinon le texte est
