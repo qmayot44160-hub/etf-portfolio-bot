@@ -4155,6 +4155,36 @@
             margin-left: 4px; font-weight: 500;
         }
 
+        .hp-split-info {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            margin-bottom: 14px;
+            font-size: 0.78rem; color: var(--sf-text-secondary);
+        }
+        .hp-split-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 10px; border-radius: 99px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .hp-split-pill strong { color: var(--sf-text); font-weight: 600; font-variant-numeric: tabular-nums; }
+        .hp-split-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+        .hp-split-pill.etf .dot { background: var(--sf-blue); }
+        .hp-split-pill.crypto .dot { background: var(--sf-orange); }
+        .hp-split-cta {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 10px; border-radius: 7px;
+            background: rgba(10,132,255,0.10);
+            border: 1px solid rgba(10,132,255,0.25);
+            color: var(--sf-blue);
+            font-family: inherit; font-size: 0.76rem; font-weight: 500;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .hp-split-cta:hover {
+            background: rgba(10,132,255,0.16);
+            border-color: rgba(10,132,255,0.4);
+            transform: translateY(-1px);
+        }
+
         .hp-timerange {
             display: inline-flex; padding: 3px; margin-bottom: 18px;
             background: rgba(255,255,255,0.04);
@@ -7098,6 +7128,7 @@
                     <span class="hp-change-sub" id="hero-change-period">aujourd'hui</span>
                 </div>
             </div>
+            <div class="hp-split-info" id="hero-split-info" style="display:none"></div>
             <div class="hp-timerange" id="hero-timerange" role="tablist" aria-label="Période">
                 <button data-range="1D" class="active" role="tab">1J</button>
                 <button data-range="1W" role="tab">1S</button>
@@ -10657,8 +10688,9 @@ async function collectAppState(){
         fetch('/api/notifications/config').then(r=>r.json()),
         fetch('/api/health').then(r=>r.json()),
         fetch('/api/portfolio').then(r=>r.json()),
+        fetch('/api/crypto/portfolio').then(r=>r.ok?r.json():null),
     ]);
-    const [st, cst, set, notif, hlt, pf] = fetches.map(f => f.status==='fulfilled'?f.value:null);
+    const [st, cst, set, notif, hlt, pf, cpf] = fetches.map(f => f.status==='fulfilled'?f.value:null);
     if(st){ state.broker = !!st.broker_connected; state.brokerName = st.broker_name || ''; }
     if(cst){ state.cryptoBroker = !!cst.connected; state.cryptoBrokerName = cst.broker_name || ''; }
     if(set){ state.paperMode = set.paper_mode !== false; state.killSwitch = !!set.kill_switch_active; }
@@ -10666,8 +10698,14 @@ async function collectAppState(){
     if(hlt){ state.health = hlt.health || 'unknown'; state.uptime = hlt.uptime_human;
              state.lastSeen = hlt.last_seen_at; state.trades24 = hlt.trades_last_24h||0;
              state.errors24 = hlt.errors_last_24h||0; }
+    // Valeurs separees ETF / Crypto. null = pas connecte, number = connecte (0 si vide)
+    state.etfValue = (pf && pf.mode !== 'not_connected') ? Number(pf.total_value || 0) : null;
+    state.cryptoValue = (state.cryptoBroker && cpf && cpf.total_value != null) ? Number(cpf.total_value) : null;
+    // totalValue agrege (null si rien connecte). 1$ ~= 1€ comme dans loadPatrimoine.
+    if(state.etfValue !== null || state.cryptoValue !== null){
+        state.totalValue = (state.etfValue || 0) + (state.cryptoValue || 0);
+    }
     if(pf && pf.mode !== 'not_connected'){
-        state.totalValue = pf.total_value;
         state.positions = (pf.positions||[]).filter(p=>p.shares>0).length;
     }
     return state;
@@ -10994,9 +11032,37 @@ async function loadHome(){
 
         // KPIs
         const totalEl = document.getElementById('home-total');
+        const splitInfo = document.getElementById('hero-split-info');
+        const hasETF = s.etfValue !== null;
+        const hasCrypto = s.cryptoValue !== null;
         if(s.totalValue !== null){
             totalEl.innerHTML = ''; animateVal(totalEl, s.totalValue, '', '€', 0);
-            document.getElementById('home-total-sub').textContent = s.brokerName || '-';
+            // Sub-label : nom du/des broker(s) connectes
+            const names = [];
+            if(hasETF && s.brokerName) names.push(s.brokerName);
+            if(hasCrypto && s.cryptoBrokerName) names.push(s.cryptoBrokerName);
+            document.getElementById('home-total-sub').textContent = names.join(' + ') || '-';
+            // Split info sous le hero : breakdown si les deux, mini-CTA si un seul
+            if(splitInfo){
+                if(hasETF && hasCrypto){
+                    splitInfo.style.display = 'flex';
+                    splitInfo.innerHTML =
+                        `<span class="hp-split-pill etf"><span class="dot"></span>ETF <strong>${fmt(s.etfValue)}</strong></span>` +
+                        `<span class="hp-split-pill crypto"><span class="dot"></span>Crypto <strong>${fmtU(s.cryptoValue)}</strong></span>`;
+                } else if(hasETF){
+                    splitInfo.style.display = 'flex';
+                    splitInfo.innerHTML =
+                        `<span class="hp-split-pill etf"><span class="dot"></span>ETF <strong>${fmt(s.etfValue)}</strong></span>` +
+                        `<button class="hp-split-cta" onclick="showView('crypto')">+ Connecter un exchange crypto</button>`;
+                } else if(hasCrypto){
+                    splitInfo.style.display = 'flex';
+                    splitInfo.innerHTML =
+                        `<span class="hp-split-pill crypto"><span class="dot"></span>Crypto <strong>${fmtU(s.cryptoValue)}</strong></span>` +
+                        `<button class="hp-split-cta" onclick="showView('broker')">+ Connecter IBKR pour les ETF</button>`;
+                } else {
+                    splitInfo.style.display = 'none';
+                }
+            }
             // Trading-app hero : big portfolio value + sparkline (vraies données via /api/portfolio/history)
             updateHeroPortfolio(s.totalValue, HERO_STATE.range);
             _heroLoadRealSeries(HERO_STATE.range).then(real => {
@@ -11006,6 +11072,7 @@ async function loadHome(){
                 }
             }).catch(() => {});
         }else{
+            if(splitInfo) splitInfo.style.display = 'none';
             totalEl.innerHTML = '<span title="Aucun broker connecté - la valeur de ton portefeuille apparaîtra ici une fois IBKR ou Binance branché" style="color:var(--sf-text-muted);cursor:help">-</span>';
             document.getElementById('home-total-sub').textContent = 'Aucun broker connecté';
             // Onboarding hero : plutôt qu'un simple label gris, on propose un vrai CTA
