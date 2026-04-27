@@ -394,6 +394,73 @@ def api_broker_account():
         return jsonify({"error": str(e)}), 500
 
 
+# ── API: Connecteurs (architecture universelle) ─────────
+# Coexiste avec /api/brokers ci-dessus. La nouvelle UI utilisera /api/connectors,
+# l'ancienne UI continue d'utiliser /api/broker/* tant que la migration n'est pas finie.
+
+@app.route("/api/connectors")
+def api_connectors_list():
+    """Liste tous les connecteurs disponibles, avec leurs metadata.
+    Query optionnel : ?asset_class=crypto pour filtrer.
+    """
+    from connectors import list_connectors as _list
+    asset_class = request.args.get("asset_class")
+    return jsonify(_list(asset_class=asset_class))
+
+
+@app.route("/api/connectors/active")
+def api_connectors_active():
+    """Liste les comptes actuellement connectes via le manager."""
+    from connectors import get_manager
+    return jsonify(get_manager().list_active())
+
+
+@app.route("/api/connectors/connect", methods=["POST"])
+def api_connectors_connect():
+    """Connecte un connecteur.
+    Body : {connector_id: str, credentials: {...}}
+    Retourne : {ok, account_id, ...} ou {ok: false, error}.
+    """
+    from connectors import get_manager
+    data = request.get_json() or {}
+    connector_id = data.get("connector_id")
+    credentials = data.get("credentials", {})
+    if not connector_id:
+        return jsonify({"ok": False, "error": "connector_id requis"}), 400
+    result = get_manager().connect(connector_id, credentials)
+    return jsonify(result)
+
+
+@app.route("/api/connectors/disconnect", methods=["POST"])
+def api_connectors_disconnect():
+    """Deconnecte un compte. Body : {account_id}."""
+    from connectors import get_manager
+    data = request.get_json() or {}
+    account_id = data.get("account_id")
+    if not account_id:
+        return jsonify({"ok": False, "error": "account_id requis"}), 400
+    return jsonify(get_manager().disconnect(account_id))
+
+
+@app.route("/api/connectors/positions")
+def api_connectors_positions():
+    """Toutes les positions agregees de tous les comptes connectes."""
+    from connectors import get_manager
+    return jsonify(get_manager().all_positions())
+
+
+@app.route("/api/portfolio/aggregated")
+def api_portfolio_aggregated():
+    """Vue agregee : total + repartition par classe d'actif + comptes + positions.
+
+    C'est le futur endpoint principal du dashboard une fois la migration finie.
+    Pour l'instant ne reflete que les comptes connectes via /api/connectors/connect,
+    pas les anciens connectes via /api/broker/connect ou /api/crypto/connect.
+    """
+    from connectors import get_manager
+    return jsonify(get_manager().aggregated_summary())
+
+
 # ── API: Portfolio ─────────────────────────────────────
 
 @app.route("/api/portfolio")
