@@ -1346,6 +1346,225 @@
         #view-trading .hero   { --hero-glow: rgba(100,210,255,0.12); }
         #view-scanner .hero   { --hero-glow: rgba(48,209,88,0.10); }
         #view-broker .hero    { --hero-glow: rgba(255,69,58,0.10); }
+
+        /* ════════════════════════════════════════════════
+           CONNECTEURS UNIVERSELS - cards, filtres, modal
+           ════════════════════════════════════════════════ */
+        .conn-filters {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .conn-filters::-webkit-scrollbar { display: none; }
+        .conn-filter {
+            padding: 7px 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 99px;
+            color: var(--sf-text-secondary);
+            font-family: inherit; font-size: 0.82rem; font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.18s;
+        }
+        .conn-filter:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--sf-text);
+        }
+        .conn-filter.active {
+            background: rgba(10,132,255,0.14);
+            border-color: rgba(10,132,255,0.35);
+            color: var(--sf-blue);
+        }
+        .conn-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 14px;
+        }
+        .conn-card {
+            position: relative;
+            padding: 18px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex; flex-direction: column; gap: 10px;
+            text-align: left;
+            font-family: inherit;
+            color: var(--sf-text);
+        }
+        .conn-card:hover {
+            border-color: rgba(10,132,255,0.4);
+            background: rgba(10,132,255,0.05);
+            transform: translateY(-2px);
+        }
+        .conn-card-head {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 10px;
+        }
+        .conn-card-title {
+            font-size: 0.95rem; font-weight: 600; color: var(--sf-text);
+        }
+        .conn-card-class {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 3px 9px; border-radius: 99px;
+            font-size: 0.68rem; font-weight: 500;
+            text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .conn-card-class.equity        { background: rgba(10,132,255,0.12); color: #5eb1ff; }
+        .conn-card-class.crypto        { background: rgba(255,159,10,0.12); color: #ffb84d; }
+        .conn-card-class.cash          { background: rgba(48,209,88,0.12); color: #7ddc9a; }
+        .conn-card-class.real_estate   { background: rgba(191,90,242,0.12); color: #d4a3ff; }
+        .conn-card-class.life_insurance { background: rgba(100,210,255,0.12); color: #8edcff; }
+        .conn-card-class.lending       { background: rgba(255,69,58,0.12); color: #ff8a82; }
+        .conn-card-class.commodity     { background: rgba(255,214,10,0.12); color: #ffe066; }
+        .conn-card-class.bond          { background: rgba(48,209,88,0.12); color: #7ddc9a; }
+        .conn-card-class.other         { background: rgba(255,255,255,0.08); color: var(--sf-text-muted); }
+        .conn-card-desc {
+            color: var(--sf-text-secondary); font-size: 0.8rem;
+            line-height: 1.45; flex: 1;
+        }
+        .conn-card-flags {
+            display: flex; gap: 6px; flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .conn-card-flag {
+            font-size: 0.65rem; font-weight: 600;
+            padding: 2px 7px; border-radius: 5px;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .conn-card-flag.local { background: rgba(255,159,10,0.14); color: #ffb84d; }
+        .conn-card-flag.beta  { background: rgba(191,90,242,0.14); color: #d4a3ff; }
+        .conn-card-flag.dep   { background: rgba(255,255,255,0.06); color: var(--sf-text-muted); }
+        .conn-card-cta {
+            color: var(--sf-blue); font-size: 0.82rem; font-weight: 500;
+            margin-top: 4px;
+        }
+
+        /* Comptes actifs */
+        .conn-active-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+        .conn-active-card {
+            display: flex; flex-direction: column; gap: 6px;
+            padding: 14px;
+            background: rgba(48,209,88,0.05);
+            border: 1px solid rgba(48,209,88,0.18);
+            border-radius: 11px;
+        }
+        .conn-active-name {
+            font-size: 0.88rem; font-weight: 600; color: var(--sf-text);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .conn-active-name::before {
+            content: ''; width: 6px; height: 6px; border-radius: 50%;
+            background: var(--sf-green);
+            box-shadow: 0 0 6px rgba(48,209,88,0.6);
+        }
+        .conn-active-meta {
+            font-size: 0.74rem; color: var(--sf-text-muted);
+        }
+        .conn-active-value {
+            font-size: 1.05rem; font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            margin-top: 4px;
+        }
+        .conn-active-actions {
+            display: flex; gap: 8px; margin-top: 8px;
+        }
+        .conn-active-actions button {
+            flex: 1;
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--sf-text-secondary);
+            border-radius: 7px;
+            font-family: inherit; font-size: 0.74rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .conn-active-actions button:hover {
+            background: rgba(255,69,58,0.1);
+            border-color: rgba(255,69,58,0.3);
+            color: var(--sf-red);
+        }
+
+        /* Modal */
+        .conn-modal {
+            position: fixed; inset: 0; z-index: 99999;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .conn-modal-backdrop {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .conn-modal-content {
+            position: relative;
+            width: min(480px, calc(100% - 32px));
+            max-height: calc(100vh - 64px);
+            overflow-y: auto;
+            padding: 24px;
+            background: rgba(20,20,26,0.98);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+        }
+        .conn-modal-header {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: 14px; margin-bottom: 14px;
+        }
+        .conn-modal-close {
+            width: 28px; height: 28px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--sf-text-muted);
+            border-radius: 8px;
+            font-size: 1.2rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .conn-modal-close:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--sf-text);
+        }
+        .conn-modal-desc {
+            color: var(--sf-text-secondary); font-size: 0.85rem;
+            line-height: 1.5; margin-bottom: 18px;
+        }
+        .conn-modal-form {
+            display: flex; flex-direction: column; gap: 14px;
+        }
+        .conn-field-label {
+            display: block; font-size: 0.78rem; font-weight: 500;
+            color: var(--sf-text-secondary); margin-bottom: 5px;
+        }
+        .conn-field-label .req { color: var(--sf-red); }
+        .conn-field-input,
+        .conn-field-select {
+            width: 100%;
+            padding: 9px 11px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--sf-text);
+            border-radius: 8px;
+            font-family: inherit; font-size: 0.88rem;
+            transition: border-color 0.15s;
+        }
+        .conn-field-input:focus,
+        .conn-field-select:focus {
+            outline: none;
+            border-color: var(--sf-blue);
+        }
+        .conn-field-help {
+            font-size: 0.72rem; color: var(--sf-text-muted);
+            margin-top: 4px; line-height: 1.4;
+        }
         #view-auto .hero      { --hero-glow: rgba(191,90,242,0.10); }
         #view-glossaire .hero { --hero-glow: rgba(100,210,255,0.10); }
         #view-analytics .hero { --hero-glow: rgba(48,209,88,0.10); }
@@ -8096,13 +8315,42 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-broker">
     <div class="hero">
-        <div class="hero-eyebrow"><span class="dot"></span>Brokers · Exchanges</div>
+        <div class="hero-eyebrow"><span class="dot"></span>Connecteurs universels</div>
         <div class="hero-badge"><span class="sfi" data-icon="plug"></span></div>
         <h1 class="hero-title">Connexions</h1>
-        <p class="hero-subtitle">Gerez vos brokers ETF et exchanges crypto.</p>
+        <p class="hero-subtitle">Connecte tout ce qui a une API : ETF, crypto, banque, immo, assurance vie. Tout au meme endroit.</p>
     </div>
     <div class="section">
-        <div id="broker-current-status" class="dcard" style="text-align:center"><p style="color:var(--sf-text-muted)">Aucun broker connecté.</p></div>
+        <!-- ═══ CONNECTEURS UNIVERSELS (nouveau systeme) ═══ -->
+        <!-- Cards des comptes actuellement connectes via le manager -->
+        <div id="conn-active-section" style="display:none;margin-bottom:24px">
+            <div class="dcard">
+                <div class="dcard-title"><span class="sfi" data-icon="checkCircle" style="color:var(--sf-green)"></span>Mes connexions actives</div>
+                <div id="conn-active-list" class="conn-active-grid"></div>
+                <div id="conn-aggregated-summary" style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06)"></div>
+            </div>
+        </div>
+
+        <!-- Filtres par classe d'actif -->
+        <div class="conn-filters" id="conn-filters">
+            <button class="conn-filter active" data-class="all">Tout</button>
+            <button class="conn-filter" data-class="equity">Actions / ETF</button>
+            <button class="conn-filter" data-class="crypto">Crypto</button>
+            <button class="conn-filter" data-class="cash">Liquidites</button>
+            <button class="conn-filter" data-class="real_estate">Immobilier</button>
+            <button class="conn-filter" data-class="life_insurance">Assurance vie</button>
+            <button class="conn-filter" data-class="lending">Crowdlending</button>
+            <button class="conn-filter" data-class="other">Autre</button>
+        </div>
+
+        <!-- Liste des connecteurs disponibles, groupes par classe d'actif -->
+        <div id="conn-available" class="conn-grid"></div>
+
+        <!-- ═══ ANCIEN SYSTEME (legacy, garde le temps de la migration) ═══ -->
+        <details style="margin-top:32px">
+            <summary style="cursor:pointer;color:var(--sf-text-muted);font-size:0.85rem;padding:8px 0">Vue legacy (broker unique ETF + crypto)</summary>
+            <div style="margin-top:16px">
+                <div id="broker-current-status" class="dcard" style="text-align:center"><p style="color:var(--sf-text-muted)">Aucun broker connecté.</p></div>
 
         <!-- ETF Brokers -->
         <div class="dcard" style="margin-top:24px">
@@ -8124,6 +8372,29 @@
             <div id="broker-fields"></div>
             <div style="display:flex;gap:14px;margin-top:20px"><button class="abtn abtn-blue" onclick="connectBroker()">Connecter</button><button class="abtn abtn-danger" onclick="disconnectBroker()">Deconnecter</button></div>
             <div id="broker-connect-result" style="margin-top:14px"></div>
+        </div>
+            </div>
+        </details>
+
+        <!-- ═══ MODAL DE CONNEXION (form auto-genere depuis ConnectorField) ═══ -->
+        <div id="conn-modal" class="conn-modal" style="display:none">
+            <div class="conn-modal-backdrop" onclick="closeConnModal()"></div>
+            <div class="conn-modal-content">
+                <div class="conn-modal-header">
+                    <div>
+                        <div id="conn-modal-name" style="font-size:1.1rem;font-weight:600"></div>
+                        <div id="conn-modal-class" style="font-size:0.78rem;color:var(--sf-text-muted);margin-top:2px"></div>
+                    </div>
+                    <button class="conn-modal-close" onclick="closeConnModal()" aria-label="Fermer">×</button>
+                </div>
+                <div id="conn-modal-desc" class="conn-modal-desc"></div>
+                <form id="conn-modal-form" class="conn-modal-form" onsubmit="event.preventDefault();submitConnModal()"></form>
+                <div id="conn-modal-result" style="margin-top:12px"></div>
+                <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+                    <button class="abtn" onclick="closeConnModal()">Annuler</button>
+                    <button class="abtn abtn-blue" onclick="submitConnModal()" id="conn-modal-submit">Connecter</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -10164,7 +10435,254 @@ async function loadAnalytics(){
 /* ═══ Broker ═══ */
 const BF={ibkr:[{id:'host',label:'TWS Host',type:'text',value:'127.0.0.1'},{id:'port',label:'Port',type:'number',value:'7497'},{id:'client_id',label:'Client ID',type:'number',value:'1'}],degiro:[{id:'username',label:'Username',type:'text',value:''},{id:'password',label:'Password',type:'password',value:''},{id:'totp_secret',label:'TOTP',type:'text',value:''},{id:'one_time_password',label:'OTP',type:'text',value:''}],alpaca:[{id:'api_key',label:'API Key',type:'text',value:''},{id:'secret_key',label:'Secret',type:'password',value:''}],mexc:[{id:'api_key',label:'API Key',type:'text',value:''},{id:'secret_key',label:'Secret Key',type:'password',value:''},{id:'wallet_type',label:'Wallet',type:'select',value:'spot',options:[{v:'spot',l:'Spot (trading crypto)'},{v:'futures',l:'Futures / Swap (contrats)'}]}]};
 const CRYPTO_BROKERS=['mexc'];
-async function loadBrokers(){refreshStatus();try{const b=await(await fetch('/api/brokers')).json();const etfList=b.filter(x=>!CRYPTO_BROKERS.includes(x.id));const cryptoList=b.filter(x=>CRYPTO_BROKERS.includes(x.id));const card=(x)=>`<div class="stat-card" style="cursor:pointer;text-align:left" onclick="selectBroker('${x.id}')"><div class="stat-label">${x.name}</div><p style="color:var(--sf-text-secondary);font-size:0.85rem;margin-top:8px">${x.description}</p></div>`;document.getElementById('etf-broker-list').innerHTML=etfList.map(card).join('');document.getElementById('crypto-exchange-list').innerHTML=cryptoList.map(card).join('');const s=await(await fetch('/api/status')).json();const cs=await(await fetch('/api/crypto/status')).json();const sd=document.getElementById('broker-current-status');let html='';if(s.broker_connected)html+=`<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--sf-green);display:inline-block"></span><strong style="color:var(--sf-green)">${s.broker_name}</strong><span class="pill pill-green" style="font-size:0.6rem;animation:pulse 2s infinite">ETF LIVE</span></div>`;if(cs.connected)html+=`<div style="display:flex;align-items:center;justify-content:center;gap:8px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--sf-green);display:inline-block"></span><strong style="color:var(--sf-green)">${cs.broker_name}</strong><span class="pill pill-green" style="font-size:0.6rem;animation:pulse 2s infinite">CRYPTO LIVE</span></div>`;if(!html)html='<p style="color:var(--sf-text-muted)">Aucun broker connecté. Choisis ci-dessous.</p>';sd.innerHTML=html;}catch(e){}}
+/* ═══════════════════════════════════════════════════════
+   CONNECTEURS UNIVERSELS (architecture nouvelle)
+   Charge /api/connectors + /api/connectors/active.
+   Form de connexion auto-genere depuis ConnectorField.
+   ═══════════════════════════════════════════════════════ */
+
+let _connState = { available: [], active: [], filterClass: 'all', selected: null };
+
+async function loadConnectors(){
+    try {
+        const [avail, active, agg] = await Promise.all([
+            fetch('/api/connectors').then(r => r.json()),
+            fetch('/api/connectors/active').then(r => r.json()),
+            fetch('/api/portfolio/aggregated').then(r => r.json()).catch(() => null),
+        ]);
+        _connState.available = Array.isArray(avail) ? avail : [];
+        _connState.active = Array.isArray(active) ? active : [];
+        _renderConnActive(agg);
+        _renderConnAvailable();
+    } catch(e){
+        console.error('loadConnectors:', e);
+    }
+}
+
+function _renderConnAvailable(){
+    const grid = document.getElementById('conn-available');
+    if(!grid) return;
+    const filter = _connState.filterClass;
+    let items = _connState.available;
+    if(filter && filter !== 'all'){
+        items = items.filter(c => c.asset_class === filter);
+    }
+    if(!items.length){
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--sf-text-muted);font-size:0.88rem">Aucun connecteur dans cette classe pour l'instant. Tu peux en proposer un via une PR sur GitHub.</div>`;
+        return;
+    }
+    grid.innerHTML = items.map(c => {
+        const flags = [];
+        if(!c.hosted_compatible) flags.push(`<span class="conn-card-flag local" title="Necessite une installation locale (ex: TWS pour IBKR)">Local</span>`);
+        if(c.beta) flags.push(`<span class="conn-card-flag beta">Beta</span>`);
+        if(c.install_hint) flags.push(`<span class="conn-card-flag dep" title="${c.install_hint}">Dep</span>`);
+        const flagsHtml = flags.length ? `<div class="conn-card-flags">${flags.join('')}</div>` : '';
+        return `
+            <button class="conn-card" onclick="openConnModal('${c.id}')" type="button">
+                <div class="conn-card-head">
+                    <div class="conn-card-title">${_escapeHtml(c.name)}</div>
+                    <span class="conn-card-class ${c.asset_class}">${_escapeHtml(c.asset_class_label)}</span>
+                </div>
+                <div class="conn-card-desc">${_escapeHtml(c.description || '')}</div>
+                ${flagsHtml}
+                <div class="conn-card-cta">Connecter →</div>
+            </button>
+        `;
+    }).join('');
+}
+
+function _renderConnActive(agg){
+    const section = document.getElementById('conn-active-section');
+    const list = document.getElementById('conn-active-list');
+    const summary = document.getElementById('conn-aggregated-summary');
+    if(!section || !list) return;
+    const active = _connState.active || [];
+    if(!active.length){
+        section.style.display = 'none';
+        return;
+    }
+    section.style.display = 'block';
+
+    // Map account_id -> totals depuis le summary aggregated
+    const totals = {};
+    if(agg && Array.isArray(agg.accounts)){
+        for(const a of agg.accounts) totals[a.account_id] = a;
+    }
+
+    list.innerHTML = active.map(a => {
+        const t = totals[a.account_id] || {};
+        const totalValue = t.total_value;
+        const valueHtml = (typeof totalValue === 'number')
+            ? `<div class="conn-active-value">${_fmtCurrency(totalValue)}</div>`
+            : '';
+        return `
+            <div class="conn-active-card">
+                <div class="conn-active-name">${_escapeHtml(a.name)}</div>
+                <div class="conn-active-meta">${_escapeHtml(a.asset_class_label)} · ${_escapeHtml(a.account_id)}</div>
+                ${valueHtml}
+                <div class="conn-active-actions">
+                    <button onclick="disconnectConn('${a.account_id}')">Deconnecter</button>
+                </div>
+            </div>`;
+    }).join('');
+
+    // Total agrege en bas du bloc
+    if(summary && agg && typeof agg.total_value === 'number'){
+        const breakdown = (agg.breakdown_by_class || []).map(b =>
+            `<span class="hp-split-pill"><span class="dot" style="background:var(--sf-blue)"></span>${_escapeHtml(b.asset_class_label)} <strong>${_fmtCurrency(b.value)}</strong></span>`
+        ).join(' ');
+        summary.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+                <div>
+                    <div style="font-size:0.74rem;color:var(--sf-text-muted);text-transform:uppercase;letter-spacing:0.06em">Total agrege</div>
+                    <div style="font-size:1.4rem;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px">${_fmtCurrency(agg.total_value)}</div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">${breakdown}</div>
+            </div>`;
+    } else if(summary){
+        summary.innerHTML = '';
+    }
+}
+
+function _fmtCurrency(v){
+    try { return new Intl.NumberFormat('fr-FR', {style:'currency', currency:'EUR', maximumFractionDigits:0}).format(v); }
+    catch(e){ return v + ' EUR'; }
+}
+
+function _escapeHtml(s){
+    return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function openConnModal(connectorId){
+    const c = _connState.available.find(x => x.id === connectorId);
+    if(!c) return;
+    _connState.selected = c;
+    document.getElementById('conn-modal-name').textContent = c.name;
+    document.getElementById('conn-modal-class').textContent = c.asset_class_label;
+    document.getElementById('conn-modal-desc').textContent = c.description || '';
+    document.getElementById('conn-modal-result').innerHTML = '';
+
+    // Genere le formulaire dynamiquement depuis fields
+    const form = document.getElementById('conn-modal-form');
+    const fields = c.fields || [];
+    if(!fields.length){
+        form.innerHTML = `<div style="color:var(--sf-text-muted);font-size:0.85rem">Aucun champ requis pour ce connecteur.</div>`;
+    } else {
+        form.innerHTML = fields.map(f => {
+            const reqMark = f.required ? ' <span class="req">*</span>' : '';
+            const help = f.help ? `<div class="conn-field-help">${_escapeHtml(f.help)}</div>` : '';
+            const placeholder = f.placeholder ? ` placeholder="${_escapeHtml(f.placeholder)}"` : '';
+            const value = f.default != null ? ` value="${_escapeHtml(String(f.default))}"` : '';
+            let input;
+            if(f.type === 'select'){
+                const opts = (f.options || []).map(o =>
+                    `<option value="${_escapeHtml(o.value)}"${f.default === o.value ? ' selected' : ''}>${_escapeHtml(o.label)}</option>`
+                ).join('');
+                input = `<select class="conn-field-select" data-field="${_escapeHtml(f.id)}">${opts}</select>`;
+            } else if(f.type === 'boolean'){
+                input = `<select class="conn-field-select" data-field="${_escapeHtml(f.id)}"><option value="true">Oui</option><option value="false">Non</option></select>`;
+            } else {
+                const inputType = f.type === 'password' ? 'password' : (f.type === 'number' ? 'number' : 'text');
+                input = `<input class="conn-field-input" type="${inputType}" data-field="${_escapeHtml(f.id)}"${placeholder}${value}>`;
+            }
+            return `
+                <div>
+                    <label class="conn-field-label">${_escapeHtml(f.label)}${reqMark}</label>
+                    ${input}
+                    ${help}
+                </div>`;
+        }).join('');
+    }
+    document.getElementById('conn-modal').style.display = 'flex';
+}
+
+function closeConnModal(){
+    document.getElementById('conn-modal').style.display = 'none';
+    _connState.selected = null;
+}
+
+async function submitConnModal(){
+    const c = _connState.selected;
+    if(!c) return;
+    const credentials = {};
+    document.querySelectorAll('#conn-modal-form [data-field]').forEach(el => {
+        const id = el.dataset.field;
+        let v = el.value;
+        // Cast simple selon type defini dans fields
+        const f = (c.fields || []).find(x => x.id === id);
+        if(f){
+            if(f.type === 'number') v = v === '' ? null : Number(v);
+            else if(f.type === 'boolean') v = v === 'true';
+        }
+        credentials[id] = v;
+    });
+
+    // Cas special connecteur manuel : on construit un tableau positions[] depuis un seul ticker
+    // (premiere version simplifiee, on enrichira la Phase 4)
+    if(c.id === 'manual'){
+        // Le user n'a pas saisi de positions, on lui propose une saisie minimale via prompt
+        const valueStr = prompt('Valeur estimee de cet actif (en EUR) :', '0');
+        const val = Number(valueStr);
+        if(!val || val <= 0){
+            document.getElementById('conn-modal-result').innerHTML = `<div style="color:var(--sf-red);font-size:0.82rem">Valeur invalide.</div>`;
+            return;
+        }
+        credentials.positions = [{
+            ticker: (credentials.label || 'MANUAL').toUpperCase().replace(/\s+/g, '_'),
+            name: credentials.label || 'Position manuelle',
+            quantity: 1,
+            value: val,
+            currency: 'EUR',
+        }];
+    }
+
+    const submit = document.getElementById('conn-modal-submit');
+    submit.disabled = true; submit.textContent = 'Connexion...';
+    try {
+        const r = await fetch('/api/connectors/connect', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({connector_id: c.id, credentials})
+        });
+        const d = await r.json();
+        if(d.ok){
+            document.getElementById('conn-modal-result').innerHTML = `<div style="color:var(--sf-green);font-size:0.85rem">Connecte ! Compte : ${_escapeHtml(d.account_id)}</div>`;
+            setTimeout(() => { closeConnModal(); loadConnectors(); }, 700);
+        } else {
+            document.getElementById('conn-modal-result').innerHTML = `<div style="color:var(--sf-red);font-size:0.82rem">${_escapeHtml(d.error || 'Echec')}</div>`;
+        }
+    } catch(e){
+        document.getElementById('conn-modal-result').innerHTML = `<div style="color:var(--sf-red);font-size:0.82rem">Erreur reseau : ${_escapeHtml(e.message)}</div>`;
+    } finally {
+        submit.disabled = false; submit.textContent = 'Connecter';
+    }
+}
+
+async function disconnectConn(accountId){
+    if(!confirm('Deconnecter ce compte ?')) return;
+    try {
+        await fetch('/api/connectors/disconnect', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({account_id: accountId})
+        });
+        loadConnectors();
+    } catch(e){
+        toast('Erreur : ' + e.message, true);
+    }
+}
+
+// Bind des filtres
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.conn-filter');
+    if(!btn) return;
+    document.querySelectorAll('.conn-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    _connState.filterClass = btn.dataset.class || 'all';
+    _renderConnAvailable();
+});
+
+async function loadBrokers(){refreshStatus();loadConnectors();try{const b=await(await fetch('/api/brokers')).json();const etfList=b.filter(x=>!CRYPTO_BROKERS.includes(x.id));const cryptoList=b.filter(x=>CRYPTO_BROKERS.includes(x.id));const card=(x)=>`<div class="stat-card" style="cursor:pointer;text-align:left" onclick="selectBroker('${x.id}')"><div class="stat-label">${x.name}</div><p style="color:var(--sf-text-secondary);font-size:0.85rem;margin-top:8px">${x.description}</p></div>`;document.getElementById('etf-broker-list').innerHTML=etfList.map(card).join('');document.getElementById('crypto-exchange-list').innerHTML=cryptoList.map(card).join('');const s=await(await fetch('/api/status')).json();const cs=await(await fetch('/api/crypto/status')).json();const sd=document.getElementById('broker-current-status');let html='';if(s.broker_connected)html+=`<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--sf-green);display:inline-block"></span><strong style="color:var(--sf-green)">${s.broker_name}</strong><span class="pill pill-green" style="font-size:0.6rem;animation:pulse 2s infinite">ETF LIVE</span></div>`;if(cs.connected)html+=`<div style="display:flex;align-items:center;justify-content:center;gap:8px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--sf-green);display:inline-block"></span><strong style="color:var(--sf-green)">${cs.broker_name}</strong><span class="pill pill-green" style="font-size:0.6rem;animation:pulse 2s infinite">CRYPTO LIVE</span></div>`;if(!html)html='<p style="color:var(--sf-text-muted)">Aucun broker connecté. Choisis ci-dessous.</p>';sd.innerHTML=html;}catch(e){}}
 function selectBroker(id){selectedBrokerId=id;document.getElementById('broker-form').style.display='block';document.getElementById('broker-form-title').textContent=id.toUpperCase()+(CRYPTO_BROKERS.includes(id)?' - Exchange Crypto':' - Broker ETF');const f=BF[id]||[];document.getElementById('broker-fields').innerHTML=f.map(x=>{if(x.type==='select'){return`<div class="form-group"><div class="form-label">${x.label}</div><select id="bf-${x.id}" class="ainput">${x.options.map(o=>`<option value="${o.v}"${o.v===x.value?' selected':''}>${o.l}</option>`).join('')}</select></div>`;}return`<div class="form-group"><div class="form-label">${x.label}</div><input type="${x.type}" id="bf-${x.id}" value="${x.value}" class="ainput"></div>`;}).join('');}
 async function connectBroker(){if(!selectedBrokerId)return;const f=BF[selectedBrokerId]||[];const c={};f.forEach(x=>{const el=document.getElementById('bf-'+x.id);c[x.id]=x.type==='number'?parseInt(el.value):el.value;});
 const rd=document.getElementById('broker-connect-result');rd.innerHTML='<span style="color:var(--sf-orange)">Connexion...</span>';try{const isCrypto=CRYPTO_BROKERS.includes(selectedBrokerId);const url=isCrypto?'/api/crypto/connect':'/api/broker/connect';const body=isCrypto?{broker_id:selectedBrokerId,credentials:c}:{broker_id:selectedBrokerId,credentials:c};const d=await(await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).json();if(d.status==='connected'){rd.innerHTML=`<span style="color:var(--sf-green)">Connecte</span>`;toast(selectedBrokerId.toUpperCase()+' connecte');refreshStatus();loadBrokers();}else rd.innerHTML=`<span style="color:var(--sf-red)">${d.message}</span>`;}catch(e){rd.innerHTML=`<span style="color:var(--sf-red)">${e.message}</span>`;}}
