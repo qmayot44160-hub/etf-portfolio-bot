@@ -28,8 +28,12 @@ class ConnectorManager:
 
     # ─── Connect / Disconnect ───────────────────────────────
 
-    def connect(self, connector_id: str, credentials: dict) -> dict:
-        """Instancie + connecte un connecteur. Retourne un dict de statut."""
+    def connect(self, connector_id: str, credentials: dict, persist: bool = True) -> dict:
+        """Instancie + connecte un connecteur. Retourne un dict de statut.
+
+        Si persist=True (defaut), sauvegarde les credentials chiffres pour
+        reconnecter automatiquement au prochain demarrage.
+        """
         meta = get_connector_metadata(connector_id)
         if meta is None:
             return {"ok": False, "error": f"Connecteur inconnu: {connector_id}"}
@@ -47,11 +51,22 @@ class ConnectorManager:
         if not ok:
             return {"ok": False, "error": "Connexion refusee par le broker"}
 
-        # Genere un account_id unique
+        # Genere un account_id unique (le connecteur peut avoir defini le sien)
         account_id = conn.account_id or f"{connector_id}-{uuid4().hex[:8]}"
+        # S'assure d'unicite cote manager (un meme broker plusieurs comptes)
+        if account_id in self._active:
+            account_id = f"{connector_id}-{uuid4().hex[:8]}"
 
         with self._lock:
             self._active[account_id] = conn
+
+        # Persist (chiffre)
+        if persist:
+            try:
+                from connectors import storage
+                storage.save_account(account_id, connector_id, credentials)
+            except Exception as e:
+                print(f"[manager] erreur persistance {account_id}: {e}")
 
         return {
             "ok": True,
@@ -61,7 +76,7 @@ class ConnectorManager:
             "asset_class": meta.asset_class.value,
         }
 
-    def disconnect(self, account_id: str) -> dict:
+    def disconnect(self, account_id: str, persist: bool = True) -> dict:
         with self._lock:
             conn = self._active.pop(account_id, None)
         if conn is None:
@@ -70,7 +85,49 @@ class ConnectorManager:
             conn.disconnect()
         except Exception:
             pass
+        if persist:
+            try:
+                from connectors import storage
+                storage.remove_account(account_id)
+            except Exception as e:
+                print(f"[manager] erreur suppression {account_id}: {e}")
         return {"ok": True, "account_id": account_id}
+
+    # ─── Restore au demarrage ───────────────────────────────
+
+    def restore_from_storage(self) -> dict:
+        """Reconnecte tous les comptes persistes au demarrage.
+
+        Retourne {restored: int, failed: int, errors: [...]}.
+        Les comptes qui echouent restent persistes (peut-etre que la
+        connexion reseau est temporairement KO, on retentera plus tard).
+        """
+        from connectors import storage
+        saved = storage.restore_all()
+        restored = 0
+        failed = 0
+        errors = []
+        for entry in saved:
+            account_id = entry.get("account_id")
+            connector_id = entry.get("connector_id")
+            credentials = entry.get("credentials") or {}
+            if not account_id or not connector_id:
+                continue
+            try:
+                conn = get_connector(connector_id, credentials)
+                ok = bool(conn.connect())
+            except Exception as e:
+                ok = False
+                errors.append({"account_id": account_id, "error": str(e)})
+            if ok:
+                with self._lock:
+                    self._active[account_id] = conn
+                restored += 1
+            else:
+                failed += 1
+                if not errors or errors[-1].get("account_id") != account_id:
+                    errors.append({"account_id": account_id, "error": "Connexion refusee"})
+        return {"restored": restored, "failed": failed, "errors": errors}
 
     # ─── Etat ───────────────────────────────────────────────
 

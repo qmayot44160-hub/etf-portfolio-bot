@@ -42,6 +42,21 @@ engine = BotEngine()
 crypto = CryptoEngine()
 trader = AutoTrader()
 
+# ─── Restore des connecteurs persistes ────────────────────
+# Au demarrage, on rejoue toutes les connexions sauvegardees (creds chiffrees).
+# Si le reseau ou le broker est indispo, le compte reste persiste pour
+# une nouvelle tentative au prochain redemarrage.
+try:
+    from connectors import get_manager as _get_conn_mgr
+    _restore_result = _get_conn_mgr().restore_from_storage()
+    if _restore_result["restored"] or _restore_result["failed"]:
+        print(f"[Startup] Connecteurs restaures : {_restore_result['restored']} OK, "
+              f"{_restore_result['failed']} echec(s)")
+        for err in _restore_result.get("errors", []):
+            print(f"  - {err.get('account_id')}: {err.get('error')}")
+except Exception as _e:
+    print(f"[Startup] Restore connecteurs ignore : {_e}")
+
 
 # ── Auth ───────────────────────────────────────────────
 

@@ -41,6 +41,7 @@ from connectors.registry import (
     CONNECTOR_REGISTRY,
 )
 from connectors.manager import ConnectorManager, get_manager
+from connectors import storage
 
 __all__ = [
     "AssetClass",
@@ -57,4 +58,5 @@ __all__ = [
     "CONNECTOR_REGISTRY",
     "ConnectorManager",
     "get_manager",
+    "storage",
 ]

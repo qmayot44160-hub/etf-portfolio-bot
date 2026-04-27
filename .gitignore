@@ -37,6 +37,7 @@ audit_log.json
 health.json
 scheduler_config.json
 notifications.log
+connectors_state.json
 users/
 backups/
 

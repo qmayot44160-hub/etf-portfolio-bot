@@ -8346,10 +8346,10 @@
         <!-- Liste des connecteurs disponibles, groupes par classe d'actif -->
         <div id="conn-available" class="conn-grid"></div>
 
-        <!-- ═══ ANCIEN SYSTEME (legacy, garde le temps de la migration) ═══ -->
-        <details style="margin-top:32px">
-            <summary style="cursor:pointer;color:var(--sf-text-muted);font-size:0.85rem;padding:8px 0">Vue legacy (broker unique ETF + crypto)</summary>
-            <div style="margin-top:16px">
+        <!-- ═══ ANCIEN SYSTEME (legacy, masque visuellement mais conserve le DOM
+             le temps de la migration finale - le dashboard et le bot l'utilisent encore) ═══ -->
+        <div style="display:none" aria-hidden="true">
+            <div>
                 <div id="broker-current-status" class="dcard" style="text-align:center"><p style="color:var(--sf-text-muted)">Aucun broker connecté.</p></div>
 
         <!-- ETF Brokers -->
@@ -8374,7 +8374,7 @@
             <div id="broker-connect-result" style="margin-top:14px"></div>
         </div>
             </div>
-        </details>
+        </div>
 
         <!-- ═══ MODAL DE CONNEXION (form auto-genere depuis ConnectorField) ═══ -->
         <div id="conn-modal" class="conn-modal" style="display:none">
