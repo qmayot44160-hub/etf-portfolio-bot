@@ -131,7 +131,10 @@ toute version modifiee deployee comme service doit aussi etre open-source.
 Si ce projet t'est utile, tu peux le soutenir :
 - Star le repo
 - Ouvrir une issue / PR
-- Sponsoriser via [GitHub Sponsors](https://github.com/sponsors/qmayot44160-hub)
+- M'offrir un cafe sur [Buy Me a Coffee](https://buymeacoffee.com/portfolioquant)
+
+Chaque don finance le serveur et m'aide a shipper plus vite les nouvelles features
+(nouveaux brokers, multi-user, export fiscal francais, app mobile).
 
 ## Disclaimer
 

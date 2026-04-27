@@ -1,0 +1,14 @@
+# Configure les boutons "Sponsor" affiches en haut du repo GitHub.
+# Doc : https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+
+# Buy Me a Coffee : ton username sur la plateforme
+buy_me_a_coffee: portfolioquant
+
+# Decommente quand GitHub Sponsors sera actif (apres creation auto-entreprise)
+# github: qmayot44160-hub
+
+# Autres options possibles si tu en ajoutes plus tard :
+# ko_fi: portfolioquant
+# patreon: portfolioquant
+# liberapay: portfolioquant
+# custom: ['https://votre-url.com/donate']
