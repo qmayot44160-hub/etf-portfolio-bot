@@ -8102,7 +8102,7 @@
         <p class="hero-subtitle">Gerez vos brokers ETF et exchanges crypto.</p>
     </div>
     <div class="section">
-        <div id="broker-current-status" class="dcard" style="text-align:center"><p style="color:var(--sf-text-muted)">Aucun broker connecte.</p></div>
+        <div id="broker-current-status" class="dcard" style="text-align:center"><p style="color:var(--sf-text-muted)">Aucun broker connecté.</p></div>
 
         <!-- ETF Brokers -->
         <div class="dcard" style="margin-top:24px">
@@ -10164,7 +10164,7 @@ async function loadAnalytics(){
 /* ═══ Broker ═══ */
 const BF={ibkr:[{id:'host',label:'TWS Host',type:'text',value:'127.0.0.1'},{id:'port',label:'Port',type:'number',value:'7497'},{id:'client_id',label:'Client ID',type:'number',value:'1'}],degiro:[{id:'username',label:'Username',type:'text',value:''},{id:'password',label:'Password',type:'password',value:''},{id:'totp_secret',label:'TOTP',type:'text',value:''},{id:'one_time_password',label:'OTP',type:'text',value:''}],alpaca:[{id:'api_key',label:'API Key',type:'text',value:''},{id:'secret_key',label:'Secret',type:'password',value:''}],mexc:[{id:'api_key',label:'API Key',type:'text',value:''},{id:'secret_key',label:'Secret Key',type:'password',value:''},{id:'wallet_type',label:'Wallet',type:'select',value:'spot',options:[{v:'spot',l:'Spot (trading crypto)'},{v:'futures',l:'Futures / Swap (contrats)'}]}]};
 const CRYPTO_BROKERS=['mexc'];
-async function loadBrokers(){refreshStatus();try{const b=await(await fetch('/api/brokers')).json();const etfList=b.filter(x=>!CRYPTO_BROKERS.includes(x.id));const cryptoList=b.filter(x=>CRYPTO_BROKERS.includes(x.id));const card=(x)=>`<div class="stat-card" style="cursor:pointer;text-align:left" onclick="selectBroker('${x.id}')"><div class="stat-label">${x.name}</div><p style="color:var(--sf-text-secondary);font-size:0.85rem;margin-top:8px">${x.description}</p></div>`;document.getElementById('etf-broker-list').innerHTML=etfList.map(card).join('');document.getElementById('crypto-exchange-list').innerHTML=cryptoList.map(card).join('');const s=await(await fetch('/api/status')).json();const cs=await(await fetch('/api/crypto/status')).json();const sd=document.getElementById('broker-current-status');let html='';if(s.broker_connected)html+=`<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--sf-green);display:inline-block"></span><strong style="color:var(--sf-green)">${s.broker_name}</strong><span class="pill pill-green" style="font-size:0.6rem;animation:pulse 2s infinite">ETF LIVE</span></div>`;if(cs.connected)html+=`<div style="display:flex;align-items:center;justify-content:center;gap:8px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--sf-green);display:inline-block"></span><strong style="color:var(--sf-green)">${cs.broker_name}</strong><span class="pill pill-green" style="font-size:0.6rem;animation:pulse 2s infinite">CRYPTO LIVE</span></div>`;if(!html)html='<p style="color:var(--sf-text-muted)">Aucun broker connecte. Choisissez ci-dessous.</p>';sd.innerHTML=html;}catch(e){}}
+async function loadBrokers(){refreshStatus();try{const b=await(await fetch('/api/brokers')).json();const etfList=b.filter(x=>!CRYPTO_BROKERS.includes(x.id));const cryptoList=b.filter(x=>CRYPTO_BROKERS.includes(x.id));const card=(x)=>`<div class="stat-card" style="cursor:pointer;text-align:left" onclick="selectBroker('${x.id}')"><div class="stat-label">${x.name}</div><p style="color:var(--sf-text-secondary);font-size:0.85rem;margin-top:8px">${x.description}</p></div>`;document.getElementById('etf-broker-list').innerHTML=etfList.map(card).join('');document.getElementById('crypto-exchange-list').innerHTML=cryptoList.map(card).join('');const s=await(await fetch('/api/status')).json();const cs=await(await fetch('/api/crypto/status')).json();const sd=document.getElementById('broker-current-status');let html='';if(s.broker_connected)html+=`<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--sf-green);display:inline-block"></span><strong style="color:var(--sf-green)">${s.broker_name}</strong><span class="pill pill-green" style="font-size:0.6rem;animation:pulse 2s infinite">ETF LIVE</span></div>`;if(cs.connected)html+=`<div style="display:flex;align-items:center;justify-content:center;gap:8px"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:var(--sf-green);display:inline-block"></span><strong style="color:var(--sf-green)">${cs.broker_name}</strong><span class="pill pill-green" style="font-size:0.6rem;animation:pulse 2s infinite">CRYPTO LIVE</span></div>`;if(!html)html='<p style="color:var(--sf-text-muted)">Aucun broker connecté. Choisis ci-dessous.</p>';sd.innerHTML=html;}catch(e){}}
 function selectBroker(id){selectedBrokerId=id;document.getElementById('broker-form').style.display='block';document.getElementById('broker-form-title').textContent=id.toUpperCase()+(CRYPTO_BROKERS.includes(id)?' - Exchange Crypto':' - Broker ETF');const f=BF[id]||[];document.getElementById('broker-fields').innerHTML=f.map(x=>{if(x.type==='select'){return`<div class="form-group"><div class="form-label">${x.label}</div><select id="bf-${x.id}" class="ainput">${x.options.map(o=>`<option value="${o.v}"${o.v===x.value?' selected':''}>${o.l}</option>`).join('')}</select></div>`;}return`<div class="form-group"><div class="form-label">${x.label}</div><input type="${x.type}" id="bf-${x.id}" value="${x.value}" class="ainput"></div>`;}).join('');}
 async function connectBroker(){if(!selectedBrokerId)return;const f=BF[selectedBrokerId]||[];const c={};f.forEach(x=>{const el=document.getElementById('bf-'+x.id);c[x.id]=x.type==='number'?parseInt(el.value):el.value;});
 const rd=document.getElementById('broker-connect-result');rd.innerHTML='<span style="color:var(--sf-orange)">Connexion...</span>';try{const isCrypto=CRYPTO_BROKERS.includes(selectedBrokerId);const url=isCrypto?'/api/crypto/connect':'/api/broker/connect';const body=isCrypto?{broker_id:selectedBrokerId,credentials:c}:{broker_id:selectedBrokerId,credentials:c};const d=await(await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).json();if(d.status==='connected'){rd.innerHTML=`<span style="color:var(--sf-green)">Connecte</span>`;toast(selectedBrokerId.toUpperCase()+' connecte');refreshStatus();loadBrokers();}else rd.innerHTML=`<span style="color:var(--sf-red)">${d.message}</span>`;}catch(e){rd.innerHTML=`<span style="color:var(--sf-red)">${e.message}</span>`;}}
@@ -11075,7 +11075,11 @@ async function loadHome(){
         }else{
             if(splitInfo) splitInfo.style.display = 'none';
             totalEl.innerHTML = '<span title="Aucun broker connecté - la valeur de ton portefeuille apparaîtra ici une fois IBKR ou Binance branché" style="color:var(--sf-text-muted);cursor:help">-</span>';
-            document.getElementById('home-total-sub').textContent = 'Aucun broker connecté';
+            // Sub-label adaptatif : on indique ce qui est connecte si quelque chose l'est partiellement
+            const subParts = [];
+            if(s.broker && s.brokerName) subParts.push(s.brokerName);
+            if(s.cryptoBroker && s.cryptoBrokerName) subParts.push(s.cryptoBrokerName);
+            document.getElementById('home-total-sub').textContent = subParts.length ? subParts.join(' + ') : 'Aucun broker connecté';
             // Onboarding hero : plutôt qu'un simple label gris, on propose un vrai CTA
             const heroTot = document.getElementById('hero-total');
             if(heroTot && !heroTot.dataset.placeholder){
@@ -11271,31 +11275,59 @@ async function loadHomeAllocation(){
     const hintEl = document.getElementById('home-alloc-hint');
     if(!donutEl || !legendEl || !listEl) return;
 
-    let d;
+    // On fetch ETF + Crypto status pour adapter les messages selon ce qui est connecte
+    let d, cryptoStatus;
     try {
-        d = await (await fetch('/api/portfolio')).json();
+        const [pfRes, csRes] = await Promise.allSettled([
+            fetch('/api/portfolio').then(r => r.json()),
+            fetch('/api/crypto/status').then(r => r.json())
+        ]);
+        d = pfRes.status === 'fulfilled' ? pfRes.value : null;
+        cryptoStatus = csRes.status === 'fulfilled' ? csRes.value : null;
     } catch(e){
         return;
     }
 
     // Empty state : broker non connecté ou pas de positions
     const positions = Array.isArray(d && d.positions) ? d.positions.filter(p => p && p.shares > 0 && p.value > 0) : [];
-    if(d && d.mode === 'not_connected' || positions.length === 0){
-        const notConnected = d && d.mode === 'not_connected';
+    const etfNotConnected = d && d.mode === 'not_connected';
+    const cryptoConnected = cryptoStatus && cryptoStatus.connected;
+    if(etfNotConnected || positions.length === 0){
+        // Messages adaptes : si crypto seul connecte, on l'indique pour eviter le faux "rien connecte"
+        let title, sub, ctaLabel, ctaView, listMsg;
+        if(etfNotConnected && cryptoConnected){
+            title = 'Pas encore d\'allocation ETF';
+            sub = `${cryptoStatus.broker_name || 'Crypto'} est connecte. Connecte aussi un broker ETF (IBKR, Degiro, Alpaca) pour voir ton allocation complete.`;
+            ctaLabel = 'Voir mon portefeuille crypto';
+            ctaView = 'crypto';
+            listMsg = `${cryptoStatus.broker_name || 'Crypto'} connecte, aucun broker ETF.`;
+        } else if(etfNotConnected){
+            title = 'Pas encore de repartition';
+            sub = 'Connecte un broker ETF (IBKR, Degiro, Alpaca) pour afficher ton allocation reelle par categorie.';
+            ctaLabel = 'Connecter un broker';
+            ctaView = 'broker';
+            listMsg = 'Aucun broker connecte.';
+        } else {
+            title = 'Pas encore de positions';
+            sub = 'Aucune position active. Lance un DCA pour commencer.';
+            ctaLabel = 'Lancer un DCA';
+            ctaView = 'portfolio';
+            listMsg = 'Aucune position pour l\'instant.';
+        }
         const emptyIcon = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--sf-text-muted);opacity:0.7"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
         donutEl.innerHTML = `
             <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;text-align:center">
               ${emptyIcon}
-              <div style="color:var(--sf-text);font-size:0.9rem;font-weight:500">Pas encore de répartition</div>
-              <div style="color:var(--sf-text-muted);font-size:0.78rem;line-height:1.45;max-width:220px">${notConnected ? 'Connecte un broker pour afficher ton allocation réelle par catégorie.' : 'Aucune position active. Lance un DCA pour commencer.'}</div>
-              <button onclick="showView('${notConnected ? 'broker' : 'portfolio'}')" style="margin-top:4px;background:rgba(10,132,255,0.1);color:var(--sf-blue);border:1px solid rgba(10,132,255,0.25);border-radius:8px;padding:7px 14px;font-size:0.78rem;font-weight:500;cursor:pointer">${notConnected ? 'Connecter un broker' : 'Lancer un DCA'} →</button>
+              <div style="color:var(--sf-text);font-size:0.9rem;font-weight:500">${title}</div>
+              <div style="color:var(--sf-text-muted);font-size:0.78rem;line-height:1.45;max-width:240px">${sub}</div>
+              <button onclick="showView('${ctaView}')" style="margin-top:4px;background:rgba(10,132,255,0.1);color:var(--sf-blue);border:1px solid rgba(10,132,255,0.25);border-radius:8px;padding:7px 14px;font-size:0.78rem;font-weight:500;cursor:pointer">${ctaLabel} →</button>
             </div>`;
         legendEl.innerHTML = '';
         if(centerEl) centerEl.style.display = 'none';
         listEl.innerHTML = `
             <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:36px 16px;text-align:center">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--sf-text-muted);opacity:0.7"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-              <div style="color:var(--sf-text-muted);font-size:0.82rem;line-height:1.5">${notConnected ? 'Aucun broker connecté.' : 'Aucune position pour l\'instant.'}<br><span style="font-size:0.75rem;opacity:0.75">Tes 5 plus grosses lignes apparaîtront ici.</span></div>
+              <div style="color:var(--sf-text-muted);font-size:0.82rem;line-height:1.5">${listMsg}<br><span style="font-size:0.75rem;opacity:0.75">Tes 5 plus grosses lignes apparaitront ici.</span></div>
             </div>`;
         return;
     }
