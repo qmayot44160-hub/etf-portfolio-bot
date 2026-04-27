@@ -1,10 +1,47 @@
+# Virtual env
 venv/
+.venv/
+env/
+
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Secrets et credentials
+.env
+.env.local
+.env.*.local
+*.secret*
+*.key
+*.pem
+creds.enc
+mdp bot etf.txt
+
+# Donnees utilisateur (chaque instance a les siennes)
 portfolio_state.json
+portfolio_history.json
 profile.json
 audit_log.json
-.env
-mdp bot etf.txt
-*.secret*
+health.json
+scheduler_config.json
+notifications.log
+users/
+backups/
+
+# Claude Code config locale
 .claude/settings.local.json
+
+# Logs
+*.log
