@@ -44,5 +44,10 @@ backups/
 # Claude Code config locale
 .claude/settings.local.json
 
+# Impeccable skill (installé via npx, contenu local)
+.agents/
+.claude/skills/
+skills-lock.json
+
 # Logs
 *.log
