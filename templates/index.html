@@ -446,24 +446,15 @@
             letter-spacing: -0.04em;
             line-height: 1.05;
             margin-bottom: 18px;
-            background: linear-gradient(120deg,
-                #fff 0%,
-                #fff 30%,
-                rgba(255,255,255,0.55) 60%,
-                #fff 70%,
-                rgba(255,255,255,0.55) 100%);
-            background-size: 200% 100%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: titleShine 8s ease-in-out infinite;
+            color: var(--sf-text);
         }
+        /* Polish: shimmer titleShine retiré (gradient text + animation décorative
+           = double violation des absolute bans + principe "Le calme est un feature").
+           Le keyframe titleShine est conservé pour ne pas casser d'éventuels usages
+           tiers, mais plus aucun élément ne s'y réfère par défaut. */
         @keyframes titleShine {
             0%, 100% { background-position: 0% 50%; }
             50%      { background-position: 100% 50%; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            .hero-title { animation: none; }
         }
         .hero-subtitle {
             font-size: clamp(1.1rem, 2.5vw, 1.6rem);
@@ -513,11 +504,13 @@
         .stat-grid-3 { grid-template-columns: repeat(3, 1fr); }
         .stat-grid-2 { grid-template-columns: repeat(2, 1fr); }
         @media (max-width: 860px) { .stat-grid-4,.stat-grid-3 { grid-template-columns: repeat(2,1fr); } }
-        /* Sous 500px on garde 2 colonnes pour stat-grid-4 (sinon 4 cards
-           empilées = scroll interminable). Grid-3 et 2 passent à 1 col. */
+        /* Sous 500px on garde 2 colonnes pour stat-grid-4 et stat-grid-3
+           (sinon scroll vertical interminable). Stat-grid-2 passe en 1 col
+           pour laisser respirer les 2 cards à pleine largeur. */
         @media (max-width: 500px) {
             .stat-grid-4 { grid-template-columns: repeat(2, 1fr); }
-            .stat-grid-3, .stat-grid-2 { grid-template-columns: 1fr; }
+            .stat-grid-3 { grid-template-columns: repeat(2, 1fr); }
+            .stat-grid-2 { grid-template-columns: 1fr; }
         }
 
         .stat-card {
@@ -578,6 +571,15 @@
             display: flex; align-items: center; gap: 12px;
         }
         .dcard-title .sfi { color: var(--sf-blue); width: 1.3em; height: 1.3em; }
+        /* Sous-titre court placé sous .dcard-title (cf. "Actions rapides"). */
+        .dcard-sub {
+            margin-top: -8px;
+            margin-bottom: 18px;
+            color: var(--sf-text-muted);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            max-width: 65ch;
+        }
         .dcard-label {
             font-size: 0.68rem; font-weight: 500;
             text-transform: uppercase; letter-spacing: 0.08em;
@@ -1743,14 +1745,40 @@
             text-transform: uppercase; letter-spacing: 0.08em;
             margin-bottom: 14px;
         }
+        /* Polish: home-title - retrait gradient text + shimmer animation
+           (cf. DESIGN.md absolute bans). Solid color, hiérarchie via taille/poids. */
         .home-title {
             font-size: clamp(2.2rem, 5vw, 3.6rem);
             font-weight: 700; letter-spacing: -0.04em; line-height: 1.05;
-            background: linear-gradient(120deg, #fff 0%, #fff 30%, rgba(255,255,255,0.55) 60%, #fff 70%, rgba(255,255,255,0.55) 100%);
-            background-size: 200% 100%;
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            color: var(--sf-text);
             margin-bottom: 8px;
-            animation: titleShine 8s ease-in-out infinite;
+        }
+
+        /* Polish: tokens utilitaires pour view-home (suppression d'inline styles).
+           - .stat-value--text : pour les stat-cards qui contiennent du texte
+             plutôt qu'un nombre (Mode actif, Santé du bot). Évite l'inline
+             style="font-size:1.6rem" répété.
+           - .holdings-empty : empty state des "Principales positions" (avant
+             qu'un broker soit connecté). Remplace 4 lignes d'inline style. */
+        .stat-value.stat-value--text {
+            font-size: 1.45rem;
+            letter-spacing: -0.01em;
+        }
+        .holdings-empty {
+            color: var(--sf-text-muted);
+            font-size: 0.85rem;
+            padding: 30px 0;
+            text-align: center;
+            line-height: 1.5;
+        }
+        /* Rythme spatial : on respire un peu plus après le hero portfolio
+           (l'ancre visuelle), et un peu moins entre les modules d'action en
+           bas. Évite la monotonie du même margin-bottom partout. */
+        #view-home #hero-portfolio { margin-bottom: 44px; }
+        #view-home #home-stats { margin-bottom: 36px; }
+        @media (max-width: 720px) {
+            #view-home #hero-portfolio { margin-bottom: 28px; }
+            #view-home #home-stats { margin-bottom: 24px; }
         }
         .home-subtitle {
             font-size: 1.1rem; color: var(--sf-text-secondary);
@@ -4334,6 +4362,9 @@
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
+        /* Polish: fix violation absolute-ban "Gradient text" (DESIGN.md).
+           Le chiffre principal repasse en solid color : la hiérarchie est portée
+           par la taille (3.6rem) et le poids (700), pas par un dégradé décoratif. */
         .hp-value {
             font-size: 3.6rem;
             font-weight: 700;
@@ -4341,10 +4372,6 @@
             line-height: 1;
             font-variant-numeric: tabular-nums;
             color: var(--sf-text);
-            background: linear-gradient(180deg, #fff 0%, #c4c4c7 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
         .hp-change {
             display: inline-flex; align-items: center; gap: 6px;
@@ -7413,12 +7440,12 @@
         <div class="stat-grid stat-grid-3 home-module" id="home-stats" data-module-id="home-stats" data-module-label="État (Mode, Santé, Positions)">
             <div class="stat-card">
                 <div class="stat-label">Mode actif</div>
-                <div class="stat-value" id="home-mode" style="font-size:1.6rem">-</div>
+                <div class="stat-value stat-value--text" id="home-mode">-</div>
                 <div class="stat-sub" id="home-mode-sub">-</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Santé du bot</div>
-                <div class="stat-value" id="home-health" style="font-size:1.6rem">-</div>
+                <div class="stat-value stat-value--text" id="home-health">-</div>
                 <div class="stat-sub" id="home-health-sub">-</div>
             </div>
             <div class="stat-card">
@@ -7460,7 +7487,7 @@
                     <div class="home-dual-card-hint">Top 5 par valeur</div>
                 </div>
                 <div class="holdings-list" id="home-holdings-list">
-                    <div style="color:var(--sf-text-muted);font-size:0.82rem;padding:30px 0;text-align:center">
+                    <div class="holdings-empty">
                         Connectez un broker pour voir vos positions.
                     </div>
                 </div>
@@ -7474,7 +7501,7 @@
                     <div class="sp-title-icon"><span class="sfi" data-icon="sparkles"></span></div>
                     <div>
                         <div class="sp-title">Picks du jour</div>
-                        <div class="sp-subtitle">Le bot scanne le marché et sélectionne les meilleures opportunités</div>
+                        <div class="sp-subtitle">Opportunités sélectionnées par le bot, mises à jour en continu.</div>
                     </div>
                 </div>
                 <div class="sp-meta">
@@ -7502,7 +7529,7 @@
 
         <!-- Prochaines actions -->
         <div class="dcard home-module" data-module-id="home-actions" data-module-label="Que faire maintenant ? (actions suggérées)">
-            <div class="dcard-title" style="display:flex;align-items:center;gap:10px"><span class="sfi sfi-lg c-blue" data-icon="target"></span>Que faire maintenant&nbsp;?</div>
+            <div class="dcard-title"><span class="sfi sfi-lg c-blue" data-icon="target"></span>Que faire maintenant&nbsp;?</div>
             <div class="action-list" id="home-actions">
                 <div class="action-card suggest">
                     <div class="action-icon"><span class="sfi c-blue" data-icon="hourglass"></span></div>
@@ -7518,8 +7545,8 @@
              "Lancer un scan", "Rafraîchir", "Basculer Paper/Live" sont accessibles
              ailleurs (header, settings, vue Découverte). Inutile de les répéter ici. -->
         <div class="dcard home-module" data-module-id="home-shortcuts" data-module-label="Actions rapides">
-            <div class="dcard-title" style="display:flex;align-items:center;gap:10px"><span class="sfi sfi-lg c-blue" data-icon="bolt"></span>Actions rapides</div>
-            <div class="dcard-sub" style="margin-bottom:18px;color:var(--sf-text-muted);font-size:.9rem">Les trois opérations qui n'ont pas leur place ailleurs.</div>
+            <div class="dcard-title"><span class="sfi sfi-lg c-blue" data-icon="bolt"></span>Actions rapides</div>
+            <div class="dcard-sub">Les trois opérations qui n'ont pas leur place ailleurs.</div>
             <div class="shortcut-grid">
                 <button class="shortcut-tile" onclick="quickAction('rebalance')">
                     <div class="shortcut-tile-icon"><span class="sfi" data-icon="refresh"></span></div>
