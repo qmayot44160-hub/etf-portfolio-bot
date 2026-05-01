@@ -58,8 +58,12 @@ def _default_profile() -> dict:
         "density": "standard",
         "animations_enabled": True,
         "reduce_motion": False,
-        "show_ambient_aurora": True,
-        "show_film_grain": True,
+        # Quieter default (cf. PRODUCT.md "Le calme est un feature").
+        # Aurora + grain etaient on par defaut, ce qui contredisait le principe
+        # "pas d'animation decorative". L'utilisateur peut les reactiver dans
+        # Settings > Apparence si la deco lui manque.
+        "show_ambient_aurora": False,
+        "show_film_grain": False,
         "number_format": "fr-FR",
         # Méta
         "created_at": datetime.utcnow().isoformat(timespec="seconds"),

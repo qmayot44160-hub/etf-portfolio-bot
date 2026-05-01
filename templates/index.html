@@ -526,7 +526,13 @@
             transition: transform 0.3s, background 0.3s, border-color 0.3s, box-shadow 0.3s;
             cursor: default;
         }
-        .stat-card:hover { transform: scale(1.02); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 32px rgba(0,0,0,0.4); }
+        /* Quieter: hover plus discret. La scale(1.02) etait deja sobre,
+           on garde mais on tonalise l'ombre (plus diffuse, moins forte). */
+        .stat-card:hover {
+            transform: scale(1.01);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06),
+                        0 6px 20px rgba(0,0,0,0.28);
+        }
         .stat-label {
             font-size: 0.72rem; font-weight: 500;
             text-transform: uppercase; letter-spacing: 0.08em;
@@ -4344,18 +4350,21 @@
             margin-bottom: 10px;
         }
         .hp-label .sfi { width: 13px; height: 13px; opacity: 0.7; }
+        /* Quieter: pulse retire (PRODUCT.md "pas de pulse, pas d'animation
+           sauf quand elle aide a comprendre"). Le dot reste vert avec un
+           halo doux ; sa simple presence (vs absence) suffit a indiquer le
+           live, l'animation n'apportait pas d'info. */
         .hp-live-dot {
             width: 7px; height: 7px; border-radius: 50%;
             background: var(--sf-green);
-            box-shadow: 0 0 8px rgba(48,209,88,0.75);
+            box-shadow: 0 0 6px rgba(48,209,88,0.45);
             margin-left: auto;
-            animation: livePulse 2s ease-in-out infinite;
+            opacity: 0.9;
         }
         @keyframes livePulse {
             0%, 100% { opacity: 0.45; transform: scale(0.8); }
             50%      { opacity: 1;    transform: scale(1.2); }
         }
-        body.reduce-motion .hp-live-dot { animation: none; }
 
         .hp-value-row {
             display: flex; align-items: baseline; gap: 14px;
@@ -4593,14 +4602,16 @@
         @media (max-width: 900px) {
             .home-dual { grid-template-columns: 1fr; }
         }
+        /* Quieter: glassmorphism retire (DESIGN.md ban "Glassmorphism as default,
+           rare and purposeful or nothing"). On bascule sur le tonal-stack du
+           systeme : surface bg-card opaque, hairline 1px. Plus lisible, pas
+           dependant de ce qu'il y a derriere. */
         .home-dual-card {
             position: relative;
             padding: 22px 24px;
             border-radius: 18px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-            border: 1px solid rgba(255,255,255,0.06);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            background: var(--sf-bg-card);
+            border: 1px solid var(--sf-border);
             overflow: hidden;
         }
         .home-dual-card-header {
@@ -7129,7 +7140,11 @@
         }
     </style>
 </head>
-<body>
+<!-- Quieter default: aurora et grain off au premier paint, evite le flash
+     decoratif avant que applyAppearancePrefs(profile) ne s'execute. Si
+     l'utilisateur a opt-in dans Settings > Apparence, le JS retire ces
+     classes au moment de la lecture du profil. -->
+<body class="no-aurora no-grain">
 
 <!-- ════════════════════════════════════════════════════════
      APPLE-STYLE GLOBAL NAV
