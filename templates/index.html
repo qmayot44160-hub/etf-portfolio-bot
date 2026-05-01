@@ -115,6 +115,12 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* Force le respect de l'attribut HTML `hidden` meme quand un selecteur
+           applique display:flex/grid/etc (les selecteurs CSS battent display:none
+           du UA stylesheet). Necessaire apres le distill du dashboard ou
+           insights-rail / market-ticker / heatmap sont marques hidden mais
+           gardaient leur display:flex/grid. */
+        [hidden] { display: none !important; }
         html { font-size: calc(16px * var(--ui-scale)); }
 
         body {
@@ -11470,7 +11476,20 @@ function updateHeroPortfolio(totalValue, range, realValues){
     if(!wrap || totalValue == null || !isFinite(totalValue)) return;
     wrap.style.maxWidth = '';
     const _show = id => { const el = document.getElementById(id); if(el) el.style.display = ''; };
-    _show('hero-sparkline-wrap'); _show('hero-change'); _show('hero-timerange');
+    const _hide = id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; };
+    // Empty state : portefeuille a 0 et aucune serie reelle -> on masque la
+    // sparkline plate (qui ressemblait a un soulignement vert) et le timerange
+    // (inutile sans donnees a comparer). On garde le change pill a "+0 €"
+    // pour rester explicite sur l'absence de mouvement.
+    const hasRealSeries = Array.isArray(realValues) && realValues.length >= 2 &&
+                          realValues.some(v => v && v !== 0);
+    if(totalValue === 0 && !hasRealSeries){
+        _hide('hero-sparkline-wrap');
+        _hide('hero-timerange');
+        _show('hero-change');
+    } else {
+        _show('hero-sparkline-wrap'); _show('hero-change'); _show('hero-timerange');
+    }
     HERO_STATE.lastTotal = totalValue;
     range = range || HERO_STATE.range;
     HERO_STATE.range = range;
