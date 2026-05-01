@@ -4425,6 +4425,19 @@
             box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset,
                         0 2px 6px rgba(0,0,0,0.25);
         }
+        /* Bouton "···" qui révèle les ranges secondaires (1S/3M/Max). */
+        .hp-range-more {
+            padding: 7px 10px; border: none; background: transparent;
+            color: var(--sf-text-muted); font-size: 0.9rem; font-weight: 700;
+            font-family: inherit; border-radius: 8px; cursor: pointer;
+            transition: all 0.2s; line-height: 1;
+            letter-spacing: 0;
+        }
+        .hp-range-more:hover { color: var(--sf-text); background: rgba(255,255,255,0.04); }
+        .hp-range-more[aria-expanded="true"] {
+            color: var(--sf-text);
+            background: rgba(255,255,255,0.06);
+        }
 
         .hp-sparkline {
             height: 130px;
@@ -7349,13 +7362,19 @@
                 </div>
             </div>
             <div class="hp-split-info" id="hero-split-info" style="display:none"></div>
+            <!-- Distill: ranges réduits 6 → 3 (1J/1M/1A) + dropdown "Plus".
+                 Cible le check quotidien sans encombrer le hero. JS conserve les 6 valeurs. -->
             <div class="hp-timerange" id="hero-timerange" role="tablist" aria-label="Période">
                 <button data-range="1D" class="active" role="tab">1J</button>
-                <button data-range="1W" role="tab">1S</button>
                 <button data-range="1M" role="tab">1M</button>
-                <button data-range="3M" role="tab">3M</button>
                 <button data-range="1Y" role="tab">1A</button>
-                <button data-range="ALL" role="tab">Max</button>
+                <button data-range="1W" role="tab" class="hp-range-extra" hidden>1S</button>
+                <button data-range="3M" role="tab" class="hp-range-extra" hidden>3M</button>
+                <button data-range="ALL" role="tab" class="hp-range-extra" hidden>Max</button>
+                <button type="button" class="hp-range-more" id="hp-range-more"
+                        aria-label="Afficher plus de périodes" title="Plus de périodes">
+                    <span aria-hidden="true">···</span>
+                </button>
             </div>
             <div class="hp-sparkline" id="hero-sparkline-wrap">
                 <svg viewBox="0 0 800 130" preserveAspectRatio="none" aria-hidden="true">
@@ -7376,24 +7395,22 @@
             </div>
         </div>
 
-        <!-- Insights stories - rail horizontal de cartes générées dynamiquement.
-             Style Revolut Stories. Donne une raison d'ouvrir l'app le matin. -->
-        <div class="insights-rail home-module" id="insights-rail" data-module-id="insights" data-module-label="Insights du jour" aria-label="Insights du jour"></div>
+        <!-- Distill: insights-rail + market-ticker masqués par défaut.
+             Ils créaient un effet "buffet" avec smart-picks (3 carrousels d'affilée).
+             Conservés en DOM pour ne pas casser le JS qui les remplit ; à exposer
+             plus tard dans une vue Marchés dédiée ou via toggle Settings. -->
+        <div class="insights-rail home-module" id="insights-rail" data-module-id="insights" data-module-label="Insights du jour" aria-label="Insights du jour" hidden></div>
 
-        <!-- Market ticker (scrolling horizontal strip) -->
-        <div class="market-ticker home-module" id="market-ticker" data-module-id="market-ticker" data-module-label="Ticker marchés" aria-hidden="true">
+        <div class="market-ticker home-module" id="market-ticker" data-module-id="market-ticker" data-module-label="Ticker marchés" aria-hidden="true" hidden>
             <div class="market-ticker-track" id="market-ticker-track">
                 <!-- rempli dynamiquement par updateMarketTicker() -->
             </div>
         </div>
 
-        <!-- KPIs rapides -->
-        <div class="stat-grid stat-grid-4 home-module" id="home-stats" data-module-id="home-stats" data-module-label="KPIs rapides (Valeur, Mode, Santé, Positions)">
-            <div class="stat-card accent-blue">
-                <div class="stat-label">Valeur totale</div>
-                <div class="stat-value" id="home-total"><span class="skel skel-val"></span></div>
-                <div class="stat-sub" id="home-total-sub">-</div>
-            </div>
+        <!-- KPIs rapides - Distill: 4 → 3 cards.
+             "Valeur totale" supprimée (doublon du hero-portfolio juste au-dessus).
+             Le hero porte la valeur, ce bloc porte les états (mode/santé/positions). -->
+        <div class="stat-grid stat-grid-3 home-module" id="home-stats" data-module-id="home-stats" data-module-label="État (Mode, Santé, Positions)">
             <div class="stat-card">
                 <div class="stat-label">Mode actif</div>
                 <div class="stat-value" id="home-mode" style="font-size:1.6rem">-</div>
@@ -7409,6 +7426,9 @@
                 <div class="stat-value" id="home-positions">-</div>
                 <div class="stat-sub" id="home-positions-sub">-</div>
             </div>
+            <!-- home-total conservé hors grille pour ne pas casser les références JS qui le mettent à jour -->
+            <div id="home-total" hidden aria-hidden="true"></div>
+            <div id="home-total-sub" hidden aria-hidden="true"></div>
         </div>
 
         <!-- ═══ TRADING-APP DUAL BLOCK : Répartition + Top holdings ═══ -->
@@ -7494,20 +7514,17 @@
             </div>
         </div>
 
-        <!-- Actions rapides (remplace les anciens raccourcis de navigation déjà présents dans la nav + footer) -->
+        <!-- Actions rapides - Distill: 6 → 3 actions vraiment uniques au dashboard.
+             "Lancer un scan", "Rafraîchir", "Basculer Paper/Live" sont accessibles
+             ailleurs (header, settings, vue Découverte). Inutile de les répéter ici. -->
         <div class="dcard home-module" data-module-id="home-shortcuts" data-module-label="Actions rapides">
             <div class="dcard-title" style="display:flex;align-items:center;gap:10px"><span class="sfi sfi-lg c-blue" data-icon="bolt"></span>Actions rapides</div>
-            <div class="dcard-sub" style="margin-bottom:18px;color:var(--sf-text-muted);font-size:.9rem">Les opérations les plus courantes, en un clic, sans avoir à naviguer.</div>
+            <div class="dcard-sub" style="margin-bottom:18px;color:var(--sf-text-muted);font-size:.9rem">Les trois opérations qui n'ont pas leur place ailleurs.</div>
             <div class="shortcut-grid">
-                <button class="shortcut-tile" onclick="quickAction('scan')">
-                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="search"></span></div>
-                    <div class="shortcut-tile-title">Lancer un scan</div>
-                    <div class="shortcut-tile-desc">Opportunités marché live</div>
-                </button>
                 <button class="shortcut-tile" onclick="quickAction('rebalance')">
                     <div class="shortcut-tile-icon"><span class="sfi" data-icon="refresh"></span></div>
-                    <div class="shortcut-tile-title">Simuler rebalance</div>
-                    <div class="shortcut-tile-desc">Drift vs. allocation cible</div>
+                    <div class="shortcut-tile-title">Simuler un rebalance</div>
+                    <div class="shortcut-tile-desc">Écart vs. allocation cible</div>
                 </button>
                 <button class="shortcut-tile" onclick="quickAction('dca')">
                     <div class="shortcut-tile-icon"><span class="sfi" data-icon="plus"></span></div>
@@ -7519,21 +7536,15 @@
                     <div class="shortcut-tile-title">Exporter CSV</div>
                     <div class="shortcut-tile-desc">Positions + historique</div>
                 </button>
-                <button class="shortcut-tile" onclick="quickAction('paperlive')">
-                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="bolt"></span></div>
-                    <div class="shortcut-tile-title">Basculer Paper / Live</div>
-                    <div class="shortcut-tile-desc">Mode de trading actif</div>
-                </button>
-                <button class="shortcut-tile" onclick="quickAction('refresh')">
-                    <div class="shortcut-tile-icon"><span class="sfi" data-icon="refresh"></span></div>
-                    <div class="shortcut-tile-title">Rafraîchir les données</div>
-                    <div class="shortcut-tile-desc">Prix et cotations</div>
-                </button>
             </div>
         </div>
 
-        <!-- ═══ HEATMAP - Carte du marché (déplacée sous Raccourcis, scroll interne) ═══ -->
-        <div class="heatmap-card home-module" data-focusable="true" data-module-id="heatmap-market" data-module-label="Carte du marché (heatmap ETF)">
+        <!-- Distill: Heatmap masquée du dashboard.
+             Module lourd (40 ETF + scroll horizontal) qui appartient à une vue
+             Marchés dédiée plutôt qu'à l'écran d'accueil. Conservée en DOM pour
+             ne pas casser le JS de population ; sortir le `hidden` quand on
+             aura un toggle "Mode pro" dans Settings. -->
+        <div class="heatmap-card home-module" data-focusable="true" data-module-id="heatmap-market" data-module-label="Carte du marché (heatmap ETF)" hidden>
             <div class="hm-header">
                 <div class="hm-title-wrap">
                     <div class="hm-title-icon"><span class="sfi" data-icon="chart"></span></div>
@@ -11506,7 +11517,7 @@ function _initHeroTimeRange(){
     wrap.__wired = true;
     wrap.querySelectorAll('button[data-range]').forEach(btn => {
         btn.addEventListener('click', async () => {
-            wrap.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            wrap.querySelectorAll('button[data-range]').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             const range = btn.dataset.range;
             const real = await _heroLoadRealSeries(range);
@@ -11518,6 +11529,17 @@ function _initHeroTimeRange(){
             }
         });
     });
+    // "···" reveals secondary ranges (1S / 3M / Max). Toggle hidden + aria.
+    const more = wrap.querySelector('#hp-range-more');
+    const extras = wrap.querySelectorAll('.hp-range-extra');
+    if(more && extras.length){
+        more.setAttribute('aria-expanded', 'false');
+        more.addEventListener('click', () => {
+            const expanded = more.getAttribute('aria-expanded') === 'true';
+            extras.forEach(b => { b.hidden = expanded; });
+            more.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+        });
+    }
 }
 
 /* ═══════════════════════════════════════════════════════
