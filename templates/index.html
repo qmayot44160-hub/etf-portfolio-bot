@@ -12045,14 +12045,19 @@ async function loadHome(){
         // connecteur universel) repond. La bascule se fait via [data-mode]
         // sur #view-home, le CSS gere le show/hide des deux modes.
         // Multi-user ready : aucune donnee perso dans la welcome.
+        // Override URL pour preview : ?preview=welcome ou ?preview=dashboard.
         const view = document.getElementById('view-home');
         if(view){
+            const previewMode = new URLSearchParams(window.location.search).get('preview');
             const hasAnyBroker = !!(s.broker || s.cryptoBroker || s.connectorsValue);
-            view.dataset.mode = hasAnyBroker ? 'dashboard' : 'welcome';
-            // Si on est en welcome, on saute la suite (le dashboard est cache,
-            // pas besoin de calculer ses KPI). On reactivera loadHome au
-            // prochain appel quand un broker sera connecte.
-            if(!hasAnyBroker){
+            const mode = previewMode === 'welcome' || previewMode === 'dashboard'
+                ? previewMode
+                : (hasAnyBroker ? 'dashboard' : 'welcome');
+            view.dataset.mode = mode;
+            // Si on est en welcome (reel ou preview), on saute le calcul des
+            // KPI dashboard : ils ne sont pas affiches et ca evite des
+            // appels API inutiles.
+            if(mode === 'welcome'){
                 return;
             }
         }
