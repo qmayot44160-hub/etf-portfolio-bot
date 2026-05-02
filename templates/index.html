@@ -1749,14 +1749,90 @@
            HOME DASHBOARD
            ════════════════════════════════════════════════ */
         /* ════════════════════════════════════════════════
-           WELCOME LANDING - mode A (aucun broker connecte)
-           Marketing sobre, register brand. Sections espacees,
-           hierarchie typo tres tranchee, palette restrainte
-           (neutres + bleu accent). Aucune image, aucun gradient.
+           WELCOME SCREEN - landing page plein ecran
+           Pilote depuis le bas du body via #welcome-screen.
+           Affichee tant que localStorage.pq_landing_skip n'est pas pose.
+           Marketing sobre, register brand. Aucune image, aucun gradient.
            ════════════════════════════════════════════════ */
-        #view-home[data-mode="dashboard"] #view-home-welcome { display: none; }
-        #view-home[data-mode="welcome"] .home-hero,
-        #view-home[data-mode="welcome"] #home-modules-root { display: none; }
+        #welcome-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9000;
+            background: var(--sf-bg);
+            overflow-y: auto;
+            color: var(--sf-text);
+            display: none;
+        }
+        #welcome-screen.active { display: block; }
+
+        .wl-topbar {
+            position: sticky; top: 0; z-index: 1;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 64px;
+            padding: 0 32px;
+            background: rgba(0,0,0,0.82);
+            backdrop-filter: saturate(180%) blur(22px);
+            -webkit-backdrop-filter: saturate(180%) blur(22px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .wl-brand {
+            display: inline-flex; align-items: center; gap: 10px;
+            color: var(--sf-text);
+            font-weight: 700; font-size: 1rem;
+            letter-spacing: -0.01em;
+        }
+        .wl-brand-mark {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px;
+            border-radius: 7px;
+            background: #0a0a0e;
+            border: 1px solid #1a3a7a;
+            color: #fff;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08),
+                        0 2px 8px rgba(10,40,90,0.35);
+        }
+        @media (max-width: 720px) {
+            .wl-topbar { padding: 0 18px; height: 56px; }
+        }
+
+        /* Checkbox "Se souvenir de moi" */
+        .wl-remember {
+            display: inline-flex; align-items: center; gap: 10px;
+            margin-top: 18px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.9rem;
+            color: var(--sf-text-secondary);
+        }
+        .wl-remember input { position: absolute; opacity: 0; width: 0; height: 0; }
+        .wl-remember-box {
+            display: inline-block;
+            width: 18px; height: 18px;
+            border-radius: 5px;
+            border: 1.5px solid var(--sf-border);
+            background: rgba(255,255,255,0.04);
+            position: relative;
+            flex-shrink: 0;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .wl-remember input:checked + .wl-remember-box {
+            background: var(--sf-blue);
+            border-color: var(--sf-blue);
+        }
+        .wl-remember input:checked + .wl-remember-box::after {
+            content: '';
+            position: absolute;
+            left: 4px; top: 1px;
+            width: 6px; height: 10px;
+            border: solid #fff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        .wl-remember:hover .wl-remember-box { border-color: var(--sf-text-muted); }
+        .wl-remember input:focus-visible + .wl-remember-box {
+            outline: 2px solid var(--sf-blue);
+            outline-offset: 2px;
+        }
 
         .wl-landing {
             padding: 0;
@@ -7440,6 +7516,119 @@
 <body class="no-aurora no-grain">
 
 <!-- ════════════════════════════════════════════════════════
+     WELCOME SCREEN - landing par defaut
+     Affichee a chaque ouverture sauf si "Se souvenir de moi" coche
+     (pq_landing_skip dans localStorage). Logout = clear + reload.
+     ════════════════════════════════════════════════════════ -->
+<div id="welcome-screen" role="dialog" aria-label="Bienvenue sur PortfolioQuant" aria-modal="true">
+    <div class="wl-topbar">
+        <div class="wl-brand">
+            <span class="wl-brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 512 512" width="22" height="22"><text x="256" y="262" text-anchor="middle" dominant-baseline="central" font-family="-apple-system, sans-serif" font-weight="700" font-size="380" letter-spacing="-16" fill="currentColor">Q</text></svg>
+            </span>
+            <span class="wl-brand-text">PortfolioQuant</span>
+        </div>
+    </div>
+    <div class="wl-inner">
+        <!-- Hero -->
+        <div class="wl-hero">
+            <div class="wl-eyebrow">
+                <span class="wl-eyebrow-tag">Quant pour ton patrimoine</span>
+            </div>
+            <h1 class="wl-headline">Ton portefeuille, gere comme un hedge fund.</h1>
+            <p class="wl-sub">Agrege ETF, crypto, immobilier et livrets en une seule vue. Decide avec des outils quant : frontiere efficiente, scenarios Monte Carlo, rebalance optimal, DCA programme.</p>
+            <div class="wl-ctas">
+                <button type="button" class="wl-cta-primary" id="welcome-enter-btn">
+                    Entrer dans l'app
+                    <span class="wl-cta-arrow" aria-hidden="true">&rarr;</span>
+                </button>
+                <a href="#wl-how" class="wl-cta-secondary">Voir comment ca marche</a>
+            </div>
+            <label class="wl-remember">
+                <input type="checkbox" id="welcome-remember" checked>
+                <span class="wl-remember-box" aria-hidden="true"></span>
+                <span class="wl-remember-text">Se souvenir de moi sur ce navigateur</span>
+            </label>
+        </div>
+
+        <!-- Pourquoi -->
+        <div class="wl-why">
+            <div class="wl-section-eyebrow">Pourquoi PortfolioQuant</div>
+            <div class="wl-why-grid">
+                <div class="wl-why-card">
+                    <div class="wl-why-num">01</div>
+                    <h3 class="wl-why-title">Multi-broker, multi-classe.</h3>
+                    <p class="wl-why-desc">IBKR pour les ETF, MEXC pour la crypto, manuel pour livrets et immo. Tout agrege dans une vue, sans Excel.</p>
+                </div>
+                <div class="wl-why-card">
+                    <div class="wl-why-num">02</div>
+                    <h3 class="wl-why-title">La couche quant que les apps natives n'ont pas.</h3>
+                    <p class="wl-why-desc">Frontiere efficiente, simulations Monte Carlo, rolling Sharpe, drawdown, rebalance optimal. Pour decider, pas seulement contempler.</p>
+                </div>
+                <div class="wl-why-card">
+                    <div class="wl-why-num">03</div>
+                    <h3 class="wl-why-title">Prive par design.</h3>
+                    <p class="wl-why-desc">Tes credentials chiffres Fernet AES, stockes uniquement sur ton serveur. Aucun tiers, aucun tracking, aucune publicite.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comment ca marche -->
+        <div class="wl-how" id="wl-how">
+            <div class="wl-section-eyebrow">Comment ca marche</div>
+            <ol class="wl-steps">
+                <li class="wl-step">
+                    <span class="wl-step-num">01</span>
+                    <div class="wl-step-body">
+                        <h3 class="wl-step-title">Connecte un broker</h3>
+                        <p class="wl-step-desc">5 minutes, API key chiffree localement. IBKR, Degiro, Alpaca, MEXC ou mode paper si tu veux tester sans engagement.</p>
+                    </div>
+                </li>
+                <li class="wl-step">
+                    <span class="wl-step-num">02</span>
+                    <div class="wl-step-body">
+                        <h3 class="wl-step-title">Reponds a 3 questions</h3>
+                        <p class="wl-step-desc">Horizon, tolerance au risque, montant DCA mensuel. Le bot calibre l'allocation cible et les seuils d'alerte.</p>
+                    </div>
+                </li>
+                <li class="wl-step">
+                    <span class="wl-step-num">03</span>
+                    <div class="wl-step-body">
+                        <h3 class="wl-step-title">Le bot prend le relais</h3>
+                        <p class="wl-step-desc">Premiere allocation suggeree, picks du jour scannes en continu, alertes Telegram quand un seuil bouge. Tu gardes la main sur chaque ordre.</p>
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <!-- Features rail -->
+        <div class="wl-features">
+            <div class="wl-section-eyebrow">Ce que tu peux faire</div>
+            <div class="wl-features-grid">
+                <div class="wl-feature"><span class="wl-feature-dot"></span>DCA programme</div>
+                <div class="wl-feature"><span class="wl-feature-dot"></span>Smart picks IA</div>
+                <div class="wl-feature"><span class="wl-feature-dot"></span>Backtests historiques</div>
+                <div class="wl-feature"><span class="wl-feature-dot"></span>Scenarios Monte Carlo</div>
+                <div class="wl-feature"><span class="wl-feature-dot"></span>Rebalance optimal</div>
+                <div class="wl-feature"><span class="wl-feature-dot"></span>Frontiere efficiente</div>
+                <div class="wl-feature"><span class="wl-feature-dot"></span>Watchlist live</div>
+                <div class="wl-feature"><span class="wl-feature-dot"></span>Alertes Telegram</div>
+            </div>
+        </div>
+
+        <!-- CTA final -->
+        <div class="wl-final">
+            <h2 class="wl-final-title">Prets a commencer ?</h2>
+            <p class="wl-final-sub">Configure en moins de deux minutes. Mode paper disponible si tu veux tester sans broker reel.</p>
+            <button type="button" class="wl-cta-primary wl-cta-final" id="welcome-enter-btn-bottom">
+                Entrer dans l'app
+                <span class="wl-cta-arrow" aria-hidden="true">&rarr;</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
      APPLE-STYLE GLOBAL NAV
      ════════════════════════════════════════════════════════ -->
 <nav class="globalheader">
@@ -7649,6 +7838,7 @@
     <button class="user-menu-item" onclick="openSettingsPanel('raccourcis')"><span class="sfi" data-icon="key"></span>Raccourcis clavier</button>
     <div class="user-menu-divider"></div>
     <button class="user-menu-item" onclick="openSettingsPanel('apropos')"><span class="sfi" data-icon="info"></span>À propos</button>
+    <button class="user-menu-item" onclick="if(window.logoutFromApp)window.logoutFromApp()"><span class="sfi" data-icon="home"></span>Retour à l'accueil</button>
     <button class="user-menu-item danger" onclick="logoutUser()"><span class="sfi" data-icon="logout"></span>Déconnexion</button>
     <div class="user-menu-footer" id="user-menu-footer">PortfolioQuant · v1.0</div>
 </div>
@@ -7670,112 +7860,10 @@
 <!-- ═══════════════════════════════════════════════════════
      ACCUEIL (Dashboard)
      ═══════════════════════════════════════════════════════ -->
-<div id="view-home" class="show" data-mode="dashboard">
-    <!-- ═══════════════════════════════════════════════════════
-         WELCOME LANDING - mode A : aucun broker connecte
-         Affichee tant qu'aucun broker n'est branche. Bascule en mode
-         "dashboard" automatiquement des qu'un broker repond. Marketing
-         sobre, ton "salle de marche tamisee" + ouvert multi-user.
-         Toggle via [data-mode="welcome"] sur #view-home depuis loadHome().
-         ═══════════════════════════════════════════════════════ -->
-    <section class="wl-landing" id="view-home-welcome" aria-label="Bienvenue sur PortfolioQuant">
-        <div class="wl-inner">
-            <!-- Hero -->
-            <div class="wl-hero">
-                <div class="wl-eyebrow">
-                    <span class="wl-eyebrow-mark">Q</span>
-                    <span>PortfolioQuant</span>
-                    <span class="wl-eyebrow-sep" aria-hidden="true"></span>
-                    <span class="wl-eyebrow-tag">Quant pour ton patrimoine</span>
-                </div>
-                <h1 class="wl-headline">Ton portefeuille, gere comme un hedge fund.</h1>
-                <p class="wl-sub">Agrege ETF, crypto, immobilier et livrets en une seule vue. Decide avec des outils quant : frontiere efficiente, scenarios Monte Carlo, rebalance optimal, DCA programme.</p>
-                <div class="wl-ctas">
-                    <button type="button" class="wl-cta-primary" onclick="if(window.showOnboarding)window.showOnboarding();else if(window.showView)window.showView('broker');">
-                        Commencer la configuration
-                        <span class="wl-cta-arrow" aria-hidden="true">&rarr;</span>
-                    </button>
-                    <a href="#wl-how" class="wl-cta-secondary">Voir comment ca marche</a>
-                </div>
-            </div>
-
-            <!-- Pourquoi -->
-            <div class="wl-why">
-                <div class="wl-section-eyebrow">Pourquoi PortfolioQuant</div>
-                <div class="wl-why-grid">
-                    <div class="wl-why-card">
-                        <div class="wl-why-num">01</div>
-                        <h3 class="wl-why-title">Multi-broker, multi-classe.</h3>
-                        <p class="wl-why-desc">IBKR pour les ETF, MEXC pour la crypto, manuel pour livrets et immo. Tout agrege dans une vue, sans Excel.</p>
-                    </div>
-                    <div class="wl-why-card">
-                        <div class="wl-why-num">02</div>
-                        <h3 class="wl-why-title">La couche quant que les apps natives n'ont pas.</h3>
-                        <p class="wl-why-desc">Frontiere efficiente, simulations Monte Carlo, rolling Sharpe, drawdown, rebalance optimal. Pour decider, pas seulement contempler.</p>
-                    </div>
-                    <div class="wl-why-card">
-                        <div class="wl-why-num">03</div>
-                        <h3 class="wl-why-title">Prive par design.</h3>
-                        <p class="wl-why-desc">Tes credentials chiffres Fernet AES, stockes uniquement sur ton serveur. Aucun tiers, aucun tracking, aucune publicite.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Comment ca marche -->
-            <div class="wl-how" id="wl-how">
-                <div class="wl-section-eyebrow">Comment ca marche</div>
-                <ol class="wl-steps">
-                    <li class="wl-step">
-                        <span class="wl-step-num">01</span>
-                        <div class="wl-step-body">
-                            <h3 class="wl-step-title">Connecte un broker</h3>
-                            <p class="wl-step-desc">5 minutes, API key chiffree localement. IBKR, Degiro, Alpaca, MEXC ou mode paper si tu veux tester sans engagement.</p>
-                        </div>
-                    </li>
-                    <li class="wl-step">
-                        <span class="wl-step-num">02</span>
-                        <div class="wl-step-body">
-                            <h3 class="wl-step-title">Reponds a 3 questions</h3>
-                            <p class="wl-step-desc">Horizon, tolerance au risque, montant DCA mensuel. Le bot calibre l'allocation cible et les seuils d'alerte.</p>
-                        </div>
-                    </li>
-                    <li class="wl-step">
-                        <span class="wl-step-num">03</span>
-                        <div class="wl-step-body">
-                            <h3 class="wl-step-title">Le bot prend le relais</h3>
-                            <p class="wl-step-desc">Premiere allocation suggeree, picks du jour scannes en continu, alertes Telegram quand un seuil bouge. Tu gardes la main sur chaque ordre.</p>
-                        </div>
-                    </li>
-                </ol>
-            </div>
-
-            <!-- Features rail -->
-            <div class="wl-features">
-                <div class="wl-section-eyebrow">Ce que tu peux faire</div>
-                <div class="wl-features-grid">
-                    <div class="wl-feature"><span class="wl-feature-dot"></span>DCA programme</div>
-                    <div class="wl-feature"><span class="wl-feature-dot"></span>Smart picks IA</div>
-                    <div class="wl-feature"><span class="wl-feature-dot"></span>Backtests historiques</div>
-                    <div class="wl-feature"><span class="wl-feature-dot"></span>Scenarios Monte Carlo</div>
-                    <div class="wl-feature"><span class="wl-feature-dot"></span>Rebalance optimal</div>
-                    <div class="wl-feature"><span class="wl-feature-dot"></span>Frontiere efficiente</div>
-                    <div class="wl-feature"><span class="wl-feature-dot"></span>Watchlist live</div>
-                    <div class="wl-feature"><span class="wl-feature-dot"></span>Alertes Telegram</div>
-                </div>
-            </div>
-
-            <!-- CTA final -->
-            <div class="wl-final">
-                <h2 class="wl-final-title">Prets a commencer ?</h2>
-                <p class="wl-final-sub">Configure en moins de deux minutes. Mode paper disponible si tu veux tester sans broker reel.</p>
-                <button type="button" class="wl-cta-primary wl-cta-final" onclick="if(window.showOnboarding)window.showOnboarding();else if(window.showView)window.showView('broker');">
-                    Configurer en 2 minutes
-                    <span class="wl-cta-arrow" aria-hidden="true">&rarr;</span>
-                </button>
-            </div>
-        </div>
-    </section>
-
+<div id="view-home" class="show">
+    <!-- Welcome landing deplacee en niveau body (id="welcome-screen") pour
+         eviter le bug de toggle [data-mode] et beneficier d'un overlay
+         simple. Voir <div id="welcome-screen"> juste apres <body>. -->
     <div class="home-hero">
         <div class="home-greeting" id="home-greeting">
             <span class="hg-salutation">Bonsoir</span>
@@ -12040,27 +12128,9 @@ async function loadHome(){
     try{
         const s = await collectAppState();
 
-        // Mode adaptatif : welcome page tant qu'aucun broker n'est connecte,
-        // dashboard des qu'au moins un broker (ETF ou crypto, natif ou
-        // connecteur universel) repond. La bascule se fait via [data-mode]
-        // sur #view-home, le CSS gere le show/hide des deux modes.
-        // Multi-user ready : aucune donnee perso dans la welcome.
-        // Override URL pour preview : ?preview=welcome ou ?preview=dashboard.
-        const view = document.getElementById('view-home');
-        if(view){
-            const previewMode = new URLSearchParams(window.location.search).get('preview');
-            const hasAnyBroker = !!(s.broker || s.cryptoBroker || s.connectorsValue);
-            const mode = previewMode === 'welcome' || previewMode === 'dashboard'
-                ? previewMode
-                : (hasAnyBroker ? 'dashboard' : 'welcome');
-            view.dataset.mode = mode;
-            // Si on est en welcome (reel ou preview), on saute le calcul des
-            // KPI dashboard : ils ne sont pas affiches et ca evite des
-            // appels API inutiles.
-            if(mode === 'welcome'){
-                return;
-            }
-        }
+        // (la welcome landing vit en overlay #welcome-screen au niveau body,
+        //  pilote par showWelcomeScreenIfNeeded() au load. loadHome se contente
+        //  de remplir le dashboard.)
 
         // Salutation heure de la journee + meta-line date/heure (feel terminal pro)
         const _now = new Date();
@@ -13919,7 +13989,10 @@ function loadAuditLog(){
 }
 
 function logoutUser(){
-    if(confirm('Se déconnecter ?')) window.location.href = '/logout';
+    if(!confirm('Se deconnecter ?')) return;
+    // Clear le flag welcome pour reafficher la landing au prochain load.
+    try { localStorage.removeItem('pq_landing_skip'); } catch(e){}
+    window.location.href = '/logout';
 }
 
 // Rail navigation
@@ -16110,6 +16183,70 @@ function investInCurrentPick(){
             }
         } catch(e){}
     });
+})();
+</script>
+
+<!-- ════════════════════════════════════════════════════════
+     WELCOME SCREEN - controller
+     Affiche la landing en overlay tant que pq_landing_skip n'est pas pose.
+     Les boutons "Entrer dans l'app" + checkbox "Se souvenir de moi" gerent
+     la transition. Logout (window.logoutFromApp) clear le flag et reload.
+     ════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+    const SKIP_KEY = 'pq_landing_skip';
+    const screen = document.getElementById('welcome-screen');
+    if(!screen) return;
+
+    function shouldShow(){
+        // ?welcome=1 force l'affichage (pour les liens "voir la welcome").
+        // ?welcome=0 force le bypass (pour debug ou navigation directe).
+        const q = new URLSearchParams(window.location.search).get('welcome');
+        if(q === '1') return true;
+        if(q === '0') return false;
+        try {
+            return !localStorage.getItem(SKIP_KEY);
+        } catch(e){ return true; }
+    }
+
+    function dismiss(remember){
+        if(remember){
+            try { localStorage.setItem(SKIP_KEY, '1'); } catch(e){}
+        }
+        screen.classList.remove('active');
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+    }
+
+    // Affichage initial
+    if(shouldShow()){
+        screen.classList.add('active');
+        // Empeche le scroll du body sous l'overlay
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Wire les CTAs (en haut + en bas)
+    const ctas = document.querySelectorAll('#welcome-enter-btn, #welcome-enter-btn-bottom');
+    const remember = document.getElementById('welcome-remember');
+    ctas.forEach(btn => {
+        btn.addEventListener('click', () => {
+            dismiss(!!(remember && remember.checked));
+        });
+    });
+
+    // Expose pour usage externe (logout, debug)
+    window.showWelcomeScreen = function(){
+        screen.classList.add('active');
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+    };
+    window.hideWelcomeScreen = function(){ dismiss(false); };
+    window.logoutFromApp = function(){
+        try { localStorage.removeItem(SKIP_KEY); } catch(e){}
+        // Rechargement complet pour repartir d'un etat propre
+        window.location.reload();
+    };
 })();
 </script>
 
