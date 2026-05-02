@@ -1757,13 +1757,24 @@
         #welcome-screen {
             position: fixed;
             inset: 0;
-            z-index: 9000;
+            z-index: 10500;
             background: var(--sf-bg);
             overflow-y: auto;
             color: var(--sf-text);
             display: none;
         }
         #welcome-screen.active { display: block; }
+        /* Quand la welcome est active, on cache tout le chrome de l'app
+           (header global, bottom tabs, context banner, decors lateraux) :
+           la landing est une page autonome, pas un overlay au-dessus du
+           dashboard. */
+        body.welcome-active .globalheader,
+        body.welcome-active .bottom-tabbar,
+        body.welcome-active .ctx-banner,
+        body.welcome-active .page-sides-decor,
+        body.welcome-active .page,
+        body.welcome-active footer,
+        body.welcome-active .gfooter { display: none !important; }
 
         .wl-topbar {
             position: sticky; top: 0; z-index: 1;
@@ -16214,6 +16225,7 @@ function investInCurrentPick(){
             try { localStorage.setItem(SKIP_KEY, '1'); } catch(e){}
         }
         screen.classList.remove('active');
+        document.body.classList.remove('welcome-active');
         document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
     }
@@ -16221,6 +16233,7 @@ function investInCurrentPick(){
     // Affichage initial
     if(shouldShow()){
         screen.classList.add('active');
+        document.body.classList.add('welcome-active');
         // Empeche le scroll du body sous l'overlay
         document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
@@ -16238,6 +16251,7 @@ function investInCurrentPick(){
     // Expose pour usage externe (logout, debug)
     window.showWelcomeScreen = function(){
         screen.classList.add('active');
+        document.body.classList.add('welcome-active');
         document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
     };

@@ -7,7 +7,7 @@
  *  - API (/api/*): network-only, jamais en cache (données live, sensibles).
  */
 
-const VERSION = 'pq-v15';
+const VERSION = 'pq-v16';
 const STATIC_CACHE = `pq-static-${VERSION}`;
 const HTML_CACHE = `pq-html-${VERSION}`;
 
