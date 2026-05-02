@@ -1748,22 +1748,54 @@
         /* ════════════════════════════════════════════════
            HOME DASHBOARD
            ════════════════════════════════════════════════ */
+        /* Bolder: hero passe en left-align + pleine largeur. La centrage etait
+           un reflexe template SaaS ; left-aligned est l'identite des outils
+           pros (Bloomberg, Refinitiv, Tradingview). Le max-width disparait
+           pour s'aligner sur la largeur des modules en dessous. */
         .home-hero {
-            padding: 60px 24px 30px; text-align: center;
-            max-width: 900px; margin: 0 auto;
+            padding: 56px 4px 28px;
+            text-align: left;
         }
+        /* Greeting : eyebrow uppercase mais avec une structure de meta-line
+           (heure / date) qui vit a cote pour le feel terminal. */
         .home-greeting {
-            font-size: 0.85rem; color: var(--sf-text-muted);
-            text-transform: uppercase; letter-spacing: 0.08em;
+            display: inline-flex; align-items: center; gap: 12px;
+            font-size: 0.78rem; color: var(--sf-text-muted);
+            text-transform: uppercase; letter-spacing: 0.1em;
+            font-variant-numeric: tabular-nums;
             margin-bottom: 14px;
+            font-weight: 500;
         }
-        /* Polish: home-title - retrait gradient text + shimmer animation
-           (cf. DESIGN.md absolute bans). Solid color, hiérarchie via taille/poids. */
+        .home-greeting .hg-sep {
+            width: 1px; height: 12px;
+            background: var(--sf-border);
+        }
+        .home-greeting .hg-date,
+        .home-greeting .hg-time {
+            color: var(--sf-text-secondary);
+            letter-spacing: 0.08em;
+        }
+        /* Title plus dominant + signature : un trait fin de 64px en accent
+           bleu juste sous le titre. C'est le tag visuel du dashboard, sobre
+           mais reconnaissable. */
         .home-title {
-            font-size: clamp(2.2rem, 5vw, 3.6rem);
-            font-weight: 700; letter-spacing: -0.04em; line-height: 1.05;
+            font-size: clamp(2.4rem, 6vw, 4.2rem);
+            font-weight: 700; letter-spacing: -0.04em; line-height: 1;
             color: var(--sf-text);
-            margin-bottom: 8px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .home-title::after {
+            content: '';
+            display: block;
+            width: 64px; height: 2px;
+            background: var(--sf-blue);
+            margin-top: 14px;
+            border-radius: 1px;
+        }
+        @media (max-width: 720px) {
+            .home-hero { padding: 32px 14px 18px; }
+            .home-title::after { width: 48px; margin-top: 10px; }
         }
 
         /* Polish: tokens utilitaires pour view-home (suppression d'inline styles).
@@ -4377,11 +4409,11 @@
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
-        /* Polish: fix violation absolute-ban "Gradient text" (DESIGN.md).
-           Le chiffre principal repasse en solid color : la hiérarchie est portée
-           par la taille (3.6rem) et le poids (700), pas par un dégradé décoratif. */
+        /* Bolder: chiffre principal porte plus loin la hierarchie. Solid
+           color (pas de gradient, cf. polish). 4.4rem desktop pour qu'il
+           domine vraiment l'ecran ; le mobile reste lisible via clamp. */
         .hp-value {
-            font-size: 3.6rem;
+            font-size: clamp(2.6rem, 6vw, 4.4rem);
             font-weight: 700;
             letter-spacing: -0.045em;
             line-height: 1;
@@ -7385,7 +7417,13 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="view-home" class="show">
     <div class="home-hero">
-        <div class="home-greeting" id="home-greeting">Bienvenue</div>
+        <div class="home-greeting" id="home-greeting">
+            <span class="hg-salutation">Bonsoir</span>
+            <span class="hg-sep" aria-hidden="true"></span>
+            <span class="hg-date" id="home-greeting-date">—</span>
+            <span class="hg-sep" aria-hidden="true"></span>
+            <span class="hg-time" id="home-greeting-time">—</span>
+        </div>
         <h1 class="home-title">Tableau de bord</h1>
         <p class="home-subtitle" id="home-subtitle">Calcul de ton portefeuille…</p>
     </div>
@@ -11642,10 +11680,28 @@ async function loadHome(){
     try{
         const s = await collectAppState();
 
-        // Salutation heure de la journée
-        const h = new Date().getHours();
-        const greet = h<6?'Bonne nuit':h<12?'Bonjour':h<18?'Bon après-midi':'Bonsoir';
-        document.getElementById('home-greeting').textContent = greet;
+        // Salutation heure de la journee + meta-line date/heure (feel terminal pro)
+        const _now = new Date();
+        const h = _now.getHours();
+        const greet = h<6?'Bonne nuit':h<12?'Bonjour':h<18?'Bon apres-midi':'Bonsoir';
+        const greetingEl = document.getElementById('home-greeting');
+        const salEl = greetingEl?.querySelector('.hg-salutation');
+        const dateEl = document.getElementById('home-greeting-date');
+        const timeEl = document.getElementById('home-greeting-time');
+        if(salEl) salEl.textContent = greet;
+        if(dateEl) {
+            // ex: "MAR 02 MAI" - format compact terminal-style, locale fr-FR
+            const days = ['DIM','LUN','MAR','MER','JEU','VEN','SAM'];
+            const months = ['JAN','FEV','MAR','AVR','MAI','JUN','JUL','AOU','SEP','OCT','NOV','DEC'];
+            const dd = String(_now.getDate()).padStart(2,'0');
+            dateEl.textContent = `${days[_now.getDay()]} ${dd} ${months[_now.getMonth()]}`;
+        }
+        if(timeEl) {
+            // ex: "22:48" - 24h, sans secondes pour eviter le "tic" visuel
+            const hh = String(_now.getHours()).padStart(2,'0');
+            const mm = String(_now.getMinutes()).padStart(2,'0');
+            timeEl.textContent = `${hh}:${mm}`;
+        }
 
         // Subtitle contextuel
         let sub;
