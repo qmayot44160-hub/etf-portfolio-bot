@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PortfolioQuant - Quant pour ton patrimoine</title>
+<meta name="description" content="Ton portefeuille, géré comme un hedge fund. ETF, actions, crypto, immobilier en une vue. Frontière efficiente, scenarios Monte Carlo, rebalance optimal.">
+<style>
+  :root {
+    --sf-bg: #000000;
+    --sf-panel: #0e0e12;
+    --sf-panel-2: #08080c;
+    --sf-border: rgba(255,255,255,0.06);
+    --sf-text: #f5f5f7;
+    --sf-text-secondary: #a1a1a6;
+    --sf-text-muted: #6e6e73;
+    --sf-blue: #0a84ff;
+    --sf-blue-light: #3ba4ff;
+    --sf-green: #30d158;
+    --sf-red: #ff453a;
+    --sf-orange: #ff9f0a;
+    --ui-radius: 24px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: var(--sf-bg);
+    color: var(--sf-text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    min-height: 100vh;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  /* Ambient gradient orbs (background atmosphere) */
+  body::before, body::after {
+    content: ''; position: fixed; pointer-events: none; z-index: 0;
+    border-radius: 50%; filter: blur(120px); opacity: 0.5;
+  }
+  body::before {
+    top: -200px; left: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(10,132,255,0.25), transparent 70%);
+  }
+  body::after {
+    bottom: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(48,209,88,0.12), transparent 70%);
+  }
+
+  .wrap {
+    position: relative; z-index: 1;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+  @media (max-width: 720px) { .wrap { padding: 0 24px; } }
+
+  /* ── Topbar ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: saturate(180%) blur(22px);
+    -webkit-backdrop-filter: saturate(180%) blur(22px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .topbar-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .brand {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-weight: 700; font-size: 1.1rem;
+    letter-spacing: -0.02em;
+    color: var(--sf-text);
+  }
+  .brand-logo {
+    background: linear-gradient(180deg, #fff, #a1a1a6);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .brand-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--sf-blue);
+    box-shadow: 0 0 12px rgba(10,132,255,0.6);
+  }
+  .topbar-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 18px;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #3ba4ff 0%, #0d84ff 100%);
+    color: #fff;
+    font-size: 0.88rem; font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(10,132,255,0.3);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .topbar-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(10,132,255,0.4); }
+  .topbar-cta svg { transition: transform 0.2s; }
+  .topbar-cta:hover svg { transform: translateX(2px); }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 80px 0 100px;
+    max-width: 760px;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.72rem; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--sf-blue);
+    padding: 6px 14px;
+    border: 1px solid rgba(10,132,255,0.2);
+    border-radius: 99px;
+    background: rgba(10,132,255,0.08);
+    margin-bottom: 28px;
+  }
+  .hero-eyebrow-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--sf-blue);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .hero-title {
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin-bottom: 24px;
+  }
+  .hero-title span {
+    background: linear-gradient(180deg, #0a84ff 0%, #30d158 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    font-size: clamp(1rem, 1.2vw, 1.15rem);
+    color: var(--sf-text-secondary);
+    max-width: 60ch;
+    margin-bottom: 36px;
+    line-height: 1.6;
+  }
+  .hero-ctas {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .cta-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 24px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #3ba4ff 0%, #0d84ff 100%);
+    color: #fff;
+    font-size: 0.95rem; font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(10,132,255,0.3);
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .cta-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(10,132,255,0.4); }
+  .cta-primary svg { transition: transform 0.2s; }
+  .cta-primary:hover svg { transform: translateX(2px); }
+  .cta-secondary {
+    color: var(--sf-text-secondary);
+    font-size: 0.9rem; font-weight: 500;
+    text-decoration: none;
+    padding: 14px 6px;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .cta-secondary:hover { color: var(--sf-text); border-color: var(--sf-text-muted); }
+
+  /* ── Section eyebrow + heading ── */
+  .section-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.72rem; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--sf-text-muted);
+    margin-bottom: 28px;
+    padding-left: 16px;
+    position: relative;
+  }
+  .section-eyebrow::before {
+    content: '';
+    position: absolute; left: 0; top: 50%;
+    width: 6px; height: 6px;
+    border-radius: 1px;
+    background: var(--sf-blue);
+    transform: translateY(-50%);
+    box-shadow: 0 0 10px rgba(10,132,255,0.5);
+  }
+  .section-title {
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 18px;
+    max-width: 30ch;
+  }
+  .section-sub {
+    color: var(--sf-text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 55ch;
+    margin-bottom: 48px;
+  }
+
+  /* ── Pourquoi : 3 cards ── */
+  .why { padding: 40px 0 100px; }
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  @media (max-width: 900px) { .why-grid { grid-template-columns: 1fr; } }
+  .why-card {
+    position: relative;
+    background:
+      radial-gradient(ellipse 80% 60% at 0% 0%, rgba(41,151,255,0.06), transparent 60%),
+      linear-gradient(180deg, rgba(14,14,18,0.85), rgba(8,8,12,0.92));
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 18px;
+    padding: 32px 28px;
+  }
+  .why-card::after {
+    content: ''; position: absolute; inset: 0;
+    border-radius: inherit; padding: 1px;
+    background: linear-gradient(135deg, rgba(41,151,255,0.3), transparent 60%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none;
+  }
+  .why-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: rgba(10,132,255,0.12);
+    color: var(--sf-blue);
+    font-weight: 700; font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 22px;
+  }
+  .why-title {
+    font-size: 1.1rem; font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+    margin-bottom: 10px;
+  }
+  .why-desc {
+    color: var(--sf-text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  /* ── Comment ça marche : 3 steps ── */
+  .how { padding: 40px 0 100px; }
+  .steps {
+    list-style: none;
+    counter-reset: step;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 28px;
+    padding: 28px 0;
+    border-top: 1px solid var(--sf-border);
+    align-items: start;
+  }
+  .step:last-child { border-bottom: 1px solid var(--sf-border); }
+  .step-num {
+    font-size: 2.4rem; font-weight: 700;
+    background: linear-gradient(180deg, #0a84ff 0%, #30d158 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .step-title {
+    font-size: 1.2rem; font-weight: 600;
+    letter-spacing: -0.015em;
+    margin-bottom: 8px;
+  }
+  .step-desc {
+    color: var(--sf-text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    max-width: 64ch;
+  }
+  @media (max-width: 720px) {
+    .step { grid-template-columns: 1fr; gap: 8px; }
+    .step-num { font-size: 1.8rem; }
+  }
+
+  /* ── Features grid ── */
+  .features { padding: 40px 0 100px; }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 900px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .features-grid { grid-template-columns: 1fr; } }
+  .feature {
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 16px 18px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    font-size: 0.92rem;
+    color: var(--sf-text);
+  }
+  .feature-icon {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: rgba(10,132,255,0.12);
+    color: var(--sf-blue);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+
+  /* ── Final CTA ── */
+  .final {
+    margin: 40px 0 100px;
+    padding: 56px 48px;
+    background:
+      radial-gradient(ellipse 60% 80% at 0% 50%, rgba(10,132,255,0.10), transparent 70%),
+      linear-gradient(180deg, rgba(14,14,18,0.85), rgba(8,8,12,0.92));
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--ui-radius);
+    position: relative;
+    text-align: left;
+  }
+  .final::after {
+    content: ''; position: absolute; inset: 0;
+    border-radius: inherit; padding: 1px;
+    background: linear-gradient(135deg, rgba(41,151,255,0.5), rgba(48,209,88,0.15), transparent 65%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none;
+  }
+  .final-title {
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    margin-bottom: 12px;
+    max-width: 22ch;
+  }
+  .final-title span {
+    background: linear-gradient(180deg, #0a84ff 0%, #30d158 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .final-sub {
+    color: var(--sf-text-secondary);
+    font-size: 1rem;
+    line-height: 1.55;
+    margin-bottom: 28px;
+    max-width: 56ch;
+  }
+  @media (max-width: 720px) { .final { padding: 36px 24px; } }
+
+  /* ── Footer ── */
+  .foot {
+    padding: 32px 0 48px;
+    border-top: 1px solid var(--sf-border);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px;
+    color: var(--sf-text-muted);
+    font-size: 0.78rem;
+  }
+  .foot-status {
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .foot-status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--sf-green);
+    box-shadow: 0 0 8px rgba(48,209,88,0.6);
+  }
+  .foot-links { display: inline-flex; gap: 24px; }
+  .foot-links a {
+    color: var(--sf-text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .foot-links a:hover { color: var(--sf-text); }
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a href="/welcome" class="brand">
+      <span class="brand-dot"></span>
+      <span class="brand-logo">PortfolioQuant</span>
+    </a>
+    <a href="/login" class="topbar-cta">
+      <span>Se connecter</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</header>
+
+<!-- Hero -->
+<main class="wrap">
+  <section class="hero">
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-dot"></span>
+      Investissement quantitatif personnel
+    </div>
+    <h1 class="hero-title">
+      Ton portefeuille,<br>
+      <span>géré comme un hedge fund.</span>
+    </h1>
+    <p class="hero-sub">
+      Agrège ETF, actions, crypto, immobilier et livrets en une seule vue. Décide avec
+      des outils quantitatifs : frontière efficiente, scenarios Monte Carlo, rebalance optimal,
+      DCA programmé. Sans Excel, sans broker à courir d'un onglet à l'autre.
+    </p>
+    <div class="hero-ctas">
+      <a href="/login" class="cta-primary">
+        <span>Entrer dans l'app</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#how" class="cta-secondary">Voir comment ça marche</a>
+    </div>
+  </section>
+
+  <!-- Pourquoi -->
+  <section class="why">
+    <div class="section-eyebrow">Pourquoi PortfolioQuant</div>
+    <h2 class="section-title">Le terminal pro <span style="color:var(--sf-text-secondary)">pour ton patrimoine perso.</span></h2>
+    <p class="section-sub">Pensé comme un outil de salle de marché tamisée : la donnée d'abord, le bruit jamais. Cohérent sur desktop pour tes sessions du dimanche soir, pour le check matinal sur mobile.</p>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-num">01</div>
+        <h3 class="why-title">Multi-broker, multi-classe.</h3>
+        <p class="why-desc">IBKR pour les ETF, MEXC pour la crypto, manuel pour livrets et immo. Tout agrégé dans une vue, sans Excel.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-num">02</div>
+        <h3 class="why-title">La couche quant que les apps natives n'ont pas.</h3>
+        <p class="why-desc">Frontière efficiente, simulations Monte Carlo, rolling Sharpe, drawdown, rebalance optimal. Pour décider, pas seulement contempler.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-num">03</div>
+        <h3 class="why-title">Privé par design.</h3>
+        <p class="why-desc">Tes credentials chiffrés Fernet AES, stockés uniquement sur ton serveur. Aucun tiers, aucun tracking, aucune publicité.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comment ça marche -->
+  <section class="how" id="how">
+    <div class="section-eyebrow">Comment ça marche</div>
+    <h2 class="section-title">Trois étapes, <span style="color:var(--sf-text-secondary)">moins de cinq minutes.</span></h2>
+    <ol class="steps">
+      <li class="step">
+        <span class="step-num">01</span>
+        <div>
+          <h3 class="step-title">Connecte un broker</h3>
+          <p class="step-desc">5 minutes, API key chiffrée localement. IBKR, Degiro, Alpaca, MEXC, ou mode paper si tu veux tester sans engagement.</p>
+        </div>
+      </li>
+      <li class="step">
+        <span class="step-num">02</span>
+        <div>
+          <h3 class="step-title">Réponds à 3 questions</h3>
+          <p class="step-desc">Horizon, tolérance au risque, montant DCA mensuel. Le bot calibre l'allocation cible et les seuils d'alerte sur ton profil.</p>
+        </div>
+      </li>
+      <li class="step">
+        <span class="step-num">03</span>
+        <div>
+          <h3 class="step-title">Le bot prend le relais</h3>
+          <p class="step-desc">Première allocation suggérée, picks du jour scannés en continu, alertes Telegram quand un seuil bouge. Tu gardes la main sur chaque ordre.</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="section-eyebrow">Ce que tu peux faire</div>
+    <h2 class="section-title">Tout ce qu'il faut <span style="color:var(--sf-text-secondary)">pour gérer sérieusement.</span></h2>
+    <div class="features-grid">
+      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></span>DCA programmé</div>
+      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L8 6h3v6h2V6h3l-4-4zM6 9H3v3h3V9zM21 9h-3v3h3V9zM12 18l-4-4h3v-2h2v2h3l-4 4z"/></svg></span>Smart picks IA</div>
+      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg></span>Backtests historiques</div>
+      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>Scenarios Monte Carlo</div>
+      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 18 0"/><polyline points="9 8 12 5 15 8"/><line x1="12" y1="5" x2="12" y2="13"/></svg></span>Rebalance optimal</div>
+      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg></span>Frontière efficiente</div>
+      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/></svg></span>Watchlist live</div>
+      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11a10 10 0 0 1-19.5 3"/><polyline points="22 4 22 11 15 11"/></svg></span>Alertes Telegram</div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="final">
+    <h2 class="final-title">Prêt à <span>commencer ?</span></h2>
+    <p class="final-sub">Configure en moins de deux minutes. Mode paper disponible si tu veux tester sans broker réel, sans risque.</p>
+    <a href="/login" class="cta-primary">
+      <span>Entrer dans l'app</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer class="wrap">
+  <div class="foot">
+    <span class="foot-status">
+      <span class="foot-status-dot"></span>
+      Système opérationnel · Données locales uniquement
+    </span>
+    <span class="foot-links">
+      <a href="/login">Se connecter</a>
+      <span>© PortfolioQuant</span>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>

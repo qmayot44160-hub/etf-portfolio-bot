@@ -85,7 +85,18 @@ def login():
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect("/login")
+    # Apres deconnexion, on retombe sur la welcome publique : presentation
+    # de l'app + CTA "Se connecter" -> /login. Mieux que de tomber direct
+    # sur le formulaire de login pour les nouveaux utilisateurs.
+    return redirect("/welcome")
+
+
+@app.route("/welcome")
+def welcome():
+    """Public landing page (presentation de l'app, CTAs vers /login).
+    Whitelistee dans _AUTH_WHITELIST. Les users authentifies peuvent y
+    revenir via le bouton 'Retour a l'accueil' du menu utilisateur."""
+    return render_template("welcome.html")
 
 
 @app.route("/api/auth/status")
@@ -97,8 +108,8 @@ def api_auth_status():
 
 
 # ── Auth Guard global ─────────────────────────────────
-_AUTH_WHITELIST = {"/login", "/logout", "/api/auth/status", "/static", "/health",
-                   "/manifest.webmanifest", "/sw.js", "/favicon.ico"}
+_AUTH_WHITELIST = {"/login", "/logout", "/welcome", "/api/auth/status", "/static",
+                   "/health", "/manifest.webmanifest", "/sw.js", "/favicon.ico"}
 
 
 @app.before_request

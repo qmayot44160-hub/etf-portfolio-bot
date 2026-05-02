@@ -7849,7 +7849,7 @@
     <button class="user-menu-item" onclick="openSettingsPanel('raccourcis')"><span class="sfi" data-icon="key"></span>Raccourcis clavier</button>
     <div class="user-menu-divider"></div>
     <button class="user-menu-item" onclick="openSettingsPanel('apropos')"><span class="sfi" data-icon="info"></span>À propos</button>
-    <button class="user-menu-item" onclick="if(window.logoutFromApp)window.logoutFromApp()"><span class="sfi" data-icon="home"></span>Retour à l'accueil</button>
+    <button class="user-menu-item" onclick="window.location.href='/welcome'"><span class="sfi" data-icon="home"></span>Retour à l'accueil</button>
     <button class="user-menu-item danger" onclick="logoutUser()"><span class="sfi" data-icon="logout"></span>Déconnexion</button>
     <div class="user-menu-footer" id="user-menu-footer">PortfolioQuant · v1.0</div>
 </div>
@@ -16210,14 +16210,10 @@ function investInCurrentPick(){
     if(!screen) return;
 
     function shouldShow(){
-        // ?welcome=1 force l'affichage (pour les liens "voir la welcome").
-        // ?welcome=0 force le bypass (pour debug ou navigation directe).
-        const q = new URLSearchParams(window.location.search).get('welcome');
-        if(q === '1') return true;
-        if(q === '0') return false;
-        try {
-            return !localStorage.getItem(SKIP_KEY);
-        } catch(e){ return true; }
+        // L'overlay in-app a ete remplace par la vraie page publique /welcome.
+        // On garde le code en place pour pouvoir le ressusciter au besoin
+        // (showWelcomeScreen() reste expose), mais auto-affichage desactive.
+        return false;
     }
 
     function dismiss(remember){

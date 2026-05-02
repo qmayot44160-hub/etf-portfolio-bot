@@ -327,9 +327,15 @@
 
     <!-- ═══ LEFT : brand + pitch ═══ -->
     <section class="brand-side">
-      <div class="brand-top">
-        <div class="brand-logo-dot"></div>
-        <div class="brand-logo">PortfolioQuant</div>
+      <div class="brand-top" style="display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;">
+        <a href="/welcome" style="display:inline-flex;align-items:center;gap:12px;text-decoration:none;">
+          <div class="brand-logo-dot"></div>
+          <div class="brand-logo">PortfolioQuant</div>
+        </a>
+        <a href="/welcome" style="display:inline-flex;align-items:center;gap:6px;color:var(--sf-text-muted);text-decoration:none;font-size:0.82rem;font-weight:500;transition:color 0.2s;" onmouseover="this.style.color='var(--sf-text)'" onmouseout="this.style.color='var(--sf-text-muted)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>Voir la présentation</span>
+        </a>
       </div>
 
       <div class="brand-hero">
