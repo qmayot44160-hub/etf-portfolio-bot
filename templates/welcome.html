@@ -102,11 +102,157 @@
   .topbar-cta svg { transition: transform 0.2s; }
   .topbar-cta:hover svg { transform: translateX(2px); }
 
-  /* ── Hero ── */
+  /* ── Hero split ── */
   .hero {
     padding: 80px 0 100px;
-    max-width: 760px;
+    display: grid;
+    grid-template-columns: 1fr 480px;
+    gap: 64px;
+    align-items: center;
   }
+  @media (max-width: 1050px) { .hero { grid-template-columns: 1fr; gap: 48px; } }
+  .hero-text { max-width: 600px; }
+
+  /* ── App mockup ── */
+  .hero-mockup {
+    perspective: 1200px;
+  }
+  @media (max-width: 1050px) { .hero-mockup { display: none; } }
+  .mock-window {
+    background: linear-gradient(160deg, rgba(20,20,28,0.95), rgba(10,10,16,0.98));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+    transform: rotateY(-6deg) rotateX(3deg);
+    transition: transform 0.4s ease;
+  }
+  .hero-mockup:hover .mock-window { transform: rotateY(-2deg) rotateX(1deg); }
+  .mock-titlebar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+  }
+  .mock-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .mock-dot:nth-child(1) { background: #ff5f57; }
+  .mock-dot:nth-child(2) { background: #febc2e; }
+  .mock-dot:nth-child(3) { background: #28c840; }
+  .mock-tabs {
+    display: flex; gap: 4px; margin-left: 16px;
+  }
+  .mock-tab {
+    font-size: 0.72rem; padding: 4px 12px;
+    border-radius: 6px; color: var(--sf-text-muted);
+  }
+  .mock-tab.active {
+    background: rgba(10,132,255,0.15);
+    color: var(--sf-blue);
+  }
+  .mock-body { padding: 20px; }
+  .mock-kpi {
+    margin-bottom: 16px;
+  }
+  .mock-kpi-label {
+    font-size: 0.7rem; color: var(--sf-text-muted); text-transform: uppercase;
+    letter-spacing: 0.08em; margin-bottom: 4px;
+  }
+  .mock-kpi-value {
+    font-size: 1.7rem; font-weight: 700; letter-spacing: -0.03em;
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .mock-badge {
+    font-size: 0.78rem; font-weight: 600;
+    padding: 3px 8px; border-radius: 6px;
+    background: rgba(48,209,88,0.15); color: var(--sf-green);
+  }
+  .mock-chart-wrap {
+    height: 70px; margin-bottom: 16px; position: relative;
+  }
+  .mock-chart-wrap svg { width: 100%; height: 100%; overflow: visible; }
+  .mock-rows { display: flex; flex-direction: column; gap: 1px; }
+  .mock-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    transition: background 0.15s;
+  }
+  .mock-row:hover { background: rgba(255,255,255,0.03); }
+  .mock-row-left { display: flex; align-items: center; gap: 10px; }
+  .mock-row-ticker {
+    font-weight: 600; font-size: 0.8rem; width: 52px;
+  }
+  .mock-row-name { color: var(--sf-text-muted); font-size: 0.75rem; }
+  .mock-row-right { display: flex; align-items: center; gap: 14px; text-align: right; }
+  .mock-row-alloc { color: var(--sf-text-secondary); font-size: 0.78rem; width: 36px; }
+  .mock-row-change { font-weight: 500; font-size: 0.82rem; width: 44px; text-align: right; }
+  .pos { color: var(--sf-green); }
+  .neg { color: var(--sf-red); }
+  .mock-row-bar-wrap {
+    width: 60px; height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px; overflow: hidden;
+  }
+  .mock-row-bar {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--sf-blue), var(--sf-green));
+  }
+
+  /* ── Showcase sections (alternées) ── */
+  .showcase { padding: 40px 0 100px; }
+  .showcase-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+    padding: 64px 0;
+    border-top: 1px solid var(--sf-border);
+  }
+  .showcase-block:first-child { border-top: none; padding-top: 0; }
+  .showcase-block.reverse { direction: rtl; }
+  .showcase-block.reverse > * { direction: ltr; }
+  @media (max-width: 900px) {
+    .showcase-block { grid-template-columns: 1fr; gap: 36px; direction: ltr; }
+    .showcase-block > * { direction: ltr; }
+  }
+  .showcase-text {}
+  .showcase-bullets { list-style: none; margin-top: 24px; display: flex; flex-direction: column; gap: 14px; }
+  .showcase-bullets li {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 0.92rem; color: var(--sf-text-secondary); line-height: 1.5;
+  }
+  .showcase-bullets li::before {
+    content: '';
+    flex-shrink: 0;
+    width: 18px; height: 18px; margin-top: 1px;
+    border-radius: 50%;
+    background: rgba(48,209,88,0.15);
+    border: 1.5px solid rgba(48,209,88,0.4);
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='8' viewBox='0 0 10 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 4l2.5 2.5L9 1' stroke='%2330d158' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: center;
+  }
+  .showcase-visual {
+    border-radius: 18px;
+    background: linear-gradient(160deg, rgba(14,14,20,0.9), rgba(8,8,14,0.95));
+    border: 1px solid rgba(255,255,255,0.07);
+    padding: 28px;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+    overflow: hidden;
+    position: relative;
+  }
+  .showcase-visual::before {
+    content: '';
+    position: absolute; top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(10,132,255,0.12), transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ── Hero ── */
   .hero-eyebrow {
     display: inline-flex; align-items: center; gap: 8px;
     font-size: 0.72rem; font-weight: 500;
@@ -445,25 +591,110 @@
 <!-- Hero -->
 <main class="wrap">
   <section class="hero">
-    <div class="hero-eyebrow">
-      <span class="hero-eyebrow-dot"></span>
-      Investissement quantitatif personnel
+    <!-- Texte gauche -->
+    <div class="hero-text">
+      <div class="hero-eyebrow">
+        <span class="hero-eyebrow-dot"></span>
+        Investissement quantitatif personnel
+      </div>
+      <h1 class="hero-title">
+        Ton portefeuille,<br>
+        <span>géré comme un hedge fund.</span>
+      </h1>
+      <p class="hero-sub">
+        Agrège ETF, actions, crypto, immobilier et livrets en une seule vue. Décide avec
+        des outils quantitatifs : frontière efficiente, scenarios Monte Carlo, rebalance optimal,
+        DCA programmé. Sans Excel, sans broker à courir.
+      </p>
+      <div class="hero-ctas">
+        <a href="/login" class="cta-primary">
+          <span>Entrer dans l'app</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#how" class="cta-secondary">Voir comment ça marche</a>
+      </div>
     </div>
-    <h1 class="hero-title">
-      Ton portefeuille,<br>
-      <span>géré comme un hedge fund.</span>
-    </h1>
-    <p class="hero-sub">
-      Agrège ETF, actions, crypto, immobilier et livrets en une seule vue. Décide avec
-      des outils quantitatifs : frontière efficiente, scenarios Monte Carlo, rebalance optimal,
-      DCA programmé. Sans Excel, sans broker à courir d'un onglet à l'autre.
-    </p>
-    <div class="hero-ctas">
-      <a href="/login" class="cta-primary">
-        <span>Entrer dans l'app</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-      </a>
-      <a href="#how" class="cta-secondary">Voir comment ça marche</a>
+
+    <!-- Mockup droite -->
+    <div class="hero-mockup">
+      <div class="mock-window">
+        <div class="mock-titlebar">
+          <span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span>
+          <div class="mock-tabs">
+            <span class="mock-tab active">Portfolio</span>
+            <span class="mock-tab">Analyse</span>
+            <span class="mock-tab">DCA</span>
+          </div>
+        </div>
+        <div class="mock-body">
+          <div class="mock-kpi">
+            <div class="mock-kpi-label">Valeur totale</div>
+            <div class="mock-kpi-value">
+              24 318 €
+              <span class="mock-badge">+2.4%</span>
+            </div>
+          </div>
+          <div class="mock-chart-wrap">
+            <svg viewBox="0 0 440 70" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#0a84ff" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="#0a84ff" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0 62 C40 58 70 55 110 48 C150 41 170 50 210 38 C240 28 270 32 300 22 C330 12 370 18 440 8" stroke="#0a84ff" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M0 62 C40 58 70 55 110 48 C150 41 170 50 210 38 C240 28 270 32 300 22 C330 12 370 18 440 8 L440 70 L0 70 Z" fill="url(#chartGrad)"/>
+              <circle cx="440" cy="8" r="3" fill="#0a84ff"/>
+            </svg>
+          </div>
+          <div class="mock-rows">
+            <div class="mock-row">
+              <div class="mock-row-left">
+                <span class="mock-row-ticker">IWDA</span>
+                <span class="mock-row-name">iShares World</span>
+              </div>
+              <div class="mock-row-right">
+                <div class="mock-row-bar-wrap"><div class="mock-row-bar" style="width:58%"></div></div>
+                <span class="mock-row-alloc">58%</span>
+                <span class="mock-row-change pos">+1.2%</span>
+              </div>
+            </div>
+            <div class="mock-row">
+              <div class="mock-row-left">
+                <span class="mock-row-ticker">VWRL</span>
+                <span class="mock-row-name">Vanguard All-World</span>
+              </div>
+              <div class="mock-row-right">
+                <div class="mock-row-bar-wrap"><div class="mock-row-bar" style="width:22%"></div></div>
+                <span class="mock-row-alloc">22%</span>
+                <span class="mock-row-change neg">-0.3%</span>
+              </div>
+            </div>
+            <div class="mock-row">
+              <div class="mock-row-left">
+                <span class="mock-row-ticker">BTC</span>
+                <span class="mock-row-name">Bitcoin</span>
+              </div>
+              <div class="mock-row-right">
+                <div class="mock-row-bar-wrap"><div class="mock-row-bar" style="width:12%"></div></div>
+                <span class="mock-row-alloc">12%</span>
+                <span class="mock-row-change pos">+4.1%</span>
+              </div>
+            </div>
+            <div class="mock-row">
+              <div class="mock-row-left">
+                <span class="mock-row-ticker">CASH</span>
+                <span class="mock-row-name">Livrets</span>
+              </div>
+              <div class="mock-row-right">
+                <div class="mock-row-bar-wrap"><div class="mock-row-bar" style="width:8%"></div></div>
+                <span class="mock-row-alloc">8%</span>
+                <span class="mock-row-change" style="color:var(--sf-text-muted)">3.0%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -518,6 +749,118 @@
         </div>
       </li>
     </ol>
+  </section>
+
+  <!-- Showcase alternée -->
+  <section class="showcase">
+    <!-- Bloc 1 : Backtests - texte gauche, visuel droite -->
+    <div class="showcase-block">
+      <div class="showcase-text">
+        <div class="section-eyebrow">Analyse historique</div>
+        <h2 class="section-title">Teste avant d'investir.</h2>
+        <p style="color:var(--sf-text-secondary);font-size:0.95rem;line-height:1.6;margin-bottom:8px;">Lance un backtest sur 10+ ans en quelques secondes. Vois exactement comment ta stratégie aurait performé pendant 2008, 2020, ou 2022.</p>
+        <ul class="showcase-bullets">
+          <li>Rendement annualisé et CAGR sur ta période</li>
+          <li>Sharpe, Sortino, drawdown max calculés automatiquement</li>
+          <li>Comparaison vs S&amp;P 500 ou MSCI World</li>
+          <li>Contribution par actif : ce qui a vraiment tiré la performance</li>
+        </ul>
+      </div>
+      <div class="showcase-visual">
+        <!-- Faux chart backtest -->
+        <div style="font-size:0.7rem;color:var(--sf-text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">Backtest · IWDA 60% / VWRL 30% / BTC 10% · 2015-2025</div>
+        <svg viewBox="0 0 380 140" style="width:100%;height:140px;overflow:visible">
+          <defs>
+            <linearGradient id="btGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0a84ff" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#0a84ff" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="bmGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#6e6e73" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#6e6e73" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Benchmark (gris) -->
+          <path d="M0 120 C40 112 80 100 120 92 C160 84 180 96 220 80 C260 64 300 72 340 55 L380 45" stroke="rgba(110,110,115,0.4)" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+          <path d="M0 120 C40 112 80 100 120 92 C160 84 180 96 220 80 C260 64 300 72 340 55 L380 45 L380 140 L0 140Z" fill="url(#bmGrad)"/>
+          <!-- Portfolio (bleu) -->
+          <path d="M0 120 C30 110 60 98 100 82 C130 68 150 78 190 58 C220 40 250 48 290 28 C320 12 350 20 380 6" stroke="#0a84ff" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M0 120 C30 110 60 98 100 82 C130 68 150 78 190 58 C220 40 250 48 290 28 C320 12 350 20 380 6 L380 140 L0 140Z" fill="url(#btGrad)"/>
+          <!-- Crash 2020 marker -->
+          <line x1="192" y1="0" x2="192" y2="140" stroke="rgba(255,69,58,0.25)" stroke-width="1" stroke-dasharray="3,3"/>
+          <text x="196" y="14" fill="rgba(255,69,58,0.6)" font-size="9" font-family="system-ui">-34%</text>
+        </svg>
+        <div style="display:flex;gap:20px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06)">
+          <div>
+            <div style="font-size:0.68rem;color:var(--sf-text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">CAGR</div>
+            <div style="font-size:1.1rem;font-weight:700;color:var(--sf-green)">+14.2%</div>
+          </div>
+          <div>
+            <div style="font-size:0.68rem;color:var(--sf-text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">Sharpe</div>
+            <div style="font-size:1.1rem;font-weight:700">1.38</div>
+          </div>
+          <div>
+            <div style="font-size:0.68rem;color:var(--sf-text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">Max DD</div>
+            <div style="font-size:1.1rem;font-weight:700;color:var(--sf-red)">-34%</div>
+          </div>
+          <div>
+            <div style="font-size:0.68rem;color:var(--sf-text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">vs Bench</div>
+            <div style="font-size:1.1rem;font-weight:700;color:var(--sf-blue)">+3.1%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bloc 2 : Monte Carlo - visuel gauche, texte droite -->
+    <div class="showcase-block reverse">
+      <div class="showcase-text">
+        <div class="section-eyebrow">Projection de risque</div>
+        <h2 class="section-title">Vois les scénarios, pas juste la moyenne.</h2>
+        <p style="color:var(--sf-text-secondary);font-size:0.95rem;line-height:1.6;margin-bottom:8px;">10 000 simulations de Monte Carlo sur ton horizon. Le pire cas, le meilleur cas, et tout ce qui est entre les deux - avec la probabilité d'atteindre ton objectif.</p>
+        <ul class="showcase-bullets">
+          <li>Fan chart : intervalles 10%, 25%, 75%, 90%</li>
+          <li>Probabilité d'atteindre ton objectif capital</li>
+          <li>Analyse de sensibilité : que se passe-t-il si tu investis 20% de plus ?</li>
+          <li>Scénarios de stress : crise 2008, bulle dot-com</li>
+        </ul>
+      </div>
+      <div class="showcase-visual">
+        <div style="font-size:0.7rem;color:var(--sf-text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">Monte Carlo · 10 000 simulations · horizon 20 ans</div>
+        <svg viewBox="0 0 380 150" style="width:100%;height:150px;overflow:visible">
+          <defs>
+            <linearGradient id="fanOuter" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#0a84ff" stop-opacity="0.06"/>
+              <stop offset="100%" stop-color="#0a84ff" stop-opacity="0.12"/>
+            </linearGradient>
+            <linearGradient id="fanInner" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#0a84ff" stop-opacity="0.14"/>
+              <stop offset="100%" stop-color="#30d158" stop-opacity="0.22"/>
+            </linearGradient>
+          </defs>
+          <!-- Zone 10-90% -->
+          <path d="M0 130 C80 120 160 95 380 20 L380 148 C160 148 80 148 0 148Z" fill="url(#fanOuter)"/>
+          <!-- Zone 25-75% -->
+          <path d="M0 130 C80 118 160 100 380 38 L380 128 C160 135 80 135 0 140Z" fill="url(#fanInner)"/>
+          <!-- Médiane -->
+          <path d="M0 130 C80 118 160 98 380 80" stroke="#0a84ff" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Objectif -->
+          <line x1="0" y1="55" x2="380" y2="55" stroke="rgba(48,209,88,0.35)" stroke-width="1" stroke-dasharray="5,4"/>
+          <text x="4" y="50" fill="rgba(48,209,88,0.7)" font-size="9" font-family="system-ui">Objectif 80 000 €</text>
+        </svg>
+        <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--sf-text-secondary)">
+            <div style="width:12px;height:4px;border-radius:2px;background:rgba(10,132,255,0.5)"></div> Médiane
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--sf-text-secondary)">
+            <div style="width:12px;height:8px;border-radius:2px;background:rgba(10,132,255,0.2)"></div> P25-P75
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--sf-text-secondary)">
+            <div style="width:12px;height:8px;border-radius:2px;background:rgba(10,132,255,0.08)"></div> P10-P90
+          </div>
+          <div style="margin-left:auto;font-size:0.82rem;font-weight:600;color:var(--sf-green)">Objectif atteint : 73%</div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- Features -->
