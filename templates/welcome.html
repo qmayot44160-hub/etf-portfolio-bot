@@ -309,13 +309,22 @@
   @media (max-width: 900px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 480px) { .features-grid { grid-template-columns: 1fr; } }
   .feature {
-    display: inline-flex; align-items: center; gap: 12px;
-    padding: 16px 18px;
+    display: flex; flex-direction: column;
+    padding: 0;
     background: rgba(255,255,255,0.02);
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 12px;
     font-size: 0.92rem;
     color: var(--sf-text);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    overflow: hidden;
+  }
+  .feature:hover { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); }
+  .feature.active { border-color: rgba(10,132,255,0.3); background: rgba(10,132,255,0.04); }
+  .feature-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 18px;
   }
   .feature-icon {
     flex-shrink: 0;
@@ -324,6 +333,30 @@
     background: rgba(10,132,255,0.12);
     color: var(--sf-blue);
     display: inline-flex; align-items: center; justify-content: center;
+  }
+  .feature-chevron {
+    margin-left: auto;
+    color: var(--sf-text-muted);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+  }
+  .feature.active .feature-chevron { transform: rotate(180deg); }
+  .feature-note {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s ease;
+    padding: 0 18px;
+  }
+  .feature.active .feature-note {
+    max-height: 120px;
+    padding: 0 18px 16px;
+  }
+  .feature-note p {
+    color: var(--sf-text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 12px;
   }
 
   /* ── Final CTA ── */
@@ -492,14 +525,70 @@
     <div class="section-eyebrow">Ce que tu peux faire</div>
     <h2 class="section-title">Tout ce qu'il faut <span style="color:var(--sf-text-secondary)">pour gérer sérieusement.</span></h2>
     <div class="features-grid">
-      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></span>DCA programmé</div>
-      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L8 6h3v6h2V6h3l-4-4zM6 9H3v3h3V9zM21 9h-3v3h3V9zM12 18l-4-4h3v-2h2v2h3l-4 4z"/></svg></span>Smart picks IA</div>
-      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg></span>Backtests historiques</div>
-      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>Scenarios Monte Carlo</div>
-      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 18 0"/><polyline points="9 8 12 5 15 8"/><line x1="12" y1="5" x2="12" y2="13"/></svg></span>Rebalance optimal</div>
-      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg></span>Frontière efficiente</div>
-      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/></svg></span>Watchlist live</div>
-      <div class="feature"><span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11a10 10 0 0 1-19.5 3"/><polyline points="22 4 22 11 15 11"/></svg></span>Alertes Telegram</div>
+      <div class="feature" onclick="this.classList.toggle('active')">
+        <div class="feature-header">
+          <span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></span>
+          <span>DCA programmé</span>
+          <svg class="feature-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="feature-note"><p>Investis automatiquement chaque mois sur tes ETF favoris. Montant, fréquence et répartition configurables.</p></div>
+      </div>
+      <div class="feature" onclick="this.classList.toggle('active')">
+        <div class="feature-header">
+          <span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L8 6h3v6h2V6h3l-4-4zM6 9H3v3h3V9zM21 9h-3v3h3V9zM12 18l-4-4h3v-2h2v2h3l-4 4z"/></svg></span>
+          <span>Smart picks IA</span>
+          <svg class="feature-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="feature-note"><p>Scoring multi-facteurs quotidien sur l'univers ETF. Le bot identifie les meilleures opportunités selon tes critères.</p></div>
+      </div>
+      <div class="feature" onclick="this.classList.toggle('active')">
+        <div class="feature-header">
+          <span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg></span>
+          <span>Backtests historiques</span>
+          <svg class="feature-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="feature-note"><p>Teste ta stratégie sur 10+ ans de données. Rendement, volatilité, drawdown max, Sharpe - tout est mesuré.</p></div>
+      </div>
+      <div class="feature" onclick="this.classList.toggle('active')">
+        <div class="feature-header">
+          <span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+          <span>Scenarios Monte Carlo</span>
+          <svg class="feature-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="feature-note"><p>10 000 simulations pour visualiser les trajectoires possibles de ton portefeuille sur ton horizon d'investissement.</p></div>
+      </div>
+      <div class="feature" onclick="this.classList.toggle('active')">
+        <div class="feature-header">
+          <span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 18 0"/><polyline points="9 8 12 5 15 8"/><line x1="12" y1="5" x2="12" y2="13"/></svg></span>
+          <span>Rebalance optimal</span>
+          <svg class="feature-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="feature-note"><p>Calcule les ordres exacts pour ramener ton portefeuille à l'allocation cible en minimisant les frais de transaction.</p></div>
+      </div>
+      <div class="feature" onclick="this.classList.toggle('active')">
+        <div class="feature-header">
+          <span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg></span>
+          <span>Frontière efficiente</span>
+          <svg class="feature-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="feature-note"><p>Visualise le meilleur compromis rendement/risque selon Markowitz. Ton portefeuille est positionné sur la courbe.</p></div>
+      </div>
+      <div class="feature" onclick="this.classList.toggle('active')">
+        <div class="feature-header">
+          <span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/></svg></span>
+          <span>Watchlist live</span>
+          <svg class="feature-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="feature-note"><p>Suis tes ETF et cryptos en temps réel. Cours, variations, volumes - tout mis à jour en continu.</p></div>
+      </div>
+      <div class="feature" onclick="this.classList.toggle('active')">
+        <div class="feature-header">
+          <span class="feature-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11a10 10 0 0 1-19.5 3"/><polyline points="22 4 22 11 15 11"/></svg></span>
+          <span>Alertes Telegram</span>
+          <svg class="feature-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="feature-note"><p>Notifications instantanées quand un seuil est franchi, un DCA exécuté, ou une opportunité détectée par le scanner.</p></div>
+      </div>
     </div>
   </section>
 
