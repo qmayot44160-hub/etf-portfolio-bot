@@ -1748,12 +1748,14 @@
         /* ════════════════════════════════════════════════
            HOME DASHBOARD
            ════════════════════════════════════════════════ */
-        /* Bolder: hero passe en left-align + pleine largeur. La centrage etait
-           un reflexe template SaaS ; left-aligned est l'identite des outils
-           pros (Bloomberg, Refinitiv, Tradingview). Le max-width disparait
-           pour s'aligner sur la largeur des modules en dessous. */
+        /* Bolder: hero left-aligned, mais aligne sur la grille des cards en
+           dessous (.section a max-width: var(--ui-maxwidth) + padding 32px).
+           Sans cet alignement, le titre file flush-left au viewport et fait
+           tache asymetrique. */
         .home-hero {
-            padding: 56px 4px 28px;
+            max-width: var(--ui-maxwidth);
+            margin: 0 auto;
+            padding: 56px 32px 28px;
             text-align: left;
         }
         /* Greeting : eyebrow uppercase mais avec une structure de meta-line
@@ -1794,7 +1796,7 @@
             border-radius: 1px;
         }
         @media (max-width: 720px) {
-            .home-hero { padding: 32px 14px 18px; }
+            .home-hero { padding: 32px 18px 18px; }
             .home-title::after { width: 48px; margin-top: 10px; }
         }
 
