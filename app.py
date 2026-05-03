@@ -150,6 +150,11 @@ def api_health():
     return jsonify(health.get_status())
 
 
+@app.errorhandler(404)
+def _handle_404(e):
+    return render_template('404.html'), 404
+
+
 @app.errorhandler(500)
 def _handle_500(e):
     """Capture les erreurs 500 pour le compteur health + notification Telegram."""

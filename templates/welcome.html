@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>PortfolioQuant - Quant pour ton patrimoine</title>
 <meta name="description" content="Ton portefeuille, géré comme un hedge fund. ETF, actions, crypto, immobilier en une vue. Frontière efficiente, scenarios Monte Carlo, rebalance optimal.">
+<!-- Open Graph -->
+<meta property="og:title" content="PortfolioQuant - Géré comme un hedge fund">
+<meta property="og:description" content="ETF, actions, crypto, immobilier en une vue. Frontière efficiente, Monte Carlo, rebalance optimal, DCA programmé. Sans Excel.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://etf-portfolio-bot-production.up.railway.app/welcome">
+<meta property="og:site_name" content="PortfolioQuant">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PortfolioQuant">
+<meta name="twitter:description" content="Ton portefeuille, géré comme un hedge fund. Outils quant pour investisseurs sérieux.">
+<!-- Theme -->
+<meta name="theme-color" content="#000000">
 <style>
   :root {
     --sf-bg: #000000;
@@ -69,8 +80,22 @@
   }
   .topbar-inner {
     display: flex; align-items: center; justify-content: space-between;
-    height: 64px;
+    height: 64px; gap: 32px;
   }
+  .topbar-nav {
+    display: flex; align-items: center; gap: 4px;
+    flex: 1;
+  }
+  .topbar-nav a {
+    color: var(--sf-text-muted);
+    font-size: 0.87rem; font-weight: 500;
+    text-decoration: none;
+    padding: 7px 12px;
+    border-radius: 8px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .topbar-nav a:hover { color: var(--sf-text); background: rgba(255,255,255,0.05); }
+  @media (max-width: 720px) { .topbar-nav { display: none; } }
   .brand {
     display: inline-flex; align-items: center; gap: 12px;
     font-weight: 700; font-size: 1.1rem;
@@ -590,28 +615,64 @@
 
   /* ── Footer ── */
   .foot {
-    padding: 32px 0 48px;
+    padding: 56px 0 40px;
     border-top: 1px solid var(--sf-border);
-    display: flex; justify-content: space-between; align-items: center;
-    flex-wrap: wrap; gap: 16px;
-    color: var(--sf-text-muted);
-    font-size: 0.78rem;
+  }
+  .foot-top {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 48px;
+  }
+  @media (max-width: 720px) { .foot-top { grid-template-columns: 1fr 1fr; gap: 32px; } }
+  @media (max-width: 480px) { .foot-top { grid-template-columns: 1fr; } }
+  .foot-brand-logo {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 1rem; letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .foot-brand-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--sf-blue); box-shadow: 0 0 10px rgba(10,132,255,0.5);
+  }
+  .foot-brand-logo span {
+    background: linear-gradient(180deg, #fff, #a1a1a6);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .foot-tagline {
+    color: var(--sf-text-muted); font-size: 0.82rem; line-height: 1.55;
+    max-width: 30ch; margin-bottom: 16px;
   }
   .foot-status {
-    display: inline-flex; align-items: center; gap: 8px;
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 0.75rem; color: var(--sf-text-muted);
   }
   .foot-status-dot {
     width: 6px; height: 6px; border-radius: 50%;
-    background: var(--sf-green);
-    box-shadow: 0 0 8px rgba(48,209,88,0.6);
+    background: var(--sf-green); box-shadow: 0 0 8px rgba(48,209,88,0.5);
+    flex-shrink: 0;
   }
-  .foot-links { display: inline-flex; gap: 24px; }
-  .foot-links a {
-    color: var(--sf-text-muted);
-    text-decoration: none;
-    transition: color 0.2s;
+  .foot-col-title {
+    font-size: 0.72rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--sf-text-secondary);
+    margin-bottom: 16px;
   }
-  .foot-links a:hover { color: var(--sf-text); }
+  .foot-col-links {
+    list-style: none; display: flex; flex-direction: column; gap: 10px;
+  }
+  .foot-col-links a {
+    color: var(--sf-text-muted); font-size: 0.85rem;
+    text-decoration: none; transition: color 0.15s;
+  }
+  .foot-col-links a:hover { color: var(--sf-text); }
+  .foot-bottom {
+    padding-top: 24px;
+    border-top: 1px solid var(--sf-border);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 12px;
+    font-size: 0.75rem; color: var(--sf-text-muted);
+  }
 
   /* ── Smooth scroll ── */
   html { scroll-behavior: smooth; }
@@ -710,6 +771,10 @@
       <span class="brand-dot"></span>
       <span class="brand-logo">PortfolioQuant</span>
     </a>
+    <nav class="topbar-nav">
+      <a href="#features">Fonctionnalités</a>
+      <a href="#how">Comment ça marche</a>
+    </nav>
     <a href="/login" class="topbar-cta">
       <span>Se connecter</span>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
@@ -1015,7 +1080,7 @@
   </section>
 
   <!-- Features -->
-  <section class="features">
+  <section class="features" id="features">
     <div class="section-eyebrow">Ce que tu peux faire</div>
     <h2 class="section-title">Tout ce qu'il faut <span style="color:var(--sf-text-secondary)">pour gérer sérieusement.</span></h2>
     <div class="features-grid">
@@ -1122,14 +1187,44 @@
 <!-- Footer -->
 <footer class="wrap">
   <div class="foot">
-    <span class="foot-status">
-      <span class="foot-status-dot"></span>
-      Système opérationnel · Données locales uniquement
-    </span>
-    <span class="foot-links">
-      <a href="/login">Se connecter</a>
-      <span>© PortfolioQuant</span>
-    </span>
+    <div class="foot-top">
+      <!-- Colonne brand -->
+      <div>
+        <div class="foot-brand-logo">
+          <span class="foot-brand-dot"></span>
+          <span>PortfolioQuant</span>
+        </div>
+        <p class="foot-tagline">Terminal quantitatif pour gérer ton patrimoine comme un pro. Privé, local, sans compromis.</p>
+        <div class="foot-status">
+          <span class="foot-status-dot"></span>
+          Système opérationnel · Données locales uniquement
+        </div>
+      </div>
+      <!-- Colonne produit -->
+      <div>
+        <div class="foot-col-title">Produit</div>
+        <ul class="foot-col-links">
+          <li><a href="#features">Fonctionnalités</a></li>
+          <li><a href="#how">Comment ça marche</a></li>
+          <li><a href="#features">Backtests historiques</a></li>
+          <li><a href="#features">Monte Carlo</a></li>
+          <li><a href="/login">Se connecter</a></li>
+        </ul>
+      </div>
+      <!-- Colonne infos -->
+      <div>
+        <div class="foot-col-title">Infos</div>
+        <ul class="foot-col-links">
+          <li><a href="#" onclick="return false" style="cursor:default;opacity:0.5">Confidentialité</a></li>
+          <li><a href="#" onclick="return false" style="cursor:default;opacity:0.5">Aucun cookie tiers</a></li>
+          <li><a href="#" onclick="return false" style="cursor:default;opacity:0.5">Chiffrement AES-256</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 PortfolioQuant · Tous droits réservés</span>
+      <span>Construit avec Flask · Déployé sur Railway</span>
+    </div>
   </div>
 </footer>
 
