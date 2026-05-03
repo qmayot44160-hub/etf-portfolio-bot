@@ -111,13 +111,55 @@
     align-items: center;
   }
   @media (max-width: 1050px) { .hero { grid-template-columns: 1fr; gap: 48px; } }
-  .hero-text { max-width: 600px; }
+  .hero-text {
+    max-width: 600px;
+    animation: heroTextIn 0.8s cubic-bezier(0.2, 0, 0, 1) both;
+  }
+  @keyframes heroTextIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
   /* ── App mockup ── */
   .hero-mockup {
     perspective: 1200px;
+    animation: mockupIn 0.9s cubic-bezier(0.2, 0, 0, 1) 0.25s both;
+  }
+  @keyframes mockupIn {
+    from { opacity: 0; transform: translateX(40px) translateY(10px); }
+    to   { opacity: 1; transform: translateX(0)    translateY(0); }
   }
   @media (max-width: 1050px) { .hero-mockup { display: none; } }
+
+  /* ── Mini stats bar (mobile, remplace le mockup) ── */
+  .hero-mini-stats {
+    display: none;
+    gap: 0;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgba(14,14,18,0.6);
+  }
+  @media (max-width: 1050px) { .hero-mini-stats { display: flex; } }
+  .hero-mini-stat {
+    flex: 1;
+    padding: 14px 16px;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    text-align: center;
+  }
+  .hero-mini-stat:last-child { border-right: none; }
+  .hero-mini-stat-val {
+    font-size: 1.1rem; font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(180deg, #fff, #a1a1a6);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-mini-stat-label {
+    font-size: 0.68rem; color: var(--sf-text-muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-top: 3px;
+  }
   .mock-window {
     background: linear-gradient(160deg, rgba(20,20,28,0.95), rgba(10,10,16,0.98));
     border: 1px solid rgba(255,255,255,0.08);
@@ -573,16 +615,19 @@
 
   /* ── Ticker strip ── */
   .ticker-bar {
-    background: rgba(255,255,255,0.015);
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: saturate(180%) blur(22px);
+    -webkit-backdrop-filter: saturate(180%) blur(22px);
     border-bottom: 1px solid rgba(255,255,255,0.04);
     overflow: hidden;
     height: 34px;
     display: flex;
     align-items: center;
-    position: relative;
+    position: sticky;
+    top: 64px;
     z-index: 9;
-    mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
-    -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 5%, black 95%, transparent);
   }
   .ticker-track {
     display: flex;
@@ -644,13 +689,6 @@
 </head>
 <body>
 
-<!-- Ticker strip -->
-<div class="ticker-bar">
-  <div class="ticker-track" id="tickerTrack">
-    <!-- items générés 2x par JS pour boucle infinie -->
-  </div>
-</div>
-
 <!-- Topbar -->
 <header class="topbar">
   <div class="wrap topbar-inner">
@@ -664,6 +702,13 @@
     </a>
   </div>
 </header>
+
+<!-- Ticker strip (sticky sous topbar) -->
+<div class="ticker-bar">
+  <div class="ticker-track" id="tickerTrack">
+    <!-- items générés 2x par JS pour boucle infinie -->
+  </div>
+</div>
 
 <!-- Hero -->
 <main class="wrap">
@@ -689,6 +734,21 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
         </a>
         <a href="#how" class="cta-secondary">Voir comment ça marche</a>
+      </div>
+      <!-- Mini stats (visible uniquement mobile) -->
+      <div class="hero-mini-stats" style="margin-top:28px;">
+        <div class="hero-mini-stat">
+          <div class="hero-mini-stat-val">+14.2%</div>
+          <div class="hero-mini-stat-label">CAGR backtest</div>
+        </div>
+        <div class="hero-mini-stat">
+          <div class="hero-mini-stat-val">1.38</div>
+          <div class="hero-mini-stat-label">Sharpe ratio</div>
+        </div>
+        <div class="hero-mini-stat">
+          <div class="hero-mini-stat-val">8</div>
+          <div class="hero-mini-stat-label">Classes d'actifs</div>
+        </div>
       </div>
     </div>
 
