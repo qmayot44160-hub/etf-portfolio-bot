@@ -570,9 +570,86 @@
     transition: color 0.2s;
   }
   .foot-links a:hover { color: var(--sf-text); }
+
+  /* ── Ticker strip ── */
+  .ticker-bar {
+    background: rgba(255,255,255,0.015);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    overflow: hidden;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 9;
+    mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+  }
+  .ticker-track {
+    display: flex;
+    animation: tickerScroll 40s linear infinite;
+    white-space: nowrap;
+    will-change: transform;
+  }
+  .ticker-track:hover { animation-play-state: paused; }
+  @keyframes tickerScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .ticker-item {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 0 24px;
+    font-size: 0.73rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    border-right: 1px solid rgba(255,255,255,0.05);
+  }
+  .ticker-name { color: var(--sf-text-muted); letter-spacing: 0.03em; }
+  .ticker-price { color: var(--sf-text); }
+  .ticker-chg { font-size: 0.68rem; padding: 1px 5px; border-radius: 4px; font-weight: 600; }
+  .ticker-chg.pos { color: var(--sf-green); background: rgba(48,209,88,0.1); }
+  .ticker-chg.neg { color: var(--sf-red);   background: rgba(255,69,58,0.1);  }
+
+  /* ── Stats section ── */
+  .stats-section {
+    padding: 56px 0;
+    border-top: 1px solid var(--sf-border);
+    border-bottom: 1px solid var(--sf-border);
+    margin-bottom: 80px;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    text-align: center;
+  }
+  @media (max-width: 720px) { .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; } }
+  .stat-item {}
+  .stat-value {
+    font-size: 2.4rem; font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    background: linear-gradient(180deg, #fff 0%, #a1a1a6 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-value span { font-size: 1.4rem; }
+  .stat-label {
+    color: var(--sf-text-muted);
+    font-size: 0.82rem;
+    margin-top: 6px;
+    line-height: 1.4;
+  }
 </style>
 </head>
 <body>
+
+<!-- Ticker strip -->
+<div class="ticker-bar">
+  <div class="ticker-track" id="tickerTrack">
+    <!-- items générés 2x par JS pour boucle infinie -->
+  </div>
+</div>
 
 <!-- Topbar -->
 <header class="topbar">
@@ -935,6 +1012,28 @@
     </div>
   </section>
 
+  <!-- Stats -->
+  <section class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-value" data-count="10000" data-suffix="+">0</div>
+        <div class="stat-label">Simulations Monte Carlo<br>en moins de 3 secondes</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" data-count="8" data-suffix="">0</div>
+        <div class="stat-label">Classes d'actifs<br>agrégées en une vue</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" data-count="256" data-suffix=" bit">0</div>
+        <div class="stat-label">Chiffrement AES<br>pour tes credentials</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" data-count="0" data-suffix="">—</div>
+        <div class="stat-label">Données partagées<br>avec des tiers</div>
+      </div>
+    </div>
+  </section>
+
   <!-- Final CTA -->
   <section class="final">
     <h2 class="final-title">Prêt à <span>commencer ?</span></h2>
@@ -959,6 +1058,84 @@
     </span>
   </div>
 </footer>
+
+<script>
+// ── Ticker strip ──
+const TICKER_ASSETS = [
+  { name: 'SP500',      price: 5283.40, chg: +0.82 },
+  { name: 'MSCI World', price: 3712.15, chg: +0.61 },
+  { name: 'CAC 40',     price: 7948.30, chg: +0.44 },
+  { name: 'DAX',        price: 18724.50, chg: +0.53 },
+  { name: 'BTC',        price: 67420.00, chg: +2.14 },
+  { name: 'ETH',        price: 3182.40, chg: +1.87 },
+  { name: 'Gold',       price: 2342.80, chg: -0.18 },
+  { name: 'EUR/USD',    price: 1.0812, chg: +0.09 },
+];
+
+function fmtPrice(asset) {
+  if (asset.name === 'EUR/USD') return asset.price.toFixed(4);
+  if (asset.price > 10000) return asset.price.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  return asset.price.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function buildTickerItem(asset) {
+  const chgClass = asset.chg >= 0 ? 'pos' : 'neg';
+  const chgStr = (asset.chg >= 0 ? '+' : '') + asset.chg.toFixed(2) + '%';
+  return `<div class="ticker-item">
+    <span class="ticker-name">${asset.name}</span>
+    <span class="ticker-price">${fmtPrice(asset)}</span>
+    <span class="ticker-chg ${chgClass}">${chgStr}</span>
+  </div>`;
+}
+
+function renderTicker() {
+  const track = document.getElementById('tickerTrack');
+  if (!track) return;
+  // Double pour boucle seamless
+  const html = TICKER_ASSETS.map(buildTickerItem).join('');
+  track.innerHTML = html + html;
+}
+
+function jitterTicker() {
+  TICKER_ASSETS.forEach(a => {
+    const delta = (Math.random() - 0.48) * 0.15;
+    a.price = parseFloat((a.price * (1 + delta / 100)).toFixed(4));
+    a.chg = parseFloat((a.chg + (Math.random() - 0.5) * 0.04).toFixed(2));
+  });
+  renderTicker();
+}
+
+renderTicker();
+setInterval(jitterTicker, 4000);
+
+// ── Compteurs stats (IntersectionObserver) ──
+function animateCounter(el) {
+  const target = parseInt(el.dataset.count, 10);
+  const suffix = el.dataset.suffix || '';
+  if (target === 0) return; // "0 données partagées" reste affiché comme —
+  const duration = 1400;
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 3); // ease-out cubic
+    const val = Math.round(ease * target);
+    el.textContent = val.toLocaleString('fr-FR') + suffix;
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+const counters = document.querySelectorAll('[data-count]');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      animateCounter(e.target);
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.5 });
+counters.forEach(c => obs.observe(c));
+</script>
 
 </body>
 </html>
