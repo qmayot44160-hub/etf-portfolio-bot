@@ -613,6 +613,20 @@
   }
   .foot-links a:hover { color: var(--sf-text); }
 
+  /* ── Smooth scroll ── */
+  html { scroll-behavior: smooth; }
+
+  /* ── Scroll animations ── */
+  .will-animate {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s cubic-bezier(0.2,0,0,1), transform 0.7s cubic-bezier(0.2,0,0,1);
+  }
+  .will-animate.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
   /* ── Ticker strip ── */
   .ticker-bar {
     background: rgba(0,0,0,0.82);
@@ -1167,6 +1181,38 @@ function jitterTicker() {
 
 renderTicker();
 setInterval(jitterTicker, 4000);
+
+// ── Scroll animations ──
+const ANIMATE_GROUPS = [
+  { sel: '.section-eyebrow', stagger: 0 },
+  { sel: '.section-title',   stagger: 0 },
+  { sel: '.section-sub',     stagger: 0 },
+  { sel: '.why-card',        stagger: 110 },
+  { sel: '.step',            stagger: 90 },
+  { sel: '.showcase-text',   stagger: 0 },
+  { sel: '.showcase-visual', stagger: 80 },
+  { sel: '.feature',         stagger: 50 },
+  { sel: '.stat-item',       stagger: 90 },
+  { sel: '.final',           stagger: 0 },
+];
+
+const scrollObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const delay = +(e.target.dataset.aosDelay || 0);
+      setTimeout(() => e.target.classList.add('is-visible'), delay);
+      scrollObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+ANIMATE_GROUPS.forEach(({ sel, stagger }) => {
+  document.querySelectorAll(sel).forEach((el, i) => {
+    el.classList.add('will-animate');
+    el.dataset.aosDelay = stagger * i;
+    scrollObs.observe(el);
+  });
+});
 
 // ── Compteurs stats (IntersectionObserver) ──
 function animateCounter(el) {

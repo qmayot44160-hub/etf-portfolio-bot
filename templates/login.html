@@ -320,9 +320,70 @@
     .login-title { font-size: 1.4rem; }
     .brand-title { font-size: 1.9rem; }
   }
+
+  /* ── Ticker strip ── */
+  .ticker-bar {
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: saturate(180%) blur(22px);
+    -webkit-backdrop-filter: saturate(180%) blur(22px);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    overflow: hidden;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 20;
+    mask-image: linear-gradient(90deg, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 5%, black 95%, transparent);
+  }
+  .ticker-track {
+    display: flex;
+    animation: tickerScroll 40s linear infinite;
+    white-space: nowrap;
+    will-change: transform;
+  }
+  .ticker-track:hover { animation-play-state: paused; }
+  @keyframes tickerScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .ticker-item {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 0 24px;
+    font-size: 0.73rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    border-right: 1px solid rgba(255,255,255,0.05);
+  }
+  .ticker-name { color: var(--sf-text-muted); letter-spacing: 0.03em; }
+  .ticker-price { color: var(--sf-text); }
+  .ticker-chg { font-size: 0.68rem; padding: 1px 5px; border-radius: 4px; font-weight: 600; }
+  .ticker-chg.pos { color: #30d158; background: rgba(48,209,88,0.1); }
+  .ticker-chg.neg { color: #ff453a; background: rgba(255,69,58,0.1); }
+
+  /* ── Animations d'entrée ── */
+  .brand-hero {
+    animation: slideFromLeft 0.8s cubic-bezier(0.2,0,0,1) 0.1s both;
+  }
+  .login-card {
+    animation: slideFromRight 0.8s cubic-bezier(0.2,0,0,1) 0.2s both;
+  }
+  @keyframes slideFromLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes slideFromRight {
+    from { opacity: 0; transform: translateX(30px); }
+    to   { opacity: 1; transform: none; }
+  }
 </style>
 </head>
 <body>
+<!-- Ticker strip -->
+<div class="ticker-bar">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
   <div class="page">
 
     <!-- ═══ LEFT : brand + pitch ═══ -->
@@ -424,6 +485,40 @@
   </div>
 
   <script>
+    // ── Ticker ──
+    const TICKER_ASSETS = [
+      { name: 'SP500',      price: 5283.40, chg: +0.82 },
+      { name: 'MSCI World', price: 3712.15, chg: +0.61 },
+      { name: 'CAC 40',     price: 7948.30, chg: +0.44 },
+      { name: 'DAX',        price: 18724.50, chg: +0.53 },
+      { name: 'BTC',        price: 67420.00, chg: +2.14 },
+      { name: 'ETH',        price: 3182.40, chg: +1.87 },
+      { name: 'Gold',       price: 2342.80, chg: -0.18 },
+      { name: 'EUR/USD',    price: 1.0812, chg: +0.09 },
+    ];
+    function fmtP(a) {
+      if (a.name === 'EUR/USD') return a.price.toFixed(4);
+      return a.price.toLocaleString('fr-FR', {minimumFractionDigits:2,maximumFractionDigits:2});
+    }
+    function renderTicker() {
+      const track = document.getElementById('tickerTrack');
+      if (!track) return;
+      const html = TICKER_ASSETS.map(a => {
+        const cls = a.chg >= 0 ? 'pos' : 'neg';
+        const s = (a.chg >= 0 ? '+' : '') + a.chg.toFixed(2) + '%';
+        return `<div class="ticker-item"><span class="ticker-name">${a.name}</span><span class="ticker-price">${fmtP(a)}</span><span class="ticker-chg ${cls}">${s}</span></div>`;
+      }).join('');
+      track.innerHTML = html + html;
+    }
+    renderTicker();
+    setInterval(() => {
+      TICKER_ASSETS.forEach(a => {
+        a.price = parseFloat((a.price * (1 + (Math.random()-0.48)*0.15/100)).toFixed(4));
+        a.chg = parseFloat((a.chg + (Math.random()-0.5)*0.04).toFixed(2));
+      });
+      renderTicker();
+    }, 4000);
+
     // Show/hide password
     (function(){
       const input = document.getElementById('password');
