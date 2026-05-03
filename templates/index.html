@@ -2377,10 +2377,38 @@
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
         }
-        .stat-card.accent-blue::before  { background: linear-gradient(90deg, transparent, rgba(41,151,255,0.6), transparent); }
-        .stat-card.accent-green::before { background: linear-gradient(90deg, transparent, rgba(48,209,88,0.6), transparent); }
-        .stat-card.accent-red::before   { background: linear-gradient(90deg, transparent, rgba(255,69,58,0.6), transparent); }
-        .stat-card.accent-blue, .stat-card.accent-green, .stat-card.accent-red { border-top: none; }
+        .stat-card.accent-blue::before   { background: linear-gradient(90deg, transparent, rgba(41,151,255,0.6), transparent); }
+        .stat-card.accent-green::before  { background: linear-gradient(90deg, transparent, rgba(48,209,88,0.6), transparent); }
+        .stat-card.accent-red::before    { background: linear-gradient(90deg, transparent, rgba(255,69,58,0.6), transparent); }
+        .stat-card.accent-orange::before { background: linear-gradient(90deg, transparent, rgba(255,159,10,0.6), transparent); }
+        .stat-card.accent-blue, .stat-card.accent-green, .stat-card.accent-red, .stat-card.accent-orange { border-top: none; }
+
+        /* Home KPI cards : glow de fond selon état */
+        #home-stats .stat-card.accent-green {
+            background:
+                radial-gradient(ellipse 100% 60% at 50% 0%, rgba(48,209,88,0.1), transparent 70%),
+                radial-gradient(ellipse 80% 60% at 0% 0%, rgba(41,151,255,0.05), transparent 60%),
+                linear-gradient(180deg, rgba(14,14,18,0.85), rgba(8,8,12,0.92));
+            border-color: rgba(48,209,88,0.14);
+        }
+        #home-stats .stat-card.accent-red {
+            background:
+                radial-gradient(ellipse 100% 60% at 50% 0%, rgba(255,69,58,0.1), transparent 70%),
+                linear-gradient(180deg, rgba(14,14,18,0.85), rgba(8,8,12,0.92));
+            border-color: rgba(255,69,58,0.14);
+        }
+        #home-stats .stat-card.accent-blue {
+            background:
+                radial-gradient(ellipse 100% 60% at 50% 0%, rgba(10,132,255,0.1), transparent 70%),
+                linear-gradient(180deg, rgba(14,14,18,0.85), rgba(8,8,12,0.92));
+            border-color: rgba(10,132,255,0.14);
+        }
+        #home-stats .stat-card.accent-orange {
+            background:
+                radial-gradient(ellipse 100% 60% at 50% 0%, rgba(255,159,10,0.1), transparent 70%),
+                linear-gradient(180deg, rgba(14,14,18,0.85), rgba(8,8,12,0.92));
+            border-color: rgba(255,159,10,0.14);
+        }
 
         /* ════════════════════════════════════════════════
            DA+ : PILL WITH DOT INDICATOR
@@ -12274,6 +12302,10 @@ async function loadHome(){
             : `<span style="display:inline-flex;align-items:center;gap:8px">${icon('checkCircle','c-green')} LIVE</span>`;
         modeEl.style.color = s.paperMode ? 'var(--sf-orange)' : 'var(--sf-green)';
         document.getElementById('home-mode-sub').textContent = s.paperMode ? 'Simulation' : 'Ordres réels';
+        // accent dynamique carte Mode
+        const modeCard = modeEl.closest('.stat-card');
+        modeCard.classList.remove('accent-green','accent-red','accent-blue','accent-orange');
+        modeCard.classList.add(s.killSwitch ? 'accent-red' : s.paperMode ? 'accent-orange' : 'accent-green');
 
         const healthEl = document.getElementById('home-health');
         const hMap2 = {
@@ -12286,9 +12318,18 @@ async function loadHome(){
         healthEl.innerHTML = `<span style="display:inline-flex;align-items:center;gap:8px">${icon(hicon)} ${hlbl}</span>`;
         healthEl.style.color = hcol;
         document.getElementById('home-health-sub').textContent = s.uptime ? 'Uptime '+s.uptime : 'Pas de données';
+        // accent dynamique carte Santé
+        const healthCard = healthEl.closest('.stat-card');
+        healthCard.classList.remove('accent-green','accent-red','accent-blue','accent-orange');
+        const ha = {healthy:'accent-green',stale:'accent-orange',unknown:'accent-red',never_seen:''}[s.health]||'';
+        if(ha) healthCard.classList.add(ha);
 
         document.getElementById('home-positions').textContent = s.positions;
         document.getElementById('home-positions-sub').textContent = s.trades24+' trades (24h) · '+s.errors24+' erreurs';
+        // accent dynamique carte Positions
+        const posCard = document.getElementById('home-positions').closest('.stat-card');
+        posCard.classList.remove('accent-green','accent-red','accent-blue','accent-orange');
+        posCard.classList.add(s.positions > 0 ? 'accent-green' : 'accent-blue');
 
         // Actions suggérées - chaque action = icône SVG + classe de couleur
         const actions = [];
