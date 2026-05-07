@@ -2157,6 +2157,47 @@
             text-align: center;
             line-height: 1.5;
         }
+        /* Empty states génériques : donut + holdings list */
+        .home-empty {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 10px;
+            padding: 28px 16px; text-align: center;
+            height: 100%;
+        }
+        .home-empty-icon {
+            width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            color: var(--sf-text-muted);
+            margin-bottom: 2px;
+        }
+        .home-empty-title {
+            color: var(--sf-text); font-size: 0.88rem; font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+        .home-empty-sub {
+            color: var(--sf-text-muted); font-size: 0.76rem; line-height: 1.5;
+            max-width: 230px;
+        }
+        .home-empty-hint {
+            color: var(--sf-text-muted); font-size: 0.72rem; opacity: 0.7;
+        }
+        .home-empty-cta {
+            margin-top: 4px;
+            background: rgba(10,132,255,0.1);
+            color: var(--sf-blue);
+            border: 1px solid rgba(10,132,255,0.25);
+            border-radius: 8px; padding: 7px 14px;
+            font-size: 0.78rem; font-weight: 500;
+            cursor: pointer; font-family: inherit;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .home-empty-cta:hover {
+            background: rgba(10,132,255,0.16);
+            border-color: rgba(10,132,255,0.4);
+        }
         /* Rythme spatial : on respire un peu plus après le hero portfolio
            (l'ancre visuelle), et un peu moins entre les modules d'action en
            bas. Évite la monotonie du même margin-bottom partout. */
@@ -4746,7 +4787,21 @@
                 radial-gradient(circle at 85% 55%, rgba(191,90,242,0.08), transparent 55%);
             pointer-events: none;
             z-index: 0;
+            transition: background 0.7s ease, opacity 0.7s ease;
         }
+        /* Gradient dynamique selon la performance du jour */
+        .hero-portfolio.up::before {
+            background:
+                radial-gradient(circle at 20% 45%, rgba(48,209,88,0.15), transparent 55%),
+                radial-gradient(circle at 85% 55%, rgba(10,132,255,0.07), transparent 55%);
+        }
+        .hero-portfolio.down::before {
+            background:
+                radial-gradient(circle at 20% 45%, rgba(255,69,58,0.13), transparent 55%),
+                radial-gradient(circle at 85% 55%, rgba(191,90,242,0.07), transparent 55%);
+        }
+        .hero-portfolio.up   { border-color: rgba(48,209,88,0.12);  transition: border-color 0.7s ease; }
+        .hero-portfolio.down { border-color: rgba(255,69,58,0.12);   transition: border-color 0.7s ease; }
         .hero-portfolio > * { position: relative; z-index: 1; }
 
         .hp-label {
@@ -12048,6 +12103,9 @@ function updateHeroPortfolio(totalValue, range, realValues){
     const changeAmount = end - start;
     const changePct = start !== 0 ? (changeAmount / start) * 100 : 0;
     const isUp = changeAmount >= 0;
+    // Gradient dynamique selon la direction du portefeuille
+    wrap.classList.toggle('up', isUp && Math.abs(changePct) >= 0.01);
+    wrap.classList.toggle('down', !isUp && Math.abs(changePct) >= 0.01);
 
     // Main value
     const totalEl = document.getElementById('hero-total');
@@ -12529,20 +12587,22 @@ async function loadHomeAllocation(){
             ctaView = 'portfolio';
             listMsg = 'Aucune position pour l\'instant.';
         }
-        const emptyIcon = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--sf-text-muted);opacity:0.7"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
+        const donutSvg = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>`;
         donutEl.innerHTML = `
-            <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;text-align:center">
-              ${emptyIcon}
-              <div style="color:var(--sf-text);font-size:0.9rem;font-weight:500">${title}</div>
-              <div style="color:var(--sf-text-muted);font-size:0.78rem;line-height:1.45;max-width:240px">${sub}</div>
-              <button onclick="showView('${ctaView}')" style="margin-top:4px;background:rgba(10,132,255,0.1);color:var(--sf-blue);border:1px solid rgba(10,132,255,0.25);border-radius:8px;padding:7px 14px;font-size:0.78rem;font-weight:500;cursor:pointer">${ctaLabel} →</button>
+            <div class="home-empty">
+              <div class="home-empty-icon">${donutSvg}</div>
+              <div class="home-empty-title">${title}</div>
+              <div class="home-empty-sub">${sub}</div>
+              <button class="home-empty-cta" onclick="showView('${ctaView}')">${ctaLabel} →</button>
             </div>`;
         legendEl.innerHTML = '';
         if(centerEl) centerEl.style.display = 'none';
+        const holdingsSvg = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`;
         listEl.innerHTML = `
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:36px 16px;text-align:center">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--sf-text-muted);opacity:0.7"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-              <div style="color:var(--sf-text-muted);font-size:0.82rem;line-height:1.5">${listMsg}<br><span style="font-size:0.75rem;opacity:0.75">Tes 5 plus grosses lignes apparaitront ici.</span></div>
+            <div class="home-empty">
+              <div class="home-empty-icon">${holdingsSvg}</div>
+              <div class="home-empty-sub">${listMsg}</div>
+              <div class="home-empty-hint">Tes 5 plus grosses lignes apparaîtront ici.</div>
             </div>`;
         return;
     }
