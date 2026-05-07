@@ -16,6 +16,79 @@ def ema(series: pd.Series, period: int) -> pd.Series:
     return series.ewm(span=period, adjust=False).mean()
 
 
+def obv(close: pd.Series, volume: pd.Series) -> pd.Series:
+    """
+    On-Balance Volume - confirme la tendance par le volume.
+    Hausse sur volume fort = accumulation institutionnelle.
+    """
+    direction = close.diff().apply(lambda x: 1 if x > 0 else (-1 if x < 0 else 0))
+    return (direction * volume).cumsum()
+
+
+def cmf(high: pd.Series, low: pd.Series, close: pd.Series,
+        volume: pd.Series, period: int = 20) -> pd.Series:
+    """
+    Chaikin Money Flow - flux d'argent sur une période.
+    > 0.05 : pression acheteuse. < -0.05 : pression vendeuse.
+    """
+    clv = ((close - low) - (high - close)) / (high - low).replace(0, np.nan)
+    clv = clv.fillna(0)
+    money_flow_vol = clv * volume
+    return money_flow_vol.rolling(period).sum() / volume.rolling(period).sum()
+
+
+def rsi_divergence(close: pd.Series, rsi_series: pd.Series,
+                   lookback: int = 14) -> dict:
+    """
+    Detecete les divergences RSI/prix.
+    - Divergence haussiere : prix fait lower low, RSI fait higher low
+    - Divergence baissiere : prix fait higher high, RSI fait lower high
+
+    Retourne {'bullish': bool, 'bearish': bool, 'strength': 0-1}
+    """
+    if len(close) < lookback * 2:
+        return {"bullish": False, "bearish": False, "strength": 0.0}
+
+    prices = close.values[-lookback * 2:]
+    rsis = rsi_series.values[-lookback * 2:]
+    half = lookback
+
+    # Comparer premiere moitie vs seconde moitie
+    price_first = prices[:half]
+    price_second = prices[half:]
+    rsi_first = rsis[:half]
+    rsi_second = rsis[half:]
+
+    price_min_1 = np.nanmin(price_first)
+    price_min_2 = np.nanmin(price_second)
+    rsi_min_1 = np.nanmin(rsi_first)
+    rsi_min_2 = np.nanmin(rsi_second)
+
+    price_max_1 = np.nanmax(price_first)
+    price_max_2 = np.nanmax(price_second)
+    rsi_max_1 = np.nanmax(rsi_first)
+    rsi_max_2 = np.nanmax(rsi_second)
+
+    # Divergence haussiere : prix baisse mais RSI monte
+    bullish = (price_min_2 < price_min_1 * 0.995) and (rsi_min_2 > rsi_min_1 + 2)
+    # Divergence baissiere : prix monte mais RSI baisse
+    bearish = (price_max_2 > price_max_1 * 1.005) and (rsi_max_2 < rsi_max_1 - 2)
+
+    # Force basee sur l'ecart RSI
+    if bullish:
+        strength = min((rsi_min_2 - rsi_min_1) / 20, 1.0)
+    elif bearish:
+        strength = min((rsi_max_1 - rsi_max_2) / 20, 1.0)
+    else:
+        strength = 0.0
+
+    return {
+        "bullish": bullish,
+        "bearish": bearish,
+        "strength": round(strength, 3),
+    }
+
+
 def rsi(series: pd.Series, period: int = 14) -> pd.Series:
     """Relative Strength Index (0-100)."""
     delta = series.diff()
@@ -95,6 +168,7 @@ def compute_all_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df["sma_50"] = sma(close, 50)
     df["ema_9"] = ema(close, 9)
     df["ema_21"] = ema(close, 21)
+    df["ema_200"] = ema(close, 200)  # Filtre long terme institutionnel
 
     # RSI
     df["rsi"] = rsi(close, 14)
@@ -118,5 +192,11 @@ def compute_all_indicators(df: pd.DataFrame) -> pd.DataFrame:
     stoch = stochastic(high, low, close)
     df["stoch_k"] = stoch["k"]
     df["stoch_d"] = stoch["d"]
+
+    # Volume indicators
+    vol = df["volume"] if "volume" in df.columns else pd.Series(
+        np.ones(len(df)), index=df.index)
+    df["obv"] = obv(close, vol)
+    df["cmf"] = cmf(high, low, close, vol, 20)
 
     return df
