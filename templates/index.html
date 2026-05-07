@@ -6073,7 +6073,7 @@
             .globalheader-links { display: none; }
             .globalheader-logo { font-size: 1.05rem; }
             .mobile-nav-toggle { display: inline-flex; }
-            #mode-badge, #bot-status, .hdr-divider { display: none; }
+            #status-chip, .hdr-divider { display: none; }
             .hdr-chip { padding: 6px 10px; font-size: 0.7rem; }
             .wallet-btn, .avatar-btn { width: 36px; height: 36px; font-size: 0.78rem; }
 
@@ -7797,9 +7797,8 @@
                 </button>
             </div>
             <span class="hdr-divider" aria-hidden="true"></span>
-            <div id="mode-badge" class="hdr-chip mode-chip" onclick="quickTogglePaperLive()" style="cursor:pointer" title="Cliquer pour basculer Paper/Live"><span class="chip-dot"></span>PAPER</div>
-            <button id="kill-switch-btn" class="hdr-chip kill-chip" onclick="triggerKillSwitch()" title="Arrêt d'urgence du bot"><span class="sfi" data-icon="power"></span>KILL</button>
-            <div id="bot-status" class="globalheader-status"><span class="dot" style="background:var(--sf-orange)"></span> Simulation</div>
+            <div id="status-chip" class="hdr-chip mode-chip" onclick="quickTogglePaperLive()" style="cursor:pointer" title="Cliquer pour basculer Paper/Live"><span class="chip-dot"></span><span id="status-chip-text">PAPER</span></div>
+            <button id="kill-switch-btn" class="hdr-chip kill-chip" onclick="triggerKillSwitch()" title="Arrêt d'urgence du bot"><span class="sfi" data-icon="power"></span></button>
             <button id="wallet-btn" class="wallet-btn" onclick="toggleWalletDrawer()" title="Wallet : patrimoine et activité" aria-haspopup="dialog"><span class="sfi" data-icon="wallet"></span></button>
             <span class="hdr-divider" aria-hidden="true"></span>
             <button id="avatar-btn" class="avatar-btn" onclick="toggleSettingsFromAvatar()" oncontextmenu="event.preventDefault(); toggleUserMenu(event);" title="Profil & Paramètres (clic droit pour menu rapide)" aria-haspopup="dialog">QM</button>
@@ -10365,8 +10364,31 @@ function emptyState(icon, title, sub='') {
     return `<div class="empty-state"><div class="empty-state-icon">${icon}</div><div class="empty-state-title">${title}</div>${sub?`<div class="empty-state-sub">${sub}</div>`:''}</div>`;
 }
 
+/* ═══ Status chip - état centralisé ═══ */
+let _chipBroker = '';   // noms des brokers connectés, ex. "MEXC" ou "IBKR+MEXC"
+let _chipPaper  = true; // true = paper mode
+let _chipKill   = false;// true = kill-switch actif
+
+function _renderStatusChip(){
+    const chip   = document.getElementById('status-chip');
+    const textEl = document.getElementById('status-chip-text');
+    if(!chip || !textEl) return;
+    const prefix = _chipBroker ? _chipBroker + ' · ' : '';
+    if(_chipKill){
+        textEl.textContent = 'ARRÊT';
+        chip.classList.remove('live');
+        chip.style.borderColor = 'rgba(255,69,58,0.45)';
+        chip.style.color = 'var(--sf-red)';
+    } else {
+        textEl.textContent = prefix + (_chipPaper ? 'PAPER' : 'LIVE');
+        chip.classList.toggle('live', !_chipPaper);
+        chip.style.borderColor = '';
+        chip.style.color = '';
+    }
+}
+
 /* ═══ Status ═══ */
-async function refreshStatus(){try{const d=await(await fetch('/api/status')).json();const cs=await(await fetch('/api/crypto/status')).json();const b=document.getElementById('bot-status');if(d.broker_connected||cs.connected){const names=[];if(d.broker_connected)names.push(d.broker_name);if(cs.connected)names.push(cs.broker_name);b.innerHTML=`<span class="dot" style="background:var(--sf-green);animation:pulse 2s infinite;border-radius:50%"></span> <strong>${names.join(' + ')}</strong> <span class="pill pill-green" style="font-size:0.6rem;animation:pulse 2s infinite">LIVE</span>`;b.style.color='var(--sf-green)';}else{b.innerHTML='<span class="dot" style="background:var(--sf-orange)"></span> Non connecté';b.style.color='var(--sf-text-secondary)';}}catch(e){}}
+async function refreshStatus(){try{const d=await(await fetch('/api/status')).json();const cs=await(await fetch('/api/crypto/status')).json();const names=[];if(d.broker_connected)names.push(d.broker_name);if(cs.connected)names.push(cs.broker_name);_chipBroker=names.join('+');_renderStatusChip();}catch(e){}}
 
 /* ═══ Portfolio ═══ */
 // Couleurs accent par catégorie pour différencier visuellement les positions
@@ -11627,12 +11649,10 @@ async function loadSecurite(){
         const secAuth = document.getElementById('sec-auth');
         secAuth.innerHTML = `${dot(authColor)}<span style="color:var(--sf-text)">${s.auth_enabled ? 'Activée' : 'Désactivée'}</span>`;
         secAuth.style.color = '';
-        // Badge global
-        const badge = document.getElementById('mode-badge');
-        if(badge){
-            badge.innerHTML = '<span class="chip-dot"></span>' + mode;
-            badge.classList.toggle('live', !s.paper_mode);
-        }
+        // Mise à jour du status chip global
+        _chipPaper = !!s.paper_mode;
+        _chipKill  = !!s.kill_switch;
+        _renderStatusChip();
     }catch(e){ console.error(e); }
     try{
         const tg = await (await fetch('/api/notifications/config')).json();
