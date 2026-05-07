@@ -1256,10 +1256,20 @@
         .mbox {
             flex: 1; min-width: 110px;
             background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
             border-radius: 14px; padding: 16px;
+            position: relative; overflow: hidden;
+            transition: border-color 0.3s;
+        }
+        .mbox::before {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
         }
         .mbox-label { font-size: 0.68rem; color: var(--sf-text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-        .mbox-val { font-size: 1.15rem; font-weight: 600; margin-top: 6px; letter-spacing: -0.02em; }
+        .mbox-val { font-size: 1.2rem; font-weight: 700; margin-top: 8px; letter-spacing: -0.02em; }
+        .mbox-val.red   { color: var(--sf-red); }
+        .mbox-val.green { color: var(--sf-green); }
 
         /* ════════════════════════════════════════════════
            SCANNER ITEMS
@@ -8567,22 +8577,22 @@
         <div id="an-results" style="display:none">
             <!-- ── Régime + KPIs ── -->
             <div class="stat-grid stat-grid-4" style="margin-top:8px">
-                <div class="stat-card accent-blue">
+                <div class="stat-card" id="an-regime-card">
                     <div class="stat-label">Régime de marché</div>
                     <div class="stat-value" id="an-regime-label" style="font-size:1.4rem">--</div>
                     <div class="stat-sub" id="an-regime-sub"></div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" id="an-sharpe-card">
                     <div class="stat-label">Sharpe portefeuille</div>
                     <div class="stat-value" id="an-sharpe">--</div>
                     <div class="stat-sub" id="an-sortino-sub"></div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" id="an-div-card">
                     <div class="stat-label">Ratio de diversification</div>
                     <div class="stat-value" id="an-div">--</div>
                     <div class="stat-sub" id="an-div-label"></div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" id="an-corr-card">
                     <div class="stat-label">Corrélation moyenne</div>
                     <div class="stat-value" id="an-avg-corr">--</div>
                     <div class="stat-sub">Entre ETFs</div>
@@ -10938,6 +10948,9 @@ async function loadAnalytics(){
         if(d.error){toast(d.error,true);return;}
         document.getElementById('an-results').style.display='block';
 
+        // helper accent
+        const _setAccent=(id,cls)=>{const el=document.getElementById(id);if(!el)return;el.classList.remove('accent-green','accent-red','accent-blue','accent-orange');if(cls)el.classList.add(cls);};
+
         // ── Régime ──
         if(d.regime&&!d.regime.error){
             const r=d.regime;
@@ -10946,21 +10959,28 @@ async function loadAnalytics(){
             lbl.style.color=REGIME_COLOR[r.regime]||'var(--sf-text)';
             document.getElementById('an-regime-sub').innerHTML=
                 `SPY ${fmt(r.spy_price)} • ${r.vs_sma_pct>=0?'+':''}${r.vs_sma_pct}% vs SMA200 • DD ${r.drawdown_pct}%`;
+            _setAccent('an-regime-card',{bull:'accent-green',bear:'accent-red',crisis:'accent-red',volatile:'accent-orange',neutral:'accent-blue'}[r.regime]||'accent-blue');
         }
 
         // ── Stats portefeuille ──
         const st=d.portfolio_stats||{};
+        const sharpeVal=parseFloat(st.sharpe)||0;
         document.getElementById('an-sharpe').textContent=st.sharpe||'--';
         document.getElementById('an-sortino-sub').textContent=`Sortino ${st.sortino||'--'} • Calmar ${st.calmar||'--'}`;
+        _setAccent('an-sharpe-card', sharpeVal>=1.5?'accent-green':sharpeVal>=0.5?'accent-blue':'accent-orange');
 
         // Diversification
         const dv=d.diversification_ratio||{};
+        const divVal=parseFloat(dv.value)||0;
         document.getElementById('an-div').textContent=dv.value||'--';
         document.getElementById('an-div-label').textContent=dv.interpretation||'';
+        _setAccent('an-div-card', divVal>=1.4?'accent-green':divVal>=1.1?'accent-blue':'accent-orange');
 
         // Corrélation moyenne
         const cm=d.correlation||{};
+        const corrVal=parseFloat(cm.average)||0;
         document.getElementById('an-avg-corr').textContent=cm.average!==undefined?cm.average:'--';
+        _setAccent('an-corr-card', corrVal<0.3?'accent-green':corrVal<0.6?'accent-blue':'accent-orange');
 
         // ── Tail risk ──
         const tr=d.tail_risk||{};
