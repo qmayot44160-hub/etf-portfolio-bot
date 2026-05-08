@@ -234,7 +234,7 @@ class AutoTrader:
 
             # 3. Quant Models - regime + multi-strategy
             if config.get("use_quant_models", True):
-                quant = QuantModels.generate_quant_signal(df, symbol)
+                quant = QuantModels.generate_quant_signal(df, symbol, self.trade_history)
                 regime = QuantModels.detect_regime(df)
                 result["quant"] = {
                     "direction": quant.direction,

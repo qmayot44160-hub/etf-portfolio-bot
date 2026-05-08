@@ -144,6 +144,44 @@ def stochastic(high: pd.Series, low: pd.Series, close: pd.Series,
     return {"k": k, "d": d}
 
 
+def squeeze_momentum(high: pd.Series, low: pd.Series, close: pd.Series,
+                     bb_period: int = 20, bb_mult: float = 2.0,
+                     kc_period: int = 20, kc_mult: float = 1.5) -> dict:
+    """
+    TTM Squeeze (John Carter) - compresse de volatilite avant explosion.
+    Squeeze ON : BB entierement dans le Keltner Channel = energie accumulee.
+    Squeeze OFF (release) : BB sort du KC = signal directionnel imminent.
+    Momentum : position du close par rapport au milieu du range, lisse.
+    """
+    # Bollinger Bands
+    bb_mid = sma(close, bb_period)
+    bb_std = close.rolling(window=bb_period).std()
+    bb_upper = bb_mid + bb_mult * bb_std
+    bb_lower = bb_mid - bb_mult * bb_std
+
+    # Keltner Channel (base EMA + ATR)
+    kc_mid = ema(close, kc_period)
+    kc_atr = atr(high, low, close, kc_period)
+    kc_upper = kc_mid + kc_mult * kc_atr
+    kc_lower = kc_mid - kc_mult * kc_atr
+
+    # Squeeze : BB entierement a l'interieur du KC
+    squeeze_on = (bb_upper < kc_upper) & (bb_lower > kc_lower)
+
+    # Momentum oscillateur : delta entre close et midpoint (HL + BB)
+    highest = high.rolling(window=kc_period).max()
+    lowest = low.rolling(window=kc_period).min()
+    mid_hl = (highest + lowest) / 2
+    val = close - (mid_hl + bb_mid) / 2
+    # Moyenne glissante comme approximation de la regression lineaire
+    momentum = val.rolling(window=kc_period).mean()
+
+    return {
+        "squeeze_on": squeeze_on,
+        "momentum": momentum,
+    }
+
+
 def support_resistance(close: pd.Series, window: int = 20) -> dict:
     """Détecte les niveaux de support et résistance."""
     rolling_min = close.rolling(window=window).min()
@@ -198,5 +236,10 @@ def compute_all_indicators(df: pd.DataFrame) -> pd.DataFrame:
         np.ones(len(df)), index=df.index)
     df["obv"] = obv(close, vol)
     df["cmf"] = cmf(high, low, close, vol, 20)
+
+    # Squeeze Momentum TTM
+    sq = squeeze_momentum(high, low, close)
+    df["squeeze_on"] = sq["squeeze_on"]
+    df["squeeze_momentum"] = sq["momentum"]
 
     return df

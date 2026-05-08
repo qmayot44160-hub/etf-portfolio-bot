@@ -537,7 +537,33 @@ class QuantModels:
     # ── Combinaison Multi-Strategie ──
 
     @staticmethod
-    def generate_quant_signal(df: pd.DataFrame, symbol: str) -> QuantSignal:
+    def _kelly_from_history(trade_history: list) -> Optional[dict]:
+        """
+        Calcule win_rate et ratio gain/perte depuis l'historique reel des trades.
+        Retourne None si moins de 5 trades fermes.
+        """
+        closed = [
+            t for t in trade_history
+            if t.get("status") in ("TP_HIT", "SL_HIT", "TRAILING_SL", "MANUAL_CLOSE")
+            and t.get("pnl") is not None
+        ]
+        if len(closed) < 5:
+            return None
+        wins = [t["pnl"] for t in closed if t["pnl"] > 0]
+        losses = [abs(t["pnl"]) for t in closed if t["pnl"] <= 0]
+        win_rate = len(wins) / len(closed)
+        avg_win = float(np.mean(wins)) if wins else 0.0
+        avg_loss = float(np.mean(losses)) if losses else 1.0
+        return {
+            "win_rate": win_rate,
+            "avg_win": avg_win,
+            "avg_loss": avg_loss,
+            "sample_size": len(closed),
+        }
+
+    @staticmethod
+    def generate_quant_signal(df: pd.DataFrame, symbol: str,
+                              trade_history: list = None) -> QuantSignal:
         """
         Genere un signal quantitatif combine a partir de toutes les strategies.
         Pondere par le regime de marche.
@@ -599,16 +625,35 @@ class QuantModels:
         vol = np.std(returns[-20:]) * 100
         edge = avg_return * (1 if direction == "LONG" else -1 if direction == "SHORT" else 0)
 
-        # 7. Kelly criterion
-        if direction != "FLAT" and vol > 0:
-            win_rate = max(0.3, min(0.7, 0.5 + edge / (vol * 2)))
-            avg_win = vol * 1.5
-            avg_loss = vol
-            kelly = (win_rate * avg_win - (1 - win_rate) * avg_loss) / avg_win if avg_win > 0 else 0
+        # 7. Kelly criterion - utilise l'historique reel si disponible
+        history_stats = None
+        if trade_history:
+            history_stats = QuantModels._kelly_from_history(trade_history)
+
+        if direction != "FLAT":
+            if history_stats:
+                # Kelly base sur stats reelles
+                win_rate = history_stats["win_rate"]
+                price_ref = close[-1] if close[-1] > 0 else 1.0
+                avg_win_pct = history_stats["avg_win"] / price_ref * 100
+                avg_loss_pct = history_stats["avg_loss"] / price_ref * 100
+                if avg_win_pct > 0:
+                    kelly = (win_rate * avg_win_pct - (1 - win_rate) * avg_loss_pct) / avg_win_pct
+                else:
+                    kelly = 0
+            elif vol > 0:
+                # Fallback synthetique
+                win_rate = max(0.3, min(0.7, 0.5 + edge / (vol * 2)))
+                avg_win = vol * 1.5
+                avg_loss = vol
+                kelly = (win_rate * avg_win - (1 - win_rate) * avg_loss) / avg_win if avg_win > 0 else 0
+            else:
+                kelly = 0
+                win_rate = 0.5
             kelly = max(0, min(0.25, kelly))  # Cap a 25% du capital
         else:
             kelly = 0
-            win_rate = 0.5
+            win_rate = history_stats["win_rate"] if history_stats else 0.5
 
         return QuantSignal(
             symbol=symbol,
@@ -623,6 +668,8 @@ class QuantModels:
             risk_metrics={
                 "volatility_20d": round(vol * np.sqrt(365), 2),
                 "estimated_win_rate": round(win_rate * 100, 1),
+                "kelly_source": "real_history" if history_stats else "synthetic",
+                "kelly_sample_size": history_stats["sample_size"] if history_stats else 0,
                 "regime": regime.regime.value,
                 "regime_confidence": regime.confidence,
                 "hurst": regime.hurst_exponent,

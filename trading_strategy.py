@@ -169,8 +169,35 @@ class TradingStrategy:
             score -= 1.5 * (0.5 + div["strength"])
             reasons.append(f"Divergence RSI baissière détectée (force={div['strength']:.2f}) - signal de retournement")
 
+        # ── 10. Squeeze Momentum TTM (+/-1.5) ──
+        sq_on_val = latest.get("squeeze_on")
+        sq_mom_val = latest.get("squeeze_momentum")
+        sq_on = bool(sq_on_val) if sq_on_val is not None and pd.notna(sq_on_val) else None
+        sq_mom = float(sq_mom_val) if sq_mom_val is not None and pd.notna(sq_mom_val) else None
+        if sq_on is not None and sq_mom is not None:
+            sq_on_prev = bool(df["squeeze_on"].iloc[-2]) if len(df) > 1 else True
+            sq_mom_prev = float(df["squeeze_momentum"].iloc[-2]) if len(df) > 1 and pd.notna(df["squeeze_momentum"].iloc[-2]) else sq_mom
+            release = sq_on_prev and not sq_on  # sortie de squeeze ce candle
+            if release:
+                if sq_mom > 0:
+                    score += 1.5
+                    reasons.append(f"Squeeze release haussier (momentum={sq_mom:.4f}) - explosion imminente")
+                else:
+                    score -= 1.5
+                    reasons.append(f"Squeeze release baissier (momentum={sq_mom:.4f}) - chute imminente")
+            elif sq_on:
+                reasons.append("Squeeze actif - compression en cours, signal en attente")
+            else:
+                # Post-release : momentum qui s'accelere dans une direction
+                if sq_mom > 0 and sq_mom > sq_mom_prev:
+                    score += 0.5
+                    reasons.append(f"Momentum post-squeeze positif croissant ({sq_mom:.4f})")
+                elif sq_mom < 0 and sq_mom < sq_mom_prev:
+                    score -= 0.5
+                    reasons.append(f"Momentum post-squeeze négatif décroissant ({sq_mom:.4f})")
+
         # ── Calcul du signal final ──
-        # Score max théorique : ~8.5 (avec toutes les divergences)
+        # Score max théorique : ~10 (avec squeeze release + divergence RSI)
         if score >= 3.5:
             signal = Signal.STRONG_BUY
         elif score >= 1.5:
@@ -206,8 +233,8 @@ class TradingStrategy:
             take_profit = price + (atr_val * self.tp_atr_mult)
 
         # Confiance sigmoidale : plus discriminante que linéaire
-        # score / 8.5 normalise, puis sigmoide centrée sur 0
-        normalized = abs(score) / 8.5
+        # score / 10 normalise (nouveau max théorique avec squeeze), sigmoide centrée
+        normalized = abs(score) / 10.0
         confidence = round(100 / (1 + np.exp(-8 * (normalized - 0.35))), 1)
         confidence = min(confidence, 98.0)  # jamais 100%
 
@@ -228,6 +255,8 @@ class TradingStrategy:
             "obv_trend": "up" if obv_rising else "down",
             "rsi_divergence": div,
             "ema200_aligned": ema200_aligned,
+            "squeeze_on": sq_on,
+            "squeeze_momentum": round(sq_mom, 6) if sq_mom is not None else None,
             "score": round(score, 2),
         }
 
