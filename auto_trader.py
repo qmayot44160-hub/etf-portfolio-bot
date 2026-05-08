@@ -29,6 +29,7 @@ from market_scanner import MarketScanner
 
 
 from data_paths import data_path
+import notifications as notif
 
 TRADES_FILE = data_path("trades_history.json")
 ACTIVE_TRADES_FILE = data_path("active_trades.json")
@@ -689,6 +690,13 @@ class AutoTrader:
                 "trade": asdict(trade),
             })
 
+            try:
+                paper = config.get("paper_mode", True)
+                notif.notify_trade_opened(symbol, side, price, actual_qty, sl,
+                                          analysis.get("take_profit", 0), paper=paper)
+            except Exception:
+                pass
+
             return {
                 "status": "EXECUTED",
                 "trade": asdict(trade),
@@ -789,6 +797,16 @@ class AutoTrader:
                     "trade": asdict(trade),
                 })
 
+                try:
+                    reason_label = {"SL_HIT": "Stop Loss", "TP_HIT": "Take Profit",
+                                    "TRAILING_SL": "Trailing Stop"}.get(hit, hit)
+                    paper = self.get_config().get("paper_mode", True)
+                    notif.notify_trade_closed(trade.symbol, trade.side,
+                                              trade.pnl or 0, trade.pnl_pct or 0,
+                                              reason_label, paper=paper)
+                except Exception:
+                    pass
+
         self.active_trades = [t for t in self.active_trades if t.status == "OPEN"]
         self._save_state()
         return closed
@@ -814,6 +832,15 @@ class AutoTrader:
                 self.trade_history.append(asdict(trade))
                 self.active_trades = [t for t in self.active_trades if t.status == "OPEN"]
                 self._save_state()
+
+                try:
+                    paper = self.get_config().get("paper_mode", True)
+                    notif.notify_trade_closed(trade.symbol, trade.side,
+                                              trade.pnl or 0, trade.pnl_pct or 0,
+                                              "Fermeture manuelle", paper=paper)
+                except Exception:
+                    pass
+
                 return {"status": "CLOSED", "trade": asdict(trade)}
 
         return {"error": f"Aucun trade ouvert sur {symbol}"}
@@ -970,6 +997,7 @@ class AutoTrader:
 
     def _trading_loop(self):
         scan_counter = 0
+        last_daily_summary_date = None
         while self.running:
             config = self.get_config()
             if not config["enabled"]:
@@ -1001,10 +1029,44 @@ class AutoTrader:
                         result = self.execute_signal(analysis)
                         if result.get("status") == "BLOCKED":
                             print(f"[AutoTrader] RISK BLOCK: {result.get('reason')}")
+                        elif result.get("status") == "SKIP":
+                            # Signal fort mais trade skipped - notifier si STRONG
+                            if signal in ("STRONG_BUY", "STRONG_SELL"):
+                                sym = analysis.get("symbol", "")
+                                conf = analysis.get("confidence", 0)
+                                price = analysis.get("price", 0)
+                                try:
+                                    arrow = "🚀" if "BUY" in signal else "📉"
+                                    notif.notify(
+                                        f"{arrow} <b>Signal {signal}</b> - {sym}\n"
+                                        f"Prix : {price} · Confiance : {conf}%\n"
+                                        f"<i>Non exécuté : {result.get('reason', '')}</i>",
+                                        "trades"
+                                    )
+                                except Exception:
+                                    pass
 
             except Exception as e:
                 print(f"[AutoTrader] Erreur: {e}")
                 self.risk_engine.log_event("ERROR", str(e))
+                try:
+                    notif.notify_error(str(e), "AutoTrader._trading_loop")
+                except Exception:
+                    pass
+
+            # Résumé quotidien à minuit
+            today = datetime.now().date()
+            if last_daily_summary_date != today and datetime.now().hour == 0:
+                last_daily_summary_date = today
+                try:
+                    perf = self.get_performance()
+                    notif.notify_daily_summary({
+                        "total_pnl": perf.get("daily_pnl", 0),
+                        "total_trades": perf.get("total_trades", 0),
+                        "win_rate": perf.get("win_rate", 0),
+                    })
+                except Exception:
+                    pass
 
             time.sleep(config.get("check_interval", 300))
 

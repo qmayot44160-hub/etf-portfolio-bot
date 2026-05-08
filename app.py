@@ -239,6 +239,10 @@ def api_kill_switch():
     except Exception as e:
         print(f"[KillSwitch] scheduler disable error: {e}")
     state = trigger_kill_switch(reason)
+    try:
+        notif.notify_kill_switch(reason)
+    except Exception:
+        pass
     return jsonify({"status": "killed", "settings": state})
 
 
