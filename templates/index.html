@@ -8798,6 +8798,98 @@
     <th class="sortable" data-sort-type="date">Date</th>
 </tr></thead><tbody id="trade-history-table" class="stagger-on-render"></tbody></table>
         </div>
+
+        <!-- ═══ BACKTEST STRATÉGIE ═══ -->
+        <div class="dcard" id="bt-card">
+            <div class="dcard-title"><span class="sfi" data-icon="flask"></span>Backtest stratégie</div>
+            <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:20px;line-height:1.55">
+                Simulation walk-forward sur données historiques. Un seul trade à la fois, SL/TP ATR-based, taille de position par risque fixe. Permet de valider la stratégie avant de déployer du capital réel.
+            </p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px">
+                <div class="form-group">
+                    <div class="form-label">Symbole</div>
+                    <input type="text" id="bt-symbol" value="BTC/USDT" class="ainput" placeholder="BTC/USDT">
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Timeframe</div>
+                    <select id="bt-timeframe" class="ainput">
+                        <option value="15m">15m</option>
+                        <option value="1h" selected>1h</option>
+                        <option value="4h">4h</option>
+                        <option value="1d">1d</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Candles</div>
+                    <input type="number" id="bt-periods" value="300" min="150" max="500" class="ainput">
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Capital ($)</div>
+                    <input type="number" id="bt-capital" value="10000" min="100" class="ainput">
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Risk/trade %</div>
+                    <input type="number" id="bt-risk" value="1" min="0.1" max="5" step="0.1" class="ainput">
+                </div>
+            </div>
+            <button class="abtn abtn-blue" onclick="runStrategyBacktest()" id="bt-run-btn">Lancer le backtest</button>
+
+            <div id="bt-results" style="display:none;margin-top:24px">
+                <!-- KPI row -->
+                <div class="stat-grid stat-grid-4" style="margin-bottom:20px">
+                    <div class="stat-card" id="bt-ret-card">
+                        <div class="stat-label">Rendement</div>
+                        <div class="stat-value" id="bt-return">--</div>
+                        <div class="stat-sub" id="bt-capital-sub">--</div>
+                    </div>
+                    <div class="stat-card" id="bt-wr-card">
+                        <div class="stat-label">Win Rate</div>
+                        <div class="stat-value" id="bt-winrate">--</div>
+                        <div class="stat-sub" id="bt-trades-sub">--</div>
+                    </div>
+                    <div class="stat-card" id="bt-pf-card">
+                        <div class="stat-label">Profit Factor</div>
+                        <div class="stat-value" id="bt-pf">--</div>
+                        <div class="stat-sub" id="bt-exp-sub">--</div>
+                    </div>
+                    <div class="stat-card" id="bt-dd-card">
+                        <div class="stat-label">Max Drawdown</div>
+                        <div class="stat-value" id="bt-dd">--</div>
+                        <div class="stat-sub" id="bt-sharpe-sub">--</div>
+                    </div>
+                </div>
+                <!-- Equity chart + stats secondaires -->
+                <div class="grid-2col">
+                    <div class="dcard">
+                        <div class="dcard-label">Courbe equity</div>
+                        <div id="bt-equity-chart" class="chart-box" style="height:200px"></div>
+                    </div>
+                    <div class="dcard">
+                        <div class="dcard-label">Stats détaillées</div>
+                        <div id="bt-stats-detail" class="metrics" style="flex-wrap:wrap"></div>
+                    </div>
+                </div>
+                <!-- Derniers trades -->
+                <div style="margin-top:20px">
+                    <div style="font-size:0.82rem;font-weight:600;color:var(--sf-text-secondary);margin-bottom:12px">Derniers trades simulés</div>
+                    <div style="overflow-x:auto">
+                        <table style="width:100%;font-size:0.8rem">
+                            <thead><tr style="color:var(--sf-text-muted)">
+                                <th style="text-align:left;padding:6px 8px">Date</th>
+                                <th style="text-align:left;padding:6px 8px">Side</th>
+                                <th style="text-align:right;padding:6px 8px">Entree</th>
+                                <th style="text-align:right;padding:6px 8px">Sortie</th>
+                                <th style="text-align:right;padding:6px 8px">P&L</th>
+                                <th style="text-align:right;padding:6px 8px">%</th>
+                                <th style="text-align:left;padding:6px 8px">Statut</th>
+                                <th style="text-align:right;padding:6px 8px">Confiance</th>
+                            </tr></thead>
+                            <tbody id="bt-trades-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -11432,6 +11524,98 @@ async function executeTrade(a){try{const d=await(await fetch('/api/trading/execu
 async function loadActiveTrades(){try{const t=await(await fetch('/api/trading/active')).json();const tb=document.getElementById('active-trades-table');if(!t.length){tb.innerHTML=`<tr><td colspan="9">${emptyState(icon('inbox','c-muted sfi-xl'),'Aucun trade actif','Le bot ouvrira des positions quand un signal sera détecté.')}</td></tr>`;return;}tb.innerHTML=t.map(x=>{const pc=x.pnl>=0?'var(--sf-green)':'var(--sf-red)';return`<tr><td><strong>${x.symbol}</strong></td><td><span class="pill ${x.side==='BUY'?'pill-green':'pill-red'}">${x.side}</span></td><td class="mono">${fmtU(x.entry_price)}</td><td class="mono">${x.quantity}</td><td class="mono" style="color:var(--sf-red)">${fmtU(x.stop_loss)}</td><td class="mono" style="color:var(--sf-green)">${fmtU(x.take_profit)}</td><td>${x.trailing_active?'<span class="pill pill-green" style="font-size:0.65rem">ON</span>':'-'}</td><td style="color:${pc}"><strong>${fmtU(x.pnl)}</strong><br><span style="font-size:0.75rem">${x.pnl_pct?x.pnl_pct.toFixed(2)+'%':''}</span></td><td><button class="abtn abtn-danger abtn-sm" onclick="closeTrade('${x.symbol}')">Fermer</button></td></tr>`;}).join('');}catch(e){}}
 async function closeTrade(s){if(!confirm('Fermer '+s+' ?'))return;await fetch('/api/trading/close',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({symbol:s})});toast(s+' ferme');loadActiveTrades();loadTradeHistory();loadPerformance();}
 async function loadTradeHistory(){try{const t=await(await fetch('/api/trading/history')).json();const tb=document.getElementById('trade-history-table');if(!t.length){tb.innerHTML=`<tr><td colspan="8">${emptyState(icon('inbox','c-muted sfi-xl'),'Historique vide','Les trades terminés apparaîtront ici.')}</td></tr>`;return;}tb.innerHTML=t.slice().reverse().map(x=>{const pc=x.pnl>=0?'var(--sf-green)':'var(--sf-red)';const sl={SL_HIT:'Stop Loss',TP_HIT:'Take Profit',TRAILING_SL:'Trailing',MANUAL_CLOSE:'Manuel'};const slc={TP_HIT:'var(--sf-green)',SL_HIT:'var(--sf-red)',TRAILING_SL:'var(--sf-orange)',MANUAL_CLOSE:'var(--sf-text-secondary)'};return`<tr><td><strong>${x.symbol}</strong></td><td><span class="pill ${x.side==='BUY'?'pill-green':'pill-red'}">${x.side}</span></td><td class="mono">${fmtU(x.entry_price)}</td><td class="mono">${x.close_price?fmtU(x.close_price):'--'}</td><td class="mono" style="color:${pc};font-weight:600">${fmtU(x.pnl)}</td><td style="color:${pc}">${x.pnl_pct?x.pnl_pct.toFixed(2)+'%':'--'}</td><td style="color:${slc[x.status]||'var(--sf-text-secondary)'}">${sl[x.status]||x.status}</td><td style="color:var(--sf-text-muted);font-size:0.78rem">${x.closed_at?new Date(x.closed_at).toLocaleString('fr-FR'):'--'}</td></tr>`;}).join('');}catch(e){}}
+
+/* ═══ Backtest Stratégie ═══ */
+async function runStrategyBacktest(){
+  const btn=document.getElementById('bt-run-btn');
+  btn.disabled=true;btn.textContent='Calcul en cours...';
+  const res=document.getElementById('bt-results');
+  res.style.display='none';
+  try{
+    const sym=document.getElementById('bt-symbol').value.trim()||'BTC/USDT';
+    const tf=document.getElementById('bt-timeframe').value;
+    const periods=document.getElementById('bt-periods').value;
+    const capital=document.getElementById('bt-capital').value;
+    const risk=document.getElementById('bt-risk').value;
+    const url=`/api/trading/strategy_backtest?symbol=${encodeURIComponent(sym)}&timeframe=${tf}&periods=${periods}&capital=${capital}&risk_pct=${risk}`;
+    const d=await(await fetch(url)).json();
+    if(d.error){toast(d.error,true);return;}
+
+    // Accent des KPI cards
+    const _sa=(id,cls)=>{const el=document.getElementById(id);if(!el)return;el.classList.remove('accent-green','accent-red','accent-blue','accent-orange');if(cls)el.classList.add(cls);};
+    const retEl=document.getElementById('bt-return');
+    retEl.textContent=(d.return_pct>=0?'+':'')+d.return_pct+'%';
+    retEl.className='stat-value '+(d.return_pct>=0?'green':'red');
+    document.getElementById('bt-capital-sub').textContent=`${d.initial_capital.toLocaleString()} → ${d.final_capital.toLocaleString()} $`;
+    _sa('bt-ret-card',d.return_pct>20?'accent-green':d.return_pct>0?'accent-blue':d.return_pct>-10?'accent-orange':'accent-red');
+
+    document.getElementById('bt-winrate').textContent=d.win_rate+'%';
+    document.getElementById('bt-trades-sub').textContent=`${d.n_trades} trades sur ${d.n_candles} candles`;
+    _sa('bt-wr-card',d.win_rate>=55?'accent-green':d.win_rate>=45?'accent-blue':'accent-orange');
+
+    document.getElementById('bt-pf').textContent=d.profit_factor;
+    document.getElementById('bt-exp-sub').textContent=`Expectancy: ${d.expectancy>=0?'+':''}${d.expectancy.toFixed(2)}`;
+    _sa('bt-pf-card',d.profit_factor>=1.5?'accent-green':d.profit_factor>=1?'accent-blue':'accent-red');
+
+    document.getElementById('bt-dd').textContent=d.max_drawdown_pct.toFixed(1)+'%';
+    document.getElementById('bt-sharpe-sub').textContent=`Sharpe: ${d.sharpe}`;
+    _sa('bt-dd-card',d.max_drawdown_pct>-20?'accent-orange':d.max_drawdown_pct>-35?'accent-red':'accent-red');
+
+    // Stats détaillées
+    document.getElementById('bt-stats-detail').innerHTML=`
+      <div class="mbox"><div class="mbox-label">Win streak</div><div class="mbox-val">${d.max_consec_wins}</div></div>
+      <div class="mbox"><div class="mbox-label">Loss streak</div><div class="mbox-val red">${d.max_consec_losses}</div></div>
+      <div class="mbox"><div class="mbox-label">Avg win</div><div class="mbox-val green">+${d.avg_win.toFixed(2)}</div></div>
+      <div class="mbox"><div class="mbox-label">Avg loss</div><div class="mbox-val red">-${d.avg_loss.toFixed(2)}</div></div>
+      <div class="mbox"><div class="mbox-label">Sharpe</div><div class="mbox-val ${d.sharpe>=1?'green':d.sharpe>=0?'':'red'}">${d.sharpe}</div></div>
+      <div class="mbox"><div class="mbox-label">Total P&L</div><div class="mbox-val ${d.total_pnl>=0?'green':'red'}">${d.total_pnl>=0?'+':''}${d.total_pnl.toFixed(2)}</div></div>
+    `;
+
+    // Equity chart (SVG bars simplifié)
+    _renderBtEquity(d.equity_curve);
+
+    // Table trades
+    const statC={TP_HIT:'var(--sf-green)',SL_HIT:'var(--sf-red)',TRAILING_SL:'var(--sf-orange)',STILL_OPEN:'var(--sf-blue)'};
+    const statL={TP_HIT:'TP',SL_HIT:'SL',TRAILING_SL:'Trail',STILL_OPEN:'Ouvert'};
+    document.getElementById('bt-trades-table').innerHTML=[...(d.trades||[])].reverse().slice(0,30).map(t=>`
+      <tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
+        <td style="padding:5px 8px;color:var(--sf-text-muted);font-size:0.75rem">${(t.entry_date||'').substring(0,16)}</td>
+        <td style="padding:5px 8px"><span class="pill ${t.side==='BUY'?'pill-green':'pill-red'}" style="font-size:0.65rem">${t.side}</span></td>
+        <td style="padding:5px 8px;text-align:right;font-family:monospace">${t.entry.toLocaleString()}</td>
+        <td style="padding:5px 8px;text-align:right;font-family:monospace">${t.exit.toLocaleString()}</td>
+        <td style="padding:5px 8px;text-align:right;font-weight:600;color:${t.pnl>=0?'var(--sf-green)':'var(--sf-red)'}">${t.pnl>=0?'+':''}${t.pnl.toFixed(2)}</td>
+        <td style="padding:5px 8px;text-align:right;color:${t.pnl_pct>=0?'var(--sf-green)':'var(--sf-red)'}">${t.pnl_pct>=0?'+':''}${t.pnl_pct}%</td>
+        <td style="padding:5px 8px;font-size:0.78rem;color:${statC[t.status]||'var(--sf-text-secondary)'}">${statL[t.status]||t.status}</td>
+        <td style="padding:5px 8px;text-align:right;color:var(--sf-text-muted);font-size:0.78rem">${t.confidence}%</td>
+      </tr>`).join('');
+
+    res.style.display='block';
+  }catch(e){toast(e.message,true);}
+  finally{btn.disabled=false;btn.textContent='Lancer le backtest';}
+}
+
+function _renderBtEquity(curve){
+  const el=document.getElementById('bt-equity-chart');
+  if(!curve||!curve.length)return;
+  const W=el.clientWidth||600,H=180,pad=8;
+  const vals=curve.map(c=>c.value);
+  const mn=Math.min(...vals),mx=Math.max(...vals);
+  const rng=mx-mn||1;
+  const pts=vals.map((v,i)=>{
+    const x=pad+(i/(vals.length-1||1))*(W-2*pad);
+    const y=H-pad-((v-mn)/rng)*(H-2*pad);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const isUp=vals[vals.length-1]>=vals[0];
+  const col=isUp?'var(--sf-green)':'var(--sf-red)';
+  const fillCol=isUp?'rgba(48,209,88,0.1)':'rgba(255,69,58,0.1)';
+  const firstX=pad, lastX=pad+(W-2*pad);
+  const fillPts=`${firstX},${H-pad} ${pts} ${lastX},${H-pad}`;
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:100%" preserveAspectRatio="none">
+    <polygon points="${fillPts}" fill="${fillCol}"/>
+    <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round"/>
+  </svg>`;
+}
 
 /* ═══ Scanner ═══ */
 async function loadScannerCached(){try{const d=await(await fetch('/api/trading/scan/results')).json();if(d.results&&d.results.length)renderScanResults(d);loadTopMovers();}catch(e){}}

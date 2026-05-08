@@ -698,6 +698,32 @@ def api_backtest():
     return jsonify(result)
 
 
+# ── API: Backtest Strategie de Trading ────────────────
+
+@app.route("/api/trading/strategy_backtest")
+def api_strategy_backtest():
+    """Backtest walk-forward de la TradingStrategy sur donnees historiques."""
+    symbol = request.args.get("symbol", "BTC/USDT")
+    periods = min(request.args.get("periods", 300, type=int), 500)
+    timeframe = request.args.get("timeframe", "1h")
+    risk_pct = request.args.get("risk_pct", 1.0, type=float)
+    capital = request.args.get("capital", 10000.0, type=float)
+
+    _sync_trader_exchange()
+    if not trader.exchange or not trader.exchange.connected:
+        return jsonify({"error": "Exchange non connecte"})
+
+    try:
+        df = trader._fetch_ohlcv(symbol.upper(), timeframe, limit=periods + 50)
+        if len(df) < 150:
+            return jsonify({"error": "Pas assez de donnees (minimum 150 candles)"})
+        from strategy_backtest import run_strategy_backtest
+        result = run_strategy_backtest(df, symbol.upper(), capital, risk_pct)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
 # ── API: Analytics ─────────────────────────────────────
 
 @app.route("/api/analytics")
