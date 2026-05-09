@@ -600,6 +600,7 @@ class AutoTrader:
                     stop_loss=sl,
                     signal_confidence=analysis.get("confidence", 50),
                     volatility=analysis.get("quant", {}).get("volatility_regime_pct") if analysis.get("quant") else None,
+                    quant_kelly_pct=analysis.get("quant", {}).get("kelly_size") if analysis.get("quant") else None,
                 )
                 quantity = sizing["quantity"]
 

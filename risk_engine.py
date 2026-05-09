@@ -216,10 +216,15 @@ class RiskEngine:
         signal_confidence: float = 50,
         kelly_fraction: float = None,
         volatility: float = None,
+        quant_kelly_pct: float = None,
     ) -> dict:
         """
         Calcul institutionnel de la taille de position.
         Combine : risk-based, Kelly, volatility-adjusted.
+
+        quant_kelly_pct : fraction Kelly deja calculee par les quant models
+                          (avec historique reel si disponible). Prioritaire sur le
+                          calcul synthetique interne quand fournie.
         """
         if entry_price <= 0 or stop_loss <= 0:
             return {"quantity": 0, "error": "Prix invalide"}
@@ -234,11 +239,16 @@ class RiskEngine:
         qty_risk = risk_amount / risk_per_unit
 
         # 2. Kelly sizing
-        kf = kelly_fraction or self.config["kelly_fraction"]
-        win_rate = max(0.35, min(0.65, signal_confidence / 100))
-        rr_ratio = 2.0  # Assume 2:1 RR
-        kelly_full = (win_rate * rr_ratio - (1 - win_rate)) / rr_ratio
-        kelly_adj = max(0, kelly_full * kf)
+        if quant_kelly_pct is not None and quant_kelly_pct > 0:
+            # Kelly calcule avec historique reel (quant_models._kelly_from_history)
+            kelly_adj = min(quant_kelly_pct, 0.25)  # cap securite 25%
+        else:
+            # Kelly synthetique base sur la confiance du signal
+            kf = kelly_fraction or self.config["kelly_fraction"]
+            win_rate = max(0.35, min(0.65, signal_confidence / 100))
+            rr_ratio = 2.0  # Assume 2:1 RR
+            kelly_full = (win_rate * rr_ratio - (1 - win_rate)) / rr_ratio
+            kelly_adj = max(0, kelly_full * kf)
         qty_kelly = (capital * kelly_adj) / entry_price
 
         # 3. Volatility-adjusted (si vol disponible)
@@ -275,6 +285,7 @@ class RiskEngine:
                 "qty_kelly": round(qty_kelly, 6),
                 "qty_vol_adjusted": round(qty_vol, 6),
                 "kelly_fraction": round(kelly_adj, 4),
+                "kelly_source": "quant_real" if quant_kelly_pct else "synthetic",
                 "vol_scalar": round(vol_scalar if volatility else 1.0, 2),
             }
         }
