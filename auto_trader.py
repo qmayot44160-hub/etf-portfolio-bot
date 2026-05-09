@@ -967,6 +967,17 @@ class AutoTrader:
         avg_loss_val = total_losses / len(losses) if losses else 0
         expectancy = (win_rate * avg_win_val - (1 - win_rate) * avg_loss_val)
 
+        # PnL du jour (trades clotures aujourd'hui)
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        daily_pnl = round(sum(
+            t.get("pnl", 0) for t in history
+            if (t.get("closed_at") or "")[:10] == today_str
+        ), 2)
+        daily_trades = sum(
+            1 for t in history
+            if (t.get("closed_at") or "")[:10] == today_str
+        )
+
         return {
             "total_trades": len(history),
             "wins": len(wins),
@@ -986,6 +997,8 @@ class AutoTrader:
             "calmar_ratio": round(calmar, 2),
             "expectancy": round(expectancy, 2),
             "max_drawdown": round(max_dd, 2),
+            "daily_pnl": daily_pnl,
+            "daily_trades": daily_trades,
             "pnl_history": cumulative,
             "monthly_pnl": monthly,
             "by_symbol": by_symbol,
@@ -998,6 +1011,7 @@ class AutoTrader:
     def _trading_loop(self):
         scan_counter = 0
         last_daily_summary_date = None
+        last_regime_per_symbol: dict = {}  # symbol -> regime str
         while self.running:
             config = self.get_config()
             if not config["enabled"]:
@@ -1010,7 +1024,16 @@ class AutoTrader:
                     try:
                         self.scanner.exchange = self.exchange
                         self.scanner.full_scan()
-                        print(f"[AutoTrader] Market scan complete - {len(self.scanner.cache.get('results', []))} opportunities")
+                        results = self.scanner.cache.get("results", [])
+                        print(f"[AutoTrader] Market scan complete - {len(results)} opportunities")
+                        # Notifier le meilleur pick si score >= 70
+                        if results:
+                            top = max(results, key=lambda x: x.get("score", 0))
+                            if top.get("score", 0) >= 70:
+                                try:
+                                    notif.notify_smart_pick(top)
+                                except Exception:
+                                    pass
                     except Exception as e:
                         print(f"[AutoTrader] Scan error: {e}")
                 scan_counter += 1
@@ -1024,6 +1047,19 @@ class AutoTrader:
                 for analysis in analyses:
                     if analysis.get("error"):
                         continue
+
+                    # Changement de régime de marché
+                    sym = analysis.get("symbol", "")
+                    new_regime = (analysis.get("quant") or {}).get("regime", "")
+                    if new_regime and sym:
+                        old_regime = last_regime_per_symbol.get(sym, "")
+                        if old_regime and old_regime != new_regime:
+                            try:
+                                notif.notify_regime_change(old_regime, new_regime, sym)
+                            except Exception:
+                                pass
+                        last_regime_per_symbol[sym] = new_regime
+
                     signal = analysis.get("signal", analysis.get("final_signal", "HOLD"))
                     if signal in ("STRONG_BUY", "BUY", "STRONG_SELL", "SELL"):
                         result = self.execute_signal(analysis)
@@ -1032,7 +1068,6 @@ class AutoTrader:
                         elif result.get("status") == "SKIP":
                             # Signal fort mais trade skipped - notifier si STRONG
                             if signal in ("STRONG_BUY", "STRONG_SELL"):
-                                sym = analysis.get("symbol", "")
                                 conf = analysis.get("confidence", 0)
                                 price = analysis.get("price", 0)
                                 try:

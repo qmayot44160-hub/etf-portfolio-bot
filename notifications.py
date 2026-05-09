@@ -215,8 +215,9 @@ def notify_daily_summary(stats: dict) -> bool:
     return notify(msg, "daily_summary")
 
 
-def notify_regime_change(old: str, new: str) -> bool:
-    msg = f"🌡️ <b>Régime de marché changé</b>\n\n{old} → <b>{new}</b>"
+def notify_regime_change(old: str, new: str, symbol: str = "") -> bool:
+    sym_txt = f" ({symbol})" if symbol else ""
+    msg = f"🌡️ <b>Régime de marché changé{sym_txt}</b>\n\n{old} → <b>{new}</b>"
     return notify(msg, "regime_change")
 
 
