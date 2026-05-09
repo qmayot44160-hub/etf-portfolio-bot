@@ -1011,6 +1011,8 @@ class AutoTrader:
     def _trading_loop(self):
         scan_counter = 0
         last_daily_summary_date = None
+        last_heartbeat_hour = -1   # heure (0-23) du dernier heartbeat
+        loop_start_time = time.time()
         last_regime_per_symbol: dict = {}  # symbol -> regime str
         while self.running:
             config = self.get_config()
@@ -1099,6 +1101,23 @@ class AutoTrader:
                         "total_pnl": perf.get("daily_pnl", 0),
                         "total_trades": perf.get("total_trades", 0),
                         "win_rate": perf.get("win_rate", 0),
+                    })
+                except Exception:
+                    pass
+
+            # Heartbeat toutes les 6h (heures paires : 0, 6, 12, 18)
+            current_hour = datetime.now().hour
+            if current_hour % 6 == 0 and current_hour != last_heartbeat_hour:
+                last_heartbeat_hour = current_hour
+                try:
+                    perf = self.get_performance()
+                    uptime_h = (time.time() - loop_start_time) / 3600
+                    notif.notify_heartbeat({
+                        "active_trades": len(self.active_trades),
+                        "total_pnl": perf.get("total_pnl", 0),
+                        "daily_pnl": perf.get("daily_pnl", 0),
+                        "win_rate": perf.get("win_rate", 0),
+                        "uptime_hours": uptime_h,
                     })
                 except Exception:
                     pass

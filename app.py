@@ -3,7 +3,7 @@ Dashboard web Flask pour le bot ETF.
 """
 
 from datetime import datetime
-from flask import Flask, render_template, jsonify, request, session, redirect, url_for
+from flask import Flask, render_template, jsonify, request, session, redirect, url_for, Response
 from bot_engine import BotEngine
 from portfolio import (
     load_state, get_portfolio_value, calculate_rebalance,
@@ -862,6 +862,32 @@ def api_trading_active():
 @app.route("/api/trading/history")
 def api_trading_history():
     return jsonify(trader.get_trade_history())
+
+
+@app.route("/api/trading/history/export")
+@login_required
+def api_trading_history_export():
+    """Exporte le trade history en CSV."""
+    import io, csv
+    trades = trader.get_trade_history()
+    if not trades:
+        return Response("Aucun trade", mimetype="text/plain"), 404
+
+    cols = ["symbol", "side", "entry_price", "close_price", "quantity",
+            "pnl", "pnl_pct", "stop_loss", "take_profit", "status",
+            "opened_at", "closed_at", "regime", "confidence"]
+    buf = io.StringIO()
+    writer = csv.DictWriter(buf, fieldnames=cols, extrasaction="ignore")
+    writer.writeheader()
+    writer.writerows(trades)
+    csv_str = buf.getvalue()
+
+    filename = f"trades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    return Response(
+        csv_str,
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 
 @app.route("/api/trading/close", methods=["POST"])

@@ -8786,7 +8786,10 @@
             <table><thead><tr><th>Token</th><th>Side</th><th>Entree</th><th>Qty</th><th>SL</th><th>TP</th><th>Trailing</th><th>P&L</th><th></th></tr></thead><tbody id="active-trades-table" class="stagger-on-render"></tbody></table>
         </div>
         <div class="dcard">
-            <div class="dcard-title"><span class="sfi" data-icon="inbox"></span>Historique</div>
+            <div class="dcard-title" style="display:flex;align-items:center;justify-content:space-between">
+                <span><span class="sfi" data-icon="inbox"></span>Historique</span>
+                <a href="/api/trading/history/export" class="abtn abtn-ghost" style="font-size:0.75rem;padding:4px 10px" title="Exporter en CSV"><span class="sfi" data-icon="download"></span> CSV</a>
+            </div>
             <table class="sortable-table"><thead><tr>
     <th class="sortable" data-sort-type="text">Token</th>
     <th class="sortable" data-sort-type="text" data-tooltip="Long = pari à la hausse. Short = pari à la baisse.">Side</th>
@@ -9257,6 +9260,7 @@
                 <label><input type="checkbox" id="tg-kill" checked> Kill-switch</label>
                 <label><input type="checkbox" id="tg-daily" checked> Résumé quotidien</label>
                 <label><input type="checkbox" id="tg-regime" checked> Changement de régime</label>
+                <label><input type="checkbox" id="tg-heartbeat" checked> Heartbeat (6h)</label>
             </div>
             <div style="display:flex;gap:20px;margin-top:18px">
                 <button class="link-more" onclick="saveTelegram()">Enregistrer</button>
@@ -11949,6 +11953,7 @@ async function loadSecurite(){
         document.getElementById('tg-kill').checked = tg.notify_kill_switch !== false;
         document.getElementById('tg-daily').checked = tg.notify_daily_summary !== false;
         document.getElementById('tg-regime').checked = tg.notify_regime_change !== false;
+        document.getElementById('tg-heartbeat').checked = tg.notify_heartbeat !== false;
     }catch(e){ console.error(e); }
     try{
         const p = await (await fetch('/api/paper/portfolio')).json();
@@ -11999,6 +12004,7 @@ async function saveTelegram(){
         notify_kill_switch: document.getElementById('tg-kill').checked,
         notify_daily_summary: document.getElementById('tg-daily').checked,
         notify_regime_change: document.getElementById('tg-regime').checked,
+        notify_heartbeat: document.getElementById('tg-heartbeat').checked,
     };
     const tok = document.getElementById('tg-token').value.trim();
     if(tok)payload.telegram_bot_token = tok;

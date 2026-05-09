@@ -8,6 +8,7 @@ Envoie des alertes pour :
 - Kill-switch activé
 - Résumé quotidien
 - Changement de régime de marché
+- Heartbeat (bot vivant) toutes les 6h
 """
 
 import os
@@ -38,6 +39,7 @@ def _load_config() -> dict:
         "notify_kill_switch": True,
         "notify_daily_summary": True,
         "notify_regime_change": True,
+        "notify_heartbeat": True,
     }
 
 
@@ -213,6 +215,25 @@ def notify_daily_summary(stats: dict) -> bool:
         f"Date : {datetime.now().strftime('%Y-%m-%d')}"
     )
     return notify(msg, "daily_summary")
+
+
+def notify_heartbeat(stats: dict) -> bool:
+    """Ping Telegram pour confirmer que le bot tourne. Envoye toutes les 6h."""
+    active = stats.get("active_trades", 0)
+    total_pnl = stats.get("total_pnl", 0)
+    daily_pnl = stats.get("daily_pnl", 0)
+    uptime_h = stats.get("uptime_hours", 0)
+    win_rate = stats.get("win_rate", 0)
+    emoji = "💚" if active > 0 else "🟢"
+    msg = (
+        f"{emoji} <b>Bot actif</b> · {datetime.now().strftime('%H:%M')}\n\n"
+        f"Trades ouverts : <b>{active}</b>\n"
+        f"P&L jour : <b>{daily_pnl:+.2f}$</b>\n"
+        f"P&L total : <b>{total_pnl:+.2f}$</b>\n"
+        f"Win rate : {win_rate}%\n"
+        f"Uptime : {uptime_h:.1f}h"
+    )
+    return notify(msg, "heartbeat")
 
 
 def notify_regime_change(old: str, new: str, symbol: str = "") -> bool:
