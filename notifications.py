@@ -13,7 +13,6 @@ Envoie des alertes pour :
 
 import os
 import json
-import time
 import requests
 from datetime import datetime
 from data_paths import data_path

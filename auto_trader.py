@@ -17,17 +17,15 @@ import os
 import time
 import threading
 from datetime import datetime
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict, field, MISSING
 from typing import Optional
 from config import CRYPTO_PORTFOLIO
-from trading_strategy import TradingStrategy, Signal
-from quant_models import QuantModels, MarketRegime
+from trading_strategy import TradingStrategy
+from quant_models import QuantModels
 from risk_engine import RiskEngine
 from smart_execution import SmartExecution
 from market_intelligence import MarketIntelligence
 from market_scanner import MarketScanner
-
-
 from data_paths import data_path
 import notifications as notif
 
@@ -79,27 +77,40 @@ class AutoTrader:
 
     def _load_state(self):
         if os.path.exists(ACTIVE_TRADES_FILE):
-            with open(ACTIVE_TRADES_FILE, "r") as f:
-                data = json.load(f)
+            try:
+                with open(ACTIVE_TRADES_FILE, "r") as f:
+                    data = json.load(f)
                 self.active_trades = []
                 for t in data:
-                    for k in ActiveTrade.__dataclass_fields__:
+                    for k, fld in ActiveTrade.__dataclass_fields__.items():
                         if k not in t:
-                            df = ActiveTrade.__dataclass_fields__[k]
-                            t[k] = df.default if df.default is not dataclass else df.default_factory()
+                            if fld.default is not MISSING:
+                                t[k] = fld.default
+                            elif fld.default_factory is not MISSING:
+                                t[k] = fld.default_factory()
                     self.active_trades.append(ActiveTrade(**{
                         k: v for k, v in t.items()
                         if k in ActiveTrade.__dataclass_fields__
                     }))
+            except Exception as e:
+                print(f"[AutoTrader] _load_state active_trades error: {e}")
+                self.active_trades = []
         if os.path.exists(TRADES_FILE):
-            with open(TRADES_FILE, "r") as f:
-                self.trade_history = json.load(f)
+            try:
+                with open(TRADES_FILE, "r") as f:
+                    self.trade_history = json.load(f)
+            except Exception as e:
+                print(f"[AutoTrader] _load_state trade_history error: {e}")
+                self.trade_history = []
 
     def _save_state(self):
-        with open(ACTIVE_TRADES_FILE, "w") as f:
-            json.dump([asdict(t) for t in self.active_trades], f, indent=2)
-        with open(TRADES_FILE, "w") as f:
-            json.dump(self.trade_history[-500:], f, indent=2)
+        try:
+            with open(ACTIVE_TRADES_FILE, "w") as f:
+                json.dump([asdict(t) for t in self.active_trades], f, indent=2)
+            with open(TRADES_FILE, "w") as f:
+                json.dump(self.trade_history[-500:], f, indent=2)
+        except Exception as e:
+            print(f"[AutoTrader] _save_state error: {e}")
 
     def get_config(self) -> dict:
         if os.path.exists(TRADER_CONFIG_FILE):
@@ -342,7 +353,7 @@ class AutoTrader:
             reasons.append(f"AT: {ta_signal} ({ta_conf}%)")
         else:
             votes.append(("TA", 0, ta_conf, 0.25))
-            reasons.append(f"AT: HOLD")
+            reasons.append("TA: HOLD")
 
         # Vote 2: Quant Models
         quant = analysis.get("quant")
@@ -801,7 +812,7 @@ class AutoTrader:
                 try:
                     reason_label = {"SL_HIT": "Stop Loss", "TP_HIT": "Take Profit",
                                     "TRAILING_SL": "Trailing Stop"}.get(hit, hit)
-                    paper = self.get_config().get("paper_mode", True)
+                    paper = config.get("paper_mode", True)
                     notif.notify_trade_closed(trade.symbol, trade.side,
                                               trade.pnl or 0, trade.pnl_pct or 0,
                                               reason_label, paper=paper)
@@ -835,7 +846,8 @@ class AutoTrader:
                 self._save_state()
 
                 try:
-                    paper = self.get_config().get("paper_mode", True)
+                    cfg = self.get_config()
+                    paper = cfg.get("paper_mode", True)
                     notif.notify_trade_closed(trade.symbol, trade.side,
                                               trade.pnl or 0, trade.pnl_pct or 0,
                                               "Fermeture manuelle", paper=paper)
@@ -898,7 +910,8 @@ class AutoTrader:
                 "max_consecutive_wins": 0, "max_consecutive_losses": 0,
                 "pnl_history": [], "monthly_pnl": {}, "by_symbol": {},
                 "sharpe_ratio": 0, "sortino_ratio": 0, "calmar_ratio": 0,
-                "expectancy": 0,
+                "expectancy": 0, "max_drawdown": 0,
+                "daily_pnl": 0, "daily_trades": 0,
             }
 
         pnls = [t.get("pnl", 0) for t in history]
