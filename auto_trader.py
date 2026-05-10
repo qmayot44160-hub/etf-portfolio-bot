@@ -140,6 +140,8 @@ class AutoTrader:
             "min_confidence": 40,
             "min_strategies_agree": 2,
             "execution_urgency": "normal",  # low, normal, high
+            "trading_capital": 10000.0,     # capital de référence pour les limites
+            "max_daily_loss_pct": 3.0,      # auto kill-switch si perte jour > X% (0 = désactivé)
         }
 
     def save_config(self, config: dict):
@@ -1056,6 +1058,27 @@ class AutoTrader:
 
                 # 1. Check SL/TP/trailing
                 self.check_stop_loss_take_profit()
+
+                # Limite de perte journalière - auto kill-switch
+                max_daily_loss = config.get("max_daily_loss_pct", 0)
+                if max_daily_loss > 0:
+                    try:
+                        perf = self.get_performance()
+                        daily_pnl = perf.get("daily_pnl", 0)
+                        capital = config.get("trading_capital", 10000)
+                        if daily_pnl < 0 and capital > 0:
+                            daily_loss_pct = abs(daily_pnl) / capital * 100
+                            if daily_loss_pct >= max_daily_loss:
+                                from settings import trigger_kill_switch
+                                reason = (
+                                    f"Limite perte journalière dépassée : "
+                                    f"-{daily_loss_pct:.1f}% ({daily_pnl:+.2f}$)"
+                                )
+                                trigger_kill_switch(reason)
+                                print(f"[AutoTrader] AUTO KILL-SWITCH: {reason}")
+                                self.running = False
+                    except Exception as e:
+                        print(f"[AutoTrader] daily loss check error: {e}")
 
                 # 2. Analyze all symbols (includes scanner results if enabled)
                 analyses = self.analyze_all()

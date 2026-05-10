@@ -8697,6 +8697,17 @@
         <div id="risk-warnings"></div>
         <div id="risk-circuit-breaker" style="display:none" class="warn-bar" style="text-align:center;font-weight:600;font-size:1.1rem;padding:20px">CIRCUIT BREAKER ACTIVE</div>
 
+        <!-- Daily loss limit bar -->
+        <div id="daily-loss-bar-wrap" style="display:none;margin-bottom:16px;padding:14px 20px;background:rgba(255,69,58,0.06);border:1px solid rgba(255,69,58,0.15);border-radius:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span style="font-size:0.82rem;font-weight:500;color:var(--sf-text-secondary)">Limite perte journalière</span>
+                <span id="daily-loss-bar-label" style="font-size:0.82rem;font-weight:600;color:var(--sf-red)"></span>
+            </div>
+            <div style="background:rgba(255,255,255,0.06);border-radius:6px;height:6px;overflow:hidden">
+                <div id="daily-loss-bar-fill" style="height:100%;border-radius:6px;background:var(--sf-green);transition:width 0.4s ease;width:0%"></div>
+            </div>
+        </div>
+
         <!-- Perf -->
         <div class="stat-grid stat-grid-4">
             <div class="stat-card" id="perf-pnl-card"><div class="stat-label">P&L Total</div><div class="stat-value" id="perf-total-pnl">--</div><div class="stat-sub" id="perf-total-trades">0 trades</div></div>
@@ -8760,6 +8771,13 @@
                 <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:20px;margin-top:20px">
                     <div class="form-label" style="margin-bottom:10px">Mode Scanner</div>
                     <select id="t-scanner-mode" class="ainput"><option value="fixed">Tokens fixes</option><option value="hybrid" selected>Hybride (fixes + scanner)</option><option value="dynamic">100% dynamique</option></select>
+                </div>
+                <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:20px;margin-top:20px">
+                    <div class="form-label" style="margin-bottom:10px">Protection capital</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                        <div class="form-group"><div class="form-label">Capital ($)</div><input type="number" id="t-capital" value="10000" min="100" class="ainput"></div>
+                        <div class="form-group"><div class="form-label" data-tooltip="Auto kill-switch si la perte du jour dépasse ce %. 0 = désactivé.">Perte max/jour (%)</div><input type="number" id="t-max-daily-loss" value="3" min="0" max="20" step="0.5" class="ainput" placeholder="0 = off"></div>
+                    </div>
                 </div>
                 <button class="abtn abtn-blue" onclick="saveTraderConfig()" style="width:100%;margin-top:24px">Sauvegarder la configuration</button>
             </div>
@@ -10192,12 +10210,14 @@ function showView(v, opts){
         if(loaders[v]){
             requestAnimationFrame(()=>requestAnimationFrame(loaders[v]));
         }
-        // Auto-refresh signaux : activer/désactiver selon la vue
+        // Auto-refresh signaux + trades actifs : activer/désactiver selon la vue
         if(v === 'trading'){
             const cb = document.getElementById('signals-auto-refresh');
             if(cb && cb.checked) toggleSignalsAutoRefresh(true);
+            if(!_activeTradesTimer) _activeTradesTimer = setInterval(()=>{ if(document.getElementById('view-trading').style.display!=='none') loadActiveTrades(); }, 30000);
         } else {
             clearInterval(_signalsAutoTimer); _signalsAutoTimer = null;
+            clearInterval(_activeTradesTimer); _activeTradesTimer = null;
         }
         // Cleanup will-change après la transition pour libérer la couche compositor
         const cleanup = () => {
@@ -11507,9 +11527,9 @@ async function cryptoRebalance(){try{const o=await(await fetch('/api/crypto/reba
 
 /* ═══ Trading ═══ */
 let traderRunning=false;
-async function loadTrading(){try{const d=await(await fetch('/api/trading/status')).json();traderRunning=d.running;const btn=document.getElementById('trader-start-btn'),lbl=document.getElementById('trader-status-label');const modeBadge=d.live_mode?'<span class="pill pill-green" style="font-size:0.65rem;margin-left:8px;animation:pulse 2s infinite">LIVE</span>':'<span class="pill pill-orange" style="font-size:0.65rem;margin-left:8px">SIMULATION</span>';if(d.running){btn.textContent='Arreter';btn.className='abtn abtn-danger';lbl.innerHTML='<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--sf-green);margin-right:6px"></span>'+d.active_trades+' trades'+modeBadge;lbl.style.color='var(--sf-green)';}else{btn.textContent='Demarrer';btn.className='abtn abtn-blue';lbl.innerHTML='Arrete'+modeBadge;lbl.style.color='var(--sf-text-secondary)';}const cfg=d.config;document.getElementById('t-interval').value=cfg.check_interval;document.getElementById('t-max-trades').value=cfg.max_open_trades;document.getElementById('t-timeframe').value=cfg.timeframe;document.getElementById('t-risk').value=cfg.risk_per_trade_pct;document.getElementById('t-sl').value=cfg.sl_atr_multiplier;document.getElementById('t-tp').value=cfg.tp_atr_multiplier;document.getElementById('t-trailing-enabled').checked=cfg.trailing_stop!==false;document.getElementById('t-trailing-pct').value=cfg.trailing_stop_pct||2;document.getElementById('t-trailing-activation').value=cfg.trailing_activation_pct||1;document.getElementById('t-scanner-mode').value=cfg.scanner_mode||'hybrid';document.querySelectorAll('#t-confirm-tf input[type=checkbox]').forEach(c=>c.checked=(cfg.confirm_timeframes||['1h','4h']).includes(c.value));document.getElementById('t-only-strong').checked=cfg.only_strong_signals||false;loadTokenList();loadActiveTrades();loadTradeHistory();loadPerformance();loadRiskDashboard();}catch(e){}}
+async function loadTrading(){try{const d=await(await fetch('/api/trading/status')).json();traderRunning=d.running;const btn=document.getElementById('trader-start-btn'),lbl=document.getElementById('trader-status-label');const modeBadge=d.live_mode?'<span class="pill pill-green" style="font-size:0.65rem;margin-left:8px;animation:pulse 2s infinite">LIVE</span>':'<span class="pill pill-orange" style="font-size:0.65rem;margin-left:8px">SIMULATION</span>';if(d.running){btn.textContent='Arreter';btn.className='abtn abtn-danger';lbl.innerHTML='<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--sf-green);margin-right:6px"></span>'+d.active_trades+' trades'+modeBadge;lbl.style.color='var(--sf-green)';}else{btn.textContent='Demarrer';btn.className='abtn abtn-blue';lbl.innerHTML='Arrete'+modeBadge;lbl.style.color='var(--sf-text-secondary)';}const cfg=d.config;document.getElementById('t-interval').value=cfg.check_interval;document.getElementById('t-max-trades').value=cfg.max_open_trades;document.getElementById('t-timeframe').value=cfg.timeframe;document.getElementById('t-risk').value=cfg.risk_per_trade_pct;document.getElementById('t-sl').value=cfg.sl_atr_multiplier;document.getElementById('t-tp').value=cfg.tp_atr_multiplier;document.getElementById('t-trailing-enabled').checked=cfg.trailing_stop!==false;document.getElementById('t-trailing-pct').value=cfg.trailing_stop_pct||2;document.getElementById('t-trailing-activation').value=cfg.trailing_activation_pct||1;document.getElementById('t-scanner-mode').value=cfg.scanner_mode||'hybrid';document.querySelectorAll('#t-confirm-tf input[type=checkbox]').forEach(c=>c.checked=(cfg.confirm_timeframes||['1h','4h']).includes(c.value));document.getElementById('t-only-strong').checked=cfg.only_strong_signals||false;document.getElementById('t-capital').value=cfg.trading_capital||10000;document.getElementById('t-max-daily-loss').value=cfg.max_daily_loss_pct!=null?cfg.max_daily_loss_pct:3;loadTokenList();loadActiveTrades();loadTradeHistory();loadPerformance();loadRiskDashboard();}catch(e){}}
 async function toggleTrader(){await fetch(traderRunning?'/api/trading/stop':'/api/trading/start',{method:'POST'});toast(traderRunning?'Bot arrete':'Bot demarre');traderRunning=!traderRunning;loadTrading();}
-async function saveTraderConfig(){const ctf=[];document.querySelectorAll('#t-confirm-tf input:checked').forEach(c=>ctf.push(c.value));const syms=Array.from(document.querySelectorAll('#token-list .ttag')).map(e=>e.dataset.symbol);await fetch('/api/trading/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled:true,symbols:syms.length?syms:['BTC','ETH','SOL','LINK','AAVE'],timeframe:document.getElementById('t-timeframe').value,confirm_timeframes:ctf.length?ctf:['1h'],check_interval:parseInt(document.getElementById('t-interval').value),max_open_trades:parseInt(document.getElementById('t-max-trades').value),risk_per_trade_pct:parseFloat(document.getElementById('t-risk').value),sl_atr_multiplier:parseFloat(document.getElementById('t-sl').value),tp_atr_multiplier:parseFloat(document.getElementById('t-tp').value),trailing_stop:document.getElementById('t-trailing-enabled').checked,trailing_stop_pct:parseFloat(document.getElementById('t-trailing-pct').value),trailing_activation_pct:parseFloat(document.getElementById('t-trailing-activation').value),only_strong_signals:document.getElementById('t-only-strong').checked,use_quant_models:true,use_risk_engine:true,use_smart_execution:true,use_market_intel:true,use_market_scanner:true,scanner_mode:document.getElementById('t-scanner-mode').value})});toast('Configuration sauvegardee');}
+async function saveTraderConfig(){const ctf=[];document.querySelectorAll('#t-confirm-tf input:checked').forEach(c=>ctf.push(c.value));const syms=Array.from(document.querySelectorAll('#token-list .ttag')).map(e=>e.dataset.symbol);await fetch('/api/trading/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled:true,symbols:syms.length?syms:['BTC','ETH','SOL','LINK','AAVE'],timeframe:document.getElementById('t-timeframe').value,confirm_timeframes:ctf.length?ctf:['1h'],check_interval:parseInt(document.getElementById('t-interval').value),max_open_trades:parseInt(document.getElementById('t-max-trades').value),risk_per_trade_pct:parseFloat(document.getElementById('t-risk').value),sl_atr_multiplier:parseFloat(document.getElementById('t-sl').value),tp_atr_multiplier:parseFloat(document.getElementById('t-tp').value),trailing_stop:document.getElementById('t-trailing-enabled').checked,trailing_stop_pct:parseFloat(document.getElementById('t-trailing-pct').value),trailing_activation_pct:parseFloat(document.getElementById('t-trailing-activation').value),only_strong_signals:document.getElementById('t-only-strong').checked,use_quant_models:true,use_risk_engine:true,use_smart_execution:true,use_market_intel:true,use_market_scanner:true,scanner_mode:document.getElementById('t-scanner-mode').value,trading_capital:parseFloat(document.getElementById('t-capital').value)||10000,max_daily_loss_pct:parseFloat(document.getElementById('t-max-daily-loss').value)||0})});toast('Configuration sauvegardee');}
 async function loadTokenList(){try{const d=await(await fetch('/api/trading/symbols')).json();document.getElementById('token-list').innerHTML=(d.symbols||[]).map(s=>`<div class="ttag" data-symbol="${s}"><span style="color:var(--sf-blue);font-weight:600">${s}</span><span style="color:var(--sf-red);cursor:pointer;margin-left:2px" onclick="removeToken('${s}')">\u00d7</span></div>`).join('');}catch(e){}}
 async function addToken(){const i=document.getElementById('new-token-input'),s=i.value.trim().toUpperCase();if(!s)return;try{const d=await(await fetch('/api/trading/symbols',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'add',symbol:s})})).json();document.getElementById('token-list').innerHTML=(d.symbols||[]).map(x=>`<div class="ttag" data-symbol="${x}"><span style="color:var(--sf-blue);font-weight:600">${x}</span><span style="color:var(--sf-red);cursor:pointer;margin-left:2px" onclick="removeToken('${x}')">\u00d7</span></div>`).join('');i.value='';toast(s+' ajoute');}catch(e){toast(e.message,true);}}
 async function removeToken(s){try{const d=await(await fetch('/api/trading/symbols',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'remove',symbol:s})})).json();document.getElementById('token-list').innerHTML=(d.symbols||[]).map(x=>`<div class="ttag" data-symbol="${x}"><span style="color:var(--sf-blue);font-weight:600">${x}</span><span style="color:var(--sf-red);cursor:pointer;margin-left:2px" onclick="removeToken('${x}')">\u00d7</span></div>`).join('');toast(s+' retire');}catch(e){}}
@@ -11541,8 +11561,25 @@ async function loadRiskDashboard(){try{const d=await(await fetch('/api/trading/r
     document.getElementById('risk-exposure').textContent=r.total_exposure+'%';
     document.getElementById('risk-exposure-detail').textContent='L:'+r.long_exposure+'% S:'+r.short_exposure+'%';
     _sa('risk-exposure-card', r.total_exposure>80?'accent-red':r.total_exposure>50?'accent-orange':'accent-blue');
-    document.getElementById('risk-dd-current').textContent=r.current_drawdown+'%';document.getElementById('risk-daily-pnl').textContent=fmtU(r.daily_pnl);document.getElementById('risk-circuit-breaker').style.display=r.circuit_breaker_triggered?'block':'none';document.getElementById('risk-warnings').innerHTML=(r.warnings||[]).map(w=>`<div class="warn-bar">${w}</div>`).join('');}catch(e){}}
+    document.getElementById('risk-dd-current').textContent=r.current_drawdown+'%';document.getElementById('risk-daily-pnl').textContent=fmtU(r.daily_pnl);document.getElementById('risk-circuit-breaker').style.display=r.circuit_breaker_triggered?'block':'none';document.getElementById('risk-warnings').innerHTML=(r.warnings||[]).map(w=>`<div class="warn-bar">${w}</div>`).join('');try{const cap=parseFloat(document.getElementById('t-capital').value)||10000;const mld=parseFloat(document.getElementById('t-max-daily-loss').value)||0;_updateDailyLossBar(r.daily_pnl||0,cap,mld);}catch(_){}}catch(e){}}
 
+function _updateDailyLossBar(daily_pnl, capital, max_pct){
+    const wrap=document.getElementById('daily-loss-bar-wrap');
+    const lbl=document.getElementById('daily-loss-bar-label');
+    const fill=document.getElementById('daily-loss-bar-fill');
+    if(!wrap)return;
+    if(!max_pct||max_pct<=0||!capital){wrap.style.display='none';return;}
+    const loss=daily_pnl<0?Math.abs(daily_pnl):0;
+    if(loss===0){wrap.style.display='none';return;}
+    const limitAmt=capital*max_pct/100;
+    const pct=Math.min(100,loss/limitAmt*100);
+    wrap.style.display='block';
+    lbl.textContent=fmtU(-loss)+' / '+fmtU(-limitAmt)+' ('+pct.toFixed(0)+'%)';
+    fill.style.width=pct+'%';
+    fill.style.background=pct>=80?'var(--sf-red)':pct>=50?'#ff9500':'var(--sf-green)';
+}
+
+let _activeTradesTimer = null;
 let _signalsAutoTimer = null;
 function toggleSignalsAutoRefresh(enabled){
     clearInterval(_signalsAutoTimer);
