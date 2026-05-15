@@ -8924,6 +8924,50 @@
                     </div>
                 </div>
             </div>
+        <!-- ═══ OPTIMISATION & VALIDATION OOS ═══ -->
+        <div class="dcard" id="opt-card">
+            <div class="dcard-title"><span class="sfi" data-icon="flask"></span>Optimisation des paramètres</div>
+            <p style="color:var(--sf-text-muted);font-size:0.82rem;margin-bottom:20px;line-height:1.55">
+                Grid search SL×TP sur 70% des données (train), validé sur les 30% restants (test).
+                Un score stable train→test = edge réel. Un score train élevé mais test cassé = overfitting.
+            </p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px">
+                <div class="form-group"><div class="form-label">Symbole</div><input type="text" id="opt-symbol" value="BTC/USDT" class="ainput"></div>
+                <div class="form-group"><div class="form-label">Timeframe</div>
+                    <select id="opt-timeframe" class="ainput">
+                        <option value="15m">15m</option>
+                        <option value="1h" selected>1h</option>
+                        <option value="4h">4h</option>
+                        <option value="1d">1d</option>
+                    </select>
+                </div>
+                <div class="form-group"><div class="form-label">Candles</div><input type="number" id="opt-periods" value="500" min="200" max="1000" class="ainput"></div>
+                <div class="form-group"><div class="form-label">Capital ($)</div><input type="number" id="opt-capital" value="10000" min="100" class="ainput"></div>
+            </div>
+            <button class="abtn abtn-blue" onclick="runOptimization()" id="opt-run-btn">Lancer l'optimisation</button>
+            <div id="opt-results" style="display:none;margin-top:28px">
+                <!-- Résumé + recommandation -->
+                <div id="opt-summary" style="margin-bottom:20px;padding:16px 20px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08)"></div>
+                <div class="grid-2col" style="margin-bottom:20px">
+                    <!-- Heatmap SL × TP -->
+                    <div class="dcard">
+                        <div class="dcard-label">Heatmap Score (SL × TP) — train</div>
+                        <div id="opt-heatmap" style="overflow-x:auto;margin-top:8px"></div>
+                    </div>
+                    <!-- Top 5 validation OOS -->
+                    <div class="dcard">
+                        <div class="dcard-label">Validation out-of-sample — top 5</div>
+                        <div id="opt-oos-table" style="overflow-x:auto;margin-top:8px"></div>
+                    </div>
+                </div>
+                <!-- Table complète des combinaisons -->
+                <div class="dcard">
+                    <div class="dcard-label">Classement complet (train set)</div>
+                    <div style="overflow-x:auto;margin-top:8px"><table id="opt-grid-table" style="width:100%;font-size:0.78rem"><thead></thead><tbody></tbody></table></div>
+                </div>
+            </div>
+        </div>
+
         </div>
     </div>
 </div>
@@ -11693,6 +11737,135 @@ function _renderBtEquity(curve){
     <polygon points="${fillPts}" fill="${fillCol}"/>
     <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round"/>
   </svg>`;
+}
+
+/* ═══ Optimisation des paramètres ═══ */
+async function runOptimization(){
+    const btn=document.getElementById('opt-run-btn');
+    btn.disabled=true; btn.textContent='Optimisation en cours...';
+    document.getElementById('opt-results').style.display='none';
+    try{
+        const sym=document.getElementById('opt-symbol').value.trim()||'BTC/USDT';
+        const tf=document.getElementById('opt-timeframe').value;
+        const periods=document.getElementById('opt-periods').value;
+        const capital=document.getElementById('opt-capital').value;
+        const url=`/api/trading/optimize?symbol=${encodeURIComponent(sym)}&timeframe=${tf}&periods=${periods}&capital=${capital}`;
+        const d=await(await fetch(url)).json();
+        if(d.error){toast(d.error,true);return;}
+        _renderOptResults(d);
+        document.getElementById('opt-results').style.display='block';
+    }catch(e){toast(e.message,true);}
+    finally{btn.disabled=false;btn.textContent='Lancer l\'optimisation';}
+}
+
+function _renderOptResults(d){
+    // --- Résumé ---
+    const recColors={'valid':'var(--sf-green)','weak':'#ff9500','overfit':'var(--sf-red)'};
+    const recLabels={'valid':'✅ Edge confirmé - paramètres robustes train→test','weak':'⚠️ Résultats fragiles - utiliser avec prudence','overfit':'🚨 Overfitting détecté - méfiance, les résultats ne tiennent pas hors échantillon'};
+    const bp=d.best_params||{};
+    document.getElementById('opt-summary').innerHTML=`
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+            <div>
+                <div style="font-size:0.72rem;color:var(--sf-text-muted);margin-bottom:4px">${d.n_combinations} combinaisons · ${d.train_candles} candles train / ${d.test_candles} candles test</div>
+                <div style="font-weight:700;font-size:1rem;color:${recColors[d.recommendation]||'var(--sf-text)'}">${recLabels[d.recommendation]||''}</div>
+            </div>
+            <div style="text-align:right">
+                <div style="font-size:0.72rem;color:var(--sf-text-muted);margin-bottom:2px">Meilleurs paramètres</div>
+                <div style="font-size:0.9rem;font-weight:600">SL ×${bp.sl} · TP ×${bp.tp} · Risk ${bp.risk_pct}%</div>
+            </div>
+        </div>`;
+
+    // --- Heatmap SVG natif sl × tp ---
+    _renderOptHeatmap(d.heatmap, d.sl_values, d.tp_values);
+
+    // --- Table OOS ---
+    const oos=d.oos_validation||[];
+    const oosRows=oos.map((o,i)=>{
+        const t=o.train, ts=o.test, p=o.params;
+        const rob=o.robustness;
+        const robCls=rob>=0.7?'green':rob>=0.4?'':'red';
+        const testRet=ts.error?'—':(ts.return_pct!=null?(ts.return_pct>=0?'+':'')+ts.return_pct+'%':'—');
+        const testWr=ts.error?'—':(ts.win_rate!=null?ts.win_rate+'%':'—');
+        return`<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+            <td style="padding:5px 8px;font-weight:${i===0?700:400}">#${i+1} SL×${p.sl} TP×${p.tp} R${p.risk_pct}%</td>
+            <td style="padding:5px 8px;text-align:right;color:var(--sf-green)">${t.return_pct!=null?(t.return_pct>=0?'+':'')+t.return_pct+'%':'—'}</td>
+            <td style="padding:5px 8px;text-align:right;color:${ts.return_pct>0?'var(--sf-green)':ts.return_pct<0?'var(--sf-red)':'var(--sf-text-muted)'}">${testRet}</td>
+            <td style="padding:5px 8px;text-align:right">${testWr}</td>
+            <td style="padding:5px 8px;text-align:right" class="${robCls}">${rob!=null?(rob*100).toFixed(0)+'%':'—'}</td>
+        </tr>`;
+    }).join('');
+    document.getElementById('opt-oos-table').innerHTML=`
+        <table style="width:100%;font-size:0.78rem">
+            <thead><tr style="color:var(--sf-text-muted)">
+                <th style="text-align:left;padding:5px 8px">Params</th>
+                <th style="text-align:right;padding:5px 8px">Return train</th>
+                <th style="text-align:right;padding:5px 8px">Return test</th>
+                <th style="text-align:right;padding:5px 8px">WR test</th>
+                <th style="text-align:right;padding:5px 8px">Robustesse</th>
+            </tr></thead>
+            <tbody>${oosRows}</tbody>
+        </table>`;
+
+    // --- Table grid complète ---
+    const rows=(d.grid_results||[]).map((r,i)=>`
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.04);${i<3?'background:rgba(255,255,255,0.03)':''}">
+            <td style="padding:4px 8px;font-weight:${i<3?600:400}">${i+1}</td>
+            <td style="padding:4px 8px">SL ×${r.sl}</td>
+            <td style="padding:4px 8px">TP ×${r.tp}</td>
+            <td style="padding:4px 8px">${r.risk_pct}%</td>
+            <td style="padding:4px 8px;text-align:right;color:${r.return_pct>=0?'var(--sf-green)':'var(--sf-red)'}">${r.return_pct!=null?(r.return_pct>=0?'+':'')+r.return_pct+'%':'—'}</td>
+            <td style="padding:4px 8px;text-align:right">${r.win_rate!=null?r.win_rate+'%':'—'}</td>
+            <td style="padding:4px 8px;text-align:right">${r.profit_factor!=null?r.profit_factor:'—'}</td>
+            <td style="padding:4px 8px;text-align:right;color:var(--sf-text-muted)">${r.sharpe!=null?r.sharpe:'—'}</td>
+            <td style="padding:4px 8px;text-align:right;color:var(--sf-text-muted)">${r.n_trades}</td>
+            <td style="padding:4px 8px;text-align:right;font-weight:600">${r.score!=null?r.score.toFixed(3):'—'}</td>
+        </tr>`).join('');
+    const tbl=document.getElementById('opt-grid-table');
+    tbl.querySelector('thead').innerHTML=`<tr style="color:var(--sf-text-muted);font-size:0.75rem">
+        <th style="padding:4px 8px">#</th><th style="padding:4px 8px">SL mult</th><th style="padding:4px 8px">TP mult</th>
+        <th style="padding:4px 8px">Risk</th><th style="text-align:right;padding:4px 8px">Return</th>
+        <th style="text-align:right;padding:4px 8px">WR</th><th style="text-align:right;padding:4px 8px">PF</th>
+        <th style="text-align:right;padding:4px 8px">Sharpe</th><th style="text-align:right;padding:4px 8px">Trades</th>
+        <th style="text-align:right;padding:4px 8px">Score</th></tr>`;
+    tbl.querySelector('tbody').innerHTML=rows;
+}
+
+function _renderOptHeatmap(data, slVals, tpVals){
+    const el=document.getElementById('opt-heatmap');
+    if(!data||!data.length){el.innerHTML='<p style="color:var(--sf-text-muted);font-size:0.8rem">Pas de données</p>';return;}
+    const scores=data.map(c=>c.score).filter(s=>s!=null);
+    if(!scores.length){el.innerHTML='<p style="color:var(--sf-text-muted);font-size:0.8rem">Aucun résultat</p>';return;}
+    const mn=Math.min(...scores), mx=Math.max(...scores);
+    const rng=mx-mn||1;
+    const CW=58, CH=34, padL=36, padT=20, padB=28;
+    const W=padL+tpVals.length*CW+4, H=padT+slVals.length*CH+padB;
+    // Interpolation couleur : rouge→jaune→vert
+    const cellColor=(s)=>{
+        if(s==null)return'rgba(255,255,255,0.05)';
+        const t=Math.max(0,Math.min(1,(s-mn)/rng));
+        if(t<0.5){const f=t*2;return`rgb(${Math.round(255)},${Math.round(f*200)},0)`;}
+        const f=(t-0.5)*2;return`rgb(${Math.round(255*(1-f))},${Math.round(150+f*60)},0)`;
+    };
+    let cells='', xlabels='', ylabels='';
+    slVals.forEach((sl,si)=>{
+        ylabels+=`<text x="${padL-6}" y="${padT+si*CH+CH/2+4}" text-anchor="end" fill="rgba(255,255,255,0.5)" font-size="10">×${sl}</text>`;
+        tpVals.forEach((tp,ti)=>{
+            const cell=data.find(c=>c.sl===sl&&c.tp===tp);
+            const score=cell?cell.score:null;
+            const x=padL+ti*CW, y=padT+si*CH;
+            const col=cellColor(score);
+            const lbl=score!=null?score.toFixed(2):'';
+            cells+=`<rect x="${x}" y="${y}" width="${CW-1}" height="${CH-1}" rx="3" fill="${col}" opacity="0.85"/>`;
+            cells+=`<text x="${x+CW/2-0.5}" y="${y+CH/2+4}" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="10" font-weight="600">${lbl}</text>`;
+        });
+    });
+    tpVals.forEach((tp,ti)=>{
+        xlabels+=`<text x="${padL+ti*CW+CW/2-0.5}" y="${H-6}" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="10">×${tp}</text>`;
+    });
+    el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;height:auto">
+        <text x="${padL}" y="12" fill="rgba(255,255,255,0.3)" font-size="9">SL ↓ / TP →</text>
+        ${ylabels}${cells}${xlabels}
+    </svg>`;
 }
 
 /* ═══ Scanner ═══ */

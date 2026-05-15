@@ -728,6 +728,36 @@ def api_strategy_backtest():
         return jsonify({"error": str(e)})
 
 
+# ── API: Optimisation paramètres (grid search + OOS) ──
+
+@app.route("/api/trading/optimize")
+@login_required
+def api_trading_optimize():
+    """
+    Grid search sl_mult × tp_mult × risk_pct sur 70% des données,
+    validation out-of-sample sur les 30% restants.
+    Retourne le classement des meilleures combinaisons + heatmap.
+    """
+    symbol    = request.args.get("symbol", "BTC/USDT")
+    timeframe = request.args.get("timeframe", "1h")
+    periods   = min(request.args.get("periods", 500, type=int), 1000)
+    capital   = request.args.get("capital", 10000.0, type=float)
+
+    _sync_trader_exchange()
+    if not trader.exchange or not trader.exchange.connected:
+        return jsonify({"error": "Exchange non connecte"})
+
+    try:
+        df = trader._fetch_ohlcv(symbol.upper(), timeframe, limit=periods + 50)
+        if len(df) < 200:
+            return jsonify({"error": "Pas assez de données (minimum 200 candles)"})
+        from optimizer import run_optimization
+        result = run_optimization(df, symbol.upper(), capital)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
 # ── API: Analytics ─────────────────────────────────────
 
 @app.route("/api/analytics")
