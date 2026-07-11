@@ -44,8 +44,10 @@ app.secret_key = get_flask_secret()
 engine = BotEngine()
 crypto = CryptoEngine()
 trader = AutoTrader()
-prob_engine = ProbabilityEngine()
-mh_engine = MultiHorizonEngine()
+# Instances partagees avec la boucle de fond du trader (source unique).
+# La boucle peut auto-entrainer les modeles ; l'UI lit le meme etat en memoire.
+prob_engine = trader.prob_engine
+mh_engine = trader.mh_engine
 
 # ─── Restore des connecteurs persistes ────────────────────
 # Au demarrage, on rejoue toutes les connexions sauvegardees (creds chiffrees).

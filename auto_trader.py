@@ -27,6 +27,7 @@ from smart_execution import SmartExecution
 from market_intelligence import MarketIntelligence
 from market_scanner import MarketScanner
 from probability_engine import ProbabilityEngine
+from multi_horizon import MultiHorizonEngine
 import prediction_log
 from data_paths import data_path
 import notifications as notif
@@ -73,6 +74,8 @@ class AutoTrader:
         self.market_intel = MarketIntelligence(exchange)
         self.scanner = MarketScanner(exchange)
         self.prob_engine = ProbabilityEngine()
+        self.mh_engine = MultiHorizonEngine()
+        self._last_model_train_ts = 0.0   # timestamp du dernier auto-entrainement
         self.active_trades: list[ActiveTrade] = []
         self.trade_history: list = []
         self.running = False
@@ -189,9 +192,20 @@ class AutoTrader:
             print(f"[AutoTrader] _save_state error: {e}")
 
     def get_config(self) -> dict:
+        # Fusionne les défauts avec le fichier sauvegardé : les nouvelles clés
+        # (ajoutées au fil des versions) apparaissent toujours avec leur défaut,
+        # les valeurs de l'utilisateur ont priorité.
+        defaults = self._default_config()
         if os.path.exists(TRADER_CONFIG_FILE):
-            with open(TRADER_CONFIG_FILE, "r") as f:
-                return json.load(f)
+            try:
+                with open(TRADER_CONFIG_FILE, "r") as f:
+                    loaded = json.load(f)
+                return {**defaults, **loaded}
+            except Exception:
+                return defaults
+        return defaults
+
+    def _default_config(self) -> dict:
         return {
             "enabled": False,
             "symbols": list(CRYPTO_PORTFOLIO.keys()),
@@ -215,6 +229,8 @@ class AutoTrader:
             "scanner_mode": "hybrid",  # "fixed", "dynamic", "hybrid"
             "min_confidence": 55,           # seuil qualité signal (relevé de 40→55)
             "min_probability": 0.0,         # gate proba calibrée 0-1 (0 = désactivé, ex: 0.6 = 60%)
+            "auto_train_models": True,      # auto-entraînement ML en tâche de fond
+            "model_refresh_days": 7,        # ré-entraînement périodique (jours)
             "min_strategies_agree": 2,
             "execution_urgency": "normal",  # low, normal, high
             "trading_capital": 10000.0,     # capital de référence pour les limites
@@ -1188,6 +1204,55 @@ class AutoTrader:
     #  BOUCLE AUTOMATIQUE
     # ══════════════════════════════════════════════════════════
 
+    def _auto_train_models(self, config: dict):
+        """
+        Auto-entraine les modeles probabilistes s'ils sont absents ou perimes.
+        Tourne en tache de fond (sur Railway l'exchange est connecte en permanence),
+        ce qui active le ML sans intervention manuelle. Entrainement rapide (numpy
+        pur, ~1-2s) donc ne bloque pas le trading de facon sensible.
+        """
+        if not config.get("auto_train_models", True):
+            return
+        if not self.exchange or not self.exchange.connected:
+            return  # besoin de l'historique via l'exchange
+
+        now = time.time()
+        refresh_secs = config.get("model_refresh_days", 7) * 86400
+        prob_ready = self.prob_engine.is_ready()
+        mh_ready = self.mh_engine.is_ready()
+        stale = (now - self._last_model_train_ts) > refresh_secs
+
+        # Rien a faire si tout est pret et pas perime
+        if prob_ready and mh_ready and not stale:
+            return
+
+        # Symbole d'entrainement : 1er de la watchlist (base seule, _fetch_ohlcv
+        # ajoute lui-meme /USDT).
+        symbols = config.get("symbols", ["BTC"])
+        base = (symbols[0] if symbols else "BTC").split("/")[0]
+        label = base + "/USDT"
+        timeframe = config.get("timeframe", "1h")
+        sl_mult = config.get("sl_atr_multiplier", 1.5)
+        tp_mult = config.get("tp_atr_multiplier", 3.0)
+
+        try:
+            df = self._fetch_ohlcv(base, timeframe, limit=1050)
+            if len(df) < 200:
+                return
+            if not prob_ready or stale:
+                r = self.prob_engine.train_from_history(df, label, sl_mult=sl_mult, tp_mult=tp_mult)
+                if not r.get("error"):
+                    print(f"[AutoTrader] Auto-train proba {label}: "
+                          f"{r.get('n_samples')} ech, Brier {r.get('test_brier')}")
+            if not mh_ready or stale:
+                r2 = self.mh_engine.train_from_history(df, label, timeframe=timeframe)
+                if not r2.get("error"):
+                    ok = len([h for h in r2.get("horizons", []) if not h.get("error")])
+                    print(f"[AutoTrader] Auto-train multi-horizon {label}: {ok} horizons")
+            self._last_model_train_ts = now
+        except Exception as e:
+            print(f"[AutoTrader] auto-train error: {e}")
+
     def _trading_loop(self):
         scan_counter = 0
         last_daily_summary_date = None
@@ -1232,6 +1297,11 @@ class AutoTrader:
                     )
                 except Exception:
                     pass
+
+                # 1c. Auto-entraine les modeles ML si absents ou perimes
+                # (active le ML sans intervention manuelle ; la methode se garde
+                # elle-meme contre les re-entrainements inutiles)
+                self._auto_train_models(config)
 
                 # Limite de perte journalière - auto kill-switch
                 max_daily_loss = config.get("max_daily_loss_pct", 0)

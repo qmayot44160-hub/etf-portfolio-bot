@@ -11969,7 +11969,12 @@ async function saveTraderConfig(){
   // Met à jour le pill mode immédiatement
   const pill = document.getElementById('paper-mode-pill');
   if(pill){ pill.textContent = isPaper?'PAPER':'LIVE'; pill.className='pill '+(isPaper?'pill-orange':'pill-green'); }
+  // Lecture-modification-écriture : préserve les champs non pilotés par ce formulaire
+  // (min_probability, auto_train_models, model_refresh_days, etc.) qui seraient sinon écrasés.
+  let base={};
+  try{ base=await(await fetch('/api/trading/config')).json(); }catch(e){}
   await fetch('/api/trading/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    ...base,
     enabled:true,
     symbols:syms.length?syms:['BTC','ETH','SOL','LINK','AAVE'],
     timeframe:document.getElementById('t-timeframe').value,
