@@ -12597,6 +12597,7 @@ async function loadProbStatus(){
             if(m.n_samples)parts.push(m.n_samples+' échantillons');
             if(meta.test_brier!=null)parts.push('Brier '+meta.test_brier);
             if(meta.test_accuracy!=null)parts.push('acc '+(meta.test_accuracy*100).toFixed(0)+'%');
+            if(meta.ensemble)parts.push('ensemble LR+NB'+(meta.test_brier_lr!=null&&meta.test_brier_nb!=null?` (LR ${meta.test_brier_lr} / NB ${meta.test_brier_nb})`:''));
             detail.textContent=parts.join(' · ');
             // Réaffiche les résultats d'entraînement si feature importance dispo
             if((m.feature_importance||[]).length){

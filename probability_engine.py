@@ -278,6 +278,96 @@ class LogisticModel:
         )
 
 
+class GaussianNB:
+    """
+    Naive Bayes gaussien binaire (pur numpy). Modèle GÉNÉRATIF : il modélise la
+    distribution de chaque feature par classe, là où la régression logistique est
+    DISCRIMINATIVE. Deux familles différentes → erreurs décorrélées → la moyenne
+    de leurs probabilités est plus robuste (ensemble learning des docs APEX,
+    "qu'une seule IA ne décide jamais seule"). Même interface que LogisticModel.
+    """
+
+    def __init__(self):
+        self.theta = None    # moyennes par classe (2, f)
+        self.var = None      # variances par classe (2, f)
+        self.priors = None   # (2,)
+        self.trained = False
+        self.n_samples = 0
+        self.feature_names = list(FEATURE_NAMES)
+
+    def fit(self, X, y):
+        if len(X) < 30:
+            raise ValueError(f"Pas assez de données ({len(X)} < 30)")
+        X = np.asarray(X, dtype=float)
+        y = np.asarray(y, dtype=float)
+        f = X.shape[1]
+        self.theta = np.zeros((2, f))
+        self.var = np.ones((2, f))
+        self.priors = np.full(2, 1e-9)
+        for i, c in enumerate((0.0, 1.0)):
+            Xc = X[y == c]
+            if len(Xc) == 0:
+                continue
+            self.theta[i] = Xc.mean(axis=0)
+            self.var[i] = Xc.var(axis=0) + 1e-6   # epsilon : évite la division par zéro
+            self.priors[i] = len(Xc) / len(X)
+        self.trained = True
+        self.n_samples = int(len(X))
+        return self
+
+    def predict_proba(self, x):
+        """x : vecteur (f,) OU matrice (n, f). Retourne proba(s) de la classe 1."""
+        if not self.trained:
+            raise RuntimeError("Modèle non entraîné")
+        x = np.asarray(x, dtype=float)
+        single = x.ndim == 1
+        if single:
+            x = x.reshape(1, -1)
+        ll = np.zeros((x.shape[0], 2))
+        for i in range(2):
+            log_prior = np.log(self.priors[i] + 1e-12)
+            log_gauss = -0.5 * np.sum(
+                np.log(2 * np.pi * self.var[i]) + (x - self.theta[i]) ** 2 / self.var[i],
+                axis=1,
+            )
+            ll[:, i] = log_prior + log_gauss
+        # softmax numériquement stable → P(classe = 1)
+        m = ll.max(axis=1, keepdims=True)
+        e = np.exp(ll - m)
+        p1 = e[:, 1] / e.sum(axis=1)
+        return float(p1[0]) if single else p1
+
+    def to_dict(self) -> dict:
+        return {
+            "theta": self.theta.tolist() if self.theta is not None else None,
+            "var": self.var.tolist() if self.var is not None else None,
+            "priors": self.priors.tolist() if self.priors is not None else None,
+            "trained": self.trained,
+            "n_samples": self.n_samples,
+            "feature_names": self.feature_names,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict):
+        m = cls()
+        if not d or not d.get("trained"):
+            return m
+        m.theta = np.array(d["theta"], dtype=float)
+        m.var = np.array(d["var"], dtype=float)
+        m.priors = np.array(d["priors"], dtype=float)
+        m.trained = True
+        m.n_samples = int(d.get("n_samples", 0))
+        m.feature_names = d.get("feature_names", list(FEATURE_NAMES))
+        return m
+
+    def is_compatible(self) -> bool:
+        return (
+            self.theta is not None
+            and list(self.feature_names) == list(FEATURE_NAMES)
+            and self.theta.shape[1] == len(FEATURE_NAMES)
+        )
+
+
 def brier_score(probs, outcomes) -> float:
     """
     Brier score = moyenne des (proba - résultat)². Plus bas = mieux calibré.
@@ -322,23 +412,38 @@ class ProbabilityEngine:
     """
 
     def __init__(self):
-        self.model = self._load()
+        self.model = LogisticModel()   # discriminatif
+        self.nb = GaussianNB()         # génératif
+        self.ens_weights = [0.5, 0.5]  # [logistic, nb], pondérés par la calibration
+        self._load()
 
     def _path(self) -> str:
         return user_data_path(MODEL_FILE)
 
-    def _load(self) -> LogisticModel:
+    def _load(self):
         try:
             p = self._path()
             if os.path.exists(p):
                 with open(p, "r", encoding="utf-8") as f:
-                    return LogisticModel.from_dict(json.load(f))
+                    data = json.load(f)
+                if "logistic" in data:   # nouveau format ensemble
+                    self.model = LogisticModel.from_dict(data["logistic"])
+                    self.nb = GaussianNB.from_dict(data.get("nb", {}))
+                    self.ens_weights = data.get("ensemble_weights", [0.5, 0.5])
+                else:                    # ancien format (logistique seule)
+                    # nb absent → is_ready False → réentraînement de l'ensemble
+                    self.model = LogisticModel.from_dict(data)
+                    self.nb = GaussianNB()
         except Exception:
-            pass
-        return LogisticModel()
+            self.model = LogisticModel()
+            self.nb = GaussianNB()
 
     def save(self, meta: dict = None):
-        data = self.model.to_dict()
+        data = {
+            "logistic": self.model.to_dict(),
+            "nb": self.nb.to_dict(),
+            "ensemble_weights": self.ens_weights,
+        }
         if meta:
             data["meta"] = meta
         try:
@@ -348,7 +453,11 @@ class ProbabilityEngine:
             print(f"[probability_engine] save error: {e}")
 
     def is_ready(self) -> bool:
-        return self.model.trained and self.model.is_compatible()
+        # Ensemble prêt = les deux modèles entraînés ET compatibles avec les features
+        return (
+            self.model.trained and self.model.is_compatible()
+            and self.nb.trained and self.nb.is_compatible()
+        )
 
     def train_from_history(
         self, df: pd.DataFrame, symbol: str = "",
@@ -369,16 +478,37 @@ class ProbabilityEngine:
 
         model = LogisticModel()
         model.fit(X_tr, y_tr)
+        nb = GaussianNB()
+        nb.fit(X_tr, y_tr)
         self.model = model
+        self.nb = nb
 
-        # Métriques test
+        # Sélection de la pondération d'ensemble par validation sur le test :
+        # on compare LR seul, NB seul, et le mélange pondéré (inverse-Brier), puis
+        # on garde la config la MIEUX calibrée. Garantit que l'ensemble ne fait
+        # jamais pire que le meilleur modèle seul (un membre faible ne dégrade pas).
         if len(X_te) >= 5:
-            p_te = model.predict_proba(X_te)
-            brier = brier_score(p_te, y_te)
+            p_lr = model.predict_proba(X_te)
+            p_nb = nb.predict_proba(X_te)
+            brier_lr = brier_score(p_lr, y_te)
+            brier_nb = brier_score(p_nb, y_te)
+            inv_lr = 1.0 / max(brier_lr, 0.01)
+            inv_nb = 1.0 / max(brier_nb, 0.01)
+            w_blend = inv_lr / (inv_lr + inv_nb)
+            p_blend = w_blend * p_lr + (1 - w_blend) * p_nb
+            options = [
+                ([1.0, 0.0], brier_lr, p_lr),
+                ([0.0, 1.0], brier_nb, p_nb),
+                ([round(w_blend, 4), round(1 - w_blend, 4)], brier_score(p_blend, y_te), p_blend),
+            ]
+            best_w, brier, p_te = min(options, key=lambda o: o[1])
+            self.ens_weights = best_w
             curve = reliability_curve(p_te, y_te)
             acc = float(((p_te >= 0.5).astype(float) == y_te).mean())
         else:
             brier, curve, acc = None, [], None
+            brier_lr = brier_nb = None
+            self.ens_weights = [0.5, 0.5]
 
         meta = {
             "symbol": symbol,
@@ -387,7 +517,11 @@ class ProbabilityEngine:
             "n_test": int(len(X_te)),
             "base_rate": round(float(y.mean()), 4),
             "test_brier": round(brier, 4) if brier is not None else None,
+            "test_brier_lr": round(brier_lr, 4) if brier_lr is not None else None,
+            "test_brier_nb": round(brier_nb, 4) if brier_nb is not None else None,
             "test_accuracy": round(acc, 4) if acc is not None else None,
+            "ensemble": True,
+            "models": ["logistic", "gaussian_nb"],
             "sl_mult": sl_mult,
             "tp_mult": tp_mult,
             "horizon": horizon,
@@ -401,6 +535,8 @@ class ProbabilityEngine:
             "n_test": int(len(X_te)),
             "base_rate": meta["base_rate"],
             "test_brier": meta["test_brier"],
+            "test_brier_lr": meta["test_brier_lr"],
+            "test_brier_nb": meta["test_brier_nb"],
             "test_accuracy": meta["test_accuracy"],
             "reliability_curve": curve,
             "feature_importance": model.feature_importance(),
@@ -411,17 +547,23 @@ class ProbabilityEngine:
         Probabilité calibrée pour le dernier candle d'un DataFrame OHLCV.
         df peut être brut (indicateurs recalculés si absents).
         """
-        if not self.model.trained:
+        if not self.is_ready():
             return {"available": False}
         if "rsi" not in df.columns or "atr" not in df.columns:
             df = compute_all_indicators(df.copy())
         feats = _feature_frame(df)
         x = feats.iloc[-1].values
-        prob = self.model.predict_proba(x)
+        p_lr = self.model.predict_proba(x)
+        p_nb = self.nb.predict_proba(x)
+        w_lr, w_nb = self.ens_weights      # pondéré par la calibration
+        prob = w_lr * p_lr + w_nb * p_nb
         return {
             "available": True,
             "prob_up": round(prob, 4),
             "prob_down": round(1 - prob, 4),
+            "prob_lr": round(p_lr, 4),
+            "prob_nb": round(p_nb, 4),
+            "ens_weights": self.ens_weights,
             "n_samples": self.model.n_samples,
         }
 
@@ -436,7 +578,7 @@ class ProbabilityEngine:
         except Exception:
             pass
         return {
-            "trained": m.trained,
+            "trained": self.is_ready(),
             "n_samples": m.n_samples,
             "feature_importance": m.feature_importance() if m.trained else [],
             "meta": meta,

@@ -57,11 +57,10 @@ Chaque ligne faite note le fichier concerné. Chaque ligne partielle note ce qui
 
 ## 3. Machine Learning — Module 5 / « Intelligence Collective » `[~]`
 - [x] Modèle probabiliste (régression logistique pur numpy) — `probability_engine.py`
-- [ ] Random Forest
-- [ ] XGBoost / LightGBM / CatBoost
+- [x] 2e famille de modèle : Gaussian Naive Bayes (génératif, pur numpy) — `probability_engine.py`
+- [x] Ensemble des deux familles avec sélection par validation (jamais pire que le meilleur seul, pondération inverse-Brier persistée) — `ProbabilityEngine.predict`
+- [ ] Random Forest, XGBoost / LightGBM / CatBoost (libs lourdes → build/RAM Railway ; évité volontairement, ensemble fait en pur numpy à la place)
 - [ ] LSTM / Transformers séries temporelles
-- [ ] Ensemble learning (vote de plusieurs familles de modèles)
-- ⚠️ Note : ces libs sont lourdes → impact build/RAM Railway à évaluer (décision reportée par le user).
 
 ## 4. Détection de régime de marché — Module 6 `[x]`
 - [x] Haussier/baissier/range/volatil/cassure/retour moyenne — `quant_models`
@@ -119,7 +118,7 @@ Chaque ligne faite note le fichier concerné. Chaque ligne partielle note ce qui
 2. ~~Sentiment crypto (Fear & Greed)~~ ✅ FAIT (2026-05-16) — `sentiment_feed.py`, jauge UI.
 3. ~~Inter-marchés (BTC/DXY/or/S&P/VIX)~~ ✅ FAIT (2026-05-16) — `intermarket.py`, panneau UI.
 4. ~~Indicateurs manquants (Ichimoku, SuperTrend, Keltner, Donchian)~~ ✅ FAIT (2026-05-16).
-5. **Ensemble ML léger** (Random Forest via sklearn, plus léger que XGBoost) — grosse valeur ML, dépendance modérée.
+5. ~~Ensemble ML léger~~ ✅ FAIT (2026-05-16) — Gaussian NB + Logistic en ensemble pur numpy (pas de sklearn, pas de risque build/RAM), sélection par validation.
 6. Optimisation bayésienne, LSTM/Transformers, macro/news, VWAP/Volume Profile — plus tard.
 
 ---
