@@ -44,8 +44,10 @@ Chaque ligne faite note le fichier concerné. Chaque ligne partielle note ce qui
 - [x] Fear & Greed Index crypto global (réel) — `sentiment_feed.py`, jauge UI Signaux, champ `market_fng` dans l'analyse
 - [ ] X, Reddit, Discord, Telegram, Google Trends, RSS → peur/euphorie/FOMO/capitulation
 - [ ] Câbler le F&G comme feature du modèle probabiliste (reporté : ne pas perturber la calibration live en cours)
-### 2.7 Inter-marchés — IA n°7 `[ ]`
-- [ ] Relations indices/crypto/forex/or/pétrole/obligations/VIX, effets de contagion
+### 2.7 Inter-marchés — IA n°7 `[~]`
+- [x] Corrélations BTC vs Dollar/Or/S&P/VIX (90j) + biais macro (favorable/contraire) — `intermarket.py`, panneau UI Signaux, endpoint `/api/intermarket`
+- [ ] Pétrole, obligations (taux 10Y), effets de contagion avancés
+- [ ] Câbler le biais macro dans la décision (reporté : phase observation)
 ### 2.8 Anomalies — IA n°8 `[~]`
 - [x] Scan d'opportunités — `market_scanner`
 - [ ] Détection manipulation, volumes anormaux, événements rares dédiée
@@ -114,7 +116,7 @@ Chaque ligne faite note le fichier concerné. Chaque ligne partielle note ce qui
 ## Prochaines décisions (par valeur / effort / risque)
 1. **Laisser le cœur accumuler de la calibration live** (en cours, phase observation) — effort nul, valeur = savoir si l'edge existe AVANT d'ajouter des couches.
 2. ~~Sentiment crypto (Fear & Greed)~~ ✅ FAIT (2026-05-16) — `sentiment_feed.py`, jauge UI.
-3. **Inter-marchés** (corrélation BTC/DXY/or via yfinance déjà présent) — IA n°7 faisable sans nouvelle dépendance.
+3. ~~Inter-marchés (BTC/DXY/or/S&P/VIX)~~ ✅ FAIT (2026-05-16) — `intermarket.py`, panneau UI.
 4. **Indicateurs manquants** (Ichimoku, SuperTrend…) — effort faible, complète l'IA n°1.
 5. **Ensemble ML léger** (Random Forest via sklearn, plus léger que XGBoost) — grosse valeur ML, dépendance modérée.
 6. Optimisation bayésienne, LSTM/Transformers, macro/news — plus lourds, plus tard.

@@ -8828,6 +8828,14 @@
                     </div>
                     <div style="display:flex;justify-content:space-between;font-size:0.62rem;color:var(--sf-text-muted);margin-top:3px"><span>Peur</span><span id="fng-value">--</span><span>Avidité</span></div>
                 </div>
+                <!-- Inter-marchés : corrélations BTC vs macro + biais (IA n7) -->
+                <div id="intermarket-panel" style="display:none;margin-bottom:16px;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                        <span style="font-size:0.74rem;color:var(--sf-text-muted)">Macro inter-marchés <span id="im-drivers-info" title="" style="cursor:help;opacity:0.5">ⓘ</span></span>
+                        <span id="im-bias" class="pill" style="font-size:0.68rem">--</span>
+                    </div>
+                    <div id="im-corrs" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+                </div>
                 <div style="display:flex;gap:10px;margin-bottom:16px">
                     <input type="text" id="new-token-input" class="ainput" placeholder="Ajouter un token..." style="flex:1">
                     <button class="abtn abtn-dark abtn-sm" onclick="addToken()">+</button>
@@ -11968,7 +11976,7 @@ async function loadTrading(){try{const d=await(await fetch('/api/trading/status'
   const pmToggle=document.getElementById('t-paper-mode');if(pmToggle)pmToggle.checked=cfg.paper_mode!==false;
   const pill=document.getElementById('paper-mode-pill');if(pill){const isPaper=cfg.paper_mode!==false;pill.textContent=isPaper?'PAPER':'LIVE';pill.className='pill '+(isPaper?'pill-orange':'pill-green');}
   const pg=document.getElementById('prob-min-gate');if(pg)pg.value=Math.round((cfg.min_probability||0)*100);
-  loadTokenList();loadActiveTrades();loadTradeHistory();loadPerformance();loadRiskDashboard();loadPaperEquity();loadProbStatus();loadFearGreed();}catch(e){}}
+  loadTokenList();loadActiveTrades();loadTradeHistory();loadPerformance();loadRiskDashboard();loadPaperEquity();loadProbStatus();loadFearGreed();loadIntermarket();}catch(e){}}
 async function toggleTrader(){await fetch(traderRunning?'/api/trading/stop':'/api/trading/start',{method:'POST'});toast(traderRunning?'Bot arrete':'Bot demarre');traderRunning=!traderRunning;loadTrading();}
 
 async function loadPaperEquity(){
@@ -12619,6 +12627,29 @@ async function loadFearGreed(){
         if(marker) marker.style.left='calc('+v+'% - 1.5px)';
         const val=document.getElementById('fng-value');
         if(val) val.textContent=v+'/100';
+    }catch(e){}
+}
+
+async function loadIntermarket(){
+    try{
+        const d=await(await fetch('/api/intermarket')).json();
+        const p=document.getElementById('intermarket-panel');
+        if(!d||!d.available){ if(p)p.style.display='none'; return; }
+        if(p)p.style.display='block';
+        // Badge biais macro
+        const biasMap={FAVORABLE:['pill-green','Macro favorable'],UNFAVORABLE:['pill-red','Macro contraire'],NEUTRAL:['pill-gray','Macro neutre']};
+        const [cls,txt]=biasMap[d.macro_bias]||['pill-gray',d.macro_bias];
+        const bias=document.getElementById('im-bias');
+        if(bias){ bias.className='pill '+cls; bias.style.fontSize='0.68rem'; bias.textContent=txt; }
+        // Tooltip drivers
+        const info=document.getElementById('im-drivers-info');
+        if(info) info.title=(d.drivers||[]).join(' · ')||'Corrélations BTC vs marchés macro (90j)';
+        // Pills corrélations
+        const corrs=document.getElementById('im-corrs');
+        if(corrs) corrs.innerHTML=(d.correlations||[]).map(c=>{
+            const col=c.corr>=0?'var(--sf-green)':'var(--sf-red)';
+            return `<span style="font-size:0.66rem;padding:2px 7px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)" title="${c.interpretation}">${c.asset} <b style="color:${col}">${c.corr>=0?'+':''}${c.corr}</b></span>`;
+        }).join('');
     }catch(e){}
 }
 

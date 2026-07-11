@@ -946,6 +946,13 @@ def api_fear_greed():
     return jsonify(get_fear_greed())
 
 
+@app.route("/api/intermarket")
+def api_intermarket():
+    """Analyse inter-marchés : corrélations BTC vs macro + biais macro (IA n7)."""
+    from intermarket import get_intermarket_analysis
+    return jsonify(get_intermarket_analysis())
+
+
 @app.route("/api/multi_horizon/status")
 @login_required
 def api_mh_status():
