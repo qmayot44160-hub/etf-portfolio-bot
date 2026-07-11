@@ -9496,6 +9496,17 @@
             </div>
         </div>
 
+        <!-- Mode crypto uniquement : masque les autres classes d'actifs -->
+        <div class="settings-row" style="margin-bottom:18px;padding:12px 16px;background:rgba(255,159,10,0.05);border:1px solid rgba(255,159,10,0.15);border-radius:12px">
+            <div>
+                <div class="settings-row-label">Mode crypto uniquement</div>
+                <div class="settings-row-hint">Masque les brokers actions/ETF et les autres classes. Concentre l'app sur la crypto. Réactivable ici à tout moment.</div>
+            </div>
+            <div class="settings-row-control">
+                <label class="toggle"><input type="checkbox" id="crypto-only-toggle" onchange="toggleCryptoOnly(this.checked)"><span class="toggle-slider"></span></label>
+            </div>
+        </div>
+
         <!-- Filtres par classe d'actif -->
         <div class="conn-filters" id="conn-filters">
             <button class="conn-filter active" data-class="all">Tout</button>
@@ -11661,10 +11672,31 @@ async function loadConnectors(){
         _connState.available = Array.isArray(avail) ? avail : [];
         _connState.active = Array.isArray(active) ? active : [];
         _renderConnActive(agg);
+        _applyCryptoOnly();
         _renderConnAvailable();
     } catch(e){
         console.error('loadConnectors:', e);
     }
+}
+
+// ── Mode crypto uniquement (préférence locale) ──
+function _isCryptoOnly(){ return localStorage.getItem('pq_crypto_only') !== '0'; }
+
+function _applyCryptoOnly(){
+    const on = _isCryptoOnly();
+    // Masque la barre de filtres par classe : inutile quand une seule classe reste
+    const filters = document.getElementById('conn-filters');
+    if(filters) filters.style.display = on ? 'none' : '';
+    // Synchronise l'état du toggle
+    const t = document.getElementById('crypto-only-toggle');
+    if(t) t.checked = on;
+}
+
+function toggleCryptoOnly(on){
+    localStorage.setItem('pq_crypto_only', on ? '1' : '0');
+    _applyCryptoOnly();
+    _renderConnAvailable();
+    toast(on ? 'Mode crypto uniquement activé' : 'Toutes les classes affichées');
 }
 
 function _renderConnAvailable(){
@@ -11672,7 +11704,10 @@ function _renderConnAvailable(){
     if(!grid) return;
     const filter = _connState.filterClass;
     let items = _connState.available;
-    if(filter && filter !== 'all'){
+    if(_isCryptoOnly()){
+        // Mode crypto uniquement : ignore les filtres, ne montre que la crypto
+        items = items.filter(c => c.asset_class === 'crypto');
+    } else if(filter && filter !== 'all'){
         items = items.filter(c => c.asset_class === filter);
     }
     if(!items.length){
