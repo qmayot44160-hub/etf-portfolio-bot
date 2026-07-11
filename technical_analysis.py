@@ -182,6 +182,51 @@ def squeeze_momentum(high: pd.Series, low: pd.Series, close: pd.Series,
     }
 
 
+def adx(high: pd.Series, low: pd.Series, close: pd.Series,
+        period: int = 14) -> dict:
+    """
+    Average Directional Index - force de la tendance (pas sa direction).
+    ADX >= 25 : tendance forte - trade en confiance.
+    ADX 20-25 : tendance modérée - ok avec confirmation.
+    ADX < 20  : marché en range - éviter les systèmes directionnels.
+
+    Retourne adx, plus_di, minus_di (toutes pd.Series).
+    """
+    # True Range
+    tr = pd.concat([
+        high - low,
+        (high - close.shift(1)).abs(),
+        (low  - close.shift(1)).abs(),
+    ], axis=1).max(axis=1)
+
+    # Mouvements directionnels bruts
+    up_move   = high - high.shift(1)
+    down_move = low.shift(1) - low
+
+    plus_dm  = np.where((up_move > down_move) & (up_move > 0), up_move, 0.0)
+    minus_dm = np.where((down_move > up_move) & (down_move > 0), down_move, 0.0)
+
+    alpha = 1.0 / period
+    atr_s    = pd.Series(tr.values,         index=tr.index   ).ewm(alpha=alpha, min_periods=period, adjust=False).mean()
+    plus_s   = pd.Series(plus_dm,           index=high.index ).ewm(alpha=alpha, min_periods=period, adjust=False).mean()
+    minus_s  = pd.Series(minus_dm,          index=high.index ).ewm(alpha=alpha, min_periods=period, adjust=False).mean()
+
+    # DI normalisé
+    plus_di  = 100 * plus_s  / atr_s.replace(0, np.nan)
+    minus_di = 100 * minus_s / atr_s.replace(0, np.nan)
+
+    # DX puis ADX lissé
+    di_sum  = (plus_di + minus_di).replace(0, np.nan)
+    dx      = 100 * (plus_di - minus_di).abs() / di_sum
+    adx_val = dx.ewm(alpha=alpha, min_periods=period, adjust=False).mean()
+
+    return {
+        "adx":      adx_val.fillna(0),
+        "plus_di":  plus_di.fillna(0),
+        "minus_di": minus_di.fillna(0),
+    }
+
+
 def support_resistance(close: pd.Series, window: int = 20) -> dict:
     """Détecte les niveaux de support et résistance."""
     rolling_min = close.rolling(window=window).min()
@@ -241,5 +286,11 @@ def compute_all_indicators(df: pd.DataFrame) -> pd.DataFrame:
     sq = squeeze_momentum(high, low, close)
     df["squeeze_on"] = sq["squeeze_on"]
     df["squeeze_momentum"] = sq["momentum"]
+
+    # ADX - filtre de régime de marché
+    _adx = adx(high, low, close, 14)
+    df["adx"]      = _adx["adx"]
+    df["plus_di"]  = _adx["plus_di"]
+    df["minus_di"] = _adx["minus_di"]
 
     return df

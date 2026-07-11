@@ -21,6 +21,9 @@ from scheduler import (
 from config import PORTFOLIO, DCA_MONTHLY, CRYPTO_PORTFOLIO, CRYPTO_DCA_MONTHLY
 from crypto_engine import CryptoEngine
 from auto_trader import AutoTrader
+from probability_engine import ProbabilityEngine
+from multi_horizon import MultiHorizonEngine, DEFAULT_HORIZONS
+import prediction_log
 from security import (
     get_flask_secret, is_auth_enabled, verify_credentials, is_username_required,
     login_required,
@@ -41,6 +44,8 @@ app.secret_key = get_flask_secret()
 engine = BotEngine()
 crypto = CryptoEngine()
 trader = AutoTrader()
+prob_engine = ProbabilityEngine()
+mh_engine = MultiHorizonEngine()
 
 # ─── Restore des connecteurs persistes ────────────────────
 # Au demarrage, on rejoue toutes les connexions sauvegardees (creds chiffrees).
@@ -707,11 +712,16 @@ def api_backtest():
 @app.route("/api/trading/strategy_backtest")
 def api_strategy_backtest():
     """Backtest walk-forward de la TradingStrategy sur donnees historiques."""
-    symbol = request.args.get("symbol", "BTC/USDT")
-    periods = min(request.args.get("periods", 300, type=int), 500)
+    symbol    = request.args.get("symbol", "BTC/USDT")
+    periods   = min(request.args.get("periods", 300, type=int), 500)
     timeframe = request.args.get("timeframe", "1h")
-    risk_pct = request.args.get("risk_pct", 1.0, type=float)
-    capital = request.args.get("capital", 10000.0, type=float)
+    risk_pct  = request.args.get("risk_pct", 1.0, type=float)
+    capital   = request.args.get("capital", 10000.0, type=float)
+    fee_pct      = request.args.get("fee_pct", 0.10, type=float)
+    slippage     = request.args.get("slippage", 0.05, type=float)
+    trailing     = request.args.get("trailing", 0, type=int)
+    trailing_pct = request.args.get("trailing_pct", 2.0, type=float)
+    trailing_act = request.args.get("trailing_act", 1.0, type=float)
 
     _sync_trader_exchange()
     if not trader.exchange or not trader.exchange.connected:
@@ -722,13 +732,308 @@ def api_strategy_backtest():
         if len(df) < 150:
             return jsonify({"error": "Pas assez de donnees (minimum 150 candles)"})
         from strategy_backtest import run_strategy_backtest
-        result = run_strategy_backtest(df, symbol.upper(), capital, risk_pct)
+        result = run_strategy_backtest(
+            df, symbol.upper(), capital, risk_pct,
+            fee_pct=fee_pct, slippage_pct=slippage,
+            trailing_stop=bool(trailing),
+            trailing_stop_pct=trailing_pct,
+            trailing_activation_pct=trailing_act,
+        )
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)})
 
 
 # ── API: Optimisation paramètres (grid search + OOS) ──
+
+@app.route("/api/trading/multi_backtest", methods=["POST"])
+@login_required
+def api_multi_backtest():
+    """
+    Lance le backtest sur N symboles en parallele logique (sequentiel + cache).
+    Renvoie un classement avec metriques agregees.
+
+    Body JSON : { symbols: [...], timeframe, periods, capital, risk_pct, fee_pct, slippage }
+    """
+    data       = request.get_json(silent=True) or {}
+    symbols    = data.get("symbols") or []
+    timeframe  = data.get("timeframe", "1h")
+    periods    = min(int(data.get("periods", 300)), 500)
+    capital    = float(data.get("capital", 10000.0))
+    risk_pct   = float(data.get("risk_pct", 1.0))
+    fee_pct    = float(data.get("fee_pct", 0.10))
+    slippage   = float(data.get("slippage", 0.05))
+
+    if not symbols:
+        return jsonify({"error": "Aucun symbole fourni"})
+
+    _sync_trader_exchange()
+    if not trader.exchange or not trader.exchange.connected:
+        return jsonify({"error": "Exchange non connecte"})
+
+    from strategy_backtest import run_strategy_backtest
+    results = []
+    errors = []
+    for raw in symbols[:20]:  # cap a 20 pour eviter abus
+        sym = raw.upper().strip()
+        if "/" not in sym:
+            sym = sym + "/USDT"
+        try:
+            df = trader._fetch_ohlcv(sym, timeframe, limit=periods + 50)
+            if len(df) < 150:
+                errors.append({"symbol": sym, "error": "Pas assez de donnees"})
+                continue
+            r = run_strategy_backtest(
+                df, sym, capital, risk_pct,
+                fee_pct=fee_pct, slippage_pct=slippage,
+            )
+            if r.get("error"):
+                errors.append({"symbol": sym, "error": r["error"]})
+                continue
+            mc = r.get("monte_carlo") or {}
+            results.append({
+                "symbol":         sym,
+                "return_pct":     r.get("return_pct"),
+                "bh_return_pct":  r.get("bh_return_pct"),
+                "alpha":          round((r.get("return_pct") or 0) - (r.get("bh_return_pct") or 0), 2),
+                "win_rate":       r.get("win_rate"),
+                "profit_factor":  r.get("profit_factor"),
+                "sharpe":         r.get("sharpe"),
+                "max_dd":         r.get("max_drawdown_pct"),
+                "n_trades":       r.get("n_trades"),
+                "expectancy":     r.get("expectancy"),
+                "mc_prob":        mc.get("prob_profitable"),
+                "mc_dd_p5":       mc.get("dd_p5"),
+                "equity_sparkline": [e["value"] for e in (r.get("equity_curve") or [])][::max(1, len(r.get("equity_curve") or []) // 30)],
+            })
+        except Exception as e:
+            errors.append({"symbol": sym, "error": str(e)})
+
+    # Score composite pour classer : Sharpe x ProfitFactor x WinRate x penalty DD
+    def _score(r):
+        if not r.get("n_trades") or r["n_trades"] < 3:
+            return -999
+        sh = (r.get("sharpe") or 0)
+        pf = min(r.get("profit_factor") or 0, 10)
+        wr = (r.get("win_rate") or 0) / 100
+        dd_pen = max(0.1, 1 - abs(r.get("max_dd") or 0) / 100)
+        return round(sh * pf * wr * dd_pen, 4)
+
+    for r in results:
+        r["score"] = _score(r)
+    results.sort(key=lambda r: r["score"], reverse=True)
+
+    return jsonify({
+        "results":   results,
+        "errors":    errors,
+        "n_tested":  len(symbols),
+        "timeframe": timeframe,
+        "periods":   periods,
+    })
+
+
+# ── API: Moteur probabiliste + apprentissage ───────────
+
+@app.route("/api/probability/status")
+@login_required
+def api_prob_status():
+    """État du modèle probabiliste + calibration live."""
+    return jsonify({
+        "model": prob_engine.status(),
+        "calibration": prediction_log.calibration_report(),
+    })
+
+
+@app.route("/api/probability/train", methods=["POST"])
+@login_required
+def api_prob_train():
+    """
+    Entraîne le modèle probabiliste sur l'historique d'un symbole.
+    Body JSON : { symbol, timeframe, periods, sl_mult, tp_mult, horizon }
+    """
+    data      = request.get_json(silent=True) or {}
+    symbol    = data.get("symbol", "BTC/USDT")
+    timeframe = data.get("timeframe", "1h")
+    periods   = min(int(data.get("periods", 1000)), 2000)
+    sl_mult   = float(data.get("sl_mult", 1.5))
+    tp_mult   = float(data.get("tp_mult", 3.0))
+    horizon   = int(data.get("horizon", 24))
+
+    _sync_trader_exchange()
+    if not trader.exchange or not trader.exchange.connected:
+        return jsonify({"error": "Exchange non connecte"})
+    try:
+        df = trader._fetch_ohlcv(symbol.upper(), timeframe, limit=periods + 50)
+        if len(df) < 200:
+            return jsonify({"error": f"Pas assez de donnees ({len(df)} candles, min 200)"})
+        result = prob_engine.train_from_history(
+            df, symbol.upper(), sl_mult=sl_mult, tp_mult=tp_mult, horizon=horizon,
+        )
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
+@app.route("/api/probability/predict/<path:symbol>")
+@login_required
+def api_prob_predict(symbol):
+    """Probabilité calibrée pour le dernier candle d'un symbole."""
+    timeframe = request.args.get("timeframe", "1h")
+    if not prob_engine.is_ready():
+        return jsonify({"available": False, "error": "Modèle non entraîné"})
+    _sync_trader_exchange()
+    if not trader.exchange or not trader.exchange.connected:
+        return jsonify({"error": "Exchange non connecte"})
+    try:
+        sym = symbol.upper()
+        if "/" not in sym:
+            sym = sym + "/USDT"
+        df = trader._fetch_ohlcv(sym, timeframe, limit=250)
+        return jsonify(prob_engine.predict(df))
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
+@app.route("/api/probability/calibration")
+@login_required
+def api_prob_calibration():
+    """Rapport de calibration live (Brier, courbe de fiabilité)."""
+    return jsonify(prediction_log.calibration_report())
+
+
+@app.route("/api/probability/predictions")
+@login_required
+def api_prob_predictions():
+    """Dernières prédictions loggées."""
+    limit = min(request.args.get("limit", 50, type=int), 200)
+    return jsonify({"predictions": prediction_log.recent_predictions(limit)})
+
+
+@app.route("/api/probability/reconcile", methods=["POST"])
+@login_required
+def api_prob_reconcile():
+    """Réconcilie les prédictions en attente avec les prix actuels."""
+    _sync_trader_exchange()
+    if not trader.exchange or not trader.exchange.connected:
+        return jsonify({"error": "Exchange non connecte"})
+
+    def price_fetcher(sym):
+        try:
+            return trader.exchange.get_ticker_price(sym)
+        except Exception:
+            return None
+
+    result = prediction_log.reconcile(price_fetcher)
+    return jsonify(result)
+
+
+@app.route("/api/probability/reset", methods=["POST"])
+@login_required
+def api_prob_reset():
+    """Efface le journal de prédictions (repartir de zéro)."""
+    prediction_log.reset_log()
+    return jsonify({"status": "ok"})
+
+
+# ── API: Prévision multi-horizon (IA n°9) ──────────────
+
+@app.route("/api/multi_horizon/status")
+@login_required
+def api_mh_status():
+    """État des modèles multi-horizon."""
+    return jsonify(mh_engine.status())
+
+
+@app.route("/api/multi_horizon/train", methods=["POST"])
+@login_required
+def api_mh_train():
+    """
+    Entraîne un modèle directionnel par horizon.
+    Body JSON : { symbol, timeframe, periods, horizons }
+    """
+    data      = request.get_json(silent=True) or {}
+    symbol    = data.get("symbol", "BTC/USDT")
+    timeframe = data.get("timeframe", "1h")
+    periods   = min(int(data.get("periods", 1000)), 2000)
+    horizons  = data.get("horizons") or DEFAULT_HORIZONS
+
+    _sync_trader_exchange()
+    if not trader.exchange or not trader.exchange.connected:
+        return jsonify({"error": "Exchange non connecte"})
+    try:
+        df = trader._fetch_ohlcv(symbol.upper(), timeframe, limit=periods + 50)
+        if len(df) < 200:
+            return jsonify({"error": f"Pas assez de donnees ({len(df)} candles, min 200)"})
+        result = mh_engine.train_from_history(
+            df, symbol.upper(), horizons=horizons, timeframe=timeframe,
+        )
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
+@app.route("/api/multi_horizon/predict/<path:symbol>")
+@login_required
+def api_mh_predict(symbol):
+    """Prévision directionnelle multi-horizon pour un symbole."""
+    timeframe = request.args.get("timeframe", "1h")
+    if not mh_engine.is_ready():
+        return jsonify({"available": False, "error": "Modèles non entraînés"})
+    _sync_trader_exchange()
+    if not trader.exchange or not trader.exchange.connected:
+        return jsonify({"error": "Exchange non connecte"})
+    try:
+        sym = symbol.upper()
+        if "/" not in sym:
+            sym = sym + "/USDT"
+        df = trader._fetch_ohlcv(sym, timeframe, limit=250)
+        return jsonify(mh_engine.predict(df, timeframe))
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
+@app.route("/api/multi_horizon/reset", methods=["POST"])
+@login_required
+def api_mh_reset():
+    """Efface les modèles multi-horizon."""
+    mh_engine.reset()
+    return jsonify({"status": "ok"})
+
+
+@app.route("/api/trading/walk_forward")
+@login_required
+def api_walk_forward():
+    """
+    Walk-forward optimization : N fenetres glissantes train -> test.
+    Test de robustesse temporelle. Un edge qui tient sur 5 periodes
+    successives est un edge reel, pas un overfit.
+    """
+    symbol    = request.args.get("symbol", "BTC/USDT")
+    timeframe = request.args.get("timeframe", "1h")
+    periods   = min(request.args.get("periods", 1500, type=int), 2000)
+    capital   = request.args.get("capital", 10000.0, type=float)
+    n_windows = max(3, min(request.args.get("windows", 5, type=int), 10))
+    fee_pct   = request.args.get("fee_pct", 0.10, type=float)
+    slippage  = request.args.get("slippage", 0.05, type=float)
+
+    _sync_trader_exchange()
+    if not trader.exchange or not trader.exchange.connected:
+        return jsonify({"error": "Exchange non connecte"})
+
+    try:
+        df = trader._fetch_ohlcv(symbol.upper(), timeframe, limit=periods + 50)
+        if len(df) < n_windows * 200:
+            return jsonify({"error": f"Pas assez de donnees ({len(df)} candles, besoin {n_windows*200})"})
+        from optimizer import run_walk_forward
+        result = run_walk_forward(
+            df, symbol.upper(), capital,
+            n_windows=n_windows,
+            fee_pct=fee_pct, slippage_pct=slippage,
+        )
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
 
 @app.route("/api/trading/optimize")
 @login_required
@@ -742,6 +1047,8 @@ def api_trading_optimize():
     timeframe = request.args.get("timeframe", "1h")
     periods   = min(request.args.get("periods", 500, type=int), 1000)
     capital   = request.args.get("capital", 10000.0, type=float)
+    fee_pct   = request.args.get("fee_pct", 0.10, type=float)
+    slippage  = request.args.get("slippage", 0.05, type=float)
 
     _sync_trader_exchange()
     if not trader.exchange or not trader.exchange.connected:
@@ -752,7 +1059,10 @@ def api_trading_optimize():
         if len(df) < 200:
             return jsonify({"error": "Pas assez de données (minimum 200 candles)"})
         from optimizer import run_optimization
-        result = run_optimization(df, symbol.upper(), capital)
+        result = run_optimization(
+            df, symbol.upper(), capital,
+            fee_pct=fee_pct, slippage_pct=slippage,
+        )
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)})
@@ -951,6 +1261,21 @@ def api_trading_check_sltp():
 @app.route("/api/trading/performance")
 def api_trading_performance():
     return jsonify(trader.get_performance())
+
+
+@app.route("/api/trading/paper_performance")
+@login_required
+def api_paper_performance():
+    """Métriques et equity curve du paper trading."""
+    return jsonify(trader.get_paper_performance())
+
+
+@app.route("/api/trading/paper_reset", methods=["POST"])
+@login_required
+def api_trader_paper_reset():
+    """Remet le capital paper à zéro."""
+    trader.reset_paper_trading()
+    return jsonify({"status": "ok"})
 
 
 @app.route("/api/trading/risk")

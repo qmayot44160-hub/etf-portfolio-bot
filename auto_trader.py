@@ -26,12 +26,15 @@ from risk_engine import RiskEngine
 from smart_execution import SmartExecution
 from market_intelligence import MarketIntelligence
 from market_scanner import MarketScanner
+from probability_engine import ProbabilityEngine
+import prediction_log
 from data_paths import data_path
 import notifications as notif
 
 TRADES_FILE = data_path("trades_history.json")
 ACTIVE_TRADES_FILE = data_path("active_trades.json")
 TRADER_CONFIG_FILE = data_path("trader_config.json")
+PAPER_STATE_FILE = data_path("paper_trading_state.json")
 
 
 @dataclass
@@ -69,11 +72,84 @@ class AutoTrader:
         self.smart_exec = SmartExecution(exchange)
         self.market_intel = MarketIntelligence(exchange)
         self.scanner = MarketScanner(exchange)
+        self.prob_engine = ProbabilityEngine()
         self.active_trades: list[ActiveTrade] = []
         self.trade_history: list = []
         self.running = False
         self._thread: Optional[threading.Thread] = None
         self._load_state()
+
+    # ── Paper trading helpers ─────────────────────────────────
+
+    def _load_paper_state(self) -> dict:
+        """Charge le state paper (capital + equity curve) depuis disque."""
+        if os.path.exists(PAPER_STATE_FILE):
+            try:
+                with open(PAPER_STATE_FILE, "r") as f:
+                    return json.load(f)
+            except Exception:
+                pass
+        cap = self.get_config().get("trading_capital", 10000.0)
+        return {"capital": cap, "initial_capital": cap, "equity": []}
+
+    def _save_paper_state(self, state: dict):
+        try:
+            with open(PAPER_STATE_FILE, "w") as f:
+                json.dump(state, f, indent=2)
+        except Exception as e:
+            print(f"[AutoTrader] paper state save error: {e}")
+
+    def _paper_close(self, trade: ActiveTrade, exit_price: float, reason: str):
+        """
+        Clôture un trade en mode paper : calcule le P&L, met à jour
+        le capital paper et l'equity curve. Pas d'ordre réel.
+        """
+        if trade.side == "BUY":
+            trade.pnl = round((exit_price - trade.entry_price) * trade.quantity, 2)
+        else:
+            trade.pnl = round((trade.entry_price - exit_price) * trade.quantity, 2)
+        notional = (trade.entry_price + exit_price) * trade.quantity
+        # Frais MEXC inclus (0.10% + 0.05% slippage par side)
+        cost = notional * 0.0015
+        trade.pnl = round(trade.pnl - cost, 2)
+        trade.pnl_pct = round(trade.pnl / (trade.entry_price * trade.quantity) * 100, 2)
+        trade.close_price = exit_price
+        trade.status = reason
+        trade.closed_at = datetime.now().isoformat()
+
+        ps = self._load_paper_state()
+        ps["capital"] = round(ps["capital"] + trade.pnl, 2)
+        ps.setdefault("equity", []).append({
+            "ts": trade.closed_at,
+            "capital": ps["capital"],
+            "pnl": trade.pnl,
+            "symbol": trade.symbol,
+        })
+        self._save_paper_state(ps)
+
+    def get_paper_performance(self) -> dict:
+        """Retourne les métriques paper trading pour l'UI."""
+        ps = self._load_paper_state()
+        equity = ps.get("equity", [])
+        initial = ps.get("initial_capital", 10000.0)
+        capital = ps.get("capital", initial)
+        closed = [t for t in self.trade_history if t.get("status") in
+                  ("TP_HIT", "SL_HIT", "TRAILING_SL", "MANUAL_CLOSE")]
+        wins = [t for t in closed if (t.get("pnl") or 0) > 0]
+        return {
+            "initial_capital":  initial,
+            "current_capital":  capital,
+            "return_pct":       round((capital / initial - 1) * 100, 2) if initial > 0 else 0,
+            "total_trades":     len(closed),
+            "win_rate":         round(len(wins) / len(closed) * 100, 1) if closed else 0,
+            "total_pnl":        round(sum(t.get("pnl", 0) for t in closed), 2),
+            "equity":           equity[-200:],   # 200 derniers points
+        }
+
+    def reset_paper_trading(self):
+        """Remet le capital paper à son niveau initial."""
+        cap = self.get_config().get("trading_capital", 10000.0)
+        self._save_paper_state({"capital": cap, "initial_capital": cap, "equity": []})
 
     def _load_state(self):
         if os.path.exists(ACTIVE_TRADES_FILE):
@@ -137,11 +213,13 @@ class AutoTrader:
             "use_market_intel": True,
             "use_market_scanner": True,
             "scanner_mode": "hybrid",  # "fixed", "dynamic", "hybrid"
-            "min_confidence": 40,
+            "min_confidence": 55,           # seuil qualité signal (relevé de 40→55)
+            "min_probability": 0.0,         # gate proba calibrée 0-1 (0 = désactivé, ex: 0.6 = 60%)
             "min_strategies_agree": 2,
             "execution_urgency": "normal",  # low, normal, high
             "trading_capital": 10000.0,     # capital de référence pour les limites
             "max_daily_loss_pct": 3.0,      # auto kill-switch si perte jour > X% (0 = désactivé)
+            "paper_mode": True,             # paper mode par défaut (pas d'ordres réels)
         }
 
     def save_config(self, config: dict):
@@ -150,13 +228,16 @@ class AutoTrader:
 
     def get_status(self) -> dict:
         live = bool(self.exchange and self.exchange.connected)
+        cfg = self.get_config()
+        paper = cfg.get("paper_mode", True)
         return {
             "running": self.running,
-            "live_mode": live,
-            "mode": "LIVE" if live else "SIMULATION",
+            "live_mode": live and not paper,
+            "paper_mode": paper,
+            "mode": "PAPER" if paper else ("LIVE" if live else "SIMULATION"),
             "active_trades": len(self.active_trades),
             "total_trades": len(self.trade_history),
-            "config": self.get_config(),
+            "config": cfg,
         }
 
     def get_active_trades(self) -> list:
@@ -197,7 +278,7 @@ class AutoTrader:
         try:
             df = self._fetch_ohlcv(symbol, timeframe)
             signal = self.strategy.analyze(df, symbol)
-            return {
+            out = {
                 "symbol": symbol,
                 "signal": signal.signal.value,
                 "price": signal.price,
@@ -209,6 +290,15 @@ class AutoTrader:
                 "timeframe": timeframe,
                 "timestamp": datetime.now().isoformat(),
             }
+            # Probabilité calibrée si le modèle est entraîné (réutilise le df)
+            try:
+                if self.prob_engine.is_ready():
+                    pred = self.prob_engine.predict(df)
+                    if pred.get("available"):
+                        out["probability"] = pred
+            except Exception:
+                pass
+            return out
         except Exception as e:
             return {"symbol": symbol, "error": str(e)}
 
@@ -245,6 +335,15 @@ class AutoTrader:
                 "indicators": ta.indicators,
                 "reasons": ta.reasons,
             }
+
+            # 2b. Probabilité calibrée (réutilise le df déjà chargé)
+            try:
+                if self.prob_engine.is_ready():
+                    pred = self.prob_engine.predict(df)
+                    if pred.get("available"):
+                        result["probability"] = pred
+            except Exception:
+                pass
 
             # 3. Quant Models - regime + multi-strategy
             if config.get("use_quant_models", True):
@@ -447,6 +546,26 @@ class AutoTrader:
             signal = "HOLD"
             reasons.append(f"Confiance insuffisante ({weighted_confidence:.0f}% < {config.get('min_confidence', 40)}%)")
 
+        # Gate probabiliste (Module 11 des docs : ne trader que si proba >= seuil).
+        # Actif seulement si le modèle est entraîné ET qu'un seuil est configuré (>0).
+        # Désactivé par défaut → aucun changement de comportement tant que non activé.
+        min_prob = config.get("min_probability", 0.0) or 0.0
+        prob = analysis.get("probability", {})
+        prob_up = prob.get("prob_up") if isinstance(prob, dict) else None
+        if min_prob > 0 and prob_up is not None and signal != "HOLD":
+            # Probabilité dans le sens du trade
+            if signal in ("STRONG_BUY", "BUY"):
+                dir_prob = prob_up
+            else:
+                dir_prob = 1.0 - prob_up
+            if dir_prob < min_prob:
+                reasons.append(
+                    f"Probabilité calibrée insuffisante ({dir_prob*100:.0f}% < {min_prob*100:.0f}%) - trade évité"
+                )
+                signal = "HOLD"
+            else:
+                reasons.append(f"Probabilité calibrée {dir_prob*100:.0f}% >= seuil {min_prob*100:.0f}%")
+
         return {
             "signal": signal,
             "confidence": round(weighted_confidence, 1),
@@ -597,18 +716,30 @@ class AutoTrader:
         side = "BUY" if signal in ("STRONG_BUY", "BUY") else "SELL"
 
         # Position sizing
+        paper_mode = config.get("paper_mode", True)
         try:
-            account = self.exchange.get_account()
             price = analysis.get("price", 0)
             sl = analysis.get("stop_loss", 0)
 
             if not price or not sl:
                 return {"status": "SKIP", "reason": "Prix ou SL manquant"}
 
-            # Use risk engine for position sizing
-            if config.get("use_risk_engine", True):
+            if paper_mode:
+                # Paper mode : capital fictif configuré, pas d'appel exchange
+                ps = self._load_paper_state()
+                capital_val = ps.get("capital", config.get("trading_capital", 10000.0))
+                risk_amount = capital_val * config["risk_per_trade_pct"] / 100
+                risk_per_unit = abs(price - sl)
+                quantity = round(risk_amount / risk_per_unit, 6) if risk_per_unit > 0 else 0
+                auth = {"authorized": True, "risk_score": 0}
+            else:
+                account = self.exchange.get_account()
+                capital_val = account.total_value
+
+            # Use risk engine for position sizing (live only)
+            if not paper_mode and config.get("use_risk_engine", True):
                 sizing = self.risk_engine.calculate_position_size(
-                    capital=account.total_value,
+                    capital=capital_val,
                     entry_price=price,
                     stop_loss=sl,
                     signal_confidence=analysis.get("confidence", 50),
@@ -627,7 +758,7 @@ class AutoTrader:
                 }
                 auth = self.risk_engine.authorize_trade(
                     active_trades=[asdict(t) for t in self.active_trades if t.status == "OPEN"],
-                    capital=account.total_value,
+                    capital=capital_val,
                     new_trade=new_trade_data,
                     trade_history=self.trade_history,
                 )
@@ -639,9 +770,9 @@ class AutoTrader:
                         "risk_score": auth["risk_score"],
                         "warnings": auth.get("warnings", []),
                     }
-            else:
-                # Classic sizing
-                risk_amount = account.total_value * config["risk_per_trade_pct"] / 100
+            elif not paper_mode:
+                # Live : classic sizing sans risk engine
+                risk_amount = capital_val * config["risk_per_trade_pct"] / 100
                 risk_per_unit = abs(price - sl)
                 if risk_per_unit <= 0:
                     return {"status": "SKIP", "reason": "Risk par unite invalide"}
@@ -658,7 +789,12 @@ class AutoTrader:
 
         # Execute order
         try:
-            if config.get("use_smart_execution", True):
+            if paper_mode:
+                # Paper : pas d'ordre réel, fill immédiat au prix du signal
+                actual_qty = quantity
+                slippage = 0.0
+                order_id = f"paper-{int(datetime.now().timestamp()*1000)}"
+            elif config.get("use_smart_execution", True):
                 self.smart_exec.exchange = self.exchange
                 urgency = config.get("execution_urgency", "normal")
                 exec_result = self.smart_exec.smart_order(symbol, side, quantity, urgency)
@@ -699,6 +835,25 @@ class AutoTrader:
             )
             self.active_trades.append(trade)
             self._save_state()
+
+            # Log de prédiction probabiliste : chaque trade devient un point de calibration.
+            # On enregistre la proba estimée au moment de l'entrée pour la comparer au résultat.
+            try:
+                prob = analysis.get("probability", {})
+                prob_up = prob.get("prob_up")
+                if prob_up is None and self.prob_engine.is_ready():
+                    prob_up = analysis.get("confidence", 50) / 100.0  # fallback confiance
+                if prob_up is not None:
+                    tp_val = analysis.get("take_profit", 0)
+                    prediction_log.log_prediction(
+                        symbol=symbol,
+                        prob_up=prob_up if side == "BUY" else (1 - prob_up),
+                        entry=price, sl=sl, tp=tp_val,
+                        signal=side,
+                        timeframe=config.get("timeframe", "1h"),
+                    )
+            except Exception:
+                pass
 
             self.risk_engine.log_event("TRADE_OPEN", f"{side} {symbol} qty={actual_qty} @ {price}", {
                 "trade": asdict(trade),
@@ -787,22 +942,25 @@ class AutoTrader:
                     hit = None
 
             if hit:
-                trade.status = hit
-                trade.closed_at = datetime.now().isoformat()
-                trade.close_price = current_price
-
-                try:
-                    if config.get("use_smart_execution"):
-                        self.smart_exec.exchange = self.exchange
-                        close_side = "SELL" if trade.side == "BUY" else "BUY"
-                        self.smart_exec.smart_order(trade.symbol, close_side, trade.quantity, "high")
-                    else:
-                        if trade.side == "BUY":
-                            self.exchange.sell(trade.symbol, trade.quantity)
+                if config.get("paper_mode", True):
+                    # Paper : clôture simulée, mise à jour capital fictif
+                    self._paper_close(trade, current_price, hit)
+                else:
+                    trade.status = hit
+                    trade.closed_at = datetime.now().isoformat()
+                    trade.close_price = current_price
+                    try:
+                        if config.get("use_smart_execution"):
+                            self.smart_exec.exchange = self.exchange
+                            close_side = "SELL" if trade.side == "BUY" else "BUY"
+                            self.smart_exec.smart_order(trade.symbol, close_side, trade.quantity, "high")
                         else:
-                            self.exchange.buy(trade.symbol, trade.quantity)
-                except Exception:
-                    pass
+                            if trade.side == "BUY":
+                                self.exchange.sell(trade.symbol, trade.quantity)
+                            else:
+                                self.exchange.buy(trade.symbol, trade.quantity)
+                    except Exception:
+                        pass
 
                 self.trade_history.append(asdict(trade))
                 closed.append(asdict(trade))
@@ -826,29 +984,35 @@ class AutoTrader:
         return closed
 
     def close_trade(self, symbol: str) -> dict:
+        cfg = self.get_config()
         for trade in self.active_trades:
             if trade.symbol == symbol and trade.status == "OPEN":
                 try:
                     current_price = self.exchange.get_ticker_price(symbol)
-                    if trade.side == "BUY":
-                        self.exchange.sell(symbol, trade.quantity)
-                        trade.pnl = round((current_price - trade.entry_price) * trade.quantity, 2)
+                    if cfg.get("paper_mode", True):
+                        # Paper : clôture simulée
+                        self._paper_close(trade, current_price, "MANUAL_CLOSE")
                     else:
-                        self.exchange.buy(symbol, trade.quantity)
-                        trade.pnl = round((trade.entry_price - current_price) * trade.quantity, 2)
-                    trade.pnl_pct = round(trade.pnl / (trade.entry_price * trade.quantity) * 100, 2)
-                    trade.close_price = current_price
+                        if trade.side == "BUY":
+                            self.exchange.sell(symbol, trade.quantity)
+                            trade.pnl = round((current_price - trade.entry_price) * trade.quantity, 2)
+                        else:
+                            self.exchange.buy(symbol, trade.quantity)
+                            trade.pnl = round((trade.entry_price - current_price) * trade.quantity, 2)
+                        trade.pnl_pct = round(trade.pnl / (trade.entry_price * trade.quantity) * 100, 2)
+                        trade.close_price = current_price
                 except Exception as e:
                     return {"error": str(e)}
 
-                trade.status = "MANUAL_CLOSE"
-                trade.closed_at = datetime.now().isoformat()
+                if not cfg.get("paper_mode", True):
+                    # Live : status pas encore mis par _paper_close
+                    trade.status = "MANUAL_CLOSE"
+                    trade.closed_at = datetime.now().isoformat()
                 self.trade_history.append(asdict(trade))
                 self.active_trades = [t for t in self.active_trades if t.status == "OPEN"]
                 self._save_state()
 
                 try:
-                    cfg = self.get_config()
                     paper = cfg.get("paper_mode", True)
                     notif.notify_trade_closed(trade.symbol, trade.side,
                                               trade.pnl or 0, trade.pnl_pct or 0,
@@ -1058,6 +1222,16 @@ class AutoTrader:
 
                 # 1. Check SL/TP/trailing
                 self.check_stop_loss_take_profit()
+
+                # 1b. Réconcilie les prédictions probabilistes en attente
+                # (compare proba estimée vs résultat réel → calibration continue)
+                try:
+                    prediction_log.reconcile(
+                        lambda s: self.exchange.get_ticker_price(s)
+                        if self.exchange and self.exchange.connected else None
+                    )
+                except Exception:
+                    pass
 
                 # Limite de perte journalière - auto kill-switch
                 max_daily_loss = config.get("max_daily_loss_pct", 0)

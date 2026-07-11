@@ -53,6 +53,9 @@ class TradingStrategy:
         self.tp_atr_mult = self.config.get("tp_atr_multiplier", 3.0)
         # Risk par trade (% du portefeuille)
         self.risk_per_trade = self.config.get("risk_per_trade", 2.0)
+        # Filtre ADX : seuil minimum de force de tendance
+        # En-dessous de ce seuil, la stratégie passe en mode conservateur
+        self.adx_threshold = self.config.get("adx_threshold", 20.0)
 
     def analyze(self, df: pd.DataFrame, symbol: str) -> TradeSignal:
         """
@@ -196,6 +199,27 @@ class TradingStrategy:
                     score -= 0.5
                     reasons.append(f"Momentum post-squeeze négatif décroissant ({sq_mom:.4f})")
 
+        # ── 11. Filtre de régime ADX ──
+        adx_val = float(latest.get("adx", 0) or 0)
+        # Marché en range : on durcit les seuils pour éviter le bruit
+        # ADX < threshold → demande un signal plus fort pour trader
+        adx_bonus = 0.0
+        if adx_val >= 30:
+            # Tendance forte - léger bonus
+            adx_bonus = 0.5
+            reasons.append(f"ADX {adx_val:.1f} : tendance forte (bonus)")
+        elif adx_val >= 20:
+            reasons.append(f"ADX {adx_val:.1f} : tendance modérée")
+        elif adx_val >= 10:
+            # Marché en range - pénalité sur le score
+            adx_bonus = -1.0
+            reasons.append(f"ADX {adx_val:.1f} : marché en range (pénalité)")
+        else:
+            # Marché très plat - forte pénalité
+            adx_bonus = -2.0
+            reasons.append(f"ADX {adx_val:.1f} : pas de tendance (forte pénalité)")
+        score += adx_bonus
+
         # ── Calcul du signal final ──
         # Score max théorique : ~10 (avec squeeze release + divergence RSI)
         if score >= 3.5:
@@ -257,6 +281,7 @@ class TradingStrategy:
             "ema200_aligned": ema200_aligned,
             "squeeze_on": sq_on,
             "squeeze_momentum": round(sq_mom, 6) if sq_mom is not None else None,
+            "adx": round(adx_val, 1),
             "score": round(score, 2),
         }
 
