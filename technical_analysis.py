@@ -227,6 +227,74 @@ def adx(high: pd.Series, low: pd.Series, close: pd.Series,
     }
 
 
+def ichimoku(high: pd.Series, low: pd.Series, close: pd.Series,
+             tenkan: int = 9, kijun: int = 26, senkou_b: int = 52) -> dict:
+    """
+    Ichimoku Kinko Hyo : système de tendance + support/résistance complet.
+    Nuage (Senkou A/B) = zone de support/résistance projetée.
+    Prix au-dessus du nuage = tendance haussière, en-dessous = baissière.
+    """
+    conv = (high.rolling(tenkan).max() + low.rolling(tenkan).min()) / 2   # Tenkan-sen
+    base = (high.rolling(kijun).max() + low.rolling(kijun).min()) / 2     # Kijun-sen
+    span_a = ((conv + base) / 2).shift(kijun)                            # Senkou Span A
+    span_b = ((high.rolling(senkou_b).max() + low.rolling(senkou_b).min()) / 2).shift(kijun)  # Senkou Span B
+    return {"conversion": conv, "base": base, "span_a": span_a, "span_b": span_b}
+
+
+def supertrend(high: pd.Series, low: pd.Series, close: pd.Series,
+               period: int = 10, multiplier: float = 3.0) -> dict:
+    """
+    SuperTrend : suiveur de tendance basé sur l'ATR.
+    direction = 1 (haussier, ligne sous le prix) ou -1 (baissier, ligne au-dessus).
+    """
+    atr_s = atr(high, low, close, period).values
+    c = close.values
+    hl2 = (high.values + low.values) / 2
+    upper = hl2 + multiplier * atr_s
+    lower = hl2 - multiplier * atr_s
+    n = len(c)
+    st = np.full(n, np.nan)
+    direction = np.ones(n)
+    fu = np.full(n, np.nan)
+    fl = np.full(n, np.nan)
+    for i in range(n):
+        if np.isnan(upper[i]):
+            continue  # warmup ATR : pas encore de bande
+        # Amorçage au premier candle valide (evite la propagation de NaN)
+        if i == 0 or np.isnan(fu[i - 1]):
+            fu[i] = upper[i]
+            fl[i] = lower[i]
+            direction[i] = 1
+            st[i] = lower[i]
+            continue
+        fu[i] = upper[i] if (upper[i] < fu[i - 1] or c[i - 1] > fu[i - 1]) else fu[i - 1]
+        fl[i] = lower[i] if (lower[i] > fl[i - 1] or c[i - 1] < fl[i - 1]) else fl[i - 1]
+        if direction[i - 1] == 1:
+            direction[i] = -1 if c[i] < fl[i] else 1
+        else:
+            direction[i] = 1 if c[i] > fu[i] else -1
+        st[i] = fl[i] if direction[i] == 1 else fu[i]
+    return {
+        "supertrend": pd.Series(st, index=close.index),
+        "direction": pd.Series(direction, index=close.index),
+    }
+
+
+def keltner_channels(high: pd.Series, low: pd.Series, close: pd.Series,
+                     period: int = 20, atr_mult: float = 2.0) -> dict:
+    """Canaux de Keltner : EMA centrale ± ATR. Utile pour breakouts et squeeze."""
+    mid = ema(close, period)
+    rng = atr(high, low, close, period)
+    return {"upper": mid + atr_mult * rng, "middle": mid, "lower": mid - atr_mult * rng}
+
+
+def donchian_channels(high: pd.Series, low: pd.Series, period: int = 20) -> dict:
+    """Canaux de Donchian : plus haut / plus bas sur N périodes (base du breakout)."""
+    upper = high.rolling(period).max()
+    lower = low.rolling(period).min()
+    return {"upper": upper, "middle": (upper + lower) / 2, "lower": lower}
+
+
 def support_resistance(close: pd.Series, window: int = 20) -> dict:
     """Détecte les niveaux de support et résistance."""
     rolling_min = close.rolling(window=window).min()
@@ -292,5 +360,25 @@ def compute_all_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df["adx"]      = _adx["adx"]
     df["plus_di"]  = _adx["plus_di"]
     df["minus_di"] = _adx["minus_di"]
+
+    # Ichimoku (nuage tendance/support-résistance)
+    _ich = ichimoku(high, low, close)
+    df["ichimoku_conv"]   = _ich["conversion"]
+    df["ichimoku_base"]   = _ich["base"]
+    df["ichimoku_span_a"] = _ich["span_a"]
+    df["ichimoku_span_b"] = _ich["span_b"]
+
+    # SuperTrend (suiveur de tendance ATR)
+    _st = supertrend(high, low, close)
+    df["supertrend"]     = _st["supertrend"]
+    df["supertrend_dir"] = _st["direction"]
+
+    # Canaux Keltner & Donchian
+    _kc = keltner_channels(high, low, close)
+    df["kc_upper"] = _kc["upper"]
+    df["kc_lower"] = _kc["lower"]
+    _dc = donchian_channels(high, low)
+    df["dc_upper"] = _dc["upper"]
+    df["dc_lower"] = _dc["lower"]
 
     return df

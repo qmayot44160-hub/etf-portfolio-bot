@@ -262,6 +262,16 @@ class TradingStrategy:
         confidence = round(100 / (1 + np.exp(-8 * (normalized - 0.35))), 1)
         confidence = min(confidence, 98.0)  # jamais 100%
 
+        # Position vs nuage Ichimoku (above = haussier, below = baissier)
+        _sa = latest.get("ichimoku_span_a")
+        _sb = latest.get("ichimoku_span_b")
+        if pd.notna(_sa) and pd.notna(_sb):
+            _top, _bot = max(_sa, _sb), min(_sa, _sb)
+            ichimoku_pos = "above" if price > _top else "below" if price < _bot else "inside"
+        else:
+            ichimoku_pos = None
+        st_dir = int(latest["supertrend_dir"]) if pd.notna(latest.get("supertrend_dir")) else None
+
         indicators = {
             "price": round(price, 4),
             "ema_9": round(latest["ema_9"], 4),
@@ -282,6 +292,8 @@ class TradingStrategy:
             "squeeze_on": sq_on,
             "squeeze_momentum": round(sq_mom, 6) if sq_mom is not None else None,
             "adx": round(adx_val, 1),
+            "supertrend_dir": st_dir,
+            "ichimoku": ichimoku_pos,
             "score": round(score, 2),
         }
 

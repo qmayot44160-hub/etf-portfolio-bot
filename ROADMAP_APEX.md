@@ -25,7 +25,8 @@ Chaque ligne faite note le fichier concerné. Chaque ligne partielle note ce qui
 - [x] Indicateurs de base — `technical_analysis.py` (RSI, MACD, EMA, ATR, Bollinger, ADX, CMF, OBV…)
 - [x] Multi-timeframes — `auto_trader.analyze_institutional`
 - [x] Supports / résistances — `market_intelligence`
-- [ ] Ichimoku, SuperTrend, Keltner, Donchian, VWAP, Volume Profile
+- [x] Ichimoku, SuperTrend, Keltner, Donchian — `technical_analysis.py` (badges ST/Nuage dans les cartes signaux)
+- [ ] VWAP, Volume Profile
 - [ ] Figures chartistes (patterns) + chandeliers japonais
 - [ ] Cycles
 ### 2.2 Statistique — IA n°2 / Module 4 `[~]`
@@ -117,6 +118,6 @@ Chaque ligne faite note le fichier concerné. Chaque ligne partielle note ce qui
 1. **Laisser le cœur accumuler de la calibration live** (en cours, phase observation) — effort nul, valeur = savoir si l'edge existe AVANT d'ajouter des couches.
 2. ~~Sentiment crypto (Fear & Greed)~~ ✅ FAIT (2026-05-16) — `sentiment_feed.py`, jauge UI.
 3. ~~Inter-marchés (BTC/DXY/or/S&P/VIX)~~ ✅ FAIT (2026-05-16) — `intermarket.py`, panneau UI.
-4. **Indicateurs manquants** (Ichimoku, SuperTrend…) — effort faible, complète l'IA n°1.
+4. ~~Indicateurs manquants (Ichimoku, SuperTrend, Keltner, Donchian)~~ ✅ FAIT (2026-05-16).
 5. **Ensemble ML léger** (Random Forest via sklearn, plus léger que XGBoost) — grosse valeur ML, dépendance modérée.
-6. Optimisation bayésienne, LSTM/Transformers, macro/news — plus lourds, plus tard.
+6. Optimisation bayésienne, LSTM/Transformers, macro/news, VWAP/Volume Profile — plus tard.
