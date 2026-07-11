@@ -32,6 +32,8 @@ class MarketIntel:
     funding_rate: Optional[float]
     open_interest_change: Optional[float]
     details: dict
+    market_fng: Optional[int] = None          # Fear & Greed global crypto (0-100)
+    market_fng_label: Optional[str] = None     # libellé FR (Peur, Avidité…)
 
 
 class MarketIntelligence:
@@ -63,8 +65,20 @@ class MarketIntelligence:
         # Divergences
         divs = self._detect_divergences(close, volume)
 
-        # Sentiment (basé sur indicateurs techniques)
+        # Sentiment (basé sur indicateurs techniques, propre au symbole)
         sentiment_score, sentiment = self._calculate_sentiment(close, volume, high, low)
+
+        # Sentiment GLOBAL crypto : Fear & Greed Index reel (IA n6)
+        fng_val = None
+        fng_label = None
+        try:
+            from sentiment_feed import get_fear_greed
+            fng = get_fear_greed()
+            if fng.get("available"):
+                fng_val = fng["value"]
+                fng_label = fng["label_fr"]
+        except Exception:
+            pass
 
         # Key psychological levels
         key_levels = self._find_key_levels(close[-1])
@@ -100,7 +114,9 @@ class MarketIntelligence:
                 "volume": vol_details,
                 "whale": whale,
                 "sr_method": "volume_profile + swing_points",
-            }
+            },
+            market_fng=fng_val,
+            market_fng_label=fng_label,
         )
 
     # ── Market Structure ──

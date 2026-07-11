@@ -402,6 +402,8 @@ class AutoTrader:
                     "resistance_levels": intel.resistance_levels[:3],
                     "divergences": intel.divergences,
                     "funding_rate": intel.funding_rate,
+                    "market_fng": intel.market_fng,
+                    "market_fng_label": intel.market_fng_label,
                 }
             else:
                 result["intelligence"] = None

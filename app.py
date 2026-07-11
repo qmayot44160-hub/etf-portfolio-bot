@@ -939,6 +939,13 @@ def api_prob_reset():
 
 # ── API: Prévision multi-horizon (IA n°9) ──────────────
 
+@app.route("/api/sentiment/fear_greed")
+def api_fear_greed():
+    """Index Fear & Greed crypto global (sentiment de marché, IA n6)."""
+    from sentiment_feed import get_fear_greed
+    return jsonify(get_fear_greed())
+
+
 @app.route("/api/multi_horizon/status")
 @login_required
 def api_mh_status():
