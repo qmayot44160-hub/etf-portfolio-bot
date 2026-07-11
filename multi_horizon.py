@@ -70,7 +70,9 @@ class MultiHorizonEngine:
             print(f"[multi_horizon] save error: {e}")
 
     def is_ready(self) -> bool:
-        return len(self.models) > 0 and all(m.trained for m in self.models.values())
+        return len(self.models) > 0 and all(
+            m.trained and m.is_compatible() for m in self.models.values()
+        )
 
     def train_from_history(
         self, df: pd.DataFrame, symbol: str = "",
@@ -81,8 +83,9 @@ class MultiHorizonEngine:
         Retourne les métriques par horizon (Brier, accuracy, base rate).
         """
         horizons = horizons or DEFAULT_HORIZONS
-        df_ind = compute_all_indicators(df.copy())
-        n = len(df_ind)
+        # compute_all_indicators ne supprime aucune ligne : len(df) suffit,
+        # inutile de calculer tous les indicateurs juste pour un décompte.
+        n = len(df)
         if n < 200:
             return {"error": f"Pas assez de données ({n} candles, min 200)"}
 

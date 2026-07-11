@@ -112,8 +112,9 @@ class AutoTrader:
         else:
             trade.pnl = round((trade.entry_price - exit_price) * trade.quantity, 2)
         notional = (trade.entry_price + exit_price) * trade.quantity
-        # Frais MEXC inclus (0.10% + 0.05% slippage par side)
-        cost = notional * 0.0015
+        # Frais + slippage : même source que le backtest (cohérence paper/backtest)
+        from strategy_backtest import DEFAULT_FEE_PCT, DEFAULT_SLIPPAGE
+        cost = notional * (DEFAULT_FEE_PCT + DEFAULT_SLIPPAGE) / 100.0
         trade.pnl = round(trade.pnl - cost, 2)
         trade.pnl_pct = round(trade.pnl / (trade.entry_price * trade.quantity) * 100, 2)
         trade.close_price = exit_price
@@ -281,7 +282,10 @@ class AutoTrader:
 
     def _fetch_ohlcv(self, symbol: str, timeframe: str, limit: int = 100):
         import pandas as pd
-        pair = f"{symbol}/USDT"
+        # Normalisation idempotente : accepte "BTC" comme "BTC/USDT" sans doubler
+        # le suffixe (evite "BTC/USDT/USDT" quand un appelant passe deja la paire).
+        base = symbol.upper().split("/")[0]
+        pair = f"{base}/USDT"
         ohlcv = self.exchange.exchange.fetch_ohlcv(pair, timeframe, limit=limit)
         df = pd.DataFrame(ohlcv, columns=["timestamp", "open", "high", "low", "close", "volume"])
         df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
@@ -1206,6 +1210,18 @@ class AutoTrader:
     #  BOUCLE AUTOMATIQUE
     # ══════════════════════════════════════════════════════════
 
+    def _models_mtime(self) -> float:
+        """mtime le plus récent des fichiers modèle persistés (0.0 si aucun)."""
+        ts = 0.0
+        for eng in (self.prob_engine, self.mh_engine):
+            try:
+                p = eng._path()
+                if os.path.exists(p):
+                    ts = max(ts, os.path.getmtime(p))
+            except Exception:
+                pass
+        return ts
+
     def _auto_train_models(self, config: dict):
         """
         Auto-entraine les modeles probabilistes s'ils sont absents ou perimes.
@@ -1220,6 +1236,12 @@ class AutoTrader:
 
         now = time.time()
         refresh_secs = config.get("model_refresh_days", 7) * 86400
+        # Au demarrage (_last_model_train_ts=0), deduire la date du dernier
+        # entrainement du mtime des fichiers modele persistes. Sinon chaque
+        # redeploy Railway reentrainerait tout inutilement alors que les modeles
+        # sur le volume sont frais.
+        if self._last_model_train_ts == 0.0:
+            self._last_model_train_ts = self._models_mtime()
         prob_ready = self.prob_engine.is_ready()
         mh_ready = self.mh_engine.is_ready()
         stale = (now - self._last_model_train_ts) > refresh_secs

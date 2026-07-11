@@ -121,3 +121,22 @@ Chaque ligne faite note le fichier concerné. Chaque ligne partielle note ce qui
 4. ~~Indicateurs manquants (Ichimoku, SuperTrend, Keltner, Donchian)~~ ✅ FAIT (2026-05-16).
 5. **Ensemble ML léger** (Random Forest via sklearn, plus léger que XGBoost) — grosse valeur ML, dépendance modérée.
 6. Optimisation bayésienne, LSTM/Transformers, macro/news, VWAP/Volume Profile — plus tard.
+
+---
+
+## Dette technique connue (revue qualité 2026-05-16, écartée volontairement)
+Passe `/simplify` (4 agents). 7 fixes appliqués (garde compat features, `_fetch_ohlcv`
+idempotent, pas de réentraînement au restart via mtime, `len()` multi-horizon, dédup
+tickers reconcile, `adx_threshold` mort, nombre magique paper). Écarté car risque
+comportement / trop gros pour un nettoyage :
+- **Deux systèmes paper coexistent** : `auto_trader` a son propre `paper_trading_state.json`
+  alors que `paper_broker.py` existe déjà. Unifier = gros chantier (paper_broker ne modélise
+  pas SL/TP/trailing). À trancher.
+- **Gate `min_probability` dans `_combine_signals`** (chemin institutionnel seulement), pas au
+  chokepoint `execute_signal`. Off par défaut donc inoffensif aujourd'hui, mais l'invariant
+  devrait vivre à la jointure. Déplacer quand on activera le gate.
+- **`PAPER_STATE_FILE` via `data_path()`** au lieu de `user_data_path()` (règle multi-user).
+  Non migré pour ne pas reset l'equity paper en cours.
+- **`predict()` recalcule les indicateurs** car `strategy.analyze` travaille sur une copie
+  (2× compute_all_indicators par symbole/cycle). Refactor à faire si le CPU devient un souci.
+- **Helpers de routes** (`_require_exchange`, `_ensure_pair`) : duplication dans ~7 routes app.py.

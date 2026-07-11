@@ -103,15 +103,22 @@ def reconcile(price_fetcher, max_horizon_hours: float = 168.0) -> dict:
     records = _load()
     resolved = 0
     now = time.time()
+    # Mémoïse le prix par symbole sur ce cycle : plusieurs prédictions PENDING
+    # partagent souvent le même symbole → une seule requête ticker au lieu de N.
+    price_cache = {}
 
     for r in records:
         if r["status"] != PENDING:
             continue
         symbol = r["symbol"]
-        try:
-            px = price_fetcher(symbol)
-        except Exception:
-            continue
+        if symbol in price_cache:
+            px = price_cache[symbol]
+        else:
+            try:
+                px = price_fetcher(symbol)
+            except Exception:
+                px = None
+            price_cache[symbol] = px
         if px is None:
             continue
 

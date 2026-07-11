@@ -264,6 +264,19 @@ class LogisticModel:
         m.feature_names = d.get("feature_names", list(FEATURE_NAMES))
         return m
 
+    def is_compatible(self) -> bool:
+        """
+        Le modèle chargé correspond-il à la liste de features courante ?
+        Empêche un modèle sauvé (ancien vecteur) d'être utilisé après un changement
+        de FEATURE_NAMES : sinon la prédiction lèverait une erreur de shape
+        silencieusement avalée. Incompatible → traité comme non entraîné → réentraîné.
+        """
+        return (
+            self.weights is not None
+            and list(self.feature_names) == list(FEATURE_NAMES)
+            and len(self.weights) == len(FEATURE_NAMES)
+        )
+
 
 def brier_score(probs, outcomes) -> float:
     """
@@ -335,7 +348,7 @@ class ProbabilityEngine:
             print(f"[probability_engine] save error: {e}")
 
     def is_ready(self) -> bool:
-        return self.model.trained
+        return self.model.trained and self.model.is_compatible()
 
     def train_from_history(
         self, df: pd.DataFrame, symbol: str = "",

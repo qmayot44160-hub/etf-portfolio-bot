@@ -53,9 +53,6 @@ class TradingStrategy:
         self.tp_atr_mult = self.config.get("tp_atr_multiplier", 3.0)
         # Risk par trade (% du portefeuille)
         self.risk_per_trade = self.config.get("risk_per_trade", 2.0)
-        # Filtre ADX : seuil minimum de force de tendance
-        # En-dessous de ce seuil, la stratégie passe en mode conservateur
-        self.adx_threshold = self.config.get("adx_threshold", 20.0)
 
     def analyze(self, df: pd.DataFrame, symbol: str) -> TradeSignal:
         """
