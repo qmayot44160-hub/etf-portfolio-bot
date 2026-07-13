@@ -8956,7 +8956,7 @@
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
                     <div>
                         <div class="dcard-label" style="margin-bottom:2px">Calibration live</div>
-                        <div style="font-size:0.72rem;color:var(--sf-text-muted)">Qualité mesurée sur les prédictions réelles du bot (pas l'entraînement)</div>
+                        <div style="font-size:0.72rem;color:var(--sf-text-muted)">Qualité mesurée sur les prédictions live du bot, réelles + fantômes (pas l'entraînement)</div>
                     </div>
                     <div style="display:flex;gap:8px">
                         <button class="abtn abtn-ghost" onclick="reconcileProb()" style="font-size:0.74rem;padding:5px 12px" title="Compare les prédictions en attente aux prix actuels">Réconcilier</button>
@@ -12716,7 +12716,7 @@ async function loadProbPredictions(){
             const probCol=p.prob_up>=0.5?'var(--sf-green)':'var(--sf-red)';
             const dt=p.created_at?new Date(p.created_at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
             return `<tr style="border-bottom:1px solid rgba(255,255,255,0.04)">
-                <td style="padding:5px 8px;font-weight:600">${(p.symbol||'').replace('/USDT','')}</td>
+                <td style="padding:5px 8px;font-weight:600">${(p.symbol||'').replace('/USDT','')}${p.shadow?'<span title="Prédiction fantôme : le modèle a estimé sans ouvrir de trade réel (sert à la calibration)" style="font-size:0.56rem;color:var(--sf-text-muted);margin-left:5px;opacity:0.7">👁 shadow</span>':''}</td>
                 <td style="padding:5px 8px"><span class="pill ${p.signal==='BUY'?'pill-green':'pill-red'}" style="font-size:0.62rem">${p.signal||'—'}</span></td>
                 <td style="padding:5px 8px;text-align:right;color:${probCol};font-weight:600">${(p.prob_up*100).toFixed(0)}%</td>
                 <td style="padding:5px 8px;text-align:right;font-family:monospace">${p.entry!=null?p.entry.toLocaleString():'—'}</td>

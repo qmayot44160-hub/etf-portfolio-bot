@@ -61,12 +61,21 @@ def log_prediction(
     signal: str = "",
     horizon_hours: float = None,
     timeframe: str = "",
+    shadow: bool = False,
+    dedup: bool = False,
 ) -> str:
     """
-    Enregistre une prédiction. Retourne son id.
+    Enregistre une prédiction. Retourne son id ("" si dédupliqué).
     entry/sl/tp servent à réconcilier plus tard (TP avant SL = succès).
+
+    shadow : prédiction "fantôme" (le modèle prédit mais aucun trade n'est ouvert)
+             → sert à accumuler de la calibration sans avoir à trader.
+    dedup  : si True, ne rien logger tant qu'une prédiction du même symbole est
+             PENDING (évite de re-logger le même setup à chaque cycle).
     """
     records = _load()
+    if dedup and any(r["symbol"] == symbol and r["status"] == PENDING for r in records):
+        return ""
     pid = f"{symbol.replace('/', '')}-{int(time.time()*1000)}"
     records.append({
         "id": pid,
@@ -78,6 +87,7 @@ def log_prediction(
         "sl": float(sl),
         "tp": float(tp),
         "horizon_hours": horizon_hours,
+        "shadow": shadow,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "created_ts": time.time(),
         "status": PENDING,

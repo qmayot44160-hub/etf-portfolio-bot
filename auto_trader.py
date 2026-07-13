@@ -1222,6 +1222,36 @@ class AutoTrader:
                 pass
         return ts
 
+    def _log_shadow_prediction(self, analysis: dict, config: dict):
+        """
+        Logue une prédiction "fantôme" : l'estimation du modèle pour ce setup, SANS
+        ouvrir de trade. Permet d'accumuler de la calibration même quand les filtres
+        de trading bloquent l'exécution (sinon 0 trade = 0 donnée de validation).
+        Dédup par symbole (une seule en attente) ; si un vrai trade vient d'être
+        ouvert, la dédup ignore ce doublon.
+        """
+        try:
+            prob = analysis.get("probability", {})
+            prob_up = prob.get("prob_up") if isinstance(prob, dict) else None
+            if prob_up is None:
+                return
+            entry = analysis.get("price", 0)
+            sl = analysis.get("stop_loss", 0)
+            tp = analysis.get("take_profit", 0)
+            if not (entry and sl and tp):
+                return
+            signal = analysis.get("signal", analysis.get("final_signal", "HOLD"))
+            side = "BUY" if "BUY" in signal else "SELL"
+            prediction_log.log_prediction(
+                symbol=analysis.get("symbol", ""),
+                prob_up=prob_up if side == "BUY" else 1 - prob_up,
+                entry=entry, sl=sl, tp=tp, signal=side,
+                timeframe=config.get("timeframe", "1h"),
+                shadow=True, dedup=True,
+            )
+        except Exception:
+            pass
+
     def _auto_train_models(self, config: dict):
         """
         Auto-entraine les modeles probabilistes s'ils sont absents ou perimes.
@@ -1387,6 +1417,9 @@ class AutoTrader:
                                     )
                                 except Exception:
                                     pass
+                        # Prédiction fantôme : calibration même sans trade exécuté
+                        # (dédup ignore le doublon si un vrai trade vient d'ouvrir).
+                        self._log_shadow_prediction(analysis, config)
 
             except Exception as e:
                 print(f"[AutoTrader] Erreur: {e}")
