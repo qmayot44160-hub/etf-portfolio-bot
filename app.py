@@ -727,7 +727,7 @@ def api_strategy_backtest():
 
     _sync_trader_exchange()
     if not trader.exchange or not trader.exchange.connected:
-        return jsonify({"error": "Exchange non connecte"})
+        return jsonify({"error": "MEXC non connecté. Reconnecte via Connexions → MEXC, ou vérifie ta clé API (permissions Spot, région)."})
 
     try:
         df = trader._fetch_ohlcv(symbol.upper(), timeframe, limit=periods + 50)
@@ -771,7 +771,7 @@ def api_multi_backtest():
 
     _sync_trader_exchange()
     if not trader.exchange or not trader.exchange.connected:
-        return jsonify({"error": "Exchange non connecte"})
+        return jsonify({"error": "MEXC non connecté. Reconnecte via Connexions → MEXC, ou vérifie ta clé API (permissions Spot, région)."})
 
     from strategy_backtest import run_strategy_backtest
     results = []
@@ -863,7 +863,7 @@ def api_prob_train():
 
     _sync_trader_exchange()
     if not trader.exchange or not trader.exchange.connected:
-        return jsonify({"error": "Exchange non connecte"})
+        return jsonify({"error": "MEXC non connecté. Reconnecte via Connexions → MEXC, ou vérifie ta clé API (permissions Spot, région)."})
     try:
         df = trader._fetch_ohlcv(symbol.upper(), timeframe, limit=periods + 50)
         if len(df) < 200:
@@ -885,7 +885,7 @@ def api_prob_predict(symbol):
         return jsonify({"available": False, "error": "Modèle non entraîné"})
     _sync_trader_exchange()
     if not trader.exchange or not trader.exchange.connected:
-        return jsonify({"error": "Exchange non connecte"})
+        return jsonify({"error": "MEXC non connecté. Reconnecte via Connexions → MEXC, ou vérifie ta clé API (permissions Spot, région)."})
     try:
         sym = symbol.upper()
         if "/" not in sym:
@@ -917,7 +917,7 @@ def api_prob_reconcile():
     """Réconcilie les prédictions en attente avec les prix actuels."""
     _sync_trader_exchange()
     if not trader.exchange or not trader.exchange.connected:
-        return jsonify({"error": "Exchange non connecte"})
+        return jsonify({"error": "MEXC non connecté. Reconnecte via Connexions → MEXC, ou vérifie ta clé API (permissions Spot, région)."})
 
     def price_fetcher(sym):
         try:
@@ -975,7 +975,7 @@ def api_mh_train():
 
     _sync_trader_exchange()
     if not trader.exchange or not trader.exchange.connected:
-        return jsonify({"error": "Exchange non connecte"})
+        return jsonify({"error": "MEXC non connecté. Reconnecte via Connexions → MEXC, ou vérifie ta clé API (permissions Spot, région)."})
     try:
         df = trader._fetch_ohlcv(symbol.upper(), timeframe, limit=periods + 50)
         if len(df) < 200:
@@ -997,7 +997,7 @@ def api_mh_predict(symbol):
         return jsonify({"available": False, "error": "Modèles non entraînés"})
     _sync_trader_exchange()
     if not trader.exchange or not trader.exchange.connected:
-        return jsonify({"error": "Exchange non connecte"})
+        return jsonify({"error": "MEXC non connecté. Reconnecte via Connexions → MEXC, ou vérifie ta clé API (permissions Spot, région)."})
     try:
         sym = symbol.upper()
         if "/" not in sym:
@@ -1034,7 +1034,7 @@ def api_walk_forward():
 
     _sync_trader_exchange()
     if not trader.exchange or not trader.exchange.connected:
-        return jsonify({"error": "Exchange non connecte"})
+        return jsonify({"error": "MEXC non connecté. Reconnecte via Connexions → MEXC, ou vérifie ta clé API (permissions Spot, région)."})
 
     try:
         df = trader._fetch_ohlcv(symbol.upper(), timeframe, limit=periods + 50)
@@ -1068,7 +1068,7 @@ def api_trading_optimize():
 
     _sync_trader_exchange()
     if not trader.exchange or not trader.exchange.connected:
-        return jsonify({"error": "Exchange non connecte"})
+        return jsonify({"error": "MEXC non connecté. Reconnecte via Connexions → MEXC, ou vérifie ta clé API (permissions Spot, région)."})
 
     try:
         df = trader._fetch_ohlcv(symbol.upper(), timeframe, limit=periods + 50)
@@ -1259,7 +1259,17 @@ def api_trading_start():
 
 
 def _sync_trader_exchange():
-    """Lie automatiquement le trader au broker crypto connecté."""
+    """
+    Lie automatiquement le trader au broker crypto connecté.
+    Si le broker n'est pas connecté (reconnexion au boot échouée après un redeploy),
+    retente une reconnexion depuis la config sauvée avant d'abandonner → auto-guérison
+    sans que l'utilisateur ait à re-saisir sa clé.
+    """
+    if not (crypto.broker and crypto.broker.connected):
+        try:
+            crypto._load_config()   # relit crypto_config.json et reconnecte
+        except Exception:
+            pass
     if crypto.broker and crypto.broker.connected:
         trader.exchange = crypto.broker
 
@@ -1318,7 +1328,7 @@ def api_trading_risk_log():
 def api_trading_intel(symbol):
     _sync_trader_exchange()
     if not trader.exchange or not trader.exchange.connected:
-        return jsonify({"error": "Exchange non connecte"}), 400
+        return jsonify({"error": "MEXC non connecté. Reconnecte via Connexions → MEXC, ou vérifie ta clé API (permissions Spot, région)."}), 400
     try:
         import pandas as pd
         df = trader._fetch_ohlcv(symbol.upper(), "1h", 200)
