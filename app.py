@@ -1566,6 +1566,13 @@ def init_app():
     config = load_scheduler_config()
     setup_scheduled_jobs(config)
 
+    # Retry la reconnexion MEXC si le 1er essai au boot a échoué (transitoire).
+    if not (crypto.broker and crypto.broker.connected):
+        try:
+            crypto._load_config()
+        except Exception:
+            pass
+
     # Auto-connect trader to MEXC if crypto engine is connected
     if crypto.broker and crypto.broker.connected:
         trader.exchange = crypto.broker
@@ -1574,11 +1581,15 @@ def init_app():
         trader.scanner.exchange = crypto.broker
         print("[Startup] Trader auto-linked to MEXC exchange")
 
-        # Auto-start trading loop if enabled in config
-        trader_config = trader.get_config()
-        if trader_config.get("enabled") and not trader.running:
-            trader.start()
-            print("[Startup] Trading loop auto-started (LIVE mode)")
+    # La boucle se re-synchronise elle-même si l'exchange tombe (voir reconnect_hook).
+    trader.reconnect_hook = _sync_trader_exchange
+
+    # Auto-start la boucle si activée, MÊME si l'exchange n'est pas encore prêt :
+    # elle tourne à vide et reprend dès que le reconnect_hook rétablit MEXC.
+    trader_config = trader.get_config()
+    if trader_config.get("enabled") and not trader.running:
+        trader.start()
+        print("[Startup] Trading loop auto-started")
 
     # Kick off an initial ETF scan in the background (non-blocking).
     # Si un cache existe déjà et est récent (<1h), scan_async court-circuitera.

@@ -76,6 +76,7 @@ class AutoTrader:
         self.prob_engine = ProbabilityEngine()
         self.mh_engine = MultiHorizonEngine()
         self._last_model_train_ts = 0.0   # timestamp du dernier auto-entrainement
+        self.reconnect_hook = None        # callable qui retente la connexion exchange
         self.active_trades: list[ActiveTrade] = []
         self.trade_history: list = []
         self.running = False
@@ -1318,6 +1319,14 @@ class AutoTrader:
             if not config["enabled"]:
                 time.sleep(10)
                 continue
+
+            # Auto-guérison : si l'exchange est tombé (reconnexion boot échouée),
+            # retente via le hook. La boucle reprend seule dès que MEXC revient.
+            if (not self.exchange or not self.exchange.connected) and self.reconnect_hook:
+                try:
+                    self.reconnect_hook()
+                except Exception:
+                    pass
 
             try:
                 # 0. Periodic market scan (every 3 cycles)
