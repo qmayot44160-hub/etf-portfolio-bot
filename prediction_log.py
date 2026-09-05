@@ -231,6 +231,17 @@ def recent_predictions(limit: int = 50) -> list:
     return list(reversed(records[-limit:]))
 
 
+def counts() -> dict:
+    """Compteurs du journal (pour le diagnostic /health)."""
+    records = _load()
+    return {
+        "total": len(records),
+        "pending": sum(1 for r in records if r["status"] == PENDING),
+        "resolved": sum(1 for r in records if r["status"] == RESOLVED),
+        "shadow": sum(1 for r in records if r.get("shadow")),
+    }
+
+
 def resolved_training_data() -> tuple:
     """
     Extrait (features non stockées ici, donc renvoie probs/outcomes seulement).

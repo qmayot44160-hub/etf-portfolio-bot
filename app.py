@@ -147,6 +147,21 @@ def _global_auth_guard():
 def health_check():
     """Public endpoint pour UptimeRobot / Railway Healthcheck."""
     status = health.get_status()
+    # Bloc diagnostic bot (données opérationnelles, non sensibles) : permet de
+    # vérifier l'état du trading sans login. Protégé pour ne jamais casser /health.
+    try:
+        cfg = trader.get_config()
+        status["bot"] = {
+            "exchange_connected": bool(trader.exchange and getattr(trader.exchange, "connected", False)),
+            "trader_running": bool(trader.running),
+            "enabled": bool(cfg.get("enabled")),
+            "paper_mode": bool(cfg.get("paper_mode", True)),
+            "model_trained": bool(trader.prob_engine.is_ready()),
+            "active_trades": len(trader.active_trades),
+            "predictions": prediction_log.counts(),
+        }
+    except Exception as e:
+        status["bot"] = {"error": str(e)}
     # Retourne 503 si stale (pas vu depuis > 30 min)
     http_code = 200 if status["health"] in ("healthy", "never_seen") else 503
     return jsonify(status), http_code
