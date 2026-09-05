@@ -153,6 +153,7 @@ def health_check():
         cfg = trader.get_config()
         status["bot"] = {
             "exchange_connected": bool(trader.exchange and getattr(trader.exchange, "connected", False)),
+            "exchange_error": getattr(crypto, "last_connect_error", None),
             "trader_running": bool(trader.running),
             "enabled": bool(cfg.get("enabled")),
             "paper_mode": bool(cfg.get("paper_mode", True)),

@@ -16,6 +16,7 @@ CRYPTO_CONFIG_FILE = data_path("crypto_config.json")
 class CryptoEngine:
     def __init__(self):
         self.broker: BaseBroker = None
+        self.last_connect_error = None   # dernière erreur de (re)connexion, pour diagnostic
         self._load_config()
 
     def _load_config(self):
@@ -28,9 +29,13 @@ class CryptoEngine:
                 try:
                     self.broker = get_broker(broker_id, credentials)
                     self.broker.connect()
+                    self.last_connect_error = None
                 except Exception as e:
                     print(f"[CryptoEngine] Auto-reconnect failed: {e}")
+                    self.last_connect_error = f"{type(e).__name__}: {e}"
                     self.broker = None
+        else:
+            self.last_connect_error = "crypto_config.json absent (aucune connexion sauvée)"
 
     def connect(self, broker_id: str, credentials: dict) -> dict:
         try:
